@@ -1,0 +1,41 @@
+name: Russian localization verification
+on:
+  push:
+    branches: [localization/russian]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: russian-localization
+  cancel-in-progress: true
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          submodules: recursive
+      - name: Prepare pinned Flutter
+        run: |
+          git -C .flutter fetch --tags
+          echo "$GITHUB_WORKSPACE/.flutter/bin" >> "$GITHUB_PATH"
+      - run: flutter pub get
+      - name: Generate localization code
+        run: flutter gen-l10n
+      - name: Verify Russian locale and plural rules
+        run: flutter test test/l10n/russian_localization_test.dart
+      - name: Analyze Flutter code
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - name: Run Flutter test suite
+        run: flutter test
+      - name: Commit generated translations
+        run: |
+          set -euo pipefail
+          git add lib/l10n/generated lib/l10n/untranslated_messages.json
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m "Generate Russian localization with the pinned Flutter SDK"
+            git push origin HEAD:refs/heads/localization/russian
+          fi
