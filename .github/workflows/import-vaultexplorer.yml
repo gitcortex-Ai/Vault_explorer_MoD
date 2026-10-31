@@ -1,0 +1,39 @@
+name: Import VaultExplorer upstream
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/import-vaultexplorer.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out destination
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Import original source and history
+        shell: bash
+        run: |
+          set -euo pipefail
+          upstream_sha=23a06e1d88a36aa8c4471ce0e1a988489d0b9a85
+          upstream_tree=a48e06d9baaaa45a73e3a135ccc6f24c422e5033
+          test "$(git branch --show-current)" = main
+          test "$(git ls-tree -r --name-only HEAD | wc -l)" -eq 2
+          git remote add upstream https://github.com/R0b0To/VaultExplorer.git
+          git fetch --no-tags upstream refs/heads/main:refs/remotes/upstream/main
+          test "$(git rev-parse "$upstream_sha^{tree}")" = "$upstream_tree"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --allow-unrelated-histories --no-ff --no-commit "$upstream_sha"
+          git rm .github/workflows/import-vaultexplorer.yml
+          git diff --cached --quiet "$upstream_sha" -- . ':!UPSTREAM.md'
+          test "$(git ls-files -s .flutter | awk '{print $1}')" = 160000
+          test "$(git ls-files -s .flutter | awk '{print $2}')" = d3b14c876900e553bc736ca19295fc09e3853e8e
+          git commit -m "Import VaultExplorer at 23a06e1, preserving upstream history and licenses"
+          git diff --quiet "$upstream_sha" HEAD -- . ':!UPSTREAM.md'
+          git merge-base --is-ancestor "$upstream_sha" HEAD
+          git push origin HEAD:refs/heads/main
