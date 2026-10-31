@@ -1,0 +1,72 @@
+name: Build Russian mod APK
+on:
+  push:
+    branches: [build/russian-apk]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apk:
+    name: Build ARM64 test APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      VAULTEXPLORER_TARGET_ABI: arm64-v8a
+    steps:
+      - name: Check out localized source
+        uses: actions/checkout@v4
+        with:
+          ref: 8ab845d705888509cd7037b65314f8f6f53656ed
+          submodules: recursive
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Prepare pinned Flutter
+        run: |
+          git -C .flutter fetch --tags
+          echo "$GITHUB_WORKSPACE/.flutter/bin" >> "$GITHUB_PATH"
+          .flutter/bin/flutter config --no-analytics
+      - name: Install pinned native toolchain
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;28.2.13676358" "build-tools;37.0.0"
+      - name: Resolve locked dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Build installable ARM64 APK
+        run: flutter build apk --debug --target-platform android-arm64 --build-name 1.38.0-mod-ru1 --build-number 5803
+      - name: Verify APK and prepare download
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-debug.apk dist/VaultExplorer-MoD-1.38.0-ru1-arm64.apk
+          "$ANDROID_HOME/build-tools/37.0.0/apksigner" verify --verbose --print-certs dist/*.apk
+          "$ANDROID_HOME/build-tools/37.0.0/aapt" dump badging dist/*.apk > dist/apk-info.txt
+          grep "native-code:.*arm64-v8a" dist/apk-info.txt
+          grep "locales:.*ru" dist/apk-info.txt
+          cd dist
+          sha256sum VaultExplorer-MoD-1.38.0-ru1-arm64.apk > SHA256SUMS.txt
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VaultExplorer-MoD-Russian-ARM64-APK
+          path: dist/
+          retention-days: 30
+      - name: Publish test APK download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > /tmp/mod-release-notes.md <<'NOTES'
+          Russian localization preview of VaultExplorer MoD.
+          
+          Source: 8ab845d705888509cd7037b65314f8f6f53656ed.
+          Includes 3646 Russian UI messages and Android notification translations.
+          
+          Android 8.0+ / ARM64. Debug build, signed with the standard test key.
+          This signature cannot update the original author's signed application.
+          No application ID changes; no original signing credentials are used.
+          
+          Original GPLv3 license, NOTICE.md and upstream history are preserved in this repository.
+          NOTES
+          gh release create mod-1.38.0-ru1 dist/VaultExplorer-MoD-1.38.0-ru1-arm64.apk dist/SHA256SUMS.txt --repo gitcortex-Ai/Vault_explorer_MoD --target 8ab845d705888509cd7037b65314f8f6f53656ed --title "VaultExplorer MoD 1.38.0 — Russian test build" --notes-file /tmp/mod-release-notes.md --prerelease
