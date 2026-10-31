@@ -14,7 +14,7 @@ void main() {
 
   test('Russian file and duration counts use one, few, many and other forms', () async {
     final strings = await AppLocalizations.delegate.load(const Locale('ru'));
-    const cases = <num, List<String>>{
+    final cases = <num, List<String>>{
       0: ['0 файлов', '0 папок', '0 минут', '0 часов'],
       1: ['1 файл', '1 папка', '1 минута', '1 час'],
       2: ['2 файла', '2 папки', '2 минуты', '2 часа'],
