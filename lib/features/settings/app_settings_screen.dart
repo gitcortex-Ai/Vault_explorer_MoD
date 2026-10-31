@@ -2407,6 +2407,7 @@ class AppearanceSettingsScreen extends ConsumerWidget {
       'ja': '日本語',
       'ko': '한국어',
       'pt': 'Português',
+      'ru': 'Русский',
       'uk': 'Українська',
       'zh': '中文',
     };
