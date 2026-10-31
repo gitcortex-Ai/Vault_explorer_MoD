@@ -1,0 +1,2339 @@
+// Part of the file_operation library — do not import this file directly.
+// All imports, the library declaration, and the `part` directive live in
+// file_operation.dart. Consumer code imports only file_operation.dart.
+
+part of '../models/file_operation.dart';
+
+// ── Internal exceptions ───────────────────────────────────────────────────────
+
+class _DiskFullException implements Exception {
+  const _DiskFullException();
+}
+
+class _CancelledException implements Exception {
+  const _CancelledException();
+}
+
+// ── FileOperationService ──────────────────────────────────────────────────────
+
+/// Published by [FileOperationService] once an operation has finished changing
+/// the contents of a volume, so every view of that volume (not only the one
+/// that started the operation) can bring its listing up to date.
+class VolumeContentChange {
+  const VolumeContentChange({required this.volId, required this.opId});
+
+  /// The volume whose contents changed.
+  final int volId;
+
+  /// The operation that changed it. Zero means the write happened outside an
+  /// operation; a view that started a numbered operation can skip its own
+  /// notification after refreshing directly.
+  final int opId;
+}
+
+class FileOperationService extends ChangeNotifier {
+  FileOperationService._(
+    this._engineEvents,
+    this._fileIoApi,
+    this._lifecycleApi,
+  ) {
+    _mirrorPushActiveCount = _engineEvents.mirrorPushActiveCount;
+    _engineEvents.addMirrorPushActivityListener(_onMirrorPushActivityChanged);
+    _engineEvents.addImportItemFinishedListener((event) {
+      final op = _operations.cast<FileOperation?>().firstWhere(
+        (o) => o?.id == event.opId,
+        orElse: () => null,
+      );
+      if (op != null) {
+        op._recordImportItemFinished(
+          sourceName: event.sourceName,
+          resolvedName: event.resolvedName,
+          isDir: event.isDir,
+          success: event.success,
+        );
+        notifyListeners();
+      }
+    });
+    _engineEvents.addExportItemFinishedListener((event) {
+      final op = _operations.cast<FileOperation?>().firstWhere(
+        (o) => o?.id == event.opId,
+        orElse: () => null,
+      );
+      if (op != null) {
+        op._recordExportItemFinished(
+          sourceName: event.sourceName,
+          success: event.success,
+        );
+        notifyListeners();
+      }
+    });
+  }
+
+  FileOperationService.withEngineEvents(VaultEngineEvents engineEvents)
+    : this._(
+        engineEvents,
+        VaultFileIoApi(kVaultEngineChannel),
+        VaultLifecycleApi(kVaultEngineChannel, engineEvents),
+      );
+
+  FileOperationService.withEngineApis({
+    required VaultEngineEvents engineEvents,
+    required VaultFileIoApi fileIoApi,
+    required VaultLifecycleApi lifecycleApi,
+  }) : this._(engineEvents, fileIoApi, lifecycleApi);
+
+  final VaultEngineEvents _engineEvents;
+  final VaultFileIoApi _fileIoApi;
+  final VaultLifecycleApi _lifecycleApi;
+
+  final ListenerRegistry<VolumeContentChange> _volumeContentChanged =
+      ListenerRegistry<VolumeContentChange>();
+
+  /// Subscribes to [VolumeContentChange]s. Unlike a scan of [operations], this
+  /// cannot miss an operation that its initiator dismisses before another
+  /// listener gets to look at it.
+  void addVolumeContentChangedListener(
+    void Function(VolumeContentChange change) listener,
+  ) => _volumeContentChanged.add(listener);
+
+  void removeVolumeContentChangedListener(
+    void Function(VolumeContentChange change) listener,
+  ) => _volumeContentChanged.remove(listener);
+
+  /// Announces a content change made outside this service, such as a camera
+  /// capture or a file created directly by a dialog/editor.
+  void notifyVolumeContentChanged(int volId) {
+    _volumeContentChanged.notify(VolumeContentChange(volId: volId, opId: 0));
+  }
+
+  void _publishVolumeContentChanged(FileOperation op, int volId) {
+    _volumeContentChanged.notify(VolumeContentChange(volId: volId, opId: op.id));
+  }
+
+  /// A copy or move has stopped (finished, failed or cancelled). It changed the
+  /// destination volume and, for a move, the volume the entries were taken
+  /// from, so a view of either (typically another tab, whose folder is neither
+  /// the destination nor on screen) learns its listing is out of date.
+  ///
+  /// Published whatever the outcome: a move that stopped part-way has still
+  /// taken some entries out of the source folder.
+  ///
+  /// The destination goes first. A view that started the operation skips the
+  /// first notification of its own operation (see `_ownedOpIds` in
+  /// DirectoryContentView), and the view that starts a paste shows the
+  /// destination volume.
+  void _publishTransferContentChanged(
+    FileOperation op, {
+    required int sourceVolId,
+    required int destVolId,
+  }) {
+    _publishVolumeContentChanged(op, destVolId);
+    if (op.isCut && sourceVolId != destVolId) {
+      _publishVolumeContentChanged(op, sourceVolId);
+    }
+  }
+
+  void _beginBatches(Iterable<int> volIds) {
+    for (final volId in volIds.toSet()) {
+      _engineEvents.beginBatch(volId);
+    }
+  }
+
+  void _endBatches(Iterable<int> volIds) {
+    for (final volId in volIds.toSet()) {
+      _engineEvents.endBatch(volId);
+    }
+  }
+
+  Future<void> _cancelNativeOperation(
+    int operationId,
+    bool isImport,
+    bool isExport,
+  ) {
+    if (isImport) return _fileIoApi.cancelImport(operationId);
+    if (isExport) return _fileIoApi.cancelExport(operationId);
+    return _fileIoApi.cancelCopy(operationId);
+  }
+
+  static const _maxConcurrentItems = 4;
+  static const _chunkSize = 2 * 1024 * 1024; // 2 MB
+  static const _kNotificationThrottleDuration = Duration(milliseconds: 250);
+
+  // ── State ─────────────────────────────────────────────────────────────────
+
+  int _nextId = 1;
+  final List<FileOperation> _operations = [];
+  final Map<FileOperation, VoidCallback> _opListeners = {};
+  int _mirrorPushActiveCount = 0;
+  int get mirrorPushActiveCount => _mirrorPushActiveCount;
+
+  void _onMirrorPushActivityChanged(int activeCount) {
+    if (_mirrorPushActiveCount == activeCount) return;
+    _mirrorPushActiveCount = activeCount;
+    notifyListeners();
+  }
+
+  Timer? _notificationThrottleTimer;
+  DateTime? _lastNotificationPushTime;
+
+  List<FileOperation> get operations => List.unmodifiable(_operations);
+
+  List<FileOperation> get activeOperations => _operations
+      .where(
+        (op) =>
+            op.status == FileOperationStatus.pending ||
+            op.status == FileOperationStatus.running,
+      )
+      .toList();
+
+  int get activeCount => activeOperations.length;
+
+  /// Mirrors are the storage-commit phase of a transfer, so they extend an
+  /// active transfer instead of incrementing the app-bar operation count.
+  /// A mirror activity without a tracked transfer still represents one item.
+  int get combinedActivityCount =>
+      activeCount > 0 ? activeCount : (_mirrorPushActiveCount > 0 ? 1 : 0);
+
+  List<RawEntry> getActivePlaceholders(int volId, String dirPath) {
+    final placeholders = <RawEntry>[];
+    final active = _operations.where(
+      (op) =>
+          !op.isDelete &&
+          op.destVolId == volId &&
+          op.destDirPath == dirPath &&
+          op.status != FileOperationStatus.cancelled &&
+          op.status != FileOperationStatus.failed,
+    );
+    for (final op in active) {
+      // Archive-create: the items list holds *source* files, but the only
+      // entry created at the destination is the archive itself.
+      if (op.isArchiveCreate) {
+        final name = op.archiveName;
+        if (name != null && name.isNotEmpty) {
+          placeholders.add(
+            RawEntry(
+              name: name,
+              isDir: false,
+              sizeBytes: op.archiveBytesWritten,
+              modifiedSecs: 0,
+              isPlaceholder: true,
+            ),
+          );
+        }
+        continue;
+      }
+
+      for (int i = 0; i < op.items.length; i++) {
+        final status = i < op.itemStatuses.length ? op.itemStatuses[i] : null;
+        final result = status?.result ?? FileItemResult.pending;
+        if (result == FileItemResult.failed ||
+            result == FileItemResult.skipped) {
+          continue;
+        }
+        final item = op.items[i];
+        final name = op.resolvedDestName(i) ?? item.name;
+        placeholders.add(
+          RawEntry(
+            name: name,
+            isDir: item.isDir,
+            sizeBytes: item.sizeBytes,
+            modifiedSecs: 0,
+            isPlaceholder: true,
+          ),
+        );
+      }
+    }
+    return placeholders;
+  }
+
+  Set<String> getPendingDeletedNames(int volId, String dirPath) {
+    final deletedNames = <String>{};
+    final activeDeletes = _operations.where(
+      (op) =>
+          op.isDelete &&
+          op.sourceVolId == volId &&
+          op.status != FileOperationStatus.cancelled &&
+          op.status != FileOperationStatus.failed,
+    );
+
+    final normalizedDir = dirPath.trim().replaceAll(r'\', '/');
+    final cleanDir = normalizedDir.startsWith('/')
+        ? normalizedDir.substring(1)
+        : normalizedDir;
+
+    for (final op in activeDeletes) {
+      for (int i = 0; i < op.items.length; i++) {
+        final status = i < op.itemStatuses.length ? op.itemStatuses[i] : null;
+        final result = status?.result ?? FileItemResult.pending;
+        if (result == FileItemResult.failed) continue;
+
+        final item = op.items[i];
+        final itemPath = item.path.replaceAll(r'\', '/');
+        final cleanItemPath = itemPath.startsWith('/')
+            ? itemPath.substring(1)
+            : itemPath;
+
+        final lastSlash = cleanItemPath.lastIndexOf('/');
+        final itemParent = lastSlash != -1
+            ? cleanItemPath.substring(0, lastSlash)
+            : '';
+        final itemName = lastSlash != -1
+            ? cleanItemPath.substring(lastSlash + 1)
+            : cleanItemPath;
+
+        if (itemParent == cleanDir) {
+          deletedNames.add(itemName);
+        }
+      }
+    }
+    return deletedNames;
+  }
+
+  // ── Public API ────────────────────────────────────────────────────────────
+
+  FileOperation enqueue({
+    required bool isCut,
+    required MountedContainer source,
+    required MountedContainer dest,
+    required String destDirPath,
+    required List<ClipboardItem> items,
+    ConflictPlan? conflictPlan,
+    required AppLocalizations l10n,
+  }) {
+    final op = FileOperation._internal(
+      id: _nextId++,
+      isCut: isCut,
+      sourceVolId: source.volId,
+      sourceDisplayName: source.displayName,
+      destVolId: dest.volId,
+      destDisplayName: dest.displayName,
+      destDirPath: destDirPath,
+      items: items,
+      l10n: l10n,
+      cancelNativeOperation: _cancelNativeOperation,
+    );
+    _operations.add(op);
+    _bindOperationListener(op);
+    notifyListeners();
+    _syncNotificationProgress();
+    _run(op, source, dest, conflictPlan ?? {});
+    return op;
+  }
+
+  FileOperation enqueueLocalTransfer({
+    required bool isCut,
+    required MountedContainer source,
+    required MountedContainer dest,
+    required String destDirPath,
+    required List<ClipboardItem> items,
+    ConflictPlan? conflictPlan,
+    required AppLocalizations l10n,
+  }) {
+    final op = FileOperation._internal(
+      id: _nextId++,
+      isCut: isCut,
+      sourceVolId: source.volId,
+      sourceDisplayName: source.displayName,
+      destVolId: dest.volId,
+      destDisplayName: dest.displayName,
+      destDirPath: destDirPath,
+      items: items,
+      l10n: l10n,
+      cancelNativeOperation: _cancelNativeOperation,
+    );
+    _operations.add(op);
+    _bindOperationListener(op);
+    notifyListeners();
+    _syncNotificationProgress();
+    _runLocal(op, source, dest, conflictPlan ?? {});
+    return op;
+  }
+
+  FileOperation enqueueImport({
+    required MountedContainer dest,
+    required String destDirPath,
+    List<ClipboardItem> items = const [],
+    required bool isFolder,
+    required Future<int> Function(int opId) performImport,
+    required AppLocalizations l10n,
+    String sourceDisplayName = 'Device',
+  }) {
+    final op = FileOperation._internal(
+      id: _nextId++,
+      isCut: false,
+      sourceVolId: 0,
+      sourceDisplayName: sourceDisplayName,
+      destVolId: dest.volId,
+      destDisplayName: dest.displayName,
+      destDirPath: destDirPath,
+      items: items.isNotEmpty
+          ? items
+          : [
+              ClipboardItem(
+                path: isFolder ? 'Folder' : 'Files',
+                isDir: isFolder,
+                sizeBytes: 0,
+              ),
+            ],
+      isImport: true,
+      l10n: l10n,
+      cancelNativeOperation: _cancelNativeOperation,
+    );
+    _operations.add(op);
+    _bindOperationListener(op);
+    notifyListeners();
+    _syncNotificationProgress();
+    _runImport(op, dest, performImport);
+    return op;
+  }
+
+  FileOperation enqueueExport({
+    required MountedContainer source,
+    required List<ClipboardItem> items,
+    required Future<int> Function(int opId) performExport,
+    required AppLocalizations l10n,
+  }) {
+    final op = FileOperation._internal(
+      id: _nextId++,
+      isCut: false,
+      sourceVolId: source.volId,
+      sourceDisplayName: source.displayName,
+      destVolId: 0,
+      destDisplayName: 'Device',
+      destDirPath: '',
+      items: items,
+      isExport: true,
+      l10n: l10n,
+      cancelNativeOperation: _cancelNativeOperation,
+    );
+    _operations.add(op);
+    _bindOperationListener(op);
+    notifyListeners();
+    _syncNotificationProgress();
+    _runExport(op, source, performExport);
+    return op;
+  }
+
+  FileOperation enqueueDelete({
+    required MountedContainer container,
+    required List<ClipboardItem> items,
+    String locationLabel = '',
+    required AppLocalizations l10n,
+  }) {
+    final op = FileOperation._internal(
+      id: _nextId++,
+      isCut: false,
+      sourceVolId: container.volId,
+      sourceDisplayName: container.displayName,
+      destVolId: container.volId,
+      destDisplayName: container.displayName,
+      destDirPath: locationLabel,
+      items: items,
+      isDelete: true,
+      l10n: l10n,
+      cancelNativeOperation: _cancelNativeOperation,
+    );
+    _operations.add(op);
+    _bindOperationListener(op);
+    notifyListeners();
+    _syncNotificationProgress();
+    _runDelete(op, container);
+    return op;
+  }
+
+  /// Enqueues background archive creation.
+  FileOperation enqueueArchiveCreate({
+    required MountedContainer source,
+    required MountedContainer dest,
+    required String destDirPath,
+    required String archiveName,
+    required List<ClipboardItem> items,
+    required ArchiveFormatType format,
+    String? passphrase,
+    bool encryptFilenames = false,
+    bool deleteSourceAfter = false,
+    ArchiveCompressionLevel compressionLevel = ArchiveCompressionLevel.normal,
+    ArchiveCompressionMethod compressionMethod = ArchiveCompressionMethod.auto,
+    int splitSizeBytes = 0,
+    required AppLocalizations l10n,
+  }) {
+    final op = FileOperation._internal(
+      id: _nextId++,
+      isCut: false,
+      sourceVolId: source.volId,
+      sourceDisplayName: source.displayName,
+      destVolId: dest.volId,
+      destDisplayName: dest.displayName,
+      destDirPath: destDirPath,
+      items: items,
+      isArchiveCreate: true,
+      archiveName: archiveName,
+      l10n: l10n,
+      cancelNativeOperation: _cancelNativeOperation,
+    );
+    _operations.add(op);
+    _bindOperationListener(op);
+    notifyListeners();
+    _syncNotificationProgress();
+    _runArchiveCreate(
+      op,
+      source,
+      dest,
+      destDirPath,
+      archiveName,
+      items,
+      format,
+      passphrase,
+      encryptFilenames,
+      deleteSourceAfter,
+      compressionLevel,
+      compressionMethod,
+      splitSizeBytes,
+    );
+    return op;
+  }
+
+  FileOperation enqueueArchiveExtract({
+    required MountedContainer source,
+    required MountedContainer dest,
+    required String destDirPath,
+    required String archivePath,
+    required String archiveName,
+    required ArchiveContext archiveContext,
+    List<String>? selectedEntryPaths,
+    int totalEntries = 0,
+    String subPath = '',
+    bool deleteArchiveAfter = false,
+    required AppLocalizations l10n,
+  }) {
+    final op = FileOperation._internal(
+      id: _nextId++,
+      isCut: false,
+      sourceVolId: source.volId,
+      sourceDisplayName: source.displayName,
+      destVolId: dest.volId,
+      destDisplayName: dest.displayName,
+      destDirPath: destDirPath,
+      items: [ClipboardItem(path: archivePath, isDir: false, sizeBytes: 0)],
+      isArchiveExtract: true,
+      l10n: l10n,
+      cancelNativeOperation: _cancelNativeOperation,
+    );
+    _operations.add(op);
+    _bindOperationListener(op);
+    notifyListeners();
+    _syncNotificationProgress();
+    _runArchiveExtract(
+      op,
+      source,
+      dest,
+      destDirPath,
+      archivePath,
+      archiveName,
+      archiveContext,
+      selectedEntryPaths,
+      totalEntries,
+      subPath,
+      deleteArchiveAfter,
+    );
+    return op;
+  }
+
+  void clearForVolume(int volId) {
+    final toRemove = _operations
+        .where((op) => op.sourceVolId == volId || op.destVolId == volId)
+        .toList();
+    for (final op in toRemove) {
+      _unbindOperationListener(op);
+    }
+    _operations.removeWhere(
+      (op) => op.sourceVolId == volId || op.destVolId == volId,
+    );
+    notifyListeners();
+    _syncNotificationProgress();
+  }
+
+  void clearFinished() {
+    final toRemove = _operations
+        .where(
+          (op) =>
+              op.status != FileOperationStatus.pending &&
+              op.status != FileOperationStatus.running,
+        )
+        .toList();
+    for (final op in toRemove) {
+      _unbindOperationListener(op);
+    }
+    _operations.removeWhere(
+      (op) =>
+          op.status != FileOperationStatus.pending &&
+          op.status != FileOperationStatus.running,
+    );
+    notifyListeners();
+    _syncNotificationProgress();
+  }
+
+  void dismiss(int id) {
+    final op = _operations.cast<FileOperation?>().firstWhere(
+      (o) => o?.id == id,
+      orElse: () => null,
+    );
+    if (op == null) return;
+    if (op.status == FileOperationStatus.pending ||
+        op.status == FileOperationStatus.running) {
+      return;
+    }
+    _unbindOperationListener(op);
+    _operations.remove(op);
+    notifyListeners();
+    _syncNotificationProgress();
+  }
+
+  // ── Notification Progress Synchronization ─────────────────────────────────
+
+  void _bindOperationListener(FileOperation op) {
+    void onOpChanged() {
+      _syncNotificationProgress();
+    }
+
+    op.addListener(onOpChanged);
+    _opListeners[op] = onOpChanged;
+  }
+
+  void _unbindOperationListener(FileOperation op) {
+    final listener = _opListeners.remove(op);
+    if (listener != null) {
+      op.removeListener(listener);
+    }
+  }
+
+  double? _calculateAggregateProgress() {
+    final active = activeOperations;
+    if (active.isEmpty) return 1.0;
+
+    int totalBytes = 0;
+    int transferredBytes = 0;
+    bool hasByteTracked = false;
+
+    for (final op in active) {
+      if (op.totalBytes > 0) {
+        hasByteTracked = true;
+        totalBytes += op.totalBytes;
+        transferredBytes += op.transferredBytes;
+      }
+    }
+
+    if (hasByteTracked && totalBytes > 0) {
+      return (transferredBytes / totalBytes).clamp(0.0, 1.0);
+    }
+
+    final fractions = active.map((op) => op.progressFraction).toList();
+    if (fractions.every((f) => f == null)) return null;
+
+    double sum = 0;
+    int count = 0;
+    for (final f in fractions) {
+      if (f != null) {
+        sum += f;
+        count++;
+      }
+    }
+    return count > 0 ? (sum / active.length).clamp(0.0, 1.0) : null;
+  }
+
+  void _syncNotificationProgress() {
+    final active = activeOperations;
+    if (active.isEmpty) {
+      _notificationThrottleTimer?.cancel();
+      _notificationThrottleTimer = null;
+      _lastNotificationPushTime = null;
+      unawaited(
+        _lifecycleApi.updateBackgroundServiceProgress(hasActive: false),
+      );
+      return;
+    }
+
+    final now = DateTime.now();
+    final lastPush = _lastNotificationPushTime;
+    final timeSinceLastPush = lastPush == null
+        ? const Duration(seconds: 1)
+        : now.difference(lastPush);
+
+    if (timeSinceLastPush < _kNotificationThrottleDuration) {
+      if (_notificationThrottleTimer == null) {
+        final remaining = _kNotificationThrottleDuration - timeSinceLastPush;
+        _notificationThrottleTimer = Timer(remaining, () {
+          _notificationThrottleTimer = null;
+          _pushNotificationProgress();
+        });
+      }
+      return;
+    }
+
+    _notificationThrottleTimer?.cancel();
+    _notificationThrottleTimer = null;
+    _pushNotificationProgress();
+  }
+
+  void _pushNotificationProgress() {
+    final active = activeOperations;
+    if (active.isEmpty) {
+      _lastNotificationPushTime = null;
+      unawaited(
+        _lifecycleApi.updateBackgroundServiceProgress(hasActive: false),
+      );
+      return;
+    }
+
+    _lastNotificationPushTime = DateTime.now();
+
+    final fraction = _calculateAggregateProgress();
+    final progress = fraction != null
+        ? (fraction * 1000).round().clamp(0, 1000)
+        : null;
+    final indeterminate = fraction == null;
+
+    String title;
+    String text;
+
+    if (active.length == 1) {
+      final op = active.first;
+      title = op.shortSummary;
+
+      final parts = <String>[];
+      if (op.currentActivity.isNotEmpty &&
+          op.currentActivity != op.shortSummary) {
+        parts.add(op.currentActivity);
+      }
+      if (op.totalBytes > 0) {
+        parts.add(
+          '${formatBytes(op.transferredBytes)} / ${formatBytes(op.totalBytes)}',
+        );
+        if (op.bytesPerSecond != null && op.bytesPerSecond! > 0) {
+          parts.add(
+            op.l10n.fileOpsSpeedLabel(formatBytes(op.bytesPerSecond!.round())),
+          );
+        }
+        if (op.estimatedTimeRemaining != null) {
+          parts.add(
+            op.l10n.fileOpsEtaLabel(formatDuration(op.estimatedTimeRemaining!)),
+          );
+        }
+      } else if (op.isDelete && op.removedCount > 0) {
+        parts.add(op.l10n.fileOpDeletedSoFar(op.removedCount));
+      } else if ((op.isImport || op.isArchiveExtract) && op.totalCount > 0) {
+        parts.add('${op.doneCount} / ${op.totalCount}');
+      }
+      text = parts.isNotEmpty ? parts.join(' · ') : op.shortSummary;
+    } else {
+      final l10n = active.first.l10n;
+      title = l10n.fileOpsTransfersInProgressTitle;
+
+      final parts = <String>[];
+      parts.add(l10n.multiOpLabel(active.length));
+      int totalBytes = 0;
+      int transferredBytes = 0;
+      for (final op in active) {
+        if (op.totalBytes > 0) {
+          totalBytes += op.totalBytes;
+          transferredBytes += op.transferredBytes;
+        }
+      }
+      if (totalBytes > 0) {
+        parts.add(
+          '${formatBytes(transferredBytes)} / ${formatBytes(totalBytes)}',
+        );
+      }
+      text = parts.join(' · ');
+    }
+
+    unawaited(
+      _lifecycleApi.updateBackgroundServiceProgress(
+        hasActive: true,
+        title: title,
+        text: text,
+        progress: progress,
+        max: 1000,
+        indeterminate: indeterminate,
+      ),
+    );
+  }
+
+  // ── Size measurement ──────────────────────────────────────────────────────
+
+  Future<int> measureTreeBytes(
+    MountedContainer container,
+    String dirPath,
+  ) async {
+    int total = 0;
+    final entries = await _fileIoApi.listDirectory(container, dirPath) ?? [];
+    for (final entry in entries) {
+      if (entry.startsWith('System:')) continue;
+      final e = RawEntry.parse(entry);
+      if (e.isDir) {
+        total += await measureTreeBytes(container, '$dirPath/${e.name}');
+      } else {
+        total += e.sizeBytes;
+      }
+    }
+    return total;
+  }
+
+  Future<int> measureItemBytes(
+    MountedContainer container,
+    ClipboardItem item,
+  ) async {
+    if (!item.isDir) {
+      return item.sizeBytes > 0
+          ? item.sizeBytes
+          : _fileIoApi.getFileSize(container, item.path);
+    }
+    return measureTreeBytes(container, item.path);
+  }
+
+  // ── Unique-name helper ────────────────────────────────────────────────────
+
+  /// [existingNames] must already be folded the same way as [caseSensitive]:
+  /// lowercased when `false` (the default), exact when `true`.
+  static String makeUniqueName(
+    String fileName,
+    Set<String> existingNames, {
+    bool caseSensitive = false,
+  }) {
+    String fold(String n) => foldEntryName(n, caseSensitive: caseSensitive);
+    if (!existingNames.contains(fold(fileName))) return fileName;
+    final dotIdx = fileName.lastIndexOf('.');
+    final stem = dotIdx != -1 ? fileName.substring(0, dotIdx) : fileName;
+    final ext = dotIdx != -1 ? fileName.substring(dotIdx) : '';
+    for (int i = 1; i < 9999; i++) {
+      final candidate = '$stem ($i)$ext';
+      if (!existingNames.contains(fold(candidate))) return candidate;
+    }
+    return '$fileName-${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  // ── Operation runner: Archive Create ──────────────────────────────────────
+
+  Future<void> _runArchiveCreate(
+    FileOperation op,
+    MountedContainer source,
+    MountedContainer dest,
+    String destDirPath,
+    String archiveName,
+    List<ClipboardItem> items,
+    ArchiveFormatType format,
+    String? passphrase,
+    bool encryptFilenames,
+    bool deleteSourceAfter,
+    ArchiveCompressionLevel compressionLevel,
+    ArchiveCompressionMethod compressionMethod,
+    int splitSizeBytes,
+  ) async {
+    op._setStatus(FileOperationStatus.running);
+    op._setActivity(op.l10n.verbArchiving);
+
+    void onProgress(SplitJoinProgress p) {
+      if (p.opId != op.id) return;
+      op._setArchiveCreateBytesWritten(p.bytesDone, p.bytesTotal);
+    }
+
+    _engineEvents.addSplitJoinProgressListener(onProgress);
+    final guardedVolIds = <int>{
+      if (!source.isLocalStorage) source.volId,
+      if (!dest.isLocalStorage) dest.volId,
+    };
+    _beginBatches(guardedVolIds);
+
+    try {
+      final destVaultPath = destDirPath.isEmpty
+          ? archiveName
+          : '$destDirPath/$archiveName';
+
+      final srcPaths = <String>[];
+      final entryNames = <String>[];
+      final modifiedSecs = <int>[];
+      int totalInputBytes = 0;
+
+      Future<void> collect(String containerPath, String archivePath) async {
+        if (op.cancelRequested) throw const _CancelledException();
+        final rawList = await _fileIoApi.listDirectory(source, containerPath);
+        final children = RawEntry.parseAll(rawList ?? const []);
+        for (final child in children) {
+          if (child.name.startsWith('System:')) continue;
+          final childContainerPath = '$containerPath/${child.name}';
+          final childArchivePath = '$archivePath/${child.name}';
+          if (child.isDir) {
+            await collect(childContainerPath, childArchivePath);
+          } else {
+            srcPaths.add(
+              source.isRawLocal
+                  ? p.join(source.uri, childContainerPath)
+                  : childContainerPath,
+            );
+            entryNames.add(childArchivePath);
+            modifiedSecs.add(child.modifiedSecs);
+            totalInputBytes += child.sizeBytes;
+          }
+        }
+      }
+
+      for (final item in items) {
+        if (op.cancelRequested) throw const _CancelledException();
+        if (item.isDir) {
+          await collect(item.path, item.name);
+        } else {
+          srcPaths.add(
+            source.isRawLocal ? p.join(source.uri, item.path) : item.path,
+          );
+          entryNames.add(item.name);
+          modifiedSecs.add(item.modifiedSecs);
+          totalInputBytes += item.sizeBytes;
+        }
+      }
+
+      if (op.cancelRequested) throw const _CancelledException();
+
+      if (srcPaths.isEmpty) {
+        op._setStatus(FileOperationStatus.completed);
+        return;
+      }
+
+      if (totalInputBytes > 0) {
+        op._setArchiveTotalBytes(totalInputBytes);
+      }
+
+      final split = splitSizeBytes > 0 && format.supportsSplit;
+      if (split) {
+        // Parts are never overwritten; refuse up front, with the name that is in the way.
+        final rawSiblings = await _fileIoApi.listDirectory(dest, destDirPath);
+        final clash = ArchiveService.existingSplitPartName(
+          archiveName,
+          format,
+          RawEntry.parseAll(rawSiblings ?? const []).map((e) => e.name),
+        );
+        if (clash != null) {
+          op._setError(op.l10n.failedToArchiveGeneric('"$clash" already exists'));
+          op._setStatus(FileOperationStatus.failed);
+          return;
+        }
+      }
+
+      await _fileIoApi.deleteFile(dest, destVaultPath);
+
+      final ok = await ArchiveService.createArchive(
+        format: format,
+        srcPaths: srcPaths,
+        entryNames: entryNames,
+        modifiedSecs: modifiedSecs,
+        srcUri: source.isLocalStorage ? source.uri : source.uri,
+        destUri: dest.isLocalStorage ? dest.uri : dest.uri,
+        destVaultPath: destVaultPath,
+        destFilePath: dest.isRawLocal
+            ? p.join(dest.uri, destVaultPath)
+            : null,
+        passphrase: passphrase,
+        encryptFilenames: encryptFilenames,
+        compressionLevel: compressionLevel.level,
+        compressionMethod: compressionMethod.code,
+        splitSizeBytes: split ? splitSizeBytes : null,
+        opId: op.id,
+      );
+
+      if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else if (ok) {
+        op._setDoneCount(srcPaths.length);
+        if (deleteSourceAfter) {
+          for (final item in items) {
+            await _deleteEntryRecursive(source, item.path, item.isDir);
+          }
+        }
+        op._setStatus(FileOperationStatus.completed);
+      } else {
+        op._setError(op.l10n.failedToArchiveGeneric('Create failed'));
+        op._setStatus(FileOperationStatus.failed);
+      }
+    } on _CancelledException {
+      op._setStatus(FileOperationStatus.cancelled);
+    } catch (e) {
+      if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else {
+        op._setError(e.toString());
+        op._setStatus(FileOperationStatus.failed);
+      }
+    } finally {
+      _engineEvents.removeSplitJoinProgressListener(onProgress);
+      _endBatches(guardedVolIds);
+      _publishVolumeContentChanged(op, dest.volId);
+      if (deleteSourceAfter && source.volId != dest.volId) {
+        _publishVolumeContentChanged(op, source.volId);
+      }
+      await _fileIoApi.clearCopyState(op.id);
+      _unbindOperationListener(op);
+      notifyListeners();
+      _syncNotificationProgress();
+    }
+  }
+
+  // ── Operation runner: Archive Extract ──────────────────────────────────────
+
+  Future<void> _runArchiveExtract(
+    FileOperation op,
+    MountedContainer source,
+    MountedContainer dest,
+    String destDirPath,
+    String archivePath,
+    String archiveName,
+    ArchiveContext archiveContext,
+    List<String>? selectedEntryPaths,
+    int totalEntries,
+    String subPath,
+    bool deleteArchiveAfter,
+  ) async {
+    op._setStatus(FileOperationStatus.running);
+    op._setActivity(op.l10n.fileOpExtractingArchive);
+
+    void onProgress(SplitJoinProgress p) {
+      if (p.opId != op.id) return;
+      op._setImportProgress(
+        done: p.bytesDone,
+        total: totalEntries > 0 ? totalEntries : p.bytesDone,
+        currentName: archiveName,
+      );
+    }
+
+    _engineEvents.addSplitJoinProgressListener(onProgress);
+    final guardedVolIds = <int>{
+      if (!source.isLocalStorage) source.volId,
+      if (!dest.isLocalStorage) dest.volId,
+    };
+    _beginBatches(guardedVolIds);
+
+    try {
+      // On a case-insensitive destination, entries whose names differ only
+      // by case ("Notes.txt" / "notes.txt") would replace one another. When
+      // that would happen, extract file by file under the renamed paths
+      // (the later one becomes "notes (1).txt") instead of the bulk route.
+      final caseSafePlan = isDestinationCaseSensitive(dest)
+          ? null
+          : ArchiveService.caseSafeExtractPlan(
+              archiveContext,
+              selectedEntryPaths: selectedEntryPaths,
+              subPath: subPath,
+            );
+      if (caseSafePlan != null) {
+        VeLog.d(
+          'FileOperationService',
+          'CASE_COLLISION archive extract: renaming colliding entries '
+              '(${caseSafePlan.length} files extracted one by one)',
+        );
+      }
+
+      final int count;
+      if (caseSafePlan != null) {
+        count = await ArchiveService.extractMappedToContainer(
+          container: dest,
+          archiveContext: archiveContext,
+          destRelByEntryPath: caseSafePlan,
+          targetDirInContainer: destDirPath,
+          onProgress: (doneCount, currentPath) {
+            op._setImportProgress(
+              done: doneCount,
+              total: totalEntries > 0 ? totalEntries : doneCount,
+              currentName: currentPath,
+            );
+          },
+          opId: op.id,
+        );
+      } else if (selectedEntryPaths != null && selectedEntryPaths.isNotEmpty) {
+        count = await ArchiveService.extractSelectedToContainer(
+          container: dest,
+          archiveContext: archiveContext,
+          entryPaths: selectedEntryPaths,
+          targetDirInContainer: destDirPath,
+          onProgress: (doneCount, currentPath) {
+            op._setImportProgress(
+              done: doneCount,
+              total: totalEntries > 0 ? totalEntries : doneCount,
+              currentName: currentPath,
+            );
+          },
+          opId: op.id,
+        );
+      } else {
+        count = await ArchiveService.extractAllToContainer(
+          container: dest,
+          archiveContext: archiveContext,
+          targetDirInContainer: destDirPath,
+          subPath: subPath,
+          opId: op.id,
+        );
+      }
+
+      if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else if (count > 0 || totalEntries == 0) {
+        op._setDoneCount(count);
+        if (deleteArchiveAfter) {
+          await _deleteEntryRecursive(source, archivePath, false);
+        }
+        op._setStatus(FileOperationStatus.completed);
+      } else {
+        op._setError(op.l10n.failedToExtractGeneric('Extract failed'));
+        op._setStatus(FileOperationStatus.failed);
+      }
+    } on _CancelledException {
+      op._setStatus(FileOperationStatus.cancelled);
+    } catch (e) {
+      if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else {
+        op._setError(e.toString());
+        op._setStatus(FileOperationStatus.failed);
+      }
+    } finally {
+      _engineEvents.removeSplitJoinProgressListener(onProgress);
+      _endBatches(guardedVolIds);
+      _publishVolumeContentChanged(op, dest.volId);
+      if (deleteArchiveAfter && source.volId != dest.volId) {
+        _publishVolumeContentChanged(op, source.volId);
+      }
+      await _fileIoApi.clearCopyState(op.id);
+      _unbindOperationListener(op);
+      notifyListeners();
+      _syncNotificationProgress();
+    }
+  }
+
+  // ── Operation runner: Import ──────────────────────────────────────────────
+
+  Future<void> _runImport(
+    FileOperation op,
+    MountedContainer dest,
+    Future<int> Function(int opId) performImport,
+  ) async {
+    op._setStatus(FileOperationStatus.running);
+    op._setActivity(op.l10n.fileOpImporting);
+
+    void onProgress(ImportProgress p) {
+      if (p.opId != op.id) return;
+      op._setImportProgress(
+        done: p.done,
+        total: p.total,
+        currentName: p.currentName,
+        transferredBytes: p.transferredBytes,
+        totalBytes: p.totalBytes,
+      );
+    }
+
+    _engineEvents.addImportProgressListener(onProgress);
+    final guardedVolIds = dest.isLocalStorage ? <int>{} : <int>{dest.volId};
+    _beginBatches(guardedVolIds);
+    try {
+      final count = await performImport(op.id);
+      final hasSuccessfulItem = op._itemStatuses.any(
+        (item) => item.result == FileItemResult.success,
+      );
+      if (count > 0 || hasSuccessfulItem) {
+        if (op._itemStatuses.length == 1 &&
+            op._itemStatuses[0].result == FileItemResult.pending) {
+          op._recordItemResult(0, FileItemResult.success);
+        }
+        op._setDoneCount(count);
+        op._setStatus(
+          op._itemStatuses.any((item) => item.result != FileItemResult.success)
+              ? FileOperationStatus.completedWithErrors
+              : FileOperationStatus.completed,
+        );
+      } else if (op._itemStatuses.any(
+        (item) => item.result == FileItemResult.failed,
+      )) {
+        op._setStatus(FileOperationStatus.completedWithErrors);
+      } else {
+        op._setStatus(FileOperationStatus.cancelled);
+      }
+    } on PlatformException catch (e) {
+      if (e.code == 'CANCELLED') {
+        op._setDoneCount(op._importDone);
+        op._setStatus(FileOperationStatus.cancelled);
+      } else if (e.code == 'INSUFFICIENT_SPACE') {
+        final details = e.details;
+        final needed = details is Map ? details['neededBytes'] as int? : null;
+        final available = details is Map
+            ? details['availableBytes'] as int?
+            : null;
+        op._setError(
+          (needed != null && available != null)
+              ? op.l10n.fileOpNotEnoughSpace(
+                  formatBytes(needed),
+                  formatBytes(available),
+                )
+              : e.message ?? e.toString(),
+        );
+        op._setStatus(FileOperationStatus.failed);
+      } else {
+        op._setError(e.message ?? e.toString());
+        op._setStatus(FileOperationStatus.failed);
+      }
+    } catch (e) {
+      op._setError(e.toString());
+      op._setStatus(FileOperationStatus.failed);
+    } finally {
+      _engineEvents.removeImportProgressListener(onProgress);
+      _endBatches(guardedVolIds);
+      _publishVolumeContentChanged(op, dest.volId);
+      _unbindOperationListener(op);
+      notifyListeners();
+      _syncNotificationProgress();
+    }
+  }
+
+  // ── Operation runner: Export ──────────────────────────────────────────────
+
+  Future<void> _runExport(
+    FileOperation op,
+    MountedContainer source,
+    Future<int> Function(int opId) performExport,
+  ) async {
+    op._setStatus(FileOperationStatus.running);
+    op._setActivity(op.l10n.fileOpExporting);
+
+    void onProgress(ExportProgress p) {
+      if (p.opId != op.id) return;
+      op._setImportProgress(
+        done: p.done,
+        total: p.total,
+        currentName: p.currentName,
+        transferredBytes: p.transferredBytes,
+        totalBytes: p.totalBytes,
+      );
+    }
+
+    _engineEvents.addExportProgressListener(onProgress);
+    final guardedVolIds = source.isLocalStorage ? <int>{} : <int>{source.volId};
+    _beginBatches(guardedVolIds);
+    try {
+      final count = await performExport(op.id);
+      if (count > 0) {
+        if (op._itemStatuses.length == 1 &&
+            op._itemStatuses[0].result == FileItemResult.pending) {
+          op._recordItemResult(0, FileItemResult.success);
+        }
+        op._setDoneCount(count);
+        op._setStatus(
+          op.failCount > 0
+              ? FileOperationStatus.completedWithErrors
+              : FileOperationStatus.completed,
+        );
+      } else if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else if (op._itemStatuses.isNotEmpty &&
+          op._itemStatuses.every((s) => s.result == FileItemResult.failed)) {
+        op._setDoneCount(0);
+        op._setStatus(FileOperationStatus.completedWithErrors);
+      } else {
+        op._setStatus(FileOperationStatus.cancelled);
+      }
+    } on PlatformException catch (e) {
+      if (e.code == 'CANCELLED') {
+        op._setDoneCount(op._importDone);
+        op._setStatus(FileOperationStatus.cancelled);
+      } else {
+        op._setError(e.message ?? e.toString());
+        op._setStatus(FileOperationStatus.failed);
+      }
+    } catch (e) {
+      op._setError(e.toString());
+      op._setStatus(FileOperationStatus.failed);
+    } finally {
+      _engineEvents.removeExportProgressListener(onProgress);
+      _endBatches(guardedVolIds);
+      _unbindOperationListener(op);
+      notifyListeners();
+      _syncNotificationProgress();
+    }
+  }
+
+  // ── Operation runner: Copy / Move ─────────────────────────────────────────
+
+  Future<void> _run(
+    FileOperation op,
+    MountedContainer src,
+    MountedContainer dest,
+    ConflictPlan conflictPlan,
+  ) async {
+    op._setStatus(FileOperationStatus.running);
+
+    void onCopyProgress(CopyProgress p) {
+      if (p.opId != op.id) return;
+      op._addTransferredBytes(p.bytesDelta);
+    }
+
+    _engineEvents.addCopyProgressListener(onCopyProgress);
+    final guardedVolIds = <int>{
+      if (!src.isLocalStorage) src.volId,
+      if (!dest.isLocalStorage) dest.volId,
+    };
+    _beginBatches(guardedVolIds);
+    var nativeBatchStarted = false;
+    try {
+      await _fileIoApi.beginBatchWrite(dest);
+      nativeBatchStarted = true;
+      op._setActivity(op.l10n.fileOpResolvingConflicts);
+      final existingRaw =
+          await _fileIoApi.listDirectory(dest, op.destDirPath) ?? [];
+      if (op.cancelRequested) throw const _CancelledException();
+
+      // Names are compared the way the destination's policy says (see
+      // namesAreCaseSensitive); the same fold is used for the existing-name
+      // sets, the lookups and the ConflictPlan keys the sheet produced.
+      final namesCaseSensitive = namesAreCaseSensitive(dest);
+      String fold(String n) =>
+          foldEntryName(n, caseSensitive: namesCaseSensitive);
+      final existingNames = <String>{};
+      final existingDirs = <String>{};
+      for (final raw in existingRaw) {
+        if (raw.startsWith('System:')) continue;
+        final e = RawEntry.parse(raw);
+        existingNames.add(fold(e.name));
+        if (e.isDir) existingDirs.add(fold(e.name));
+      }
+
+      bool needsRealCopy(ClipboardItem item) {
+        if (!(op.isCut && src.volId == dest.volId)) return true;
+        if (!item.isDir) return false;
+        if (!existingNames.contains(fold(item.name))) return false;
+        if (!existingDirs.contains(fold(item.name))) return false;
+        final resolution =
+            conflictPlan[fold(item.name)] ??
+            ConflictResolution.keepBoth;
+        return resolution == ConflictResolution.overwrite;
+      }
+
+      op._setActivity(op.l10n.fileOpCheckingSpace);
+      int requiredBytes = 0;
+      for (final item in op.items) {
+        if (!needsRealCopy(item)) continue;
+        requiredBytes += await measureItemBytes(src, item);
+        if (op.cancelRequested) throw const _CancelledException();
+      }
+      op._setTotalBytes(requiredBytes);
+      final spaceInfo = await _fileIoApi.getSpaceInfo(dest);
+      final freeBytes =
+          (spaceInfo != null && spaceInfo.length > 1 && spaceInfo[1] >= 0)
+          ? spaceInfo[1]
+          : null;
+      if (freeBytes != null &&
+          !fitsWithinSpaceSafetyMargin(requiredBytes, freeBytes)) {
+        op._setError(
+          op.l10n.fileOpNotEnoughSpace(
+            formatBytes(requiredBytes),
+            formatBytes(freeBytes),
+          ),
+        );
+        op._setStatus(FileOperationStatus.failed);
+        notifyListeners();
+        return;
+      }
+
+      final resolved =
+          <
+            ({
+              ClipboardItem item,
+              String destPath,
+              bool skip,
+              bool mergeOverwrite,
+            })
+          >[];
+
+      // On a destination that treats "Notes" and "notes" as one name, two
+      // selected items that differ only by case would land on the same
+      // entry -- and every copy deletes its destination before writing, so
+      // the later one would silently replace the earlier one. The second
+      // and later such items are kept under a unique name instead
+      // ("notes (1)"), the same outcome as choosing "keep both".
+      final destCaseSensitive = isDestinationCaseSensitive(dest);
+      final claimedDestLeaves = <String>{};
+
+      for (final item in op.items) {
+        final fileName = item.name;
+        String destPath = op.destDirPath.isEmpty
+            ? fileName
+            : '${op.destDirPath}/$fileName';
+        // Same container, same path as the item's current location. For a
+        // *cut*, pasting back where the item already lives is a genuine
+        // no-op -- nothing moves, so it's skipped outright below. For a
+        // *copy*, it is NOT a no-op (the destination already has an entry
+        // with this name -- itself), so this only short-circuits the cut
+        // case; a same-path copy still goes through the normal conflict
+        // handling below, where it needs its own care (see the
+        // ConflictResolution.overwrite case).
+        //
+        // "Same entry" is decided on the real filesystem path when both
+        // ends have one (see [_isSameEntry]): the same folder can be
+        // mounted twice -- as a SAF storage location and as plain Local
+        // Storage -- and then neither the volIds nor the paths match even
+        // though both sides are literally the same file.
+        final isSelfPath = await _isSameEntry(src, item.path, dest, destPath);
+
+        if (op.isCut && isSelfPath) {
+          resolved.add((
+            item: item,
+            destPath: destPath,
+            skip: true,
+            mergeOverwrite: false,
+          ));
+          continue;
+        }
+        if (item.isDir &&
+            await _isInsideEntry(src, item.path, dest, destPath)) {
+          resolved.add((
+            item: item,
+            destPath: destPath,
+            skip: true,
+            mergeOverwrite: false,
+          ));
+          continue;
+        }
+
+        bool mergeOverwrite = false;
+        if (existingNames.contains(fold(fileName))) {
+          final resolution =
+              conflictPlan[fold(fileName)] ??
+              ConflictResolution.keepBoth;
+          final destIsDir = existingDirs.contains(fold(fileName));
+
+          switch (resolution) {
+            case ConflictResolution.skip:
+              resolved.add((
+                item: item,
+                destPath: destPath,
+                skip: true,
+                mergeOverwrite: false,
+              ));
+              continue;
+            case ConflictResolution.overwrite:
+              if (isSelfPath) {
+                // A same-folder copy "overwriting" the file it was
+                // copied from has nothing to overwrite *with* --
+                // destPath and the source are the same entry. The usual
+                // overwrite path deletes destPath before the copy step
+                // runs, which here would delete the only copy of the
+                // file before ever reading it. There's nothing
+                // meaningful to do to a file with an identical copy of
+                // itself, so treat it as a no-op instead.
+                resolved.add((
+                  item: item,
+                  destPath: destPath,
+                  skip: true,
+                  mergeOverwrite: false,
+                ));
+                continue;
+              }
+              if (op.isCut && item.isDir && destIsDir) {
+                mergeOverwrite = true;
+              } else if (op.isCut) {
+                await _deleteEntryRecursive(dest, destPath, destIsDir);
+              }
+            case ConflictResolution.keepBoth:
+              final unique = makeUniqueName(
+                fileName,
+                existingNames,
+                caseSensitive: namesCaseSensitive,
+              );
+              existingNames.add(fold(unique));
+              destPath = op.destDirPath.isEmpty
+                  ? unique
+                  : '${op.destDirPath}/$unique';
+          }
+        }
+
+        if (!destCaseSensitive) {
+          final leaf = destPath.split('/').last;
+          if (!claimedDestLeaves.add(leaf.toLowerCase())) {
+            // Names here are all lowercased: a destination that is
+            // case-insensitive in fact is never case-sensitive by policy,
+            // so `existingNames` is folded the same way.
+            final taken = <String>{...existingNames, ...claimedDestLeaves};
+            final unique = makeUniqueName(leaf, taken, caseSensitive: false);
+            claimedDestLeaves.add(unique.toLowerCase());
+            existingNames.add(unique.toLowerCase());
+            destPath = op.destDirPath.isEmpty
+                ? unique
+                : '${op.destDirPath}/$unique';
+            VeLog.d(
+              'FileOperationService',
+              'CASE_COLLISION top-level item '
+                  '${VeLog.censorName(leaf)} differs only by case from an '
+                  'earlier item on a case-insensitive destination; kept '
+                  'under a unique name',
+            );
+          }
+        }
+
+        resolved.add((
+          item: item,
+          destPath: destPath,
+          skip: false,
+          mergeOverwrite: mergeOverwrite,
+        ));
+      }
+
+      for (int i = 0; i < resolved.length; i++) {
+        op._setResolvedDestName(i, resolved[i].destPath.split('/').last);
+      }
+      notifyListeners();
+
+      final semaphore = BoundedSemaphore(_maxConcurrentItems);
+      final createdDestPaths = <String>[];
+
+      try {
+        await Future.wait(
+          resolved.asMap().entries.map((entry) async {
+            final idx = entry.key;
+            final r = entry.value;
+
+            await semaphore.acquire();
+            try {
+              if (op.cancelRequested) throw const _CancelledException();
+
+              if (r.skip) {
+                op._recordItemResult(idx, FileItemResult.skipped);
+                return;
+              }
+
+              op._setActivity(
+                op.isCut
+                    ? op.l10n.fileOpMovingName(r.item.name)
+                    : op.l10n.fileOpCopyingName(r.item.name),
+              );
+              bool ok = false;
+              if (op.isCut && src.volId == dest.volId && !r.mergeOverwrite) {
+                ok = await _fileIoApi.renameFile(src, r.item.path, r.destPath);
+                if (!ok) {
+                  op._recordItemResult(
+                    idx,
+                    FileItemResult.failed,
+                    errorMessage: op.l10n.fileOpMoveFailed,
+                  );
+                } else {
+                  op._recordItemResult(idx, FileItemResult.success);
+                }
+              } else {
+                ok = await _copyEntry(
+                  src,
+                  dest,
+                  r.item.path,
+                  r.destPath,
+                  r.item.isDir,
+                  createdDestPaths,
+                  op,
+                  r.item.modifiedSecs,
+                );
+                if (!ok) {
+                  op._recordItemResult(
+                    idx,
+                    FileItemResult.failed,
+                    errorMessage: op.l10n.fileOpCopyFailed,
+                  );
+                } else if (op.isCut) {
+                  await _deleteEntryRecursive(src, r.item.path, r.item.isDir);
+                  op._recordItemResult(idx, FileItemResult.success);
+                } else {
+                  op._recordItemResult(idx, FileItemResult.success);
+                }
+              }
+            } on _DiskFullException {
+              op._recordItemResult(
+                idx,
+                FileItemResult.failed,
+                errorMessage: op.l10n.fileOpDiskFull,
+              );
+              rethrow;
+            } on _CancelledException {
+              op._recordItemResult(
+                idx,
+                FileItemResult.skipped,
+                errorMessage: op.l10n.statusCancelled,
+              );
+              rethrow;
+            } catch (e) {
+              op._recordItemResult(
+                idx,
+                FileItemResult.failed,
+                errorMessage: e.toString(),
+              );
+            } finally {
+              semaphore.release();
+            }
+          }),
+        );
+      } catch (e) {
+        if (e is! _DiskFullException && e is! _CancelledException) {
+          VeLog.e(
+            'FileOperationService',
+            'Unexpected exception escaped batch item handling',
+            e,
+          );
+        }
+      }
+      final diskFull = op.itemStatuses.any(
+        (s) =>
+            s.errorMessage == 'Disk full' ||
+            s.errorMessage == op.l10n.fileOpDiskFull,
+      );
+      if (diskFull) {
+        for (final path in createdDestPaths.reversed) {
+          try {
+            await _deleteEntryRecursive(dest, path, false);
+          } catch (e) {
+            VeLog.e(
+              'FileOperationService',
+              'Disk-full rollback: failed to remove partial entry ${VeLog.censorUri(path)}',
+              e,
+            );
+          }
+        }
+        op._setError(op.l10n.fileOpDiskFullPartialRemoved);
+        op._setStatus(FileOperationStatus.diskFull);
+      } else if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else if (op.failCount > 0) {
+        op._setStatus(FileOperationStatus.completedWithErrors);
+      } else {
+        op._setStatus(FileOperationStatus.completed);
+      }
+    } on _CancelledException {
+      op._setStatus(FileOperationStatus.cancelled);
+    } on _DiskFullException {
+      if (op.status != FileOperationStatus.diskFull) {
+        op._setStatus(FileOperationStatus.diskFull);
+      }
+    } catch (e) {
+      op._setError(e.toString());
+      op._setStatus(FileOperationStatus.failed);
+    } finally {
+      _engineEvents.removeCopyProgressListener(onCopyProgress);
+      try {
+        await _fileIoApi.clearCopyState(op.id);
+      } finally {
+        try {
+          if (nativeBatchStarted) await _fileIoApi.endBatchWrite(dest);
+        } finally {
+          _endBatches(guardedVolIds);
+          _unbindOperationListener(op);
+          notifyListeners();
+          _syncNotificationProgress();
+          // After the native batch is closed, so other views list the final state.
+          _publishTransferContentChanged(
+            op,
+            sourceVolId: src.volId,
+            destVolId: dest.volId,
+          );
+        }
+      }
+    }
+  }
+
+  // ── Operation runner: Local Transfer ──────────────────────────────────────
+
+  Future<void> _runLocal(
+    FileOperation op,
+    MountedContainer source,
+    MountedContainer dest,
+    ConflictPlan conflictPlan,
+  ) async {
+    op._setStatus(FileOperationStatus.running);
+    final guardedVolIds = <int>{
+      if (!source.isLocalStorage) source.volId,
+      if (!dest.isLocalStorage) dest.volId,
+    };
+    _beginBatches(guardedVolIds);
+    try {
+      op._setActivity(op.l10n.fileOpResolvingConflicts);
+      final destDirAbs = _resolveLocal(dest.uri, op.destDirPath);
+      final destDir = Directory(destDirAbs);
+      final existingEntities = await destDir.exists()
+          ? await destDir.list(followLinks: false).toList()
+          : const <FileSystemEntity>[];
+      final existingNames = <String>{};
+      final existingDirs = <String>{};
+      for (final entity in existingEntities) {
+        final name = p.basename(entity.path).toLowerCase();
+        existingNames.add(name);
+        if (entity is Directory) existingDirs.add(name);
+      }
+
+      op._setTotalBytes(op.items.fold(0, (sum, item) => sum + item.sizeBytes));
+
+      final resolved =
+          <
+            ({ClipboardItem item, String srcPath, String destPath, bool skip})
+          >[];
+      for (final item in op.items) {
+        final fileName = item.name;
+        final srcPath = _resolveLocal(source.uri, item.path);
+        String destPath = p.join(destDirAbs, fileName);
+        // See the matching comment in _run: same-path is only a no-op for
+        // a *cut*. A same-path *copy* still needs the normal conflict
+        // handling below (and its own care in the overwrite case).
+        final isSelfPath = srcPath == destPath;
+
+        if (op.isCut && isSelfPath) {
+          resolved.add((
+            item: item,
+            srcPath: srcPath,
+            destPath: destPath,
+            skip: true,
+          ));
+          continue;
+        }
+        if (item.isDir && p.isWithin(srcPath, destPath)) {
+          resolved.add((
+            item: item,
+            srcPath: srcPath,
+            destPath: destPath,
+            skip: true,
+          ));
+          continue;
+        }
+
+        if (existingNames.contains(fileName.toLowerCase())) {
+          final resolution =
+              conflictPlan[fileName.toLowerCase()] ??
+              ConflictResolution.keepBoth;
+          switch (resolution) {
+            case ConflictResolution.skip:
+              resolved.add((
+                item: item,
+                srcPath: srcPath,
+                destPath: destPath,
+                skip: true,
+              ));
+              continue;
+            case ConflictResolution.overwrite:
+              if (isSelfPath) {
+                // Same self-overwrite hazard as _run: destPath is the
+                // source file itself here, so deleting it before the
+                // copy step would destroy the only copy before it's
+                // ever read. No-op instead.
+                resolved.add((
+                  item: item,
+                  srcPath: srcPath,
+                  destPath: destPath,
+                  skip: true,
+                ));
+                continue;
+              }
+              await _deleteLocalRecursive(destPath);
+            case ConflictResolution.keepBoth:
+              final unique = makeUniqueName(fileName, existingNames);
+              existingNames.add(unique.toLowerCase());
+              destPath = p.join(destDirAbs, unique);
+          }
+        }
+        resolved.add((
+          item: item,
+          srcPath: srcPath,
+          destPath: destPath,
+          skip: false,
+        ));
+      }
+
+      for (int i = 0; i < resolved.length; i++) {
+        op._setResolvedDestName(i, p.basename(resolved[i].destPath));
+      }
+      notifyListeners();
+
+      for (int i = 0; i < resolved.length; i++) {
+        if (op.cancelRequested) {
+          op._recordItemResult(
+            i,
+            FileItemResult.skipped,
+            errorMessage: op.l10n.statusCancelled,
+          );
+          continue;
+        }
+        final r = resolved[i];
+        if (r.skip) {
+          op._recordItemResult(i, FileItemResult.skipped);
+          continue;
+        }
+        op._setActivity(
+          op.isCut
+              ? op.l10n.fileOpMovingName(r.item.name)
+              : op.l10n.fileOpCopyingName(r.item.name),
+        );
+        try {
+          if (op.isCut) {
+            await _moveLocalEntry(r.srcPath, r.destPath, r.item.isDir);
+          } else {
+            await _copyLocalEntry(r.srcPath, r.destPath, r.item.isDir);
+          }
+          op._addTransferredBytes(r.item.sizeBytes);
+          op._recordItemResult(i, FileItemResult.success);
+        } catch (e) {
+          op._recordItemResult(
+            i,
+            FileItemResult.failed,
+            errorMessage: e.toString(),
+          );
+        }
+      }
+
+      if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else if (op.failCount > 0) {
+        op._setStatus(FileOperationStatus.completedWithErrors);
+      } else {
+        op._setStatus(FileOperationStatus.completed);
+      }
+    } catch (e) {
+      op._setError(e.toString());
+      op._setStatus(FileOperationStatus.failed);
+    } finally {
+      _endBatches(guardedVolIds);
+      _unbindOperationListener(op);
+      notifyListeners();
+      _syncNotificationProgress();
+      _publishTransferContentChanged(
+        op,
+        sourceVolId: source.volId,
+        destVolId: dest.volId,
+      );
+    }
+  }
+
+  String _resolveLocal(String rootPath, String relativePath) =>
+      relativePath.isEmpty ? rootPath : p.join(rootPath, relativePath);
+
+  // ── Physical identity of entries ──────────────────────────────────────────
+  //
+  // Local Storage, a SAF folder added as a storage location, and a second
+  // entry for that same folder can all show one set of files while having
+  // different volIds / URIs. Everything below answers "is this the same file
+  // on disk?" so a copy never deletes or truncates its own source.
+
+  /// Canonical real path of each local/SAF container's root, by container URI.
+  /// null = no real path exists (cloud/virtual provider, or a vault).
+  final Map<String, String?> _physicalRootCache = {};
+
+  Future<String?> _physicalRoot(MountedContainer c) async {
+    if (!c.isLocalStorage) return null;
+    if (_physicalRootCache.containsKey(c.uri)) return _physicalRootCache[c.uri];
+    final root = await _fileIoApi.getRealPath(c);
+    _physicalRootCache[c.uri] = root;
+    return root;
+  }
+
+  Future<String?> _physicalPath(MountedContainer c, String relPath) async {
+    final root = await _physicalRoot(c);
+    if (root == null) return null;
+    final rel = relPath.replaceAll('\\', '/').split('/').where((s) => s.isNotEmpty);
+    return rel.isEmpty ? root : p.joinAll([root, ...rel]);
+  }
+
+  /// True when ([a], [aPath]) and ([b], [bPath]) are the same entry.
+  Future<bool> _isSameEntry(
+    MountedContainer a,
+    String aPath,
+    MountedContainer b,
+    String bPath,
+  ) async {
+    final pa = await _physicalPath(a, aPath);
+    final pb = await _physicalPath(b, bPath);
+    // Real paths, when both sides have one, are authoritative.
+    if (pa != null && pb != null) return p.equals(pa, pb);
+    // Otherwise the container-level identity: same vault slot, or the same
+    // tree URI of a provider that has no real path (e.g. a cloud drive added
+    // twice). The same Dart-side rule the check used before.
+    if (a.volId == b.volId && aPath == bPath) return true;
+    if (a.isSafStorage && b.isSafStorage && a.uri == b.uri) {
+      String clean(String s) => p.posix.normalize(s).replaceAll(RegExp(r'^/+|/+$'), '');
+      return clean(aPath) == clean(bPath);
+    }
+    return false;
+  }
+
+  /// True when ([b], [bPath]) lies strictly inside the folder ([a], [aPath]).
+  Future<bool> _isInsideEntry(
+    MountedContainer a,
+    String aPath,
+    MountedContainer b,
+    String bPath,
+  ) async {
+    final pa = await _physicalPath(a, aPath);
+    final pb = await _physicalPath(b, bPath);
+    if (pa != null && pb != null) return p.isWithin(pa, pb);
+    return a.volId == b.volId && bPath.startsWith('$aPath/');
+  }
+
+  Future<void> _copyLocalEntry(
+    String sourcePath,
+    String destPath,
+    bool isDir,
+  ) async {
+    if (isDir) {
+      await Directory(destPath).create(recursive: true);
+      await for (final entity in Directory(
+        sourcePath,
+      ).list(followLinks: false)) {
+        final childDest = p.join(destPath, p.basename(entity.path));
+        if (entity is Directory) {
+          await _copyLocalEntry(entity.path, childDest, true);
+        } else if (entity is File) {
+          await entity.copy(childDest);
+        }
+      }
+    } else {
+      await Directory(p.dirname(destPath)).create(recursive: true);
+      await File(sourcePath).copy(destPath);
+    }
+  }
+
+  Future<void> _moveLocalEntry(
+    String sourcePath,
+    String destPath,
+    bool isDir,
+  ) async {
+    try {
+      await Directory(p.dirname(destPath)).create(recursive: true);
+      final entity = isDir ? Directory(sourcePath) : File(sourcePath);
+      await entity.rename(destPath);
+    } on FileSystemException {
+      await _copyLocalEntry(sourcePath, destPath, isDir);
+      await _deleteLocalRecursive(sourcePath);
+    }
+  }
+
+  Future<void> _deleteLocalRecursive(String path) async {
+    final type = await FileSystemEntity.type(path);
+    if (type == FileSystemEntityType.directory) {
+      await Directory(path).delete(recursive: true);
+    } else if (type != FileSystemEntityType.notFound) {
+      await File(path).delete();
+    }
+  }
+
+  // ── Operation runner: Delete ──────────────────────────────────────────────
+
+  Future<void> _runDelete(FileOperation op, MountedContainer container) async {
+    if (container.isLocalStorage) {
+      return _runDeleteLocal(op, container);
+    }
+    op._setStatus(FileOperationStatus.running);
+    op._setActivity(op.l10n.fileOpDeleting);
+
+    final guardedVolIds = <int>{container.volId};
+    _beginBatches(guardedVolIds);
+    var nativeBatchStarted = false;
+    try {
+      await _fileIoApi.beginBatchDelete(container);
+      nativeBatchStarted = true;
+      for (int i = 0; i < op.items.length; i++) {
+        if (op.cancelRequested) {
+          op._recordItemResult(i, FileItemResult.skipped);
+          continue;
+        }
+        final item = op.items[i];
+        bool ok;
+        try {
+          ok = await _deleteEntryRecursive(
+            container,
+            item.path,
+            item.isDir,
+            op: op,
+          );
+        } on _CancelledException {
+          op._recordItemResult(i, FileItemResult.skipped);
+          continue;
+        }
+        op._recordItemResult(
+          i,
+          ok ? FileItemResult.success : FileItemResult.failed,
+          errorMessage: ok ? null : op.l10n.fileOpDeleteFailed,
+        );
+      }
+      if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else if (op.failCount > 0) {
+        op._setStatus(FileOperationStatus.completedWithErrors);
+      } else {
+        op._setStatus(FileOperationStatus.completed);
+      }
+    } on _CancelledException {
+      op._setStatus(FileOperationStatus.cancelled);
+    } catch (e) {
+      op._setError(e.toString());
+      op._setStatus(FileOperationStatus.failed);
+    } finally {
+      try {
+        if (nativeBatchStarted) await _fileIoApi.endBatchDelete(container);
+      } finally {
+        _endBatches(guardedVolIds);
+        _unbindOperationListener(op);
+        notifyListeners();
+        _syncNotificationProgress();
+        // After the native batch is closed, so other views list the final state.
+        _publishVolumeContentChanged(op, container.volId);
+      }
+    }
+  }
+
+  Future<void> _runDeleteLocal(
+    FileOperation op,
+    MountedContainer container,
+  ) async {
+    op._setStatus(FileOperationStatus.running);
+    op._setActivity(op.l10n.fileOpDeleting);
+    try {
+      for (int i = 0; i < op.items.length; i++) {
+        if (op.cancelRequested) {
+          op._recordItemResult(i, FileItemResult.skipped);
+          continue;
+        }
+        final item = op.items[i];
+        try {
+          final ok = await _fileIoApi.deleteFile(container, item.path);
+          if (ok) {
+            op._recordItemResult(i, FileItemResult.success);
+          } else {
+            op._recordItemResult(
+              i,
+              FileItemResult.failed,
+              errorMessage: op.l10n.fileOpDeleteFailed,
+            );
+          }
+        } catch (_) {
+          op._recordItemResult(
+            i,
+            FileItemResult.failed,
+            errorMessage: op.l10n.fileOpDeleteFailed,
+          );
+        }
+      }
+      if (op.cancelRequested) {
+        op._setStatus(FileOperationStatus.cancelled);
+      } else if (op.failCount > 0) {
+        op._setStatus(FileOperationStatus.completedWithErrors);
+      } else {
+        op._setStatus(FileOperationStatus.completed);
+      }
+    } catch (e) {
+      op._setError(e.toString());
+      op._setStatus(FileOperationStatus.failed);
+    } finally {
+      _unbindOperationListener(op);
+      notifyListeners();
+      _syncNotificationProgress();
+      _publishVolumeContentChanged(op, container.volId);
+    }
+  }
+
+  // ── Recursive copy ────────────────────────────────────────────────────────
+
+  Future<bool> _copyEntry(
+    MountedContainer src,
+    MountedContainer dest,
+    String srcPath,
+    String destPath,
+    bool isDir,
+    List<String> createdDestPaths,
+    FileOperation op,
+    int modifiedSecs,
+  ) async {
+    if (op.cancelRequested) throw const _CancelledException();
+
+    if (!isDir) {
+      return _copyFile(
+        src,
+        dest,
+        srcPath,
+        destPath,
+        createdDestPaths,
+        op,
+        modifiedSecs,
+      );
+    }
+
+    final children = await _fileIoApi.listDirectory(src, srcPath) ?? [];
+    await _fileIoApi.createDirectory(dest, destPath);
+    createdDestPaths.add(destPath);
+    if (modifiedSecs > 0) {
+      await _fileIoApi.setLastModifiedTime(dest, destPath, modifiedSecs);
+    }
+
+    // Same handling as the top-level one in `_run`: siblings that differ only
+    // by case would land on one entry of a case-insensitive destination, and
+    // `_copyFile` deletes its destination before writing. The later sibling
+    // is copied under a unique name ("notes (1)") instead of replacing the
+    // earlier one.
+    final destCaseSensitive = isDestinationCaseSensitive(dest);
+    final claimedChildNames = <String>{};
+    Set<String>? takenNames; // built lazily, only if a collision happens
+
+    bool allOk = true;
+    for (final entry in children) {
+      if (entry.startsWith('System:')) continue;
+      final e = RawEntry.parse(entry);
+      var destName = e.name;
+      if (!destCaseSensitive && !claimedChildNames.add(e.name.toLowerCase())) {
+        takenNames ??= await _takenChildNames(dest, destPath, children);
+        destName = makeUniqueName(e.name, takenNames, caseSensitive: false);
+        takenNames.add(destName.toLowerCase());
+        claimedChildNames.add(destName.toLowerCase());
+        VeLog.d(
+          'FileOperationService',
+          'CASE_COLLISION child ${VeLog.censorName(e.name)} differs only by '
+              'case from an earlier sibling on a case-insensitive '
+              'destination; copied under a unique name',
+        );
+      }
+      final ok = await _copyEntry(
+        src,
+        dest,
+        '$srcPath/${e.name}',
+        '$destPath/$destName',
+        e.isDir,
+        createdDestPaths,
+        op,
+        e.modifiedSecs,
+      );
+      if (!ok) allOk = false;
+    }
+    return allOk;
+  }
+
+  /// Lowercased names a case-colliding child must not be renamed to: every
+  /// name among the source folder's own children (they will all be written
+  /// here) plus whatever the destination folder already holds.
+  Future<Set<String>> _takenChildNames(
+    MountedContainer dest,
+    String destPath,
+    List<String> srcChildren,
+  ) async {
+    final taken = <String>{};
+    for (final raw in srcChildren) {
+      if (raw.startsWith('System:')) continue;
+      taken.add(RawEntry.parse(raw).name.toLowerCase());
+    }
+    final existing = await _fileIoApi.listDirectory(dest, destPath) ?? const [];
+    for (final raw in existing) {
+      if (raw.startsWith('System:')) continue;
+      taken.add(RawEntry.parse(raw).name.toLowerCase());
+    }
+    return taken;
+  }
+
+  Future<bool> _copyFile(
+    MountedContainer src,
+    MountedContainer dest,
+    String srcPath,
+    String destPath,
+    List<String> createdDestPaths,
+    FileOperation op,
+    int modifiedSecs,
+  ) async {
+    op._setActivity(
+      op.isCut
+          ? op.l10n.fileOpMovingName(destPath.split('/').last)
+          : op.l10n.fileOpCopyingName(destPath.split('/').last),
+    );
+    final copyStopwatch = Stopwatch()..start();
+    var readMicros = 0;
+    var writeMicros = 0;
+    var chunkCount = 0;
+    try {
+      final size = await _fileIoApi.getFileSize(src, srcPath);
+      if (size < 0) return false;
+
+      // Last line of defence, right in front of the delete below: if the
+      // destination is the source (same real file reached through two
+      // different mounts), deleting it first would destroy the only copy
+      // before it is ever read. _run already skips such items up front;
+      // this covers anything that slips past (e.g. children of a folder).
+      if (await _isSameEntry(src, srcPath, dest, destPath)) {
+        VeLog.w(
+          'FileOperationService',
+          'SELF_COPY source and destination are the same file '
+              '${VeLog.censorName(srcPath.split('/').last)}; left untouched',
+        );
+        if (op.isCut) return false; // a "move" would delete the source next
+        op._addTransferredBytes(size);
+        return true;
+      }
+
+      await _fileIoApi.deleteFile(dest, destPath);
+
+      if (size == 0) {
+        final ok = await _fileIoApi.writeFileChunk(
+          dest,
+          destPath,
+          0,
+          Uint8List(0),
+        );
+        if (ok) {
+          await _lifecycleApi.finishWrite(dest, destPath);
+          createdDestPaths.add(destPath);
+          if (modifiedSecs > 0) {
+            await _fileIoApi.setLastModifiedTime(dest, destPath, modifiedSecs);
+          }
+        }
+        return ok;
+      }
+
+      final beforeCredited = op.transferredBytes;
+      final directCopied = await _fileIoApi.copyFile(
+        src,
+        srcPath,
+        dest,
+        destPath,
+        opId: op.id,
+      );
+      if (directCopied) {
+        createdDestPaths.add(destPath);
+        if (modifiedSecs > 0) {
+          await _fileIoApi.setLastModifiedTime(dest, destPath, modifiedSecs);
+        }
+        if (src.isLocalStorage || dest.isLocalStorage) {
+          // The Local Storage fast path VaultFileIoApi.copyFile takes here
+          // (writeBackFile/decryptFile's single raw-path native call) is
+          // supposed to stream real CopyProgressBridge chunk events for
+          // this file the same way a vault<->vault copy does, at least
+          // for folder-vault formats (gocryptfs/Cryptomator/CryFS) --
+          // raw disk-image formats (VeraCrypt/LUKS/BitLocker/VHD) and
+          // Local Storage <-> Local Storage have no per-chunk hook at
+          // all. Guessing which case applies from the *other* side's
+          // format used to decide whether to credit this file's bytes
+          // here -- but that guess is exactly the kind of assumption
+          // about native internals that's easy to get wrong (or that
+          // silently goes stale if a format's progress support changes),
+          // and getting it wrong in the "assumed streamed" direction
+          // means transferredBytes permanently undershoots totalBytes:
+          // the progress bar stalls on this file and never recovers,
+          // which is indistinguishable from what the user reported.
+          //
+          // Measuring instead of guessing sidesteps that entirely: check
+          // how much onCopyProgress actually credited *for this specific
+          // file* (transferredBytes before vs. after the native call),
+          // and top up whatever's still missing against this file's
+          // known size. If it streamed fully, the top-up is zero --
+          // identical to the old "assumed streamed" branch. If it
+          // streamed nothing (or only partially), the rest is credited
+          // in one shot right here instead of being silently lost.
+          final streamedForThisFile = op.transferredBytes - beforeCredited;
+          final remaining = size - streamedForThisFile;
+          if (remaining > 0) {
+            op._addTransferredBytes(remaining);
+          }
+        }
+        return true;
+      }
+
+      int offset = 0;
+      while (offset < size) {
+        if (op.cancelRequested) throw const _CancelledException();
+        final chunkLen = min(size - offset, _chunkSize);
+        final readSw = Stopwatch()..start();
+        final chunk = await _fileIoApi.readFileChunk(
+          src,
+          srcPath,
+          offset,
+          chunkLen,
+        );
+        readMicros += readSw.elapsedMicroseconds;
+        if (chunk == null || chunk.isEmpty) return false;
+        final writeSw = Stopwatch()..start();
+        final ok = await _fileIoApi.writeFileChunk(
+          dest,
+          destPath,
+          offset,
+          chunk,
+        );
+        writeMicros += writeSw.elapsedMicroseconds;
+        if (!ok) throw const _DiskFullException();
+        offset += chunk.length;
+        chunkCount++;
+        op._addTransferredBytes(chunk.length);
+      }
+      await _lifecycleApi.finishWrite(dest, destPath);
+      createdDestPaths.add(destPath);
+      if (modifiedSecs > 0) {
+        await _fileIoApi.setLastModifiedTime(dest, destPath, modifiedSecs);
+      }
+      return true;
+    } catch (e) {
+      if (e is _DiskFullException || e is _CancelledException) rethrow;
+      return false;
+    } finally {
+      copyStopwatch.stop();
+      if (chunkCount > 0) {
+        final totalMs = copyStopwatch.elapsedMilliseconds;
+        final readMs = readMicros / 1000;
+        final writeMs = writeMicros / 1000;
+        VeLog.d(
+          'FileOperationService',
+          'INTRA_VAULT_COPY dest=${VeLog.censorName(destPath.split('/').last)} '
+              'chunks=$chunkCount chunkSize=$_chunkSize totalMs=$totalMs '
+              'readMs=${readMs.toStringAsFixed(0)} writeMs=${writeMs.toStringAsFixed(0)} '
+              'otherMs=${(totalMs - readMs - writeMs).toStringAsFixed(0)}',
+        );
+      }
+    }
+  }
+
+  // ── Recursive delete ──────────────────────────────────────────────────────
+
+  Future<bool> _deleteEntryRecursive(
+    MountedContainer container,
+    String path,
+    bool isDir, {
+    FileOperation? op,
+  }) async {
+    if (op != null && op.cancelRequested) throw const _CancelledException();
+    if (!isDir) {
+      try {
+        final ok = await _fileIoApi.deleteFile(container, path);
+        if (ok) op?._recordDeletedEntry(path.split('/').last);
+        return ok;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    List<String> children;
+    try {
+      children = await _fileIoApi.listDirectory(container, path) ?? [];
+    } catch (_) {
+      try {
+        final ok = await _fileIoApi.deleteFile(container, path);
+        if (ok) op?._recordDeletedEntry(path.split('/').last);
+        return ok;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    bool allOk = true;
+    for (final entry in children) {
+      if (entry.startsWith('System:')) continue;
+      final e = RawEntry.parse(entry);
+      final ok = await _deleteEntryRecursive(
+        container,
+        '$path/${e.name}',
+        e.isDir,
+        op: op,
+      );
+      if (!ok) allOk = false;
+    }
+
+    try {
+      final deletedSelf = await _fileIoApi.deleteFile(container, path);
+      if (deletedSelf) op?._recordDeletedEntry(path.split('/').last);
+      return deletedSelf && allOk;
+    } catch (_) {
+      return false;
+    }
+  }
+}

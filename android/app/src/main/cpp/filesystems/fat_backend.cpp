@@ -1,0 +1,406 @@
+#include "fat_backend.h"
+#include "dir_entry_wire.h"
+#include <algorithm>
+#include <android/log.h>
+#include <chrono>
+#include <cstring>
+#include <fcntl.h>
+#include <memory>
+#include <sys/stat.h>
+#include <unistd.h>
+#include "ff.h"
+#include "filesystem_paths.h"
+#include "container_utils.h"
+#include "volume_state.h"
+
+uint64_t recursiveFatFolderSize(int volumeId, const std::string& path) {
+    std::string fullPath = drivePaths[volumeId];
+    if (!path.empty()) fullPath += '/' + path;
+    uint64_t total = 0;
+    DIR directory;
+    FILINFO entry;
+    if (f_opendir(&directory, fullPath.c_str()) != FR_OK) return 0;
+    while (f_readdir(&directory, &entry) == FR_OK && entry.fname[0]) {
+        if (entry.fattrib & AM_DIR) {
+            const std::string child = path.empty() ? std::string(entry.fname)
+                                                   : path + '/' + entry.fname;
+            total += recursiveFatFolderSize(volumeId, child);
+        } else {
+            total += entry.fsize;
+        }
+    }
+    f_closedir(&directory);
+    return total;
+}
+
+namespace {
+constexpr size_t kMaxDirEntries = 50000;
+inline bool ensureFatFsValid(int volumeId) {
+    if (volumes[volumeId].fatfs.fs_type == 0) {
+        return f_mount(&volumes[volumeId].fatfs, drivePaths[volumeId], 1) == FR_OK;
+    }
+    return true;
+}
+
+int openHostSource(const std::string& sourceHostPath) {
+    if (sourceHostPath.rfind("/proc/self/fd/", 0) == 0) {
+        int fd = std::atoi(sourceHostPath.c_str() + 14);
+        int duplicated = dup(fd);
+        if (duplicated >= 0) {
+            lseek(duplicated, 0, SEEK_SET);
+            return duplicated;
+        }
+    }
+    return open(sourceHostPath.c_str(), O_RDONLY | O_CLOEXEC);
+}
+
+int openHostDest(const std::string& destHostPath) {
+    if (destHostPath.rfind("/proc/self/fd/", 0) == 0) {
+        int fd = std::atoi(destHostPath.c_str() + 14);
+        int duplicated = dup(fd);
+        if (duplicated >= 0) {
+            lseek(duplicated, 0, SEEK_SET);
+            return duplicated;
+        }
+    }
+    return open(destHostPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+}
+}
+
+void fatListDirectory(int volumeId, const std::string& pathSuffix, std::vector<std::string>& results) {
+    ensureFatFsValid(volumeId);
+    std::string fullPath = drivePaths[volumeId];
+    if (!pathSuffix.empty()) {
+        fullPath += '/';
+        fullPath += pathSuffix;
+    }
+    DIR dir;
+    FILINFO fno;
+    FRESULT fr = f_opendir(&dir, fullPath.c_str());
+    if (fr == FR_NOT_READY || fr == FR_DISK_ERR) {
+        f_mount(&volumes[volumeId].fatfs, drivePaths[volumeId], 1);
+        fr = f_opendir(&dir, fullPath.c_str());
+    }
+    if (fr == FR_OK) {
+        while (f_readdir(&dir, &fno) == FR_OK && fno.fname[0]) {
+            if (results.size() >= kMaxDirEntries) {
+                results.push_back("System:TRUNCATED");
+                break;
+            }
+            const char* name = fno.fname;
+            if (strcmp(name, "SYSTEM~1") == 0 || strcmp(name, "$RECYCLE.BIN") == 0) continue;
+            const uint64_t ts = fatToUnixTimestamp(fno.fdate, fno.ftime);
+            const bool isDir = fno.fattrib & AM_DIR;
+            results.push_back(encodeDirEntryWire(name, isDir, fno.fsize, ts));
+        }
+        f_closedir(&dir);
+    }
+}
+
+uint64_t fatGetFileSize(int volumeId, const std::string& path) {
+    ensureFatFsValid(volumeId);
+    FIL f;
+    uint64_t size = 0;
+    std::string fatPath = std::string(drivePaths[volumeId]) + "/" + path;
+    FRESULT fr = f_open(&f, fatPath.c_str(), FA_READ);
+    if (fr == FR_NOT_READY || fr == FR_DISK_ERR) {
+        f_mount(&volumes[volumeId].fatfs, drivePaths[volumeId], 1);
+        fr = f_open(&f, fatPath.c_str(), FA_READ);
+    }
+    if (fr == FR_OK) {
+        size = static_cast<uint64_t>(f_size(&f));
+        f_close(&f);
+    }
+    return size;
+}
+
+bool fatReadFileChunk(int volumeId, const std::string& path, uint64_t offset, size_t length, std::vector<uint8_t>& outBuffer) {
+    ensureFatFsValid(volumeId);
+    FIL f;
+    bool success = false;
+    std::string fatPath = std::string(drivePaths[volumeId]) + "/" + path;
+    FRESULT fr = f_open(&f, fatPath.c_str(), FA_READ);
+    if (fr == FR_NOT_READY || fr == FR_DISK_ERR) {
+        f_mount(&volumes[volumeId].fatfs, drivePaths[volumeId], 1);
+        fr = f_open(&f, fatPath.c_str(), FA_READ);
+    }
+    if (fr == FR_OK) {
+        f_lseek(&f, static_cast<FSIZE_t>(offset));
+        std::unique_ptr<unsigned char[]> buffer(new unsigned char[length]);
+        UINT br = 0;
+        if (f_read(&f, buffer.get(), static_cast<UINT>(length), &br) == FR_OK && br > 0) {
+            outBuffer.assign(buffer.get(), buffer.get() + br);
+            success = true;
+        }
+        f_close(&f);
+    }
+    return success;
+}
+
+bool fatWriteFileChunk(int volumeId, const std::string& path, uint64_t offset, const uint8_t* data, size_t length) {
+    ensureFatFsValid(volumeId);
+    FIL f;
+    bool success = false;
+    std::string fatPath = std::string(drivePaths[volumeId]) + "/" + path;
+    BYTE openMode = (offset == 0) ? (FA_WRITE | FA_CREATE_ALWAYS) : (FA_WRITE | FA_OPEN_ALWAYS);
+    FRESULT fr = f_open(&f, fatPath.c_str(), openMode);
+    if (fr == FR_NOT_READY || fr == FR_DISK_ERR) {
+        f_mount(&volumes[volumeId].fatfs, drivePaths[volumeId], 1);
+        fr = f_open(&f, fatPath.c_str(), openMode);
+    }
+    if (fr == FR_OK) {
+        if (f_lseek(&f, static_cast<FSIZE_t>(offset)) == FR_OK) {
+            UINT bw = 0;
+            if (f_write(&f, data, static_cast<UINT>(length), &bw) == FR_OK && bw == static_cast<UINT>(length))
+                success = true;
+        }
+        f_close(&f);
+    }
+    return success;
+}
+
+bool fatCopyFile(int srcVolId, const std::string& srcPath, int destVolId, const std::string& destPath,
+                  const CopyProgressCallback& onProgress) {
+    ensureFatFsValid(srcVolId);
+    ensureFatFsValid(destVolId);
+    std::string srcFatPath = std::string(drivePaths[srcVolId]) + "/" + srcPath;
+    std::string destFatPath = std::string(drivePaths[destVolId]) + "/" + destPath;
+    FIL srcF, destF;
+    if (f_open(&srcF, srcFatPath.c_str(), FA_READ) != FR_OK) return false;
+    if (f_open(&destF, destFatPath.c_str(), FA_WRITE | FA_CREATE_ALWAYS) != FR_OK) {
+        f_close(&srcF);
+        return false;
+    }
+    constexpr size_t kBufSize = 2097152;
+    std::unique_ptr<unsigned char[]> buf(new unsigned char[kBufSize]);
+    UINT br = 0, bw = 0;
+    bool ok = true;
+    while (f_read(&srcF, buf.get(), kBufSize, &br) == FR_OK && br > 0) {
+        if (f_write(&destF, buf.get(), br, &bw) != FR_OK || bw != br) {
+            ok = false;
+            break;
+        }
+        if (onProgress && !onProgress(bw)) {
+            ok = false;
+            break;
+        }
+    }
+    f_close(&destF);
+    f_close(&srcF);
+    if (!ok) f_unlink(destFatPath.c_str());
+    return ok;
+}
+
+bool fatWriteBackFile(int volumeId, const std::string& targetPath, const std::string& sourceHostPath,
+                       const CopyProgressCallback& onProgress) {
+    constexpr size_t kIoBufferSize = 2097152;
+    FIL f;
+    bool success = false;
+    std::string fatPath = std::string(drivePaths[volumeId]) + "/" + targetPath;
+    const auto opStart = std::chrono::steady_clock::now();
+    int64_t readNanos = 0, writeNanos = 0;
+    uint64_t totalBytes = 0;
+    int chunkCount = 0;
+
+    int srcFd = openHostSource(sourceHostPath);
+    if (srcFd < 0) return false;
+
+    if (f_open(&f, fatPath.c_str(), FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
+        struct stat st{};
+        if (fstat(srcFd, &st) == 0 && st.st_size > 0) {
+            auto expStart = std::chrono::steady_clock::now();
+            if (f_expand(&f, static_cast<FSIZE_t>(st.st_size), 1) != FR_OK) {
+                if (f_lseek(&f, static_cast<FSIZE_t>(st.st_size)) == FR_OK) {
+                    f_lseek(&f, 0);
+                }
+            }
+            writeNanos += (std::chrono::steady_clock::now() - expStart).count();
+        }
+
+        std::unique_ptr<char[]> buf(new char[kIoBufferSize]);
+        UINT bw;
+        bool writeError = false;
+        bool cancelled = false;
+
+        while (!writeError && !cancelled) {
+            auto rStart = std::chrono::steady_clock::now();
+            ssize_t n = read(srcFd, buf.get(), kIoBufferSize);
+            readNanos += (std::chrono::steady_clock::now() - rStart).count();
+
+            if (n <= 0) break;
+
+            auto wStart = std::chrono::steady_clock::now();
+            FRESULT res = f_write(&f, buf.get(), static_cast<UINT>(n), &bw);
+            writeNanos += (std::chrono::steady_clock::now() - wStart).count();
+
+            if (res != FR_OK || bw != static_cast<UINT>(n)) {
+                writeError = true;
+            } else {
+                totalBytes += bw;
+                chunkCount++;
+                if (onProgress && !onProgress(bw)) cancelled = true;
+            }
+        }
+        success = !writeError && !cancelled;
+        auto closeStart = std::chrono::steady_clock::now();
+        f_close(&f);
+        writeNanos += (std::chrono::steady_clock::now() - closeStart).count();
+        if (!success) f_unlink(fatPath.c_str());
+    }
+    close(srcFd);
+
+    const auto totalMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - opStart).count();
+    __android_log_print(ANDROID_LOG_INFO, "VaultExplorer_FatIO",
+        "WRITE_BACK target=%s bytes=%llu chunks=%d totalMs=%lld readMs=%lld writeMs=%lld ok=%d",
+        targetPath.c_str(), (unsigned long long)totalBytes, chunkCount,
+        (long long)totalMs, (long long)(readNanos / 1000000), (long long)(writeNanos / 1000000),
+        success ? 1 : 0);
+    return success;
+}
+
+bool fatExtractFile(int volumeId, const std::string& targetPath, const std::string& destHostPath,
+                     const CopyProgressCallback& onProgress) {
+    constexpr size_t kIoBufferSize = 2097152;
+    FIL f;
+    bool success = false;
+    std::string fatPath = std::string(drivePaths[volumeId]) + "/" + targetPath;
+
+    int destFd = openHostDest(destHostPath);
+    if (destFd < 0) return false;
+
+    if (f_open(&f, fatPath.c_str(), FA_READ) == FR_OK) {
+        std::unique_ptr<unsigned char[]> buf(new unsigned char[kIoBufferSize]);
+        UINT br;
+        bool readError = false;
+        bool cancelled = false;
+        while (f_read(&f, buf.get(), kIoBufferSize, &br) == FR_OK && br > 0) {
+            ssize_t written = write(destFd, buf.get(), br);
+            if (written != static_cast<ssize_t>(br)) {
+                readError = true;
+                break;
+            }
+            if (onProgress && !onProgress(static_cast<uint64_t>(written))) {
+                cancelled = true;
+                break;
+            }
+        }
+        success = !readError && !cancelled;
+        f_close(&f);
+        if (!success && destHostPath.rfind("/proc/self/fd/", 0) != 0) {
+            unlink(destHostPath.c_str());
+        }
+    }
+    close(destFd);
+    return success;
+}
+
+static FRESULT fatRemoveRecursive(const char* path) {
+    DIR dir;
+    FILINFO fno;
+    FRESULT fr = f_opendir(&dir, path);
+    if (fr == FR_OK) {
+        while (f_readdir(&dir, &fno) == FR_OK && fno.fname[0]) {
+            if (strcmp(fno.fname, ".") == 0 || strcmp(fno.fname, "..") == 0) continue;
+            std::string childPath = std::string(path) + "/" + fno.fname;
+            if (fno.fattrib & AM_DIR) {
+                fatRemoveRecursive(childPath.c_str());
+            } else {
+                f_unlink(childPath.c_str());
+            }
+        }
+        f_closedir(&dir);
+    }
+    return f_unlink(path);
+}
+
+bool fatDeleteFile(int volumeId, const std::string& path) {
+    std::string fatPath = std::string(drivePaths[volumeId]) + "/" + path;
+    FRESULT fr = f_unlink(fatPath.c_str());
+    if (fr == FR_DENIED) {
+        fr = fatRemoveRecursive(fatPath.c_str());
+    }
+    return fr == FR_OK;
+}
+
+bool fatCreateDirectory(int volumeId, const std::string& path) {
+    std::string fullPath = std::string(drivePaths[volumeId]) + "/" + path;
+    return f_mkdir(fullPath.c_str()) == FR_OK;
+}
+
+bool fatRenameFile(int volumeId, const std::string& oldPath, const std::string& newPath) {
+    std::string fullOld = std::string(drivePaths[volumeId]) + "/" + oldPath;
+    std::string fullNew = std::string(drivePaths[volumeId]) + "/" + newPath;
+    return f_rename(fullOld.c_str(), fullNew.c_str()) == FR_OK;
+}
+
+bool fatSetLastModifiedTime(int volumeId, const std::string& path, uint64_t epochSeconds) {
+    WORD fdate = 0, ftime = 0;
+    unixToFatTimestamp(epochSeconds, fdate, ftime);
+    std::string fatPath = std::string(drivePaths[volumeId]) + "/" + path;
+    FILINFO fno = {};
+    fno.fdate = fdate;
+    fno.ftime = ftime;
+    return f_utime(fatPath.c_str(), &fno) == FR_OK;
+}
+
+void fatGetSpaceInfo(int volumeId, uint64_t& outTotalBytes, uint64_t& outFreeBytes) {
+    FATFS* fs;
+    DWORD fre_clust;
+    if (f_getfree(drivePaths[volumeId], &fre_clust, &fs) == FR_OK) {
+        const uint64_t ss = (fs->ssize > 0) ? fs->ssize : 512ULL;
+        outTotalBytes = static_cast<uint64_t>(fs->n_fatent - 2) * fs->csize * ss;
+        outFreeBytes  = static_cast<uint64_t>(fre_clust) * fs->csize * ss;
+    }
+}
+
+std::string fatGetFilesystemLabel(int volumeId) {
+    switch (volumes[volumeId].fatfs.fs_type) {
+        case FS_FAT12: return "FAT12";
+        case FS_FAT16: return "FAT16";
+        case FS_FAT32: return "FAT32";
+        case FS_EXFAT: return "exFAT";
+        default:       return std::string();
+    }
+}
+
+void* fatOpenStream(int volumeId, const std::string& path) {
+    ensureFatFsValid(volumeId);
+    auto& v = volumes[volumeId];
+    FIL* f = new FIL();
+    std::string fatPath = std::string(drivePaths[volumeId]) + "/" + path;
+    FRESULT fr = f_open(f, fatPath.c_str(), FA_READ);
+    if (fr == FR_NOT_READY || fr == FR_DISK_ERR) {
+        f_mount(&v.fatfs, drivePaths[volumeId], 1);
+        fr = f_open(f, fatPath.c_str(), FA_READ);
+    }
+    if (fr == FR_OK) {
+        v.openStreams.push_back(f);
+        return f;
+    }
+    delete f;
+    return nullptr;
+}
+
+int32_t fatReadStream(int volumeId, void* handle, uint64_t offset, uint8_t* dest, size_t length) {
+    auto& v = volumes[volumeId];
+    FIL* f = reinterpret_cast<FIL*>(handle);
+    auto& streams = v.openStreams;
+    if (std::find(streams.begin(), streams.end(), f) == streams.end()) return -1;
+    f_lseek(f, static_cast<FSIZE_t>(offset));
+    UINT br = 0;
+    if (f_read(f, dest, static_cast<UINT>(length), &br) == FR_OK)
+        return static_cast<int32_t>(br);
+    return -1;
+}
+
+void fatCloseStream(int volumeId, void* handle) {
+    auto& v = volumes[volumeId];
+    FIL* f = reinterpret_cast<FIL*>(handle);
+    auto& streams = v.openStreams;
+    auto it = std::find(streams.begin(), streams.end(), f);
+    if (it == streams.end()) return;
+    streams.erase(it);
+    f_close(f);
+    delete f;
+}

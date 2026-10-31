@@ -1,0 +1,213 @@
+import 'package:vaultexplorer/core/utils/file_type_utils.dart';
+
+/// What the media viewer should treat a file as when the user picked
+/// "Open as..." (see [MediaViewerConstants.withKindOverride]).
+enum MediaKind { image, video, audio }
+
+class MediaViewerConstants {
+  static const Duration uiHideDelay = Duration(seconds: 3);
+  static const Duration animationDuration = Duration(milliseconds: 250);
+  static const Duration pageTransitionDuration = Duration(milliseconds: 300);
+  static const Duration doubleTapIndicatorDelay = Duration(milliseconds: 550);
+
+  static const double maxImageZoom = 12.0;
+
+  /// Keeps horizontal seek drags away from the OS back-gesture zones.
+  static const double swipeToSeekEdgeInset = 24.0;
+  static const double tapToNavigateEdgeFraction = 0.08;
+  static const double tapToNavigateMovementTolerance = 16.0;
+
+  /// Full-resolution decode headroom used by [EncryptedImageWidget] to
+  /// bound `Image.memory`'s decode target (Finding F-10). Deliberately
+  /// smaller than [maxImageZoom]: this caps how many *pixels* Skia decodes
+  /// relative to the viewport, not the interactive zoom ceiling itself — a
+  /// 48MP source at 4x the viewport's physical size would still be tens of
+  /// MB of raw bitmap. 5x gives comfortable pinch-zoom headroom before the
+  /// image visibly softens, without decoding at "whatever the source file
+  /// happens to be."
+  static const double fullResDecodeZoomHeadroom = 5.0;
+  /// Absolute decoded-bitmap cap for a single viewer image. Screen-relative
+  /// zoom headroom alone can still ask Skia for a 50+ megapixel bitmap on a
+  /// high-resolution phone, which exceeds the heap budget on some devices.
+  static const int maxImageDecodePixels = 8 * 1024 * 1024;
+  static const double maxVideoZoom = 12.0;
+
+  /// Bottom clearance for the zoom pill while media controls are visible,
+  /// excluding the device safe-area inset and optional carousel.
+  static const double zoomIndicatorImageControlsClearance = 96.0;
+  static const double zoomIndicatorVideoControlsClearance = 128.0;
+
+  /// Lower bound offered by the "minimum zoom" setting -- how far below
+  /// 1.0x pinch zoom-out is allowed to go at most. The configured value is
+  /// clamped into `[minVideoZoomFloor, 1.0]`.
+  static const double minVideoZoomFloor = 0.1;
+
+  /// Width, as a fraction of the player's total width, given to each edge
+  /// swipe zone (brightness on the left, volume on the right) at the
+  /// default setting. Configurable in Media Player Controls; clamped into
+  /// `[edgeSwipeWidthMin, edgeSwipeWidthMax]`.
+  static const double defaultEdgeSwipeWidthFraction = 0.25;
+  static const double edgeSwipeWidthMin = 0.15;
+  static const double edgeSwipeWidthMax = 0.40;
+
+  /// Vertical drag distance, in logical pixels, that swings an edge swipe
+  /// (brightness/volume) across its full 0%-100% range.
+  static const double edgeSwipeFullRangeDistance = 320.0;
+
+  /// How long the brightness/volume HUD stays visible after the finger
+  /// lifts before fading out.
+  static const Duration edgeSwipeHudHideDelay = Duration(milliseconds: 700);
+
+  static const int maxPrefetchCacheSize = 5;
+  static const int maxDirectorySearchDepth = 20;
+  // Caps how many subdirectories _scanDirectoryRecursively will walk
+  // concurrently at each level, so a huge "All (incl. subfolders)" vault
+  // doesn't burst hundreds of simultaneous native channel calls at once.
+  static const int maxDirectoryScanConcurrency = 8;
+  static const int thumbnailTargetSize = 360;
+  static const int carouselThumbnailTargetSize = 160;
+
+  static const List<double> playbackSpeeds = [
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    2.0,
+  ];
+
+  static const List<String> imageExtensions = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'webp',
+    'avif',
+    'heic',
+  ];
+static const List<String> videoExtensions = [
+  'mp4', 'm4v', 'webm', 'mov', 'avi', 'mkv', 'mpeg', 'mpg',
+  'flv', 'ts', 'wmv', '3gp', 'vob', 'ogv', 'divx', 'f4v', 'm2ts',
+  'qt', '3g2', 'mts', 'mpe',
+];
+
+static const List<String> audioExtensions = [
+  'mp3', 'm4a', 'wav', 'flac', 'ogg', 'aac',
+  'opus', 'wma', 'ac3', 'eac3', 'm4b', 'ape', 'aiff', 'dts',
+  'aif', 'aifc', 'amr', 'awb', 'mka', 'weba', 'oga',
+];
+
+  // Looked up per file name while filtering, scanning and building cells, so
+  // membership is a hash lookup instead of a scan of the list, and the
+  // extension is cut out with lastIndexOf instead of split('.') (which builds
+  // a throwaway list for every call).
+  static final Set<String> _imageExtensionSet = imageExtensions.toSet();
+  static final Set<String> _videoExtensionSet = videoExtensions.toSet();
+  static final Set<String> _audioExtensionSet = audioExtensions.toSet();
+
+  /// What `fileName.split('.').last.toLowerCase()` returns: the text after
+  /// the last '.', or the whole name when it has none.
+  static String _lowerExtension(String fileName) {
+    final dot = fileName.lastIndexOf('.');
+    return (dot == -1 ? fileName : fileName.substring(dot + 1)).toLowerCase();
+  }
+
+  // "Open as..." support: the user can tell the app to treat a file as an
+  // image/video/audio regardless of its extension (a `.dat` that is really an
+  // MP4, a media file with no extension at all). Every viewer check below
+  // goes through these predicates, so registering the exact path string the
+  // viewer was given as an override makes the whole viewer -- type switch,
+  // playlist filters, prefetch, toolbar -- agree without threading a "kind"
+  // through ~50 call sites. The native player and Flutter's image decoder
+  // both sniff the bytes, so the extension is never what actually decodes
+  // the file.
+  //
+  // Keyed by the full path string (what the viewer receives in `mediaFiles`),
+  // NOT the bare entry name the grid and tiles pass, so a forced type never
+  // leaks into thumbnails or the file list. Callers must clear the override
+  // when the viewer closes (see [withKindOverride]).
+  static final Map<String, MediaKind> _kindOverrides = <String, MediaKind>{};
+
+  /// Runs [body] with [path] treated as [kind], removing the override when it
+  /// finishes -- normally, by throwing, or by the viewer being popped.
+  static Future<T> withKindOverride<T>(
+    String path,
+    MediaKind kind,
+    Future<T> Function() body,
+  ) async {
+    final previous = _kindOverrides[path];
+    _kindOverrides[path] = kind;
+    try {
+      return await body();
+    } finally {
+      if (previous == null) {
+        _kindOverrides.remove(path);
+      } else {
+        _kindOverrides[path] = previous;
+      }
+    }
+  }
+
+  static bool isImage(String fileName) {
+    final forced = _kindOverrides[fileName];
+    if (forced != null) return forced == MediaKind.image;
+    return _imageExtensionSet.contains(_lowerExtension(fileName));
+  }
+
+  static bool isVideo(String fileName) {
+    final forced = _kindOverrides[fileName];
+    if (forced != null) return forced == MediaKind.video;
+    return _videoExtensionSet.contains(_lowerExtension(fileName));
+  }
+
+  static bool isAudio(String fileName) {
+    final forced = _kindOverrides[fileName];
+    if (forced != null) return forced == MediaKind.audio;
+    return _audioExtensionSet.contains(_lowerExtension(fileName));
+  }
+
+  static bool isSupported(String fileName) {
+    if (_kindOverrides.containsKey(fileName)) return true;
+    final ext = _lowerExtension(fileName);
+    return _imageExtensionSet.contains(ext) ||
+        _videoExtensionSet.contains(ext) ||
+        _audioExtensionSet.contains(ext);
+  }
+
+  /// Whether a file named [fileName] would render as an actual decoded
+  /// image/video thumbnail in the Grid/Masonry gallery views, as opposed to
+  /// falling back to a generic icon.
+  ///
+  /// Used to decide whether a file cell should keep its name label visible
+  /// even when the user has hidden file names -- an icon-only file (a PDF,
+  /// archive, vault item, etc.) would otherwise be an anonymous icon with
+  /// no way to tell it apart from another of the same type.
+  ///
+  /// Vault items (passwords, cards, etc.) always render as icons. Pass
+  /// [insideArchive] when browsing inside an open archive (both image and
+  /// video thumbnails are supported). Pass [isPlaceholder] for an item
+  /// still mid-transfer, since it renders as a generic icon regardless of
+  /// its eventual type.
+  ///
+  /// An APK counts as icon-only here even though it does get a thumbnail
+  /// of its own: its launcher icon is drawn at icon size and centred in
+  /// the cell rather than filling it, exactly like a PDF's or an
+  /// archive's generic icon, so it needs its name label for the same
+  /// reason -- two APKs side by side would otherwise be two anonymous
+  /// icons. (It would be the wrong call for a different reason too: this
+  /// can't be known from the filename alone the way isImage/isVideo can,
+  /// since it depends on whether the APK has a resolvable android:icon at
+  /// all -- see apk_icon_support.dart.)
+  static bool hasRealThumbnail(
+    String fileName, {
+    bool insideArchive = false,
+    bool isPlaceholder = false,
+  }) {
+    if (isPlaceholder) return false;
+    final dot = fileName.lastIndexOf('.');
+    final ext = dot == -1 ? '' : fileName.substring(dot + 1);
+    if (vaultIconForExt(ext) != null) return false;
+    return isImage(fileName) || isVideo(fileName);
+  }
+}

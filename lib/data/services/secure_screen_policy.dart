@@ -1,0 +1,31 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:vaultexplorer/core/api/vault_file_io_api.dart';
+import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
+
+part 'secure_screen_policy.g.dart';
+
+@Riverpod(keepAlive: true)
+SecureScreenPolicy secureScreenPolicy(Ref ref) =>
+    SecureScreenPolicy(ref.watch(vaultFileIoApiProvider));
+
+class SecureScreenPolicy {
+  final VaultFileIoApi _fileIoApi;
+
+  SecureScreenPolicy(this._fileIoApi);
+
+  /// Applies the user's global security preference in the real Vault app.
+  Future<void> apply({required bool preference}) {
+    return Future.wait([
+      _fileIoApi.setSecureScreen(preference),
+      _fileIoApi.setRecentsSnapshotBlocked(preference),
+    ]);
+  }
+
+  /// Forces all screen and task-switcher protections off so Decoy Mode behaves like a normal zip app.
+  Future<void> disableForDecoy() {
+    return Future.wait([
+      _fileIoApi.setSecureScreen(false),
+      _fileIoApi.setRecentsSnapshotBlocked(false),
+    ]);
+  }
+}

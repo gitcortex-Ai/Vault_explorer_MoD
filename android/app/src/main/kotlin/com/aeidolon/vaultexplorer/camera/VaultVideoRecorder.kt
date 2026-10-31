@@ -1,0 +1,567 @@
+package com.aeidolon.vaultexplorer.camera
+
+import android.content.Context
+import android.media.MediaCodec
+import android.media.MediaCodecList
+import android.media.MediaExtractor
+import android.media.MediaFormat
+import android.media.MediaMuxer
+import android.media.MediaRecorder
+import android.os.Build
+import android.view.Surface
+import com.aeidolon.vaultexplorer.container.ContainerFileSystem
+import java.io.File
+import java.io.FileInputStream
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import com.aeidolon.vaultexplorer.VeLog
+
+class VaultChunkWriter(
+    private val volId: Int,
+    private val virtualPath: String
+) : ChunkSink {
+    private var currentOffset: Long = 0L
+
+    override fun write(data: ByteArray): Boolean {
+        if (data.isEmpty()) return true
+        val ok = ContainerFileSystem.writeFileChunk(volId, virtualPath, currentOffset, data)
+        if (ok) {
+            currentOffset += data.size
+        }
+        return ok
+    }
+
+    fun write(data: ByteArray, off: Int, len: Int): Boolean {
+        if (len <= 0) return true
+        val chunk = data.copyOfRange(off, off + len)
+        return write(chunk)
+    }
+}
+
+class MemFile {
+    fun writeAndDrain(bytes: ByteArray, writer: ChunkSink): Boolean {
+        val chunkSize = 64 * 1024
+        var written = 0
+        while (written < bytes.size) {
+            val len = minOf(chunkSize, bytes.size - written)
+            val chunk = bytes.copyOfRange(written, written + len)
+            if (!writer.write(chunk)) return false
+            written += len
+        }
+        return true
+    }
+
+    fun close() {}
+}
+
+data class RecordingResult(val durationMs: Long)
+
+/** One finished part of a segmented recording: a complete, playable temp file. */
+data class VideoSegment(val path: String, val durationMs: Long)
+
+private const val TAG = "VaultVideoRecorder"
+
+// HEVC (H.265) needs roughly 40% less bitrate than H264 for the same
+// perceived quality, which is the actual fix for large 1080p file sizes --
+// checked once and cached, since enumerating MediaCodecList takes a few ms
+// and this doesn't change while the process is alive. Falls back to H264 on
+// the rare device with no hardware HEVC encoder rather than eating a
+// software-encode performance/battery hit.
+private val hevcEncoderAvailable: Boolean by lazy {
+    if (Build.VERSION.SDK_INT < 24) {
+        false
+    } else {
+        try {
+            MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos.any { info ->
+                info.isEncoder && info.supportedTypes.any { it.equals(MediaFormat.MIMETYPE_VIDEO_HEVC, ignoreCase = true) }
+            }
+        } catch (e: Exception) {
+            VeLog.w(TAG, e) { "HEVC capability probe failed, falling back to H264" }
+            false
+        }
+    }
+}
+
+class VaultVideoRecorder(
+    private val width: Int,
+    private val height: Int,
+    private val quality: VaultVideoQuality,
+    private val recordAudio: Boolean = true,
+    private val cacheDir: File? = null,
+    /**
+     * Above zero, the recording is cut into parts of exactly this many seconds
+     * (to within a couple of frames: the cut waits for a keyframe). Each part is
+     * closed as its own complete MP4 whose video starts on a keyframe at time
+     * zero, while the recorder keeps running, so nothing is dropped at the seam
+     * and a crash can only ever cost the part in progress.
+     *
+     * Segmented recording does not use `MediaRecorder`, which can only roll
+     * over to a new file on a size limit and so cannot cut on a duration; see
+     * [SegmentedVideoEngine].
+     */
+    private val segmentSeconds: Int = 0,
+) {
+    companion object {
+        internal const val TEMP_PREFIX = "vx_vid_"
+        internal const val TEMP_SUFFIX = ".mp4"
+
+        /**
+         * Sweeps [cacheDir] for plaintext recording temp files left behind
+         * by a previous process death -- a crash, force-stop, or OOM kill
+         * between MediaRecorder writing one of these (see prepareEncoder())
+         * and secureDeleteTempFile() wiping it in writeTo()/releaseEncoder()
+         * only covers the normal completion paths, not the process simply
+         * dying mid-recording. Left uncleaned, a leftover file is an
+         * unencrypted copy of whatever was being recorded sitting on disk
+         * indefinitely -- exactly what this app exists to avoid.
+         *
+         * Intended to run once at app startup (see MainActivity.onCreate),
+         * off the main thread, before any camera session could plausibly
+         * create a *new* temp file of this shape -- so there's no risk of
+         * this sweep racing a legitimate in-progress recording.
+         *
+         * Returns how many orphaned files were found and wiped, for logging.
+         */
+        fun sweepOrphanedTempFiles(cacheDir: File?): Int {
+            val dir = cacheDir ?: return 0
+            val orphans = dir.listFiles { f ->
+                f.isFile && f.name.startsWith(TEMP_PREFIX) && f.name.endsWith(TEMP_SUFFIX)
+            } ?: return 0
+            var wiped = 0
+            for (file in orphans) {
+                if (secureDeleteFile(file)) wiped++
+            }
+            if (wiped > 0) {
+                VeLog.i(TAG) { "sweepOrphanedTempFiles: wiped $wiped orphaned recording temp file(s)" }
+            }
+            return wiped
+        }
+
+        /** Overwrites [file] with zeros before deleting it, so a leftover
+         *  plaintext recording isn't just unlinked (which on most Android
+         *  filesystems leaves the content readable until the blocks are
+         *  reused). Shared by the per-recording cleanup below and by
+         *  [sweepOrphanedTempFiles]. Returns false if the file couldn't be
+         *  fully wiped -- the caller falls back to at least trying delete(). */
+      internal fun zeroFillFile(file: File): Boolean {
+            return try {
+                if (file.exists()) {
+                    val len = file.length()
+                    if (len > 0) {
+                        // Use "rw" with a 512KB buffer and a single physical sync at the end.
+                        // "rws" forced a hardware fsync on every 64KB, causing massive flash write stalls.
+                       RandomAccessFile(file, "rw").use { raf ->
+                            val zeros = ByteArray(64 * 1024)
+                            var remaining = len
+                            while (remaining > 0) {
+                                val writeLen = minOf(remaining, zeros.size.toLong()).toInt()
+                                raf.write(zeros, 0, writeLen)
+                                remaining -= writeLen
+                            }
+                            try { raf.fd.sync() } catch (_: Exception) {}
+                        }
+                    }
+                    true
+                } else {
+                    true
+                }
+            } catch (e: Exception) {
+                VeLog.w(TAG, e) { "zeroFillFile failed" }
+                false
+            }
+        }
+
+        internal fun secureDeleteFile(file: File): Boolean {
+            return try {
+                if (file.exists()) {
+                    val zeroed = zeroFillFile(file)
+                    val deleted = file.delete()
+                    zeroed && deleted
+                } else {
+                    true
+                }
+            } catch (e: Exception) {
+                VeLog.w(TAG, e) { "secureDeleteFile failed" }
+                try { file.delete() } catch (_: Exception) {}
+                false
+            }
+        }
+
+        fun streamFileToSink(file: File, sink: ChunkSink): Boolean {
+            if (!file.exists() || file.length() == 0L) return false
+            try {
+                java.io.BufferedInputStream(FileInputStream(file), 64 * 1024).use { bis ->
+                    val buffer = ByteArray(64 * 1024)
+                    var bytesRead: Int
+                    while (bis.read(buffer).also { bytesRead = it } != -1) {
+                        if (bytesRead > 0) {
+                            val chunk = if (bytesRead == buffer.size) buffer else buffer.copyOf(bytesRead)
+                            if (!sink.write(chunk)) return false
+                        }
+                    }
+                }
+                return sink.finish()
+            } catch (e: Exception) {
+                VeLog.e(TAG, e) { "streamFileToSink failed" }
+                return false
+            }
+        }
+
+        fun streamFileToSinkAndWipe(file: File, sink: ChunkSink): Boolean {
+            if (!file.exists() || file.length() == 0L) return false
+            return try {
+                streamFileToSink(file, sink)
+            } finally {
+                secureDeleteFile(file)
+            }
+        }
+
+        fun trimVideo(sourcePath: String, startMs: Long, endMs: Long): String? {
+            val srcFile = File(sourcePath)
+            if (!srcFile.exists() || startMs >= endMs) return sourcePath
+            val destFile = File.createTempFile("vx_vid_trim_", ".mp4", srcFile.parentFile)
+
+            var extractor: MediaExtractor? = null
+            var muxer: MediaMuxer? = null
+            try {
+                extractor = MediaExtractor()
+                extractor.setDataSource(sourcePath)
+                val trackCount = extractor.trackCount
+                muxer = MediaMuxer(destFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
+
+                val indexMap = HashMap<Int, Int>(trackCount)
+                var maxBufferSize = 1024 * 1024
+                for (i in 0 until trackCount) {
+                    val format = extractor.getTrackFormat(i)
+                    val mime = format.getString(MediaFormat.KEY_MIME) ?: ""
+                    if (mime.startsWith("video/") || mime.startsWith("audio/")) {
+                        val dstIndex = muxer.addTrack(format)
+                        indexMap[i] = dstIndex
+                        if (format.containsKey(MediaFormat.KEY_MAX_INPUT_SIZE)) {
+                            val inputSize = format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE)
+                            if (inputSize > maxBufferSize) maxBufferSize = inputSize
+                        }
+                        if (format.containsKey(MediaFormat.KEY_ROTATION)) {
+                            muxer.setOrientationHint(format.getInteger(MediaFormat.KEY_ROTATION))
+                        }
+                    }
+                }
+
+                muxer.start()
+
+                val startUs = startMs * 1000L
+                val endUs = endMs * 1000L
+                val buffer = ByteBuffer.allocateDirect(maxBufferSize)
+                val bufferInfo = MediaCodec.BufferInfo()
+
+                for (i in 0 until trackCount) {
+                    if (!indexMap.containsKey(i)) continue
+                    val dstIndex = indexMap[i]!!
+                    for (t in 0 until trackCount) {
+                        try { extractor.unselectTrack(t) } catch (_: Exception) {}
+                    }
+                    extractor.selectTrack(i)
+                    extractor.seekTo(startUs, MediaExtractor.SEEK_TO_PREVIOUS_SYNC)
+
+                    var firstPtsUs = -1L
+                    while (true) {
+                        bufferInfo.offset = 0
+                        bufferInfo.size = extractor.readSampleData(buffer, 0)
+                        if (bufferInfo.size < 0) break
+
+                        val sampleTimeUs = extractor.sampleTime
+                        if (sampleTimeUs > endUs) break
+
+                        if (sampleTimeUs >= startUs) {
+                            if (firstPtsUs == -1L) firstPtsUs = sampleTimeUs
+                            bufferInfo.presentationTimeUs = maxOf(0L, sampleTimeUs - firstPtsUs)
+                            bufferInfo.flags = extractor.sampleFlags
+                            muxer.writeSampleData(dstIndex, buffer, bufferInfo)
+                        }
+                        extractor.advance()
+                    }
+                }
+
+                muxer.stop()
+                secureDeleteFile(srcFile)
+                return destFile.absolutePath
+            } catch (e: Exception) {
+                VeLog.e(TAG, e) { "trimVideo failed" }
+                secureDeleteFile(destFile)
+                return sourcePath
+            } finally {
+                try { muxer?.release() } catch (_: Exception) {}
+                try { extractor?.release() } catch (_: Exception) {}
+            }
+        }
+    }
+
+    var inputSurface: Surface? = null
+        private set
+
+    private var mediaRecorder: MediaRecorder? = null
+
+    /** Set instead of [mediaRecorder] when the recording is segmented. */
+    private var engine: SegmentedVideoEngine? = null
+
+    @Volatile
+    private var tempFile: File? = null
+    private var startTimeMs: Long = 0L
+    private var stopTimeMs: Long = 0L
+
+    // Pausing (plain MediaRecorder recordings; a segmented one pauses inside its engine).
+    private var paused = false
+    private var pausedSinceMs = 0L
+    private var pausedTotalMs = 0L
+
+    /** True between [pause] and [resume]. */
+    val isPaused: Boolean get() = engine?.isPaused ?: paused
+
+    /**
+     * Called, from a recorder thread, whenever a part of a segmented recording
+     * has been closed -- every part but the last, which [tempFilePath] points
+     * at after [requestStop]. It must only queue the segment.
+     */
+    var onSegmentFinished: ((VideoSegment) -> Unit)?
+        get() = engine?.onPartFinished ?: pendingSegmentListener
+        set(value) {
+            pendingSegmentListener = value
+            engine?.onPartFinished = value
+        }
+    private var pendingSegmentListener: ((VideoSegment) -> Unit)? = null
+
+    /** The file being recorded to: the current part when segmented. */
+    private val currentFile: File? get() = engine?.currentFile ?: tempFile
+
+    /** True when this recording is cut into parts (see the constructor's [segmentSeconds]). */
+    val isSegmented: Boolean get() = segmentSeconds > 0
+
+    fun prepareEncoder(orientationDegrees: Int = 0) {
+        releaseEncoder()
+        val useHevc = hevcEncoderAvailable
+        val bitrate = if (useHevc) quality.bitrateHevc else quality.bitrateH264
+
+        if (segmentSeconds > 0) {
+            VeLog.d(TAG) { "prepareEncoder: ${width}x$height quality=$quality segmented ${segmentSeconds}s orientation=$orientationDegrees audio=$recordAudio" }
+            val segmented = SegmentedVideoEngine(
+                width = width,
+                height = height,
+                preferHevc = useHevc,
+                hevcBitrate = quality.bitrateHevc,
+                h264Bitrate = quality.bitrateH264,
+                frameRate = TARGET_RECORDING_FPS,
+                recordAudio = recordAudio,
+                partSeconds = segmentSeconds,
+                orientationDegrees = orientationDegrees,
+                cacheDir = cacheDir,
+                tempPrefix = TEMP_PREFIX,
+                tempSuffix = TEMP_SUFFIX,
+                wipe = { secureDeleteFile(it) },
+            )
+            segmented.onPartFinished = pendingSegmentListener
+            segmented.prepare()
+            engine = segmented
+            inputSurface = segmented.inputSurface
+            VeLog.d(TAG) { "prepareEncoder: segmented engine prepared, surface=$inputSurface" }
+            return
+        }
+
+        paused = false
+        pausedSinceMs = 0L
+        pausedTotalMs = 0L
+        val temp = File.createTempFile(TEMP_PREFIX, TEMP_SUFFIX, cacheDir)
+        tempFile = temp
+        VeLog.d(TAG) { "prepareEncoder: ${width}x$height quality=$quality codec=${if (useHevc) "HEVC" else "H264"} bitrate=$bitrate orientation=$orientationDegrees audio=$recordAudio" }
+
+        @Suppress("DEPRECATION")
+        val recorder = MediaRecorder()
+
+        if (recordAudio) {
+            recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER)
+        }
+        recorder.setVideoSource(MediaRecorder.VideoSource.SURFACE)
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+        // setOrientationHint() is only legal before prepare() -- calling it
+        // afterwards (as beginRecording() used to) throws the recorder into
+        // "setParameters is called in an invalid state: 8" (8 == PREPARED),
+        // because prepare() has already moved it past the state where
+        // parameter setters are allowed.
+        recorder.setOrientationHint(orientationDegrees)
+        recorder.setVideoEncoder(if (useHevc) MediaRecorder.VideoEncoder.HEVC else MediaRecorder.VideoEncoder.H264)
+        if (recordAudio) {
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            recorder.setAudioEncodingBitRate(128_000)
+            recorder.setAudioSamplingRate(44100)
+        }
+        recorder.setVideoSize(width, height)
+        recorder.setVideoEncodingBitRate(bitrate)
+        recorder.setVideoFrameRate(TARGET_RECORDING_FPS)
+        recorder.setOutputFile(temp.absolutePath)
+
+        recorder.prepare()
+        inputSurface = recorder.surface
+        mediaRecorder = recorder
+        VeLog.d(TAG) { "prepareEncoder: prepared ok, surface=$inputSurface" }
+    }
+
+    fun beginRecording() {
+        val segmented = engine
+        if (segmented != null) {
+            VeLog.d(TAG) { "beginRecording: starting segmented" }
+            segmented.start()
+            startTimeMs = System.currentTimeMillis()
+            return
+        }
+        val recorder = mediaRecorder ?: throw IllegalStateException("Encoder not prepared")
+        VeLog.d(TAG) { "beginRecording: starting" }
+        recorder.start()
+        startTimeMs = System.currentTimeMillis()
+        VeLog.d(TAG) { "beginRecording: started at $startTimeMs" }
+    }
+
+    /**
+     * Pauses the recording without ending it. A plain recording stays one file
+     * (the footage on either side of the pause is joined). A segmented one
+     * closes the part in progress, which is then handed over like any other
+     * finished part, and a new part starts after [resume]. Returns false when
+     * the recorder could not pause.
+     */
+    fun pause(): Boolean {
+        val segmented = engine
+        if (segmented != null) {
+            segmented.pause()
+            return segmented.isPaused
+        }
+        val recorder = mediaRecorder ?: return false
+        if (paused) return true
+        return try {
+            recorder.pause()
+            paused = true
+            pausedSinceMs = System.currentTimeMillis()
+            true
+        } catch (e: Exception) {
+            VeLog.e(TAG, e) { "MediaRecorder.pause failed" }
+            false
+        }
+    }
+
+    /** Ends a [pause]. Returns false when the recorder could not resume. */
+    fun resume(): Boolean {
+        val segmented = engine
+        if (segmented != null) {
+            segmented.resume()
+            return !segmented.isPaused
+        }
+        val recorder = mediaRecorder ?: return false
+        if (!paused) return true
+        return try {
+            recorder.resume()
+            pausedTotalMs += System.currentTimeMillis() - pausedSinceMs
+            paused = false
+            true
+        } catch (e: Exception) {
+            VeLog.e(TAG, e) { "MediaRecorder.resume failed" }
+            false
+        }
+    }
+
+    /**
+     * Stops recording. For a segmented recording the duration is that of the
+     * last part only (the earlier parts were reported as they closed), and every
+     * earlier part has been reported through [onSegmentFinished] by the time this
+     * returns.
+     */
+    fun requestStop(): RecordingResult {
+        val segmented = engine
+        if (segmented != null) {
+            stopTimeMs = System.currentTimeMillis()
+            val lastPartMs = segmented.stop()
+            VeLog.d(TAG) { "requestStop: segmented, last part ${lastPartMs}ms" }
+            return RecordingResult(lastPartMs)
+        }
+        val recorder = mediaRecorder ?: return RecordingResult(0)
+        stopTimeMs = System.currentTimeMillis()
+        if (paused) {
+            // Some recorders only finalize cleanly from the recording state, so
+            // leave the pause first. The instant between the two is not counted.
+            try { recorder.resume() } catch (e: Exception) {
+                VeLog.w(TAG, e) { "MediaRecorder.resume before stop failed" }
+            }
+            pausedTotalMs += stopTimeMs - pausedSinceMs
+            paused = false
+        }
+        try {
+            recorder.stop()
+        } catch (e: Exception) {
+            VeLog.e(TAG, e) { "MediaRecorder.stop failed" }
+        }
+        val duration = maxOf(0L, stopTimeMs - startTimeMs - pausedTotalMs)
+        VeLog.d(TAG) { "requestStop: duration=${duration}ms" }
+        return RecordingResult(duration)
+    }
+
+    fun writeTo(writer: ChunkSink): Boolean {
+        val temp = currentFile ?: return false
+        if (!temp.exists() || temp.length() == 0L) {
+            VeLog.e(TAG) { "writeTo: temp file missing or empty (exists=${temp.exists()}, len=${temp.length()})" }
+            return false
+        }
+        VeLog.d(TAG) { "writeTo: streaming ${temp.length()} bytes to vault" }
+
+        val writeToStart = System.currentTimeMillis()
+        try {
+            java.io.BufferedInputStream(FileInputStream(temp), 64 * 1024).use { bis ->
+                val buffer = ByteArray(64 * 1024)
+                var bytesRead: Int
+                while (bis.read(buffer).also { bytesRead = it } != -1) {
+                    if (bytesRead > 0) {
+                        val chunk = if (bytesRead == buffer.size) buffer else buffer.copyOf(bytesRead)
+                        if (!writer.write(chunk)) {
+                            return false
+                        }
+                    }
+                }
+            }
+            val ok = writer.finish()
+            VeLog.i(TAG) { "[PERF] VaultVideoRecorder.writeTo stream time: ${System.currentTimeMillis() - writeToStart}ms" }
+            return ok
+        } catch (e: Exception) {
+            VeLog.e(TAG, e) { "writeTo failed" }
+            return false
+        } finally {
+            val wipeStart = System.currentTimeMillis()
+            secureDeleteTempFile()
+            VeLog.i(TAG) { "[PERF] VaultVideoRecorder.writeTo temp wipe time: ${System.currentTimeMillis() - wipeStart}ms" }
+        }
+    }
+
+    /** The recording on disk: the only file, or for a segmented recording the current (after stop: last) part. */
+    val tempFilePath: String? get() = currentFile?.absolutePath
+
+    /**
+     * Lets go of the recorder and its encoders but leaves the recording file
+     * alone, so the caller can still hand it on (see [tempFilePath]).
+     */
+    fun releaseRecorderOnly() {
+        engine?.release()
+        try {
+            mediaRecorder?.reset()
+            mediaRecorder?.release()
+        } catch (_: Exception) {}
+        mediaRecorder = null
+        inputSurface = null
+    }
+
+    fun releaseEncoder() {
+        releaseRecorderOnly()
+        secureDeleteTempFile()
+        engine = null
+    }
+
+    fun secureDeleteTempFile() {
+        engine?.wipeCurrentFile()
+        val temp = tempFile ?: return
+        tempFile = null
+        secureDeleteFile(temp)
+    }
+}

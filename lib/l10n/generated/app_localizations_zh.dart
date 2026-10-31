@@ -1,0 +1,12216 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Chinese (`zh`).
+class AppLocalizationsZh extends AppLocalizations {
+  AppLocalizationsZh([String locale = 'zh']) : super(locale);
+
+  @override
+  String get usbAttachPromptTitle => '显示 USB 连接提示';
+
+  @override
+  String get usbAttachPromptSubtitle =>
+      '启用后，连接 USB 驱动器时 Android 会提供 VaultExplorer。关闭此选项即可停止提示；你仍可在“挂载 USB 驱动器”中手动打开驱动器。';
+
+  @override
+  String get usbAttachPromptUpdateErrorMessage => '无法更新 USB 连接设置。';
+
+  @override
+  String get cancel => '取消';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String get search => '搜索';
+
+  @override
+  String get goBack => '返回';
+
+  @override
+  String xOfYCounter(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String get pdfViewerGoToPageTitle => '跳转到页面';
+
+  @override
+  String pdfViewerPageNumberHint(int pageCount) {
+    return '页码（1-$pageCount）';
+  }
+
+  @override
+  String get pdfViewerPageLabel => '页面';
+
+  @override
+  String get pdfViewerGoButton => '跳转';
+
+  @override
+  String get pdfViewerSearchHint => '在文档中搜索';
+
+  @override
+  String get pdfViewerNoMatches => '无匹配结果';
+
+  @override
+  String get pdfViewerPreviousMatch => '上一个匹配项';
+
+  @override
+  String get pdfViewerNextMatch => '下一个匹配项';
+
+  @override
+  String get pdfViewerCloseSearch => '关闭搜索';
+
+  @override
+  String get pdfViewerPrintTooltip => '打印文档';
+
+  @override
+  String get pdfViewerLoadingDocument => '正在加载文档…';
+
+  @override
+  String get pdfViewerCannotOpenTitle => '无法打开PDF';
+
+  @override
+  String get pdfViewerFailedToLoad => '加载PDF失败';
+
+  @override
+  String get pdfViewerEditTooltip => '编辑';
+
+  @override
+  String get pdfViewerDoneEditingTooltip => '完成编辑';
+
+  @override
+  String get pdfViewerSaveFailed => '无法保存对此PDF的更改';
+
+  @override
+  String get pdfViewerEditUnavailable => '此文档不支持编辑';
+
+  @override
+  String get paste => '粘贴';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get clipboardVerbMove => '移动';
+
+  @override
+  String get clipboardVerbCopy => '复制';
+
+  @override
+  String clipboardTooltipInteractive(String verb, int count) {
+    return '$verb（$count）— 点击查看详情，长按粘贴';
+  }
+
+  @override
+  String clipboardTooltipViewOnly(String verb, int count) {
+    return '$verb（$count）— 剪贴板详情';
+  }
+
+  @override
+  String clipboardSourceLabel(String source) {
+    return '来源：$source';
+  }
+
+  @override
+  String get clipboardDefaultSourceName => '保险库';
+
+  @override
+  String clipboardHeaderCount(String verb, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个项目',
+    );
+    return '$verb $_temp0';
+  }
+
+  @override
+  String clipboardMoreItems(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '还有$count个',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get advancedParametersTitle => '高级参数';
+
+  @override
+  String get pimFieldLabel => 'PIM（留空使用默认值）';
+
+  @override
+  String get encryptionAlgorithmLabel => '加密算法';
+
+  @override
+  String get hashAlgorithmLabel => '哈希算法';
+
+  @override
+  String get clipboardVerbMoving => '正在移动';
+
+  @override
+  String get clipboardVerbCopying => '正在复制';
+
+  @override
+  String clipboardPillTitle(String verb, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个项目',
+    );
+    return '$verb $_temp0';
+  }
+
+  @override
+  String clipboardFromSourceSuffix(String source) {
+    return '，来自“$source”';
+  }
+
+  @override
+  String get clipboardOpenContainerToPaste => '打开一个容器以粘贴';
+
+  @override
+  String get keyfilesOptionalLabel => '密钥文件（可选）';
+
+  @override
+  String get addFile => '添加文件';
+
+  @override
+  String get noKeyfilesAttached => '未附加密钥文件';
+
+  @override
+  String get completed => '已完成';
+
+  @override
+  String get dismiss => '关闭';
+
+  @override
+  String byteProgressText(String transferred, String total, int pct) {
+    return '$transferred / $total（$pct%）';
+  }
+
+  @override
+  String countProgressText(int done, int total, int pct) {
+    return '$done / $total（$pct%）';
+  }
+
+  @override
+  String multiOpLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个传输任务',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String multiOpSublabel(String summary) {
+    return '$summary・点击查看全部';
+  }
+
+  @override
+  String get thumbnailSizeResolutionLabel => '缩略图大小（分辨率）';
+
+  @override
+  String get jpegCompressionQualityLabel => 'JPEG压缩质量';
+
+  @override
+  String get done => '完成';
+
+  @override
+  String get confirm => '确认';
+
+  @override
+  String get couldNotPickKeyfiles => '无法选择密钥文件';
+
+  @override
+  String get filesystemLabelEncryptedVault => '这个加密保险库';
+
+  @override
+  String get filesystemLabelThisContainer => '这个容器';
+
+  @override
+  String get nounFile => '文件';
+
+  @override
+  String get nounFolder => '文件夹';
+
+  @override
+  String get nounFileCapitalized => '文件';
+
+  @override
+  String get nounFolderCapitalized => '文件夹';
+
+  @override
+  String get unitBytes => '字节';
+
+  @override
+  String get unitCharacters => '个字符';
+
+  @override
+  String get validationEmptyName => '名称不能为空。';
+
+  @override
+  String validationReservedNavName(String name, String noun) {
+    return '“$name”是保留的导航名称，不能用作$noun名称。';
+  }
+
+  @override
+  String validationIllegalChar(String char, int position, String fsLabel) {
+    return '在$fsLabel上，名称中位置$position处的“$char”不被允许。';
+  }
+
+  @override
+  String validationControlChar(int position, String code, String fsLabel) {
+    return '位置$position包含一个不可打印的控制字符（代码$code），$fsLabel不允许使用该字符。';
+  }
+
+  @override
+  String validationReservedDeviceName(String name, String fsLabel) {
+    return '“$name”是$fsLabel上的保留设备名称（匹配CON、PRN、AUX、NUL、COM0–9或LPT0–9），无论是否带文件扩展名都不能使用。';
+  }
+
+  @override
+  String validationTrailingSpace(String noun, String fsLabel) {
+    return '在$fsLabel上，$noun名称不能以空格结尾';
+  }
+
+  @override
+  String validationTrailingDot(String noun, String fsLabel) {
+    return '在$fsLabel上，$noun名称不能以“.”结尾';
+  }
+
+  @override
+  String validationNameTooLong(
+    int length,
+    String unit,
+    String fsLabel,
+    int maxLength,
+    String noun,
+  ) {
+    return '此名称长度为$length$unit；$fsLabel允许每个$noun名称最多$maxLength$unit。';
+  }
+
+  @override
+  String validationPathTooLong(int length, String fsLabel, int maxLength) {
+    return '完整路径长度为$length个字符；$fsLabel最多允许$maxLength个字符。';
+  }
+
+  @override
+  String conflictSameType(String noun, String name) {
+    return '此处已存在名为“$name”的$noun。';
+  }
+
+  @override
+  String conflictCrossType(
+    String existingNoun,
+    String name,
+    String candidateNoun,
+  ) {
+    return '此处已存在名为“$name”的$existingNoun——它不能与$candidateNoun共用同一个名称。';
+  }
+
+  @override
+  String get readOnlyContainerWarning => '此容器已以只读方式挂载。';
+
+  @override
+  String get hiddenVolumeProtectionTriggeredWarning =>
+      '对此外部卷的写入本会损坏隐藏卷，因此已被阻止。此容器在本次会话的剩余时间内已切换为只读。';
+
+  @override
+  String get protectHiddenVolumeToggleTitle => '保护隐藏卷';
+
+  @override
+  String get protectHiddenVolumeToggleSubtitle => '防止因写入外部卷而造成的损坏';
+
+  @override
+  String get protectHiddenVolumeCredentialsRequired => '需要隐藏卷的密码或密钥文件才能对其进行保护';
+
+  @override
+  String deleteItemsTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '删除$count个项目？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteFoldersWarning => '这些项目将被永久删除，包括所选文件夹中的全部内容。';
+
+  @override
+  String get deleteFilesWarning => '这些项目将从您的加密卷中永久清除。';
+
+  @override
+  String get delete => '删除';
+
+  @override
+  String get remove => '移除';
+
+  @override
+  String get create => '创建';
+
+  @override
+  String get rename => '重命名';
+
+  @override
+  String renameMultipleTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '重命名$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newFolderTitle => '新建文件夹';
+
+  @override
+  String get newTextFileTitle => '新建文本文件';
+
+  @override
+  String get folderNameHint => '文件夹名称';
+
+  @override
+  String get filenameHint => '文件名.txt';
+
+  @override
+  String get newNameHint => '新名称';
+
+  @override
+  String get baseNameHint => '基础名称';
+
+  @override
+  String couldntCreateItem(String name) {
+    return '无法创建“$name”——请检查容器是否仍处于挂载状态';
+  }
+
+  @override
+  String couldntRenameSingle(String name) {
+    return '无法重命名“$name”——可能已存在同名项目';
+  }
+
+  @override
+  String couldntRenameMultiWithReason(num count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '无法重命名$count个项目：$reason',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String couldntRenameMultiNoReason(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '无法重命名$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hiddenVolumeErrorInvalidSize => '请输入大于0的有效隐藏卷大小';
+
+  @override
+  String get hiddenVolumeErrorTooLargeVsOuter => '隐藏卷大小必须小于外部卷大小';
+
+  @override
+  String get hiddenVolumeErrorTooLargeForContainer => '隐藏卷大小对此容器大小来说过大';
+
+  @override
+  String get hiddenVolumeErrorCredentialsRequired => '创建隐藏卷时需要提供隐藏密码或密钥文件';
+
+  @override
+  String get hiddenVolumeErrorCredentialsMustDiffer =>
+      '隐藏卷的凭据（密码、PIM和密钥文件）不能与外部卷的凭据相同。';
+
+  @override
+  String get vaultItemTypePassword => '密码';
+
+  @override
+  String get vaultItemTypePaymentCard => '支付卡';
+
+  @override
+  String get vaultItemTypeIdentity => '身份证件';
+
+  @override
+  String get vaultItemTypeSecureNote => '安全笔记';
+
+  @override
+  String get vaultItemTypeBankAccount => '银行账户';
+
+  @override
+  String get vaultItemTypeSoftwareLicense => '软件许可证';
+
+  @override
+  String get fieldUsernameEmail => '用户名 / 邮箱';
+
+  @override
+  String get fieldPassword => '密码';
+
+  @override
+  String get fieldWebsiteUrl => '网站URL';
+
+  @override
+  String get fieldTotpSecret => 'TOTP密钥（双重验证）';
+
+  @override
+  String get fieldNotes => '备注';
+
+  @override
+  String get fieldCardholderName => '持卡人姓名';
+
+  @override
+  String get fieldCardNumber => '卡号';
+
+  @override
+  String get fieldExpiryMMYY => '有效期（MM/YY）';
+
+  @override
+  String get fieldCvvCvc => 'CVV / CVC';
+
+  @override
+  String get fieldPin => 'PIN';
+
+  @override
+  String get fieldIssuingBank => '发卡银行';
+
+  @override
+  String get fieldFullName => '全名';
+
+  @override
+  String get fieldDateOfBirth => '出生日期';
+
+  @override
+  String get fieldNationality => '国籍';
+
+  @override
+  String get fieldPassportNumber => '护照号码';
+
+  @override
+  String get fieldPassportExpiry => '护照有效期';
+
+  @override
+  String get fieldNationalIdSsn => '身份证号 / 社会保障号';
+
+  @override
+  String get fieldDriversLicense => '驾照';
+
+  @override
+  String get fieldAddress => '地址';
+
+  @override
+  String get fieldPhone => '电话';
+
+  @override
+  String get fieldEmail => '邮箱';
+
+  @override
+  String get fieldNote => '备注';
+
+  @override
+  String get fieldBankName => '银行名称';
+
+  @override
+  String get fieldAccountHolder => '账户持有人';
+
+  @override
+  String get fieldAccountNumber => '账号';
+
+  @override
+  String get fieldRoutingSortCode => '银行代码 / 分行代码';
+
+  @override
+  String get fieldIban => 'IBAN';
+
+  @override
+  String get fieldSwiftBic => 'SWIFT / BIC';
+
+  @override
+  String get fieldAccountType => '账户类型';
+
+  @override
+  String get fieldProductName => '产品名称';
+
+  @override
+  String get fieldLicenseKey => '许可证密钥';
+
+  @override
+  String get fieldRegisteredTo => '注册人';
+
+  @override
+  String get fieldPurchaseDate => '购买日期';
+
+  @override
+  String get fieldExpiryRenewalDate => '到期 / 续订日期';
+
+  @override
+  String get fieldDownloadUrl => '下载链接';
+
+  @override
+  String get fieldRegistrationEmail => '注册邮箱';
+
+  @override
+  String get titleRequired => '标题为必填项';
+
+  @override
+  String newTypeTitle(String typeLabel) {
+    return '新建$typeLabel';
+  }
+
+  @override
+  String editItemTitle(String title) {
+    return '编辑$title';
+  }
+
+  @override
+  String get save => '保存';
+
+  @override
+  String typeNameHint(String typeLabel) {
+    return '$typeLabel名称';
+  }
+
+  @override
+  String get titleSectionLabel => '标题';
+
+  @override
+  String get fieldsSectionLabel => '字段';
+
+  @override
+  String get encryptedStorageHint => '所有字段均以加密方式存储在容器内。';
+
+  @override
+  String copiedSuffix(String fieldLabel) {
+    return '已复制$fieldLabel';
+  }
+
+  @override
+  String get copy => '复制';
+
+  @override
+  String get failedToSaveCheckMounted => '保存失败——请检查容器是否仍处于挂载状态';
+
+  @override
+  String get discardChangesTitle => '放弃更改？';
+
+  @override
+  String get discardChangesMessage => '未保存的更改将会丢失。';
+
+  @override
+  String get discard => '放弃';
+
+  @override
+  String get keepEditing => '继续编辑';
+
+  @override
+  String get deleteItemTitle => '删除项目？';
+
+  @override
+  String deleteItemMessage(String title) {
+    return '“$title”将从保险库中永久删除。';
+  }
+
+  @override
+  String get removeFromBookmarks => '从收藏中移除';
+
+  @override
+  String get addToBookmarks => '添加到收藏';
+
+  @override
+  String get edit => '编辑';
+
+  @override
+  String labelCopiedToClipboard(String label) {
+    return '$label已复制到剪贴板';
+  }
+
+  @override
+  String get noFieldsFilledIn => '尚未填写任何字段。\n点击编辑以添加详细信息。';
+
+  @override
+  String get sectionLabelDetails => '详细信息';
+
+  @override
+  String get sectionLabelInfo => '信息';
+
+  @override
+  String get metaLabelType => '类型';
+
+  @override
+  String get metaLabelCreated => '创建时间';
+
+  @override
+  String get metaLabelModified => '修改时间';
+
+  @override
+  String copyFieldTooltip(String fieldLabel) {
+    return '复制$fieldLabel';
+  }
+
+  @override
+  String get readOnlyCantAddItemsTooltip => '只读——无法添加项目';
+
+  @override
+  String get extractArchive => '解压压缩包';
+
+  @override
+  String get verbArchive => '压缩';
+
+  @override
+  String get verbExtract => '解压';
+
+  @override
+  String get verbArchived => '已压缩';
+
+  @override
+  String get verbExtracted => '已解压';
+
+  @override
+  String get verbArchiving => '正在压缩';
+
+  @override
+  String get verbExtracting => '正在解压';
+
+  @override
+  String get fileOpExtractingArchive => '正在解压压缩包…';
+
+  @override
+  String fileOpExtractingArchiveName(String name) {
+    return '正在解压 $name…';
+  }
+
+  @override
+  String fileOpArchivingBytes(String bytes) {
+    return '正在压缩…（$bytes）';
+  }
+
+  @override
+  String get newItemTooltip => '新建项目';
+
+  @override
+  String get camera => '相机';
+
+  @override
+  String get importFiles => '导入文件';
+
+  @override
+  String get importFolder => '导入文件夹';
+
+  @override
+  String get secureItem => '安全项目';
+
+  @override
+  String get appNameVaultExplorer => 'Vault Explorer';
+
+  @override
+  String get appNameZipExplorer => 'Archive Explorer';
+
+  @override
+  String get archiveExplorerPermissionTitle => '需要存储访问权限';
+
+  @override
+  String get archiveExplorerPermissionMessage =>
+      '允许访问您的文件，以便浏览和解压“下载”文件夹中的.zip压缩包。';
+
+  @override
+  String get archiveExplorerGrantAccess => '授予访问权限';
+
+  @override
+  String get archiveExplorerEmptyTitle => '未找到压缩包';
+
+  @override
+  String get archiveExplorerEmptyMessage => '您下载的zip文件将显示在此处。';
+
+  @override
+  String get archiveExplorerRefreshTooltip => '刷新';
+
+  @override
+  String archiveExplorerEntryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get archiveExplorerExtractAll => '全部解压';
+
+  @override
+  String get archiveExplorerExtracting => '正在解压…';
+
+  @override
+  String archiveExplorerExtractSuccess(int count, String name) {
+    return '已将$count个文件解压到Download/Extracted/$name';
+  }
+
+  @override
+  String get archiveExplorerExtractFailed => '无法解压该压缩包。';
+
+  @override
+  String get archiveExplorerOpenFailed => '无法打开该压缩包。';
+
+  @override
+  String get archiveExplorerOpenArchive => '打开压缩包…';
+
+  @override
+  String get archiveExplorerUnresolvedPath => '无法直接访问该文件。请尝试从“下载”中选择一个文件。';
+
+  @override
+  String get archiveExplorerExtractTo => '解压到…';
+
+  @override
+  String get archiveExplorerPreview => '预览';
+
+  @override
+  String get archiveExplorerChoosingDestination => '正在选择目标位置…';
+
+  @override
+  String get archiveExplorerNoDestinationChosen => '未选择目标位置。';
+
+  @override
+  String archiveExplorerExtractSuccessTo(int count, String path) {
+    return '已将$count个文件解压到$path';
+  }
+
+  @override
+  String get archiveBrowserEmptyTitle => '空文件夹';
+
+  @override
+  String get archiveBrowserEmptyMessage => '此文件夹不包含任何文件。';
+
+  @override
+  String get archiveBrowserRoot => '压缩包';
+
+  @override
+  String get archiveBrowserOpenFileFailed => '无法打开该文件。';
+
+  @override
+  String get fileAssocInAppTextEditor => '应用内文本编辑器';
+
+  @override
+  String get fileAssocInAppMediaViewer => '应用内媒体查看器';
+
+  @override
+  String fileAssocAppPrefix(String name) {
+    return '应用：$name';
+  }
+
+  @override
+  String get fileAssocExternalApp => '外部应用';
+
+  @override
+  String get appSettingsTitle => '应用设置';
+
+  @override
+  String get sectionSecurityPrivacy => '安全与隐私';
+
+  @override
+  String get sectionAppearanceInterface => '外观与界面';
+
+  @override
+  String get sectionVaultFileHandling => '保险库与文件处理';
+
+  @override
+  String get masterPasswordTitle => '主密码';
+
+  @override
+  String get masterPasswordActiveSubtitle => '已启用——点击开关即可移除';
+
+  @override
+  String get masterPasswordInactiveSubtitle => '打开应用时需要密码';
+
+  @override
+  String get newPasswordLabel => '新密码';
+
+  @override
+  String get masterPasswordFieldLabel => '主密码';
+
+  @override
+  String get confirmPasswordLabel => '确认密码';
+
+  @override
+  String get update => '更新';
+
+  @override
+  String get setPassword => '设置密码';
+
+  @override
+  String get biometricUnlockTitle => '生物识别解锁';
+
+  @override
+  String get biometricUnlockSubtitle => '进行身份验证以安全挂载容器';
+
+  @override
+  String get changeMasterPasswordTitle => '更改主密码';
+
+  @override
+  String get changeMasterPasswordSubtitle => '更新主密码凭据';
+
+  @override
+  String get autoLockContainersTitle => '自动锁定容器';
+
+  @override
+  String get autoLockContainersSubtitle => '闲置一段时间后自动锁定已打开的保险库';
+
+  @override
+  String get autoLockTimeoutLabel => '自动锁定超时时间';
+
+  @override
+  String get immediately => '立即';
+
+  @override
+  String nMinutes(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count分钟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nHours(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count小时',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get customDurationOption => '自定义…';
+
+  @override
+  String get customDurationDialogTitle => '自定义时长';
+
+  @override
+  String get blockScreenshotsTitle => '阻止截屏';
+
+  @override
+  String get blockScreenshotsSubtitle => '阻止截屏并在最近任务中隐藏预览';
+
+  @override
+  String get keepVaultsRunningInBackgroundTitle => '在后台保持保险库运行';
+
+  @override
+  String get keepVaultsRunningInBackgroundSubtitle =>
+      '显示通知，并在您离开应用后使已打开的保险库保持可用。保险库密钥会一直保留在内存中，直到锁定为止。';
+
+  @override
+  String get notificationPermissionDeniedMessage =>
+      '通知权限被拒绝。保险库仍会保持打开，但不会显示持续通知。';
+
+  @override
+  String get discreteModeTitle => '伪装模式';
+
+  @override
+  String get discreteModeActiveSubtitle => '已启用——应用当前显示为“Archive Explorer”';
+
+  @override
+  String get discreteModeInactiveSubtitle => '在主屏幕上将此应用伪装成zip压缩包浏览器';
+
+  @override
+  String get enableDiscreteModeTitle => '启用伪装模式？';
+
+  @override
+  String get disableDiscreteModeTitle => '关闭伪装模式？';
+
+  @override
+  String get enableDiscreteModeMessage =>
+      '主屏幕上的应用图标和名称将变为“Archive Explorer”。它将作为zip压缩包浏览及解压工具运行。\n\n要访问您的保险库，请打开Archive Explorer，并长按标题2秒。';
+
+  @override
+  String get disableDiscreteModeMessage => '主屏幕上的应用图标和名称将恢复为“Vault Explorer”。';
+
+  @override
+  String get enable => '启用';
+
+  @override
+  String get disable => '禁用';
+
+  @override
+  String get discreteModeEnabledSnack => '伪装模式已启用。应用即将关闭——请从新的启动器图标重新打开。';
+
+  @override
+  String get discreteModeDisabledSnack => '伪装模式已关闭。应用即将关闭——请从新的启动器图标重新打开。';
+
+  @override
+  String get failedToChangeDiscreteMode => '更改伪装模式失败';
+
+  @override
+  String get cacheDerivedKeysTitle => '默认缓存派生密钥';
+
+  @override
+  String get cacheDerivedKeysSubtitle => '将派生密钥材料存储在Keystore中以加快解锁速度';
+
+  @override
+  String get appThemeLabel => '应用主题';
+
+  @override
+  String get systemDefault => '系统默认';
+
+  @override
+  String get lightTheme => '浅色主题';
+
+  @override
+  String get darkTheme => '深色主题';
+
+  @override
+  String get useMaterialYouTitle => '使用Material You';
+
+  @override
+  String get useMaterialYouSubtitle => '使应用颜色与壁纸相匹配（Android 12+）';
+
+  @override
+  String get pureBlackThemeTitle => '纯黑（OLED）';
+
+  @override
+  String get pureBlackThemeSubtitle => '使用纯黑背景以节省电量并减少 OLED 屏幕眩光（仅限深色主题）';
+
+  @override
+  String get sortContainersByLabel => '容器排序方式';
+
+  @override
+  String get swapCardSwipeActionsTitle => '交换卡片滑动操作';
+
+  @override
+  String get swapCardSwipeActionsSubtitle => '滑动卡片时，左侧显示编辑，右侧显示移除';
+
+  @override
+  String get swipeGestureHintTitle => '滑动手势提示';
+
+  @override
+  String get swipeGestureHintSubtitle => '在第一个容器上显示卡片预览动画';
+
+  @override
+  String get autoOpenOnUnlockTitle => '解锁后自动打开';
+
+  @override
+  String get autoOpenOnUnlockActiveSubtitle => '解锁保险库后自动打开';
+
+  @override
+  String get autoOpenOnUnlockInactiveSubtitle => '仅解锁保险库并停留在仪表盘';
+
+  @override
+  String get enableJsHtmlTitle => '在HTML查看器中启用JavaScript';
+
+  @override
+  String get jsEnabledSubtitle => '已为本地HTML文件启用JavaScript';
+
+  @override
+  String get jsDisabledSubtitle => '已为本地HTML文件禁用JavaScript';
+
+  @override
+  String get fastStorageAccessTitle => '快速存储访问';
+
+  @override
+  String get fastStorageAccessGrantedSubtitle => '已授予所有文件访问权限（最高速度）';
+
+  @override
+  String get fastStorageAccessNotGrantedSubtitle => '在系统设置中授予所有文件访问权限以获得最佳速度';
+
+  @override
+  String get showStorageLocationsTitle => '在侧边栏显示存储位置';
+
+  @override
+  String get showStorageLocationsSubtitle =>
+      '显示本地存储和已添加的位置。打开本地存储需要“所有文件访问”权限。';
+
+  @override
+  String get localStorageCardTitle => '本地存储';
+
+  @override
+  String get localStorageCardSubtitle => '未加密 —— 用于与保险库快速传输';
+
+  @override
+  String get enableFastStorageAccessTitle => '启用快速存储访问';
+
+  @override
+  String get enableFastStorageAccessMessage =>
+      '授予“所有文件访问权限”可让Vault Explorer执行直接的POSIX文件操作，将文件夹保险库的性能提升高达1000倍。';
+
+  @override
+  String get disableStorageAccessTitle => '关闭存储访问权限';
+
+  @override
+  String get disableStorageAccessMessage =>
+      'Android要求在系统设置中关闭“所有文件访问权限”。是否打开设置将其关闭？';
+
+  @override
+  String get enableStoragePermissionLegacyTitle => '允许存储访问';
+
+  @override
+  String get enableStoragePermissionLegacyMessage =>
+      'Vault Explorer需要存储权限才能执行直接文件操作，从而提升文件夹保险库的性能。系统现在会请求您确认。';
+
+  @override
+  String get disableStoragePermissionLegacyMessage =>
+      'Android要求在系统设置中关闭存储权限。是否打开设置将其关闭？';
+
+  @override
+  String get openSettings => '打开设置';
+
+  @override
+  String get useThisPasswordButton => '使用此密码';
+
+  @override
+  String get quickPasswordGeneratorSheetTitle => '密码生成器';
+
+  @override
+  String get androidFileProviderTitle => 'Android文件提供程序';
+
+  @override
+  String get androidFileProviderSubtitle => '默认将新容器公开给Android文件选择器';
+
+  @override
+  String get thumbnailCachingDefaultLabel => '缩略图缓存（默认）';
+
+  @override
+  String get thumbnailQualityDefaultLabel => '缩略图质量（默认）';
+
+  @override
+  String get fileAssociationsHeader => '文件关联';
+
+  @override
+  String get noFileAssociationsYet => '尚无已记住的文件关联。打开文件时系统会提示您选择。';
+
+  @override
+  String get defaultActionsHeader => '打开非标准文件时的默认操作：';
+
+  @override
+  String get removeAssociationTooltip => '移除关联';
+
+  @override
+  String get sectionBackupRestore => '备份';
+
+  @override
+  String get exportSettingsTitle => '导出设置';
+
+  @override
+  String get exportSettingsSubtitle =>
+      '将应用、文件管理器、媒体播放器和文本编辑器的设置保存到文件。自定义皮肤为可选项。';
+
+  @override
+  String get importSettingsTitle => '导入设置';
+
+  @override
+  String get importSettingsSubtitle => '从文件恢复应用、文件管理器、媒体播放器和文本编辑器的设置';
+
+  @override
+  String get importSettingsConfirmTitle => '导入设置？';
+
+  @override
+  String get importSettingsConfirmMessage =>
+      '这将替换您当前的应用设置。您的皮肤和界面布局不受影响。此操作无法撤销。';
+
+  @override
+  String get exportSettingsOnlyTitle => '仅设置';
+
+  @override
+  String get exportSettingsOnlySubtitle => '应用、文件管理器、媒体播放器和文本编辑器的设置';
+
+  @override
+  String get exportSettingsWithSkinsTitle => '设置和皮肤';
+
+  @override
+  String get exportSettingsWithSkinsSubtitle => '同时保存您的自定义应用皮肤';
+
+  @override
+  String get importSettingsConfirmFullMessage =>
+      '这将替换您当前的应用、文件管理器、媒体播放器和文本编辑器设置（包括布局）。您的皮肤不受影响。此操作无法撤销。';
+
+  @override
+  String get importSettingsConfirmFullSkinsMessage =>
+      '这将替换您当前的应用、文件管理器、媒体播放器和文本编辑器设置（包括布局），并添加此文件中的皮肤。您已有的皮肤将被文件中的版本替换。此操作无法撤销。';
+
+  @override
+  String get exportSettingsSuccessMessage => '设置已导出';
+
+  @override
+  String get importSettingsSuccessMessage => '设置已导入';
+
+  @override
+  String get exportSettingsErrorMessage => '无法导出设置';
+
+  @override
+  String get importSettingsInvalidFileMessage => '该文件不是有效的设置导出文件';
+
+  @override
+  String get sectionDebug => '调试';
+
+  @override
+  String get debugLoggingTitle => '调试日志';
+
+  @override
+  String get debugLoggingSubtitle => '记录容器操作的详细诊断日志';
+
+  @override
+  String get logcatTitle => 'Logcat';
+
+  @override
+  String get logcatSubtitle => '查看并保存设备日志';
+
+  @override
+  String logcatSavedMessage(String path) {
+    return '日志已保存到$path';
+  }
+
+  @override
+  String get logcatSaveErrorMessage => '保存日志失败';
+
+  @override
+  String get logcatCopiedMessage => '日志已复制到剪贴板';
+
+  @override
+  String get logcatUnavailableMessage => '此设备不支持Logcat';
+
+  @override
+  String get logcatEmptyMessage => '正在等待日志行…';
+
+  @override
+  String get logcatClearTooltip => '清除日志';
+
+  @override
+  String get logcatSaveTooltip => '保存日志';
+
+  @override
+  String get logcatFilterAppOnly => '仅应用';
+
+  @override
+  String get logcatFilterAll => '所有日志';
+
+  @override
+  String get logcatSearchHint => '搜索日志…';
+
+  @override
+  String get logcatClearedMessage => '日志已清除';
+
+  @override
+  String get logcatCopyTooltip => '复制日志';
+
+  @override
+  String get retryButton => '重试';
+
+  @override
+  String get aboutAppTitle => '关于VaultExplorer';
+
+  @override
+  String versionInfoSubtitle(String version) {
+    return '版本 $version · 开源许可证及详细信息';
+  }
+
+  @override
+  String get failedToSaveSettings => '保存设置失败';
+
+  @override
+  String get masterPasswordSetSnack => '主密码已设置';
+
+  @override
+  String get passwordCannotBeEmpty => '密码不能为空';
+
+  @override
+  String get atLeast4CharsRequired => '至少需要4个字符';
+
+  @override
+  String get passwordsDoNotMatch => '两次输入的密码不一致';
+
+  @override
+  String get failedToHashPassword => '密码哈希处理失败——请重试';
+
+  @override
+  String get languageLabel => '语言';
+
+  @override
+  String get biometricNotAvailable => '此设备不支持生物识别';
+
+  @override
+  String get biometricsChangedFallbackMessage =>
+      '设备的生物识别信息已更改，因此已关闭生物识别解锁。请使用密码。';
+
+  @override
+  String get unlockVaultExplorerReason => '解锁VaultExplorer';
+
+  @override
+  String biometricErrorWithCode(String code) {
+    return '生物识别错误：$code';
+  }
+
+  @override
+  String tooManyFailedAttempts(num seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds秒',
+    );
+    return '失败次数过多。请在$_temp0后重试。';
+  }
+
+  @override
+  String get enterMasterPasswordPrompt => '请输入主密码';
+
+  @override
+  String incorrectPasswordLockedFor(int seconds, num attempts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '$attempts次',
+    );
+    return '密码错误。由于$_temp0失败尝试，已锁定$seconds秒。';
+  }
+
+  @override
+  String incorrectPasswordAttempts(num attempts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '失败$attempts次',
+    );
+    return '密码错误（$_temp0）。';
+  }
+
+  @override
+  String get brandNameNoSpace => 'VaultExplorer';
+
+  @override
+  String get enterPasswordSubtitle => '请输入主密码以继续';
+
+  @override
+  String get masterPasswordFieldLabelTitleCase => '主密码';
+
+  @override
+  String get unlock => '解锁';
+
+  @override
+  String get useBiometric => '使用生物识别';
+
+  @override
+  String get connectAtLeast4Dots => '至少连接4个点';
+
+  @override
+  String get patternsDontMatch => '图案不匹配——请重试';
+
+  @override
+  String get drawUnlockPatternTitle => '绘制解锁图案';
+
+  @override
+  String get confirmPatternTitle => '确认您的图案';
+
+  @override
+  String get drawSamePatternAgain => '再次绘制相同的图案';
+
+  @override
+  String get enterAtLeast4Digits => '请输入至少4位数字';
+
+  @override
+  String get pinsDontMatch => 'PIN不匹配——请重试';
+
+  @override
+  String get createUnlockPinTitle => '创建解锁PIN';
+
+  @override
+  String get confirmPinTitle => '确认您的PIN';
+
+  @override
+  String get enterSamePinAgain => '再次输入相同的PIN';
+
+  @override
+  String get enterUnlockPinTitle => '输入解锁PIN';
+
+  @override
+  String get wrongPinTryAgain => 'PIN错误——请重试';
+
+  @override
+  String get enterYourPinSequence => '请输入您的PIN';
+
+  @override
+  String get enterPinToMount => '请输入PIN以挂载';
+
+  @override
+  String get noPinConfiguredMessage => '尚未配置PIN。请手动输入密码。';
+
+  @override
+  String pinLockedForSeconds(int seconds) {
+    return '失败次数过多。已锁定$seconds秒。';
+  }
+
+  @override
+  String get initSecureCredsPinMessage => '正在初始化安全凭据。请手动解锁一次以授权PIN访问。';
+
+  @override
+  String get setPinButton => '设置PIN';
+
+  @override
+  String get changePinButton => '更改PIN';
+
+  @override
+  String get pinSetupRequiredBeforeSaving => '保存前请先设置PIN。';
+
+  @override
+  String get pinSetupRequiredAboveBeforeSaving => '保存前请在上方设置PIN。';
+
+  @override
+  String get verifyPinTitle => '验证PIN';
+
+  @override
+  String get incorrectPinError => 'PIN不正确';
+
+  @override
+  String removedFromListSnack(String name) {
+    return '已从列表中移除“$name”';
+  }
+
+  @override
+  String get clearRecentHistoryTitle => '清除最近记录？';
+
+  @override
+  String get clearRecentHistoryMessage => '这将从您的列表中移除所有最近的文档。设备上的实际文件不会受到影响。';
+
+  @override
+  String get clearAll => '全部清除';
+
+  @override
+  String get recentHistoryClearedSnack => '最近记录已清除';
+
+  @override
+  String get moreOptionsTooltip => '更多选项';
+
+  @override
+  String get clearHistoryMenuItem => '清除历史记录';
+
+  @override
+  String get openPdfFile => '打开PDF文件';
+
+  @override
+  String get noDocumentsYetTitle => '尚无文档';
+
+  @override
+  String get openPdfToStartMessage => '从您的设备打开一个PDF开始阅读。';
+
+  @override
+  String get removeFromListMenuItem => '从列表中移除';
+
+  @override
+  String get justNow => '刚刚';
+
+  @override
+  String minutesAgo(int count) {
+    return '$count分钟前';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count小时前';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count天前';
+  }
+
+  @override
+  String get usbDriveDisconnectedLocked => 'USB驱动器已断开——容器已锁定';
+
+  @override
+  String get containerAlreadyMounted => '此容器已挂载。';
+
+  @override
+  String get noVaultFolderFormatDetected =>
+      '在该文件夹中未找到masterkey.cryptomator、gocryptfs.conf或cryfs.config。';
+
+  @override
+  String get savedContainerSettingsNotFound => '找不到此容器的已保存设置。';
+
+  @override
+  String couldNotUpdateContainerLocation(String error) {
+    return '无法更新容器位置：$error';
+  }
+
+  @override
+  String filePickerFailed(String error) {
+    return '文件选择器失败：$error';
+  }
+
+  @override
+  String get selectContainerFirst => '请先选择一个容器';
+
+  @override
+  String get passwordOrKeyfilesRequired => '需要密码或密钥文件';
+
+  @override
+  String get slowPerformanceWarningTitle => '性能缓慢警告';
+
+  @override
+  String get slowPerformanceWarningMessage =>
+      '快速存储访问当前已禁用。\n\nCryFS将文件分散存储在数千个小块中。通过Android SAF打开非空的CryFS保险库将非常缓慢。\n\n是否打开设置以授予“所有文件访问权限”以获得更快速度？';
+
+  @override
+  String get unlockAnyway => '仍然解锁';
+
+  @override
+  String get defaultVaultName => '保险库';
+
+  @override
+  String get defaultContainerName => '容器';
+
+  @override
+  String get incorrectPasswordOrInvalidVault => '密码错误或保险库无效';
+
+  @override
+  String get incorrectPasswordOrInvalidContainer => '密码错误或容器无效';
+
+  @override
+  String get genericUnknownError => '未知错误';
+
+  @override
+  String get decryptingLabel => '正在解密…';
+
+  @override
+  String get loadingContainerFromStorage => '正在从存储中加载容器… 大型容器或云端文件可能需要一些时间。';
+
+  @override
+  String luksKeyslotProgress(int attempted, int total) {
+    return '正在尝试密钥槽 $attempted/$total…';
+  }
+
+  @override
+  String get luksKeyslotProgressUnknown => '正在尝试密钥槽…';
+
+  @override
+  String bitlockerCredentialProgress(int attempted, int total) {
+    return '正在验证凭据 $attempted/$total…';
+  }
+
+  @override
+  String get bitlockerCredentialProgressUnknown => '正在验证凭据…';
+
+  @override
+  String veracryptAlgoProgress(String algo, String slotName) {
+    return '正在尝试$algo（$slotName）…';
+  }
+
+  @override
+  String get unlockContainerLabel => '解锁容器';
+
+  @override
+  String get mountContainerTitle => '挂载容器';
+
+  @override
+  String get containerFileSegmentLabel => '容器文件';
+
+  @override
+  String get folderVaultSegmentLabel => '文件夹保险库';
+
+  @override
+  String formatContainerLabel(String format) {
+    return '$format容器';
+  }
+
+  @override
+  String formatVaultLabel(String format) {
+    return '$format保险库';
+  }
+
+  @override
+  String formatDriveLabel(String format) {
+    return '$format驱动器';
+  }
+
+  @override
+  String get encryptedContainerLabel => '加密容器';
+
+  @override
+  String get tapToSelectVaultFolder => '点击选择保险库文件夹…';
+
+  @override
+  String get tapToSelectContainerFile => '点击选择容器文件…';
+
+  @override
+  String get containerMissingTitle => '容器缺失';
+
+  @override
+  String get filePathCouldNotBeResolved => '无法解析文件路径';
+
+  @override
+  String get containerMissingExplanation => '容器文件可能已被移动、删除，或其所在存储设备当前已断开连接。';
+
+  @override
+  String get retryButtonLabel => '重试';
+
+  @override
+  String get locateFileButtonLabel => '定位文件';
+
+  @override
+  String get authenticateToMountSubtitle => '进行身份验证以安全挂载容器';
+
+  @override
+  String get usePasswordButtonLabel => '使用密码';
+
+  @override
+  String get authenticateButtonLabel => '进行身份验证';
+
+  @override
+  String get drawUnlockPatternCardTitle => '绘制解锁图案';
+
+  @override
+  String get wrongPatternTryAgain => '图案错误——请重试';
+
+  @override
+  String get connectYourPatternSequence => '连接您的图案序列';
+
+  @override
+  String get usePasswordInsteadButtonLabel => '改用密码';
+
+  @override
+  String get passwordHintFolderVault => '输入保险库密码';
+
+  @override
+  String get passwordHintBitlocker => '输入密码或恢复密钥';
+
+  @override
+  String get passwordHintContainer => '输入容器密码';
+
+  @override
+  String get usingSavedPasswordTooltip => '正在使用已保存的密码';
+
+  @override
+  String get luksKeyfileReplacesPasswordNote => '对于LUKS容器，密钥文件将取代密码。';
+
+  @override
+  String get readOnlyModeUsbSubtitle => '挂载时不允许更改此驱动器';
+
+  @override
+  String get readOnlyModeContainerSubtitle => '挂载时不允许更改此容器';
+
+  @override
+  String get rememberContainerLabel => '记住容器';
+
+  @override
+  String get rememberContainerSubtitle => '将容器固定在仪表盘上以便快速访问';
+
+  @override
+  String get cancelUnlockButtonLabel => '取消解锁';
+
+  @override
+  String get biometricSubjectContainer => '容器';
+
+  @override
+  String get biometricSubjectUsbDrive => 'USB驱动器';
+
+  @override
+  String get usbNoSavedCredentialsMessage => '未找到已保存的密码。请手动输入。';
+
+  @override
+  String get decryptingDriveLabel => '正在解密驱动器…';
+
+  @override
+  String get usbDeviceAlreadyActiveMounted => '此USB设备已处于活动状态并已挂载。';
+
+  @override
+  String reconnectUsbDriveTitle(String label) {
+    return '重新连接“$label”';
+  }
+
+  @override
+  String get unlockUsbDriveTitle => '解锁USB驱动器';
+
+  @override
+  String get noUsbStorageDetectedTitle => '未检测到USB存储设备';
+
+  @override
+  String authenticateToUnlockPrompt(String subject) {
+    return '进行身份验证以解锁$subject';
+  }
+
+  @override
+  String get noPatternConfiguredMessage => '未配置图案。请手动输入密码。';
+
+  @override
+  String patternLockedForSeconds(int seconds) {
+    return '失败次数过多。已锁定$seconds秒。';
+  }
+
+  @override
+  String get initSecureCredsBiometricMessage => '正在初始化安全凭据。请手动解锁一次以授权生物识别访问。';
+
+  @override
+  String get initSecureCredsPatternMessage => '正在初始化安全凭据。请手动解锁一次以授权图案访问。';
+
+  @override
+  String get mountExistingContainerTitle => '挂载现有容器';
+
+  @override
+  String get mountExistingContainerSubtitle => '解锁您已有的文件容器';
+
+  @override
+  String get mountSplitContainerTitle => '挂载分割容器';
+
+  @override
+  String get mountSplitContainerSubtitle => '直接解锁分割容器，无需先合并';
+
+  @override
+  String get mountUsbDriveTitle => '挂载USB驱动器';
+
+  @override
+  String get mountUsbDriveSubtitle => '解锁OTG闪存驱动器上的容器';
+
+  @override
+  String get formatUsbDriveTitle => '格式化USB驱动器';
+
+  @override
+  String get formatUsbDriveSubtitle => '清除驱动器并在其上创建一个新的加密容器';
+
+  @override
+  String get createNewContainerTitle => '创建新容器';
+
+  @override
+  String get createNewContainerSubtitle => '格式化一个全新的加密保险库';
+
+  @override
+  String get lockBeforeRemovingWarning => '移除容器前请先将其锁定。';
+
+  @override
+  String get settingsTooltip => '设置';
+
+  @override
+  String get addVaultFabLabel => '添加保险库';
+
+  @override
+  String removedLabelUndo(String label) {
+    return '已移除“$label”';
+  }
+
+  @override
+  String get undo => '撤销';
+
+  @override
+  String get pdfViewerNoSourceProvided => '未提供PDF来源。';
+
+  @override
+  String get pdfViewerFileEmpty => 'PDF文件为空或无法读取。';
+
+  @override
+  String pdfViewerFailedToInspectSize(String error) {
+    return '检查PDF文件大小失败：$error';
+  }
+
+  @override
+  String get pdfViewerErrorLoadingTitle => '加载PDF时出错';
+
+  @override
+  String get pdfViewerNoDocumentLoaded => '未加载PDF文档。';
+
+  @override
+  String get add => '添加';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String couldNotExpose(String name) {
+    return '无法公开“$name”。';
+  }
+
+  @override
+  String nowAvailableToOtherApps(String name) {
+    return '“$name”现已可供其他应用使用。';
+  }
+
+  @override
+  String couldNotUnmount(String name) {
+    return '无法卸载“$name”。';
+  }
+
+  @override
+  String pinnedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已固定$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unpinnedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已取消固定$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get readOnlyThumbnailWarning => '只读挂载——缩略图将会显示，但本次会话中不会保存在容器内。';
+
+  @override
+  String failedLoadingFolder(String type) {
+    return '加载文件夹失败：$type';
+  }
+
+  @override
+  String failedToReadArchive(String type) {
+    return '读取压缩包失败：$type';
+  }
+
+  @override
+  String archiveFormatNotSupported(String ext) {
+    return '尚不支持.$ext压缩格式';
+  }
+
+  @override
+  String get archivePasswordPromptTitle => '受密码保护';
+
+  @override
+  String get archivePasswordPromptMessage => '此压缩包受密码保护。请输入密码以查看其内容。';
+
+  @override
+  String get archiveSolidWarning => '这是一个固实压缩包 — 打开文件可能会较慢，尤其是在接近末尾时。';
+
+  @override
+  String get failedToReadFileFromArchive => '从压缩包读取文件失败';
+
+  @override
+  String failedToExtractFile(String type) {
+    return '解压文件失败：$type';
+  }
+
+  @override
+  String get failedToReadSecureItem => '读取安全项目失败';
+
+  @override
+  String get openFileDialogTitle => '打开文件';
+
+  @override
+  String chooseHowToOpen(String name) {
+    return '选择打开“$name”的方式：';
+  }
+
+  @override
+  String get playVideoAudioViewImageInApp => '在应用内播放视频/音频或查看图片';
+
+  @override
+  String get viewEditTextMarkdownCode => '查看/编辑文本、Markdown、代码';
+
+  @override
+  String get sendFileToThirdPartyApp => '将文件发送到第三方应用';
+
+  @override
+  String get openAsEllipsis => '打开方式…';
+
+  @override
+  String get chooseFileTypeToOpenAs => '选择要以哪种文件类型打开';
+
+  @override
+  String alwaysRememberChoiceExt(String ext) {
+    return '始终记住.$ext文件的选择';
+  }
+
+  @override
+  String get alwaysRememberChoiceNoExt => '始终记住无扩展名文件的选择';
+
+  @override
+  String get openAsDialogTitle => '打开方式';
+
+  @override
+  String get mimeTypeText => '文本';
+
+  @override
+  String get mimeTypeImage => '图片';
+
+  @override
+  String get mimeTypeVideo => '视频';
+
+  @override
+  String get mimeTypeAudio => '音频';
+
+  @override
+  String get mimeTypeArchive => '压缩包';
+
+  @override
+  String get mimeTypeOther => '其他';
+
+  @override
+  String get scanningSubfoldersForMedia => '正在扫描子文件夹中的媒体…';
+
+  @override
+  String get noMediaFilesFoundRecursive => '在此文件夹及其子文件夹中未找到媒体文件';
+
+  @override
+  String failedToScanSubfolders(String error) {
+    return '扫描子文件夹失败：$error';
+  }
+
+  @override
+  String scanningSubfoldersForMediaProgress(int count) {
+    return '正在扫描子文件夹中的媒体…已检查 $count 个';
+  }
+
+  @override
+  String get mediaScanCancelled => '媒体扫描已取消';
+
+  @override
+  String get mediaScanLimitReached => '已检查大量文件夹后停止扫描。未找到媒体文件。';
+
+  @override
+  String get noAppFoundForFileType => '未找到可处理此文件类型的应用';
+
+  @override
+  String couldNotOpenFile(String name) {
+    return '无法打开“$name”';
+  }
+
+  @override
+  String get couldNotShareFiles => '无法分享所选文件';
+
+  @override
+  String get readOnlyCantMove => '此容器以只读方式挂载——无法从此处移动项目。';
+
+  @override
+  String get readOnlyCantPaste => '此容器以只读方式挂载——无法在此粘贴项目。';
+
+  @override
+  String get clipboardSourceInvalid => '剪贴板来源无效';
+
+  @override
+  String get crossContainerPasteNotConfigured => '尚未配置跨容器粘贴。';
+
+  @override
+  String get crossContainerPasteRequiresBothMounted => '跨容器粘贴要求两个容器都保持挂载状态。';
+
+  @override
+  String get readOnlyCantDelete => '此容器以只读方式挂载——无法删除项目。';
+
+  @override
+  String deletedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已删除$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deletedWithFailures(int deleted, int failed) {
+    return '已删除$deleted个 · 失败$failed个';
+  }
+
+  @override
+  String exportedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已导出$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportCancelledOrFailed => '导出已取消或失败';
+
+  @override
+  String exportError(String type) {
+    return '导出错误：$type';
+  }
+
+  @override
+  String get deleteOriginalTitle => '删除原始文件？';
+
+  @override
+  String get deleteOriginalFolderMessage => '原始文件夹已导入，是否要从您的设备中删除它？';
+
+  @override
+  String get deleteOriginalFilesMessage => '原始文件已导入，是否要从您的设备中删除它们？';
+
+  @override
+  String get keepOriginal => '保留原始文件';
+
+  @override
+  String get deleteOriginalButton => '删除原始文件';
+
+  @override
+  String deletedOriginalCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已删除$count个原始项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get couldNotDeleteOriginals => '无法删除原始文件';
+
+  @override
+  String get videoCapturedEncrypted => '视频已保存';
+
+  @override
+  String get photoCapturedEncrypted => '照片已保存';
+
+  @override
+  String cameraCaptureFailed(String type) {
+    return '相机拍摄失败：$type';
+  }
+
+  @override
+  String extractAllFilesToFolder(String folder) {
+    return '将所有文件解压到文件夹“$folder”？';
+  }
+
+  @override
+  String get extract => '解压';
+
+  @override
+  String extractedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已解压$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToExtractGeneric(String type) {
+    return '解压失败：$type';
+  }
+
+  @override
+  String get archiveSelectionAction => '压缩';
+
+  @override
+  String get createArchiveTitle => '创建压缩包';
+
+  @override
+  String get archiveNameHint => '压缩包.zip';
+
+  @override
+  String archivedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已压缩$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToArchiveGeneric(String type) {
+    return '压缩失败：$type';
+  }
+
+  @override
+  String get createArchivePasswordHint => '可选密码（AES-256）';
+
+  @override
+  String get createArchivePasswordUnavailableForFormat =>
+      '密码保护仅适用于 ZIP 和 7-Zip 格式';
+
+  @override
+  String get createArchiveEncryptFilenames => '加密文件名';
+
+  @override
+  String get createArchiveEncryptFilenamesHint => '需要设置密码。之后即使只是查看内容也需要输入密码。';
+
+  @override
+  String get closeSearchTooltip => '关闭搜索';
+
+  @override
+  String get searchInThisFolderTooltip => '在此文件夹中搜索';
+
+  @override
+  String get playMediaHereTooltip => '在此播放媒体';
+
+  @override
+  String get rootFolderLabel => '根目录';
+
+  @override
+  String folderPickerFailed(String error) {
+    return '文件夹选择器失败：$error';
+  }
+
+  @override
+  String get addAVaultTitle => '添加保险库';
+
+  @override
+  String get selectEmptyDestinationFolderFirst => '请先选择一个空的目标文件夹';
+
+  @override
+  String get passwordRequired => '需要密码';
+
+  @override
+  String get vaultCreatedSuccessfully => '保险库创建成功。';
+
+  @override
+  String get vaultCreationFailedEmptyFolder => '保险库创建失败——请确保所选文件夹为空。';
+
+  @override
+  String get unknownErrorOccurred => '发生未知错误';
+
+  @override
+  String get containerNameRequired => '需要容器名称';
+
+  @override
+  String get enterValidSizeGreaterThanZero => '请输入大于0的有效大小';
+
+  @override
+  String get passwordOrKeyfileRequired => '需要密码或至少一个密钥文件';
+
+  @override
+  String get standardVolumePasswordsDoNotMatch => '标准卷密码不匹配';
+
+  @override
+  String get hiddenVolumePasswordsDoNotMatch => '隐藏卷密码不匹配';
+
+  @override
+  String get containerFileCreatedSuccessfully => '容器文件创建成功。';
+
+  @override
+  String get containerCreationCancelledOrFailed => '容器创建已取消或失败。';
+
+  @override
+  String insufficientSpaceForContainer(String needed, String available) {
+    return '目标位置可用空间不足。需要 $needed，仅有 $available 可用。';
+  }
+
+  @override
+  String get vaultKindContainerFile => '容器文件';
+
+  @override
+  String get vaultKindFolderVault => '文件夹保险库';
+
+  @override
+  String get formatFileSystemLabel => '格式化文件系统';
+
+  @override
+  String get standardVolumeHeader => '标准卷';
+
+  @override
+  String get containerFormatLabel => '容器格式';
+
+  @override
+  String get fileNameLabel => '文件名';
+
+  @override
+  String get containerSizeLabel => '容器大小';
+
+  @override
+  String get unitLabel => '单位';
+
+  @override
+  String get passwordFieldLabel => '密码';
+
+  @override
+  String get confirmPasswordFieldLabelTitleCase => '确认密码';
+
+  @override
+  String get hiddenVolumeHeader => '隐藏卷';
+
+  @override
+  String get createHiddenVolumeToggleTitle => '创建隐藏卷';
+
+  @override
+  String get createInvisibleSecondaryVolume => '创建一个不可见的次级卷';
+
+  @override
+  String get setOuterPasswordFirstToEnable => '请先设置外部密码或密钥文件以启用';
+
+  @override
+  String get hiddenPasswordLabel => '隐藏密码';
+
+  @override
+  String get confirmHiddenPasswordLabel => '确认隐藏密码';
+
+  @override
+  String get hiddenSizeLabel => '隐藏大小';
+
+  @override
+  String get unitMbMegabytes => 'MB（兆字节）';
+
+  @override
+  String get unitGbGigabytes => 'GB（吉字节）';
+
+  @override
+  String get hiddenFileSystemLabel => '隐藏文件系统';
+
+  @override
+  String get vaultFormatLabel => '保险库格式';
+
+  @override
+  String get gocryptfsCipherLabel => '内容加密算法';
+
+  @override
+  String get cryfsCipherLabel => '内容加密算法';
+
+  @override
+  String get cryfsBlockSizeLabel => '块大小';
+
+  @override
+  String get destinationFolderLabel => '目标文件夹';
+
+  @override
+  String get selectEmptyFolderLabel => '选择一个空文件夹';
+
+  @override
+  String get tapToChooseVaultLocation => '点击选择保险库的创建位置…';
+
+  @override
+  String get folderVaultLimitationsNote =>
+      '文件夹保险库不支持密钥文件、PIM、隐藏卷或VeraCrypt/LUKS加密算法选择。';
+
+  @override
+  String get createVaultButton => '创建保险库';
+
+  @override
+  String get createContainerButton => '创建容器';
+
+  @override
+  String get vaultCreationInProgressWait => '正在创建保险库，请稍候。';
+
+  @override
+  String get containerCreationInProgressWait => '正在创建容器，请稍候。';
+
+  @override
+  String get createEncryptedVaultTitle => '创建加密保险库';
+
+  @override
+  String get createEncryptedContainerTitle => '创建加密容器';
+
+  @override
+  String get unitMbShort => 'MB';
+
+  @override
+  String get unitGbShort => 'GB';
+
+  @override
+  String failedToListUsbDevices(String error) {
+    return '列出USB设备失败：$error';
+  }
+
+  @override
+  String get usbPermissionDenied => 'USB权限被拒绝';
+
+  @override
+  String get couldNotReadDriveCapacity => '无法读取驱动器容量——请手动输入大小。';
+
+  @override
+  String get selectUsbDriveFirst => '请先选择一个USB驱动器';
+
+  @override
+  String eraseDeviceTitle(String name) {
+    return '清除“$name”？';
+  }
+
+  @override
+  String get eraseDeviceMessage => '这将永久清除此USB驱动器上当前的所有内容，并用新的加密容器替换。此操作无法撤销。';
+
+  @override
+  String get eraseAndCreateButton => '清除并创建';
+
+  @override
+  String get usbPermissionRequiredToContinue => '需要USB权限才能继续';
+
+  @override
+  String get usbContainerCreatedSnack => 'USB容器已创建。使用“挂载USB驱动器”将其解锁。';
+
+  @override
+  String get usbContainerCreationFailed => 'USB容器创建失败。';
+
+  @override
+  String get usbStandardVolumeSectionHeader => 'USB驱动器与标准卷';
+
+  @override
+  String get formattingErasesEverythingWarning => '格式化将清除所选驱动器上当前的所有内容。';
+
+  @override
+  String get selectUsbDriveLabel => '选择USB驱动器';
+
+  @override
+  String get noUsbStorageDetected => '未检测到USB存储设备';
+
+  @override
+  String get connectOtgDriveToFormat => '连接OTG驱动器以进行格式化';
+
+  @override
+  String get refreshListButton => '刷新列表';
+
+  @override
+  String get readyToFormat => '已准备好格式化';
+
+  @override
+  String get permissionRequired => '需要权限';
+
+  @override
+  String get readingDriveCapacity => '正在读取驱动器容量…';
+
+  @override
+  String get mustNotExceedDriveCapacity => '不得超过驱动器的实际容量。';
+
+  @override
+  String get quickFormatTitle => '快速格式化';
+
+  @override
+  String get quickFormatDescription => '跳过驱动器的清零填充。速度更快，但不会安全清除旧数据。';
+
+  @override
+  String get eraseAndCreateContainerButton => '清除并创建容器';
+
+  @override
+  String get usbContainerCreationInProgressWait => '正在创建容器，请稍候。';
+
+  @override
+  String get formatUsbDriveScreenTitle => '格式化USB驱动器';
+
+  @override
+  String get playlistTransitionAnimationLabel => '播放列表切换动画';
+
+  @override
+  String get playlistTransitionSlideLabel => '滑动（默认）';
+
+  @override
+  String get playlistTransitionFadeLabel => '淡入淡出';
+
+  @override
+  String get playlistTransitionZoomLabel => '缩放';
+
+  @override
+  String get playlistTransitionDepthLabel => '深度堆叠';
+
+  @override
+  String get playlistTransitionCubeLabel => '3D立方体';
+
+  @override
+  String get playlistTransitionFlipLabel => '3D翻转';
+
+  @override
+  String get unlockVaultTitle => '解锁保险库';
+
+  @override
+  String get openContainerTitle => '打开容器';
+
+  @override
+  String get selectContainerFileOrFolder => '选择文件或文件夹';
+
+  @override
+  String get readOnlyModeLabel => '只读模式';
+
+  @override
+  String get readOnlyModeSubtitle => '阻止对保险库进行任何写入或修改操作';
+
+  @override
+  String get alwaysOpenReadOnlyLabel => '始终只读';
+
+  @override
+  String get alwaysOpenReadOnlySubtitle => '新会话将以只读模式启动。';
+
+  @override
+  String get selectUsbDeviceLabel => '选择USB设备';
+
+  @override
+  String get noUsbDevicesFound => '未找到兼容的USB存储设备';
+
+  @override
+  String get containerConfigTitle => '保险库配置';
+
+  @override
+  String get changePasswordTitle => '更改密码';
+
+  @override
+  String get confirmNewPasswordLabel => '确认新密码';
+
+  @override
+  String get cameraCaptureTitle => '保险库相机';
+
+  @override
+  String get takingPhoto => '正在拍照…';
+
+  @override
+  String get noVaultSelected => '未选择保险库';
+
+  @override
+  String get mediaDiagnosticsTitle => '媒体诊断';
+
+  @override
+  String get advancedViewerSettingsTitle => '查看器设置';
+
+  @override
+  String get textEditorSwitchToReadModeTooltip => '切换至只读模式';
+
+  @override
+  String get textEditorSwitchToEditModeTooltip => '切换至编辑模式';
+
+  @override
+  String get textEditorReadOnlyIndicatorLabel => '只读';
+
+  @override
+  String get textEditorMoveCursorLeftTooltip => '光标向左移动';
+
+  @override
+  String get textEditorMoveCursorRightTooltip => '光标向右移动';
+
+  @override
+  String get textEditorSelectWordTooltip => '选择单词';
+
+  @override
+  String get textEditorSwitchToHorizontalScrollTooltip => '切换到水平滚动';
+
+  @override
+  String get textEditorSwitchToSoftWrapTooltip => '切换到自动换行';
+
+  @override
+  String get textEditorCaretScrubberLabel => '向左或向右拖动以移动光标';
+
+  @override
+  String get textEditorFindTooltip => '在文件中查找';
+
+  @override
+  String get textEditorFindHint => '查找';
+
+  @override
+  String get textEditorReplaceHint => '替换';
+
+  @override
+  String get textEditorToggleReplaceTooltip => '切换替换';
+
+  @override
+  String get textEditorPreviousMatchTooltip => '上一个匹配项';
+
+  @override
+  String get textEditorNextMatchTooltip => '下一个匹配项';
+
+  @override
+  String get textEditorCaseSensitiveTooltip => '区分大小写';
+
+  @override
+  String get textEditorRegexTooltip => '使用正则表达式';
+
+  @override
+  String get textEditorCloseFindTooltip => '关闭查找';
+
+  @override
+  String get textEditorNoMatches => '无结果';
+
+  @override
+  String get textEditorReplaceButton => '替换';
+
+  @override
+  String get textEditorReplaceAllButton => '全部替换';
+
+  @override
+  String get textEditorMoreActionsTooltip => '更多操作';
+
+  @override
+  String get textEditorGoToLineMenuItem => '转到行…';
+
+  @override
+  String get textEditorGoToStartMenuItem => '转到开头';
+
+  @override
+  String get textEditorGoToEndMenuItem => '转到末尾';
+
+  @override
+  String get textEditorFormatDocumentMenuItem => '格式化文档';
+
+  @override
+  String get textEditorMinifyJsonMenuItem => '压缩 JSON';
+
+  @override
+  String get textEditorFormatFailedMessage => '无法格式化此文件，请先检查其是否有效';
+
+  @override
+  String get textEditorGoToLineDialogTitle => '转到行';
+
+  @override
+  String get textEditorGoToLineFieldLabel => '行号';
+
+  @override
+  String textEditorGoToLineHelperText(int maxLine) {
+    return '1–$maxLine';
+  }
+
+  @override
+  String textEditorGoToLineInvalidNumber(int maxLine) {
+    return '请输入介于 1 和 $maxLine 之间的行号';
+  }
+
+  @override
+  String get goToLineButton => '转到';
+
+  @override
+  String get textEditorSaveConfirmTitle => '未保存的更改';
+
+  @override
+  String get textEditorSaveConfirmMessage => '关闭前是否要保存更改？';
+
+  @override
+  String get saveAndClose => '保存并关闭';
+
+  @override
+  String get discardChanges => '放弃更改';
+
+  @override
+  String selectionBarSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已选择$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectAll => '全选';
+
+  @override
+  String get deselectAll => '取消全选';
+
+  @override
+  String get sortOptionsTitle => '文件排序';
+
+  @override
+  String get layoutModeList => '列表视图';
+
+  @override
+  String get layoutModeGrid => '网格视图';
+
+  @override
+  String get layoutModeMasonry => '瀑布流';
+
+  @override
+  String get fileOperationsTitle => '文件操作';
+
+  @override
+  String get conflictResolutionTitle => '文件冲突';
+
+  @override
+  String get replaceExistingFile => '替换现有文件';
+
+  @override
+  String get keepBothFiles => '保留两者（重命名新文件）';
+
+  @override
+  String get skipFile => '跳过此文件';
+
+  @override
+  String get noVaultsFoundTitle => '未找到保险库';
+
+  @override
+  String get noVaultsFoundSubtitle => '创建一个新的加密容器或添加一个现有保险库以开始使用。';
+
+  @override
+  String get addExistingVaultButton => '添加现有保险库';
+
+  @override
+  String get sortContainersModeManual => '手动（拖动以重新排序）';
+
+  @override
+  String get sortContainersModeUnlockStatus => '解锁状态（已解锁优先）';
+
+  @override
+  String get sortContainersModeNameAZ => '名称（A–Z）';
+
+  @override
+  String get sortContainersModeNameZA => '名称（Z–A）';
+
+  @override
+  String get sortContainersModeNewest => '最新优先';
+
+  @override
+  String get sortContainersModeOldest => '最旧优先';
+
+  @override
+  String get thumbnailCacheAppCacheLabel => '应用缓存';
+
+  @override
+  String get thumbnailCacheAppCacheDesc => '以加密方式存储在应用缓存中。速度快；存储空间紧张时会自动清除。';
+
+  @override
+  String get thumbnailCacheInContainerLabel => '容器内部';
+
+  @override
+  String get thumbnailCacheInContainerDesc => '存储在加密容器内部。受容器本身保护，但写入速度较慢。';
+
+  @override
+  String get thumbnailCacheHiddenFolderLabel => '隐藏文件夹';
+
+  @override
+  String get thumbnailCacheHiddenFolderDesc =>
+      '存储在根目录下的隐藏 .thumbcache 文件夹中。与应用缓存不同，它不会自动清除。';
+
+  @override
+  String get thumbnailCacheDisabledLabel => '已禁用';
+
+  @override
+  String get thumbnailCacheDisabledDesc => '无磁盘缓存。每次加载时都会重新生成缩略图。';
+
+  @override
+  String get unlockContainerTitle => '解锁容器';
+
+  @override
+  String get containerFileSegment => '容器文件';
+
+  @override
+  String get folderVaultSegment => '文件夹保险库';
+
+  @override
+  String get enableButtonLabel => '启用';
+
+  @override
+  String get retryButtonLabelShort => '重试';
+
+  @override
+  String get locateFileButton => '定位文件';
+
+  @override
+  String get authenticateButton => '进行身份验证';
+
+  @override
+  String get cancelUnlockButton => '取消解锁';
+
+  @override
+  String tryingKeyslotProgress(int attempted, int total) {
+    return '正在尝试密钥槽 $attempted/$total…';
+  }
+
+  @override
+  String get tryingKeyslotSingle => '正在尝试密钥槽…';
+
+  @override
+  String verifyingCredentialProgress(int attempted, int total) {
+    return '正在验证凭据 $attempted/$total…';
+  }
+
+  @override
+  String get verifyingCredentialSingle => '正在验证凭据…';
+
+  @override
+  String tryingAlgoSlot(String algo, String slotName) {
+    return '正在尝试$algo（$slotName）…';
+  }
+
+  @override
+  String get hiddenVolumeSlotName => '隐藏卷';
+
+  @override
+  String get standardVolumeSlotName => '标准卷';
+
+  @override
+  String get containerMissingSubtitle => '无法解析文件路径';
+
+  @override
+  String get containerMissingBody => '容器文件可能已被移动、删除，或其所在存储设备当前已断开连接。';
+
+  @override
+  String get connectPatternSequence => '连接您的图案序列';
+
+  @override
+  String get passwordLabel => '密码';
+
+  @override
+  String get enterVaultPasswordHint => '输入保险库密码';
+
+  @override
+  String get enterBitlockerPasswordHint => '输入密码或恢复密钥';
+
+  @override
+  String get enterContainerPasswordHint => '输入容器密码';
+
+  @override
+  String get readOnlyModeUsbSubtitleDrive => '挂载时不允许更改此驱动器';
+
+  @override
+  String get rememberDriveLabel => '记住驱动器';
+
+  @override
+  String get rememberDriveSubtitle => '将驱动器固定在仪表盘上以便快速访问';
+
+  @override
+  String get unlockVaultButtonLabel => '解锁保险库';
+
+  @override
+  String get cryfsStorageAccessWarning =>
+      'CryFS保险库使用数千个小型块文件。若没有快速存储访问，性能将明显变慢。';
+
+  @override
+  String get folderVaultStorageAccessWarning =>
+      '快速存储访问已禁用。在文件夹保险库中打开和读取文件的速度可能较慢。';
+
+  @override
+  String get requestingPermission => '正在请求权限…';
+
+  @override
+  String get unlockAndMountButton => '解锁并挂载';
+
+  @override
+  String get unlockDriveButton => '解锁驱动器';
+
+  @override
+  String couldntFindDevice(String deviceName) {
+    return '找不到“$deviceName”';
+  }
+
+  @override
+  String get plugDriveBackInRetry => '请重新插入驱动器并点击重试，或者如果它以不同名称显示，请在下方选择它。';
+
+  @override
+  String get retryConnectionButton => '重试连接';
+
+  @override
+  String get refreshDevicesButton => '刷新设备';
+
+  @override
+  String get connectOtgDriveToMount => '连接OTG闪存驱动器以进行挂载';
+
+  @override
+  String get alreadyActive => '已处于活动状态';
+
+  @override
+  String get active => '活动';
+
+  @override
+  String get readyToUnlock => '已准备好解锁';
+
+  @override
+  String get enterUsbPartitionPassword => '输入USB分区密码';
+
+  @override
+  String get biometricAuthenticationTitle => '生物识别验证';
+
+  @override
+  String get biometricAuthUsbSubtitle => '进行身份验证以解锁并挂载此USB设备';
+
+  @override
+  String get connectPatternSequenceToMount => '连接您的图案序列以进行挂载';
+
+  @override
+  String get selectAllAction => '全选';
+
+  @override
+  String get clearSelectionAction => '清除选择';
+
+  @override
+  String get clearSelectionTooltip => '清除选择';
+
+  @override
+  String get selectionOptionsTooltip => '选择选项';
+
+  @override
+  String get readOnlyContainerTooltip => '只读容器';
+
+  @override
+  String get copyAction => '复制';
+
+  @override
+  String get moveAction => '移动';
+
+  @override
+  String get renameAction => '重命名';
+
+  @override
+  String get exportToDeviceAction => '导出到设备';
+
+  @override
+  String get openWithAppAction => '用应用打开';
+
+  @override
+  String get shareAction => '分享';
+
+  @override
+  String get pinAction => '固定';
+
+  @override
+  String get pinSelectedAction => '固定所选项';
+
+  @override
+  String get unpinAction => '取消固定';
+
+  @override
+  String get unpinSelectedAction => '取消固定所选项';
+
+  @override
+  String get documentProviderSettingsMenu => '文档提供程序设置';
+
+  @override
+  String get exposeAsDocumentProviderMenu => '公开为文档提供程序';
+
+  @override
+  String get moreOptionsTooltipShort => '更多选项';
+
+  @override
+  String get copyTooltip => '复制';
+
+  @override
+  String get searchInThisFolderHint => '在此文件夹中搜索…';
+
+  @override
+  String get clearTooltip => '清除';
+
+  @override
+  String get backToDashboardTooltip => '返回仪表盘';
+
+  @override
+  String get cancelPasteButton => '取消粘贴';
+
+  @override
+  String get cancelImportButton => '取消导入';
+
+  @override
+  String get continueButton => '继续';
+
+  @override
+  String get skipButton => '跳过';
+
+  @override
+  String get keepBothButton => '两者都保留';
+
+  @override
+  String get clearAllButton => '全部清除';
+
+  @override
+  String get autoMountWhenUnlocksTitle => '容器解锁时自动挂载';
+
+  @override
+  String get autoMountWhenUnlocksSubtitle => '下次自动重新公开此文件夹';
+
+  @override
+  String get unmountButton => '卸载';
+
+  @override
+  String get filtersMenuItem => '筛选';
+
+  @override
+  String get settingsMenuItem => '设置';
+
+  @override
+  String get sortOptionsTooltip => '排序选项';
+
+  @override
+  String get layoutOptionsTooltip => '布局选项';
+
+  @override
+  String get lockContainerTooltip => '锁定容器';
+
+  @override
+  String get renameTooltip => '重命名';
+
+  @override
+  String get cancelUpdatingPasswordTooltip => '取消更新密码';
+
+  @override
+  String get unlockSettingsButton => '解锁设置';
+
+  @override
+  String get updateSavedCredentialsButton => '更新已保存的凭据';
+
+  @override
+  String get verifyCredentialsTitle => '验证凭据';
+
+  @override
+  String get verifyButton => '验证';
+
+  @override
+  String get displayNameTitle => '显示名称';
+
+  @override
+  String get containerNameHint => '容器名称';
+
+  @override
+  String get deleteFileDialogTitle => '删除文件？';
+
+  @override
+  String get deleteFilePermanentWarning => '此操作是永久性的，无法撤销。';
+
+  @override
+  String get unsavedChangesTitle => '未保存的更改';
+
+  @override
+  String get unsavedChangesMessage => '您有未保存的更改。是否要在关闭前保存？';
+
+  @override
+  String get discardButton => '放弃';
+
+  @override
+  String get decryptingFileContent => '正在解密文件内容...';
+
+  @override
+  String get cannotOpenFile => '无法打开文件';
+
+  @override
+  String get changesSavedSuccessfully => '更改已成功保存';
+
+  @override
+  String saveFailedWithError(String error) {
+    return '保存失败：$error';
+  }
+
+  @override
+  String linesCount(int count) {
+    return '行数：$count';
+  }
+
+  @override
+  String charsCount(int count) {
+    return '字符数：$count';
+  }
+
+  @override
+  String get unsavedChangesLabel => '未保存的更改';
+
+  @override
+  String get savedToVault => '已保存到保险库';
+
+  @override
+  String get saveChangesTooltip => '保存更改';
+
+  @override
+  String get textEditorDecryptFailedMessage => '从保险库解密文件失败。';
+
+  @override
+  String get textEditorInvalidTextFileMessage => '该文件似乎不是有效的文本文件。';
+
+  @override
+  String get textEditorWriteBackFailedMessage => '将文件写回保险库失败。';
+
+  @override
+  String get markdownViewerEditTooltip => '编辑';
+
+  @override
+  String get markdownViewerPreviewTooltip => '预览';
+
+  @override
+  String get markdownEmptyPreviewMessage => '暂无可预览的内容。';
+
+  @override
+  String get backTooltip => '后退';
+
+  @override
+  String get forwardTooltip => '前进';
+
+  @override
+  String get reloadTooltip => '重新加载';
+
+  @override
+  String get optionsTooltip => '选项';
+
+  @override
+  String get htmlViewerErrorTitle => '无法显示此页面';
+
+  @override
+  String get htmlViewerLoadFailedMessage => '加载文件失败';
+
+  @override
+  String get enableJavaScriptDialogTitle => '启用JavaScript？';
+
+  @override
+  String get enableJavaScriptDialogMessage =>
+      '该页面将被允许运行其自身的本地脚本。它仍然没有网络访问权限——此保险库中的任何内容都无法通过互联网发送或接收。';
+
+  @override
+  String get disableJavaScriptMenu => '禁用JavaScript';
+
+  @override
+  String get enableJavaScriptMenu => '启用JavaScript';
+
+  @override
+  String get enterFullscreenMenu => '进入全屏';
+
+  @override
+  String failedToOpenExternalApp(String error) {
+    return '在外部应用中打开失败：$error';
+  }
+
+  @override
+  String get thisFolderMenu => '此文件夹';
+
+  @override
+  String get allInclSubfoldersMenu => '全部（含子文件夹）';
+
+  @override
+  String get disableShuffleMenu => '关闭随机播放';
+
+  @override
+  String get shufflePlaylistMenu => '随机播放列表';
+
+  @override
+  String get playlistOptionsTooltip => '播放列表选项';
+
+  @override
+  String get enablePlaylistTooltip => '启用播放列表';
+
+  @override
+  String get moreActionsTooltip => '更多操作';
+
+  @override
+  String get forcePortraitMenu => '强制竖屏';
+
+  @override
+  String get forceLandscapeMenu => '强制横屏';
+
+  @override
+  String get autoRotateSensorMenu => '自动旋转（传感器）';
+
+  @override
+  String get screenOrientationMenu => '屏幕方向';
+
+  @override
+  String get playlistTransitionMenu => '播放列表切换效果';
+
+  @override
+  String get renameFileMenu => '重命名文件';
+
+  @override
+  String get deleteFileMenu => '删除文件';
+
+  @override
+  String get thumbnailCarouselTooltip => '缩略图轮播';
+
+  @override
+  String get advancedSettingsTooltip => '高级设置';
+
+  @override
+  String get previousTooltip => '上一个';
+
+  @override
+  String get nextTooltip => '下一个';
+
+  @override
+  String get diagnosticsCopiedToClipboard => '诊断信息已复制到剪贴板';
+
+  @override
+  String get diagnosticsTitle => '诊断信息';
+
+  @override
+  String get copyDiagnosticsTooltip => '复制诊断信息';
+
+  @override
+  String get closeTooltip => '关闭';
+
+  @override
+  String get diagnosticsPlaybackSection => '播放';
+
+  @override
+  String get diagnosticsEngineSection => '引擎';
+
+  @override
+  String get diagnosticsStateLabel => '状态';
+
+  @override
+  String get diagnosticsResolutionLabel => '分辨率';
+
+  @override
+  String get diagnosticsAspectRatioLabel => '宽高比';
+
+  @override
+  String get diagnosticsPositionLabel => '播放位置';
+
+  @override
+  String get diagnosticsDurationLabel => '时长';
+
+  @override
+  String get diagnosticsErrorLabel => '错误';
+
+  @override
+  String get diagnosticsPlayerLabel => '播放器';
+
+  @override
+  String get diagnosticsDecodingLabel => '解码方式';
+
+  @override
+  String get diagnosticsExoPlayerValue => 'ExoPlayer（Android）';
+
+  @override
+  String get diagnosticsHardwareAcceleratedValue => '硬件加速';
+
+  @override
+  String get diagnosticsUnknownValue => '未知';
+
+  @override
+  String get diagnosticsStateBuffering => '正在缓冲';
+
+  @override
+  String get diagnosticsStatePlaying => '正在播放';
+
+  @override
+  String get diagnosticsStatePaused => '已暂停';
+
+  @override
+  String get diagnosticsDurationUnavailable => '--:--';
+
+  @override
+  String get rotate90Label => '旋转90°';
+
+  @override
+  String get imageFitModeLabel => '图片适配模式';
+
+  @override
+  String get slideshowDelayLabel => '幻灯片间隔';
+
+  @override
+  String get playbackSpeedLabel => '播放速度';
+
+  @override
+  String get subtitlesLabel => '字幕';
+
+  @override
+  String get imageSettingsTitle => '图片设置';
+
+  @override
+  String get playbackSettingsTitle => '播放设置';
+
+  @override
+  String get imageFitContain => '完整显示';
+
+  @override
+  String get imageFitWidth => '适应宽度';
+
+  @override
+  String get imageFitHeight => '适应高度';
+
+  @override
+  String nSecondsDelay(int n) {
+    return '$n秒';
+  }
+
+  @override
+  String playbackSpeedNormal(String speed) {
+    return '$speed倍（正常）';
+  }
+
+  @override
+  String playbackSpeedValue(String speed) {
+    return '$speed倍';
+  }
+
+  @override
+  String slideshowDelaySecondsValue(int seconds) {
+    return '$seconds秒';
+  }
+
+  @override
+  String rotationDegreesValue(int degrees) {
+    return '$degrees°';
+  }
+
+  @override
+  String get settingsTooltipShort => '设置';
+
+  @override
+  String get sourceCodeTooltip => '源代码';
+
+  @override
+  String get donateTooltip => '捐赠';
+
+  @override
+  String get shareAppTooltip => '分享应用';
+
+  @override
+  String get resetToDefaultsTooltip => '重置为默认值';
+
+  @override
+  String get usbUnlockContainerTitle => '解锁USB容器';
+
+  @override
+  String get usbMountContainerTitle => '挂载USB驱动器';
+
+  @override
+  String get staticLabel => '静止';
+
+  @override
+  String get unmuteTooltip => '取消静音';
+
+  @override
+  String get muteTooltip => '静音';
+
+  @override
+  String get playOnceDisabledTooltip => '仅播放一次（已禁用自动前进）';
+
+  @override
+  String get playAndAdvanceTooltip => '播放并前进到下一个';
+
+  @override
+  String get loopCurrentVideoTooltip => '循环播放当前视频';
+
+  @override
+  String get clearThumbnailCacheDialogTitle => '清除缩略图缓存？';
+
+  @override
+  String get clearThumbnailCacheDialogMessage =>
+      '这将删除此保险库的缓存缩略图。下次浏览媒体时会重新生成它们。';
+
+  @override
+  String get clearCacheButton => '清除缓存';
+
+  @override
+  String get appCacheClearedUnlockMessage => '应用缓存已清除。解锁容器以清除内部缓存。';
+
+  @override
+  String get allThumbnailCachesClearedMessage => '所有缩略图缓存已成功清除。';
+
+  @override
+  String get appCacheClearedContainerFailedMessage => '应用缓存已清除，但清除容器内部缓存失败。';
+
+  @override
+  String get failedToClearThumbnailCachesMessage => '清除缩略图缓存失败。';
+
+  @override
+  String get authenticateToModifySettingsPrompt => '进行身份验证以修改设置';
+
+  @override
+  String get usbVaultSettingsTitle => 'USB保险库设置';
+
+  @override
+  String get vaultSettingsTitle => '保险库设置';
+
+  @override
+  String get generalSectionHeader => '通用';
+
+  @override
+  String get securityCredentialsSectionHeader => '安全与凭据';
+
+  @override
+  String get securityOptionsLockedTitle => '安全选项已锁定';
+
+  @override
+  String get authenticateOriginalCredentialsMessage =>
+      '使用容器的原始凭据进行身份验证以修改安全设置。';
+
+  @override
+  String get unlockCredentialsLabel => '解锁凭据';
+
+  @override
+  String get unavailableSuffixLabel => '（不可用）';
+
+  @override
+  String get patternSetupRequiredBeforeSaving => '保存前请先设置图案。';
+
+  @override
+  String get passwordKeystoreEncryptedHelperText =>
+      '密码使用Android Keystore加密。如果仅使用密钥文件，请留空。';
+
+  @override
+  String get changePatternButton => '更改图案';
+
+  @override
+  String get setPatternButton => '设置图案';
+
+  @override
+  String get cacheDerivedKeyLabel => '缓存派生密钥';
+
+  @override
+  String get cryfsSkipScryptKdfSubtitle =>
+      '下次跳过CryFS的scrypt KDF（密钥保存在Android Keystore中）';
+
+  @override
+  String get reuseKeyMaterialKeystoreSubtitle => '重用Android Keystore中的密钥材料';
+
+  @override
+  String nDays(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count天',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cacheDerivedKeyLifetimeTitle => '缓存密钥的保留时长';
+
+  @override
+  String get cacheDerivedKeyLifetimeNever => '直到我关闭为止';
+
+  @override
+  String cacheDerivedKeyLifetimeExpiresOn(String date) {
+    return '将于 $date 自动删除';
+  }
+
+  @override
+  String get pinAlgorithmSkipAutoDetectSubtitle => '固定算法以在解锁时跳过自动检测。';
+
+  @override
+  String get changeContainerPasswordTitle => '更改容器密码';
+
+  @override
+  String get bitlockerCredentialsChangeNotSupportedMessage =>
+      '无法在应用内更改BitLocker凭据。请在Windows上使用“管理BitLocker”。';
+
+  @override
+  String get systemIntegrationSectionHeader => '系统与集成';
+
+  @override
+  String get autoLockDurationLabel => '自动锁定时长';
+
+  @override
+  String get neverAutoLockOption => '从不';
+
+  @override
+  String get neverAutoLockOptionSubtitle => '即使应用锁定或屏幕熄灭也保持打开状态';
+
+  @override
+  String get defaultAutoLockOptionSubtitle => '遵循应用的自动锁定和屏幕锁定设置';
+
+  @override
+  String get exposeContentToFilePickerSubtitle => '解锁时向系统文件选择器公开内容';
+
+  @override
+  String get thumbnailStorageSectionHeader => '缩略图存储';
+
+  @override
+  String get cacheModeLabel => '缓存模式';
+
+  @override
+  String get useGlobalDefaultSubtitle => '使用全局默认值';
+
+  @override
+  String get thumbnailQualityLabel => '缩略图质量';
+
+  @override
+  String get clearThumbnailCacheTitle => '清除缩略图缓存';
+
+  @override
+  String get removeCachedThumbnailsSubtitle => '移除已缓存的图片和视频缩略图';
+
+  @override
+  String get vaultInformationSectionHeader => '保险库信息';
+
+  @override
+  String get vaultInformationTileTitle => '查看保险库详情';
+
+  @override
+  String get vaultInformationTileSubtitle => '加密算法、格式及其他技术详情';
+
+  @override
+  String get vaultInfoLocationLabel => '位置';
+
+  @override
+  String get vaultInfoRequiresUnlockTitle => '需要解锁';
+
+  @override
+  String get vaultInfoRequiresUnlockMessage => '解锁此保险库以查看其技术详情。';
+
+  @override
+  String get vaultInfoLoadFailedTitle => '无法加载保险库信息';
+
+  @override
+  String get vaultInfoLoadFailedMessage => '读取此保险库的详情时出了点问题。';
+
+  @override
+  String get vaultInfoVolumeSizeLabel => '卷大小';
+
+  @override
+  String get vaultInfoFileSystemLabel => '文件系统';
+
+  @override
+  String get vaultInfoHiddenVolumeLabel => '隐藏卷';
+
+  @override
+  String get vaultInfoReadOnlyLabel => '只读';
+
+  @override
+  String get vaultInfoLuksVersionLabel => 'LUKS版本';
+
+  @override
+  String get vaultInfoSectorSizeLabel => '扇区大小';
+
+  @override
+  String get vaultInfoVaultFormatLabel => '保险库格式';
+
+  @override
+  String get vaultInfoCipherComboLabel => '加密算法组合';
+
+  @override
+  String get vaultInfoShorteningThresholdLabel => '文件名缩短阈值';
+
+  @override
+  String get vaultInfoFormatVersionLabel => '格式版本';
+
+  @override
+  String get vaultInfoContentCipherLabel => '内容加密算法';
+
+  @override
+  String get vaultInfoFilenameEncryptionLabel => '文件名';
+
+  @override
+  String get vaultInfoPlaintextNamesValue => '明文';
+
+  @override
+  String get vaultInfoEncryptedNamesValue => '已加密';
+
+  @override
+  String get vaultInfoBlockCipherLabel => '分组加密算法';
+
+  @override
+  String get vaultInfoBlockSizeLabel => '块大小';
+
+  @override
+  String get vaultInfoCreatedWithVersionLabel => '创建版本';
+
+  @override
+  String get vaultInfoLastOpenedWithVersionLabel => '最后打开版本';
+
+  @override
+  String get vaultInfoYesValue => '是';
+
+  @override
+  String get vaultInfoNoValue => '否';
+
+  @override
+  String get vaultInfoBitlockerNote =>
+      '此应用不解析BitLocker自身的头部元数据，因此这里无法提供加密算法和版本详情。';
+
+  @override
+  String get patternSetupRequiredAboveBeforeSaving => '保存前请先在上方设置图案。';
+
+  @override
+  String get passwordOrCacheDerivedKeyRequiredMessage =>
+      '此解锁方式需要密码，或带密钥文件的“缓存派生密钥”。';
+
+  @override
+  String get saveConfigurationButton => '保存配置';
+
+  @override
+  String get incorrectPatternError => '图案错误';
+
+  @override
+  String get verifyPatternTitle => '验证图案';
+
+  @override
+  String get incorrectPasswordError => '密码错误';
+
+  @override
+  String get verificationFailedError => '验证失败';
+
+  @override
+  String get incorrectCredentialsError => '凭据不正确';
+
+  @override
+  String get containerPasswordOptionalLabel => '容器密码（仅使用密钥文件时可选）';
+
+  @override
+  String get pimOptionalLabel => 'PIM（可选）';
+
+  @override
+  String get usbDriveLockedLabel => 'USB驱动器・已锁定';
+
+  @override
+  String get lockedContainerLabel => '已锁定的容器';
+
+  @override
+  String get operationInProgressWaitMessage => '操作正在进行中。请在锁定前稍候。';
+
+  @override
+  String get reconnectUsbTooltip => '重新连接USB';
+
+  @override
+  String get unlockContainerTooltip => '解锁容器';
+
+  @override
+  String lockFailedMessage(String errorType) {
+    return '锁定失败：$errorType';
+  }
+
+  @override
+  String get newPasswordOrKeyfilesRequired => '需要新密码或密钥文件。';
+
+  @override
+  String get newPasswordsDoNotMatch => '新密码不匹配。';
+
+  @override
+  String get passwordChangedSuccessfullyMessage => '密码更改成功。';
+
+  @override
+  String get failedToChangePasswordMessage => '更改密码失败。请检查旧凭据。';
+
+  @override
+  String get currentCredentialsSectionHeader => '当前凭据';
+
+  @override
+  String get oldPasswordLabel => '旧密码';
+
+  @override
+  String get oldPimOptionalLabel => '旧PIM（可选）';
+
+  @override
+  String get newCredentialsSectionHeader => '新凭据';
+
+  @override
+  String get newPimOptionalLabel => '新PIM（可选）';
+
+  @override
+  String get noContainersYetTitle => '尚无容器';
+
+  @override
+  String get dashboardEmptyStateMessage =>
+      '挂载一个VeraCrypt容器、连接USB驱动器，或创建一个全新的加密保险库以开始使用。';
+
+  @override
+  String get sortFieldName => '名称';
+
+  @override
+  String get sortFieldSize => '大小';
+
+  @override
+  String get sortFieldType => '类型';
+
+  @override
+  String get sortFieldDate => '日期';
+
+  @override
+  String get layoutModeDetailedList => '详细列表';
+
+  @override
+  String get layoutModeCompactList => '紧凑列表';
+
+  @override
+  String get layoutModeGalleryGrid => '图库网格';
+
+  @override
+  String get readOnlyCantDeleteTooltip => '只读——无法删除';
+
+  @override
+  String get readOnlyCantMoveTooltip => '只读——无法移动';
+
+  @override
+  String get readOnlyCantRenameTooltip => '只读——无法重命名';
+
+  @override
+  String sizeCalculatingWithBytesLabel(String bytes) {
+    return '$bytes（正在计算…）';
+  }
+
+  @override
+  String get sizeCalculatingLabel => '正在计算…';
+
+  @override
+  String get editSecureItemsToRenameMessage => '编辑安全项目以重命名它们';
+
+  @override
+  String get vaultItemsCannotBeOpenedExternallyMessage => '保险库项目无法在外部应用中打开';
+
+  @override
+  String get itemsCannotBeSharedMessage => '这些项目无法与其他应用共享';
+
+  @override
+  String get mountedReadOnlyTooltip => '以只读方式挂载';
+
+  @override
+  String get readOnlyBadgeAbbreviation => '只读';
+
+  @override
+  String freeSpaceLabel(String bytes) {
+    return '剩余$bytes';
+  }
+
+  @override
+  String get filteredLabel => '已筛选';
+
+  @override
+  String get statsStorageSectionHeader => '存储空间';
+
+  @override
+  String statsFolderCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个文件夹',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsFileCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filterAllFilesOption => '所有文件';
+
+  @override
+  String get filterImagesOption => '图片';
+
+  @override
+  String get filterVideosOption => '视频';
+
+  @override
+  String get filterAudioOption => '音频';
+
+  @override
+  String get filterDocumentsOption => '文档';
+
+  @override
+  String get folderExposedAsStorageExplanation =>
+      '此文件夹被公开为一个独立的存储位置，因此其他应用可以直接浏览和打开其中的文件。';
+
+  @override
+  String conflictItemsAlreadyExistTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已存在$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get conflictResolutionSubtitle => '选择如何处理每个项目，或将一个选择应用于全部。';
+
+  @override
+  String get skipAllChipLabel => '全部跳过';
+
+  @override
+  String get overwriteAllChipLabel => '全部覆盖';
+
+  @override
+  String get overwriteItemDropdownLabel => '覆盖';
+
+  @override
+  String get overwriteFolderDropdownLabel => '覆盖文件夹';
+
+  @override
+  String get fileOpsTransfersInProgressTitle => '正在传输';
+
+  @override
+  String get fileOpsRecentTransfersTitle => '最近的传输';
+
+  @override
+  String get fileOpsNoRecentTransfersMessage => '没有最近的传输';
+
+  @override
+  String get fileOpsNoRecentTransfersSubtitle => '复制、移动和删除操作运行时将显示在此处。';
+
+  @override
+  String fileOpsShowDetailsLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fileOpsCancelTooltip => '取消';
+
+  @override
+  String get fileOpsDismissTooltip => '关闭';
+
+  @override
+  String get fileOpsRootDestinationLabel => '根目录';
+
+  @override
+  String get fileOpsCancelledStatusLabel => '已取消';
+
+  @override
+  String fileOpsItemsFailedLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个项目失败：',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpsMoreItemsLabel(num count) {
+    return '+还有$count个';
+  }
+
+  @override
+  String get transferActivityTooltip => '传输';
+
+  @override
+  String fileOpsSpeedLabel(String speed) {
+    return '$speed/秒';
+  }
+
+  @override
+  String fileOpsEtaLabel(String time) {
+    return '剩余约$time';
+  }
+
+  @override
+  String archiveErrorReadingFile(String error) {
+    return '读取文件出错：$error';
+  }
+
+  @override
+  String get archivePreviewNotAvailableMessage => '此文件类型不支持预览。';
+
+  @override
+  String get avifFailedToRenderMessage => '渲染AVIF失败';
+
+  @override
+  String get encryptedImageLoadFailedMessage => '加载加密图片失败';
+
+  @override
+  String encryptedImageLoadFailedWithReasonMessage(String error) {
+    return '加载加密图片失败：$error';
+  }
+
+  @override
+  String get imagePreviewTooLargeMessage => '此图片过大，无法预览';
+
+  @override
+  String get imagePreviewOutOfMemoryMessage => '可用内存不足，无法预览此图片。请关闭其他应用后重试。';
+
+  @override
+  String get invalidOrCorruptedImageMessage => '图片格式无效或已损坏。';
+
+  @override
+  String mediaViewerPlaylistPositionLabel(num current, num total) {
+    return '第$current项，共$total项';
+  }
+
+  @override
+  String mediaViewerPlaylistPositionScanningLabel(num current, num total) {
+    return '第$current项，共$total项  ·  正在扫描…';
+  }
+
+  @override
+  String get mediaViewerScanningLabel => '正在扫描…';
+
+  @override
+  String get mediaFileDeletedMessage => '文件删除成功';
+
+  @override
+  String get mediaFileDeleteFailedMessage => '删除文件失败';
+
+  @override
+  String get mediaFileRenamedMessage => '文件重命名成功';
+
+  @override
+  String get aboutScreenTitle => '关于';
+
+  @override
+  String get couldNotOpenLinkMessage => '无法打开链接';
+
+  @override
+  String get fileManagerSettingsTitle => '文件管理器设置';
+
+  @override
+  String get showMediaThumbnailsLabel => '显示媒体缩略图';
+
+  @override
+  String get showMediaThumbnailsDesc => '在列表视图中显示图片和视频的缩略图预览';
+
+  @override
+  String get showFileNamesLabel => '显示文件名';
+
+  @override
+  String get showFileNamesDesc => '在网格布局中于项目下方显示文本标签';
+
+  @override
+  String get showBreadcrumbBarLabel => '显示面包屑导航栏';
+
+  @override
+  String get showBreadcrumbBarDesc => '浏览器顶部的路径导航栏';
+
+  @override
+  String get showStatsBarLabel => '显示统计栏';
+
+  @override
+  String get showStatsBarDesc => '显示文件数量和可用空间信息的横幅';
+
+  @override
+  String get autoStartPlaylistModeLabel => '自动启动播放列表模式';
+
+  @override
+  String get autoStartPlaylistModeDesc => '打开媒体项目时自动以播放列表模式启动';
+
+  @override
+  String get showPlaylistCarouselLabel => '显示播放列表轮播';
+
+  @override
+  String get showPlaylistCarouselDesc => '查看媒体播放列表时显示缩略图轮播按钮';
+
+  @override
+  String get videoPlaybackSliderLabel => '视频播放位置滑块';
+
+  @override
+  String get longPressPlaybackDiagnosticsHint => '长按查看播放诊断信息';
+
+  @override
+  String get staticImageModeLabel => '静态图片模式';
+
+  @override
+  String slideshowModeActiveLabel(int seconds) {
+    return '幻灯片模式已启用，间隔$seconds秒';
+  }
+
+  @override
+  String videoPlaybackModeLabel(String mode) {
+    return '视频播放模式：$mode';
+  }
+
+  @override
+  String get pauseLabel => '暂停';
+
+  @override
+  String get playLabel => '播放';
+
+  @override
+  String get emptyFolderTitle => '空文件夹';
+
+  @override
+  String get emptyFolderMessage => '使用“添加”操作创建文件，或从设备导入。';
+
+  @override
+  String get noResultsTitle => '没有结果';
+
+  @override
+  String noResultsForQueryMessage(String query) {
+    return '此文件夹中没有与“$query”匹配的内容。';
+  }
+
+  @override
+  String get closeCarouselTooltip => '关闭轮播';
+
+  @override
+  String get playlistScrollModeMenu => '播放列表滚动模式';
+
+  @override
+  String get playlistScrollHorizontalLabel => '水平';
+
+  @override
+  String get playlistScrollVerticalPageLabel => '垂直分页';
+
+  @override
+  String get playlistScrollVerticalContinuousLabel => '垂直连续';
+
+  @override
+  String get undoTooltip => '撤销';
+
+  @override
+  String get redoTooltip => '重做';
+
+  @override
+  String get autosavingLabel => '正在自动保存…';
+
+  @override
+  String get savingLabel => '正在保存…';
+
+  @override
+  String autosavedAtLabel(String time) {
+    return '已于$time自动保存';
+  }
+
+  @override
+  String cameraDisconnectedError(String message) {
+    return '相机已断开连接：$message';
+  }
+
+  @override
+  String get unknownErrorFallback => '未知错误';
+
+  @override
+  String get cameraPermissionsRequiredMessage => '使用相机需要相机和麦克风权限。';
+
+  @override
+  String cameraErrorMessage(String error) {
+    return '相机错误：$error';
+  }
+
+  @override
+  String get cameraPhotoCaptureFailedMessage => '拍照失败';
+
+  @override
+  String get cameraRecordingFailedMessage => '录制失败';
+
+  @override
+  String cameraRecordingFailedWithReasonMessage(String error) {
+    return '录制失败：$error';
+  }
+
+  @override
+  String get cameraRecordingTooShortMessage => '录制时间过短，无法保存';
+
+  @override
+  String get cameraCouldNotSaveRecordingMessage => '无法保存录制内容';
+
+  @override
+  String get cameraCouldNotSaveCaptureMessage => '无法保存拍摄内容。内容仍然保留，可以重试。';
+
+  @override
+  String get cameraNotEnoughVaultSpaceMessage => '保险库可用空间不足。请释放空间后重试。';
+
+  @override
+  String cameraCouldNotSaveRecordingWithReasonMessage(String error) {
+    return '无法保存录制内容：$error';
+  }
+
+  @override
+  String get cameraCouldNotSwitchLensMessage => '无法切换镜头';
+
+  @override
+  String get cameraEncryptingPhotoLabel => '正在加密照片…';
+
+  @override
+  String get cameraEncryptingVideoLabel => '正在加密视频…';
+
+  @override
+  String get aboutApplicationSectionHeader => '应用程序';
+
+  @override
+  String get aboutTagline => '免费・开源・离线加密保险库';
+
+  @override
+  String get aboutVersionTitle => '版本';
+
+  @override
+  String aboutVersionSubtitle(String version) {
+    return 'v$version';
+  }
+
+  @override
+  String get aboutWhatsNewTitle => '新功能';
+
+  @override
+  String get aboutWhatsNewSubtitle => '查看最近的更改和版本说明';
+
+  @override
+  String get aboutPrivacySecurityTitle => '隐私与安全';
+
+  @override
+  String get aboutPrivacySecuritySubtitle => '无网络访问，解密在内存中进行';
+
+  @override
+  String get aboutSupportedFormatsSectionHeader => '支持的格式';
+
+  @override
+  String get aboutVeraCryptLuksTitle => 'VeraCrypt 与 LUKS1/2';
+
+  @override
+  String get aboutVeraCryptLuksSubtitle =>
+      '标准卷与隐藏卷、自定义PIM、密钥文件、xts-plain64、Argon2id/i';
+
+  @override
+  String get aboutBitLockerTitle => 'BitLocker 与 BitLocker To Go';
+
+  @override
+  String get aboutBitLockerSubtitle => '支持用户密码及48位数字恢复密钥';
+
+  @override
+  String get aboutDirectoryVaultsTitle => '文件夹保险库';
+
+  @override
+  String get aboutDirectoryVaultsSubtitle =>
+      'Cryptomator（v7/v8 SIV_GCM 与 SIV_CTRMAC）、gocryptfs（v2 AES-GCM 与 XChaCha20）、CryFS（v0.10+ XChaCha20 与 AES）';
+
+  @override
+  String get aboutVhdTitle => '虚拟硬盘（VHD / VHDX）';
+
+  @override
+  String get aboutVhdSubtitle => '适用于固定及动态可扩展磁盘映像的BAT转换';
+
+  @override
+  String get aboutNativeCoreEngineSectionHeader => '原生核心引擎';
+
+  @override
+  String get aboutCompiledLibrariesTitle => '已编译的C++库';
+
+  @override
+  String get aboutCompiledLibrariesBody =>
+      '• mbedTLS v3.6.7（ARMv8硬件加密与SHA-2）\n• libavif 与 libgav1（原生AVIF图像解码器）\n• libarchive v3.8.9（ZIP、7-Zip、RAR 与 TAR 归档引擎）\n• ChaN FatFs v4.0.4（FAT12/16/32 与 exFAT）\n• Tuxera NTFS-3G 与内置mkntfs\n• e2fsprogs v1.47.4 libext2fs（ext2/ext3/ext4）\n• Dislocker Virtual I/O（BitLocker FVE / To Go）\n• VeraCrypt 1.26.29（Twofish、Serpent、Camellia、Kuznyechik、Whirlpool、Streebog、BLAKE2s、Argon2id/i）\n• cJSON v1.7.18（LUKS2 与 Cryptomator 元数据）';
+
+  @override
+  String get aboutCommunitySectionHeader => '社区与开源';
+
+  @override
+  String get aboutReportIssueTitle => '报告问题';
+
+  @override
+  String get aboutReportIssueSubtitle => '发现了错误？在GitHub上提交issue';
+
+  @override
+  String get reportIssueSheetTitle => '报告问题';
+
+  @override
+  String get reportIssueSheetSubtitle => '选择最符合你问题的选项——将打开一个预填写的 GitHub 表单';
+
+  @override
+  String get reportIssueBugTitle => '错误报告';
+
+  @override
+  String get reportIssueBugSubtitle => '发生崩溃或某些功能无法正常运行';
+
+  @override
+  String get reportIssueContainerTitle => '容器／保险库问题';
+
+  @override
+  String get reportIssueContainerSubtitle => '解锁、挂载或特定格式相关问题';
+
+  @override
+  String get reportIssueFeatureTitle => '功能请求';
+
+  @override
+  String get reportIssueFeatureSubtitle => '提出想法或改进建议';
+
+  @override
+  String get reportIssueOtherTitle => '其他问题';
+
+  @override
+  String get reportIssueOtherSubtitle => '浏览 GitHub 上的所有模板';
+
+  @override
+  String get aboutContributorsTitle => '贡献者';
+
+  @override
+  String get aboutContributorsSubtitle => '帮助构建VaultExplorer的人们';
+
+  @override
+  String get aboutLicensesTitle => '开源许可证';
+
+  @override
+  String get aboutLicensesSubtitle => '本应用使用的第三方库';
+
+  @override
+  String get aboutFooterMadeWithLove => '为隐私而用❤打造。';
+
+  @override
+  String get aboutVersionCopiedMessage => '版本信息已复制——便于错误报告';
+
+  @override
+  String aboutVersionClipboardText(String version) {
+    return 'VaultExplorer v$version (Android)';
+  }
+
+  @override
+  String aboutShareText(String url) {
+    return 'VaultExplorer——一款适用于Android的免费开源离线保险库应用。\n\n将密码、笔记和文件存储在加密容器（VeraCrypt、LUKS、BitLocker、Cryptomator、Gocryptfs、CryFS）中。\n\n$url';
+  }
+
+  @override
+  String get aboutShareLinkCopiedMessage => '可分享的链接已复制到剪贴板';
+
+  @override
+  String get aboutPrivacySheetTitle => '隐私与数据安全';
+
+  @override
+  String get aboutPrivacySheetSubtitle => '100%离线，基于本地内存的安全设计';
+
+  @override
+  String get privacyPointNoNetworkTitle => '无需网络访问';
+
+  @override
+  String get privacyPointNoNetworkBody =>
+      'VaultExplorer在Android上不请求android.permission.INTERNET权限。它无法通过任何网络进行通信。';
+
+  @override
+  String get privacyPointNoDiskLeaksTitle => '在内存中解密';
+
+  @override
+  String get privacyPointNoDiskLeaksBody =>
+      '解密和重新加密在系统内存中进行。少数需要临时文件的操作（例如录制视频或导出）会将其保存在应用的私有存储中，并在完成后用零覆盖。';
+
+  @override
+  String get privacyPointNoAnalyticsTitle => '无分析或遥测';
+
+  @override
+  String get privacyPointNoAnalyticsBody =>
+      '完全没有崩溃报告、使用情况跟踪，或收集您或您设备数据的第三方SDK。';
+
+  @override
+  String get privacyPointKeystoreTitle => '密钥保留在Android Keystore中';
+
+  @override
+  String get privacyPointKeystoreBody =>
+      '记住的密码、图案以及缓存的派生密钥使用AES-GCM加密，密钥保存在Android Keystore中（设备支持时由硬件提供保护）。';
+
+  @override
+  String get privacyPointPosixTitle => 'POSIX加速与存储访问';
+
+  @override
+  String get privacyPointPosixBody =>
+      '文件夹保险库内的文件在可能的情况下会被直接读写，绕过Android较慢的SAF层以处理大型文件夹。';
+
+  @override
+  String get privacyPointScreenClipboardTitle => '屏幕与剪贴板保护';
+
+  @override
+  String get privacyPointScreenClipboardBody =>
+      '阻止任务切换器预览，可选阻止截屏（FLAG_SECURE），并在窗口获得焦点时自动清理损坏的剪贴板内容。从项目保险库复制的密码在Android 13及以上版本中会被标记为敏感信息，若30秒内未使用则会自动清除。';
+
+  @override
+  String get privacyPointMaskModeTitle => '伪装模式';
+
+  @override
+  String get privacyPointMaskModeBody =>
+      '可选择将应用伪装成一个可正常使用的本地文件管理器，使用不同的图标和名称。长按标题2秒即可进入您的真实保险库。';
+
+  @override
+  String get privacyPointExternalLinksTitle => '外部链接在浏览器中打开';
+
+  @override
+  String get privacyPointExternalLinksBody => '点击链接会将请求交给您的默认浏览器应用处理。';
+
+  @override
+  String get truncatedListingWarning => '正在显示前50,000个项目——此文件夹中还有更多文件。';
+
+  @override
+  String get gridCornerStyleLabel => '缩略图边角';
+
+  @override
+  String get gridCornerRoundedLabel => '圆角';
+
+  @override
+  String get gridCornerSquareLabel => '直角';
+
+  @override
+  String get gridSpacingLabel => '缩略图间距';
+
+  @override
+  String get gridSpacingNone => '无';
+
+  @override
+  String gridSpacingValue(int value) {
+    return '$value dp';
+  }
+
+  @override
+  String get thumbnailAutoSizeLabel => '匹配网格单元格大小';
+
+  @override
+  String get thumbnailAutoSizeDescription =>
+      '网格和瀑布流缩略图会按照各单元格的屏幕实际大小生成，因此列数越少，缩略图越清晰。下方设置的尺寸将用于其他所有位置。';
+
+  @override
+  String thumbnailQualityAutoSummary(int quality) {
+    return '自动尺寸 · $quality% 质量';
+  }
+
+  @override
+  String thumbnailQualitySummary(int size, int quality) {
+    return '$size像素 · $quality%质量';
+  }
+
+  @override
+  String holdToSpeedIndicatorLabel(String speed) {
+    return '$speed倍速';
+  }
+
+  @override
+  String get toolbarLayoutSectionHeader => '工具栏布局';
+
+  @override
+  String get listViewOptionsSectionHeader => '列表视图选项';
+
+  @override
+  String get detailedListViewColumnsSectionHeader => '详细列表视图列';
+
+  @override
+  String get galleryGridViewSectionHeader => '图库网格视图';
+
+  @override
+  String get browserLayoutSectionHeader => '浏览器布局';
+
+  @override
+  String get mediaViewerSectionHeader => '媒体查看器';
+
+  @override
+  String get viewModeAction => '查看模式';
+
+  @override
+  String get sortAction => '排序';
+
+  @override
+  String get playMediaAction => '播放媒体';
+
+  @override
+  String containerSpaceSummary(String free, String total) {
+    return '$free 可用 / $total';
+  }
+
+  @override
+  String volMountedSummary(int volId) {
+    return '卷$volId · 已挂载';
+  }
+
+  @override
+  String vaultOccupiedSpaceSummary(String used) {
+    return '已用$used';
+  }
+
+  @override
+  String get incorrectPasswordOrKeyfilesDriveError => '密码/密钥文件不正确，或驱动器不受支持';
+
+  @override
+  String driveUsableCapacity(int mb) {
+    return '驱动器可用容量：$mb MB。不得超过此容量。';
+  }
+
+  @override
+  String get unlockMethodManualPassword => '手动密码';
+
+  @override
+  String get unlockMethodRememberPassword => '记住密码';
+
+  @override
+  String get unlockMethodBiometrics => '生物识别解锁';
+
+  @override
+  String get unlockMethodPattern => '图案解锁';
+
+  @override
+  String get unlockMethodPin => 'PIN解锁';
+
+  @override
+  String get unlockMethodSubtitlePassword => '每次都输入密码';
+
+  @override
+  String get unlockMethodSubtitleRememberPassword => '安全存储在Android Keystore中';
+
+  @override
+  String get unlockMethodSubtitleBiometrics => '使用指纹或面容解锁';
+
+  @override
+  String get unlockMethodSubtitlePattern => '绘制图案以解锁';
+
+  @override
+  String get unlockMethodSubtitlePin => '输入PIN以解锁';
+
+  @override
+  String selectionSummaryCombined(String filePart, String folderPart) {
+    return '$filePart + $folderPart';
+  }
+
+  @override
+  String get videoDecoderUnavailableError => '视频解码器不可用——硬件编解码器争用';
+
+  @override
+  String get mediaStreamInitFailedError => '媒体流初始化失败';
+
+  @override
+  String get invalidAvifImage => '无效的AVIF图像';
+
+  @override
+  String get verbImport => '导入';
+
+  @override
+  String get verbExport => '导出';
+
+  @override
+  String get verbMove => '移动';
+
+  @override
+  String get verbCopy => '复制';
+
+  @override
+  String get verbDelete => '删除';
+
+  @override
+  String get verbImported => '已导入';
+
+  @override
+  String get verbExported => '已导出';
+
+  @override
+  String get verbMoved => '已移动';
+
+  @override
+  String get verbCopied => '已复制';
+
+  @override
+  String get verbDeleted => '已删除';
+
+  @override
+  String get verbImporting => '正在导入';
+
+  @override
+  String get verbExporting => '正在导出';
+
+  @override
+  String get verbMoving => '正在移动';
+
+  @override
+  String get verbCopying => '正在复制';
+
+  @override
+  String get verbDeleting => '正在删除';
+
+  @override
+  String fileOpItemsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpSummaryCount(num count, String verb) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个项目已$verb',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpSummarySkipped(num count) {
+    return '已跳过$count个';
+  }
+
+  @override
+  String fileOpSummaryFailed(num count) {
+    return '$count个失败';
+  }
+
+  @override
+  String get statusCancelled => '已取消';
+
+  @override
+  String get statusFailed => '失败';
+
+  @override
+  String get statusCompleted => '已完成';
+
+  @override
+  String get fileOpCheckingSpace => '正在检查可用空间…';
+
+  @override
+  String get fileOpResolvingConflicts => '正在解决冲突…';
+
+  @override
+  String fileOpNotEnoughSpace(String required, String free) {
+    return '空间不足——需要$required，仅剩$free可用';
+  }
+
+  @override
+  String get fileOpDiskFullPartialRemoved => '磁盘已满——已移除部分文件';
+
+  @override
+  String get fileOpMoveFailed => '移动失败';
+
+  @override
+  String get fileOpCopyFailed => '复制失败';
+
+  @override
+  String get fileOpDeleteFailed => '删除失败';
+
+  @override
+  String get fileOpDiskFull => '磁盘已满';
+
+  @override
+  String get fileOpImporting => '正在导入…';
+
+  @override
+  String get fileOpExporting => '正在导出…';
+
+  @override
+  String fileOpImportingName(String name) {
+    return '正在导入$name…';
+  }
+
+  @override
+  String fileOpExportingName(String name) {
+    return '正在导出 $name…';
+  }
+
+  @override
+  String fileOpMovingName(String name) {
+    return '正在移动$name…';
+  }
+
+  @override
+  String fileOpCopyingName(String name) {
+    return '正在复制$name…';
+  }
+
+  @override
+  String get fileOpDeleting => '正在删除…';
+
+  @override
+  String fileOpDeletingName(String name) {
+    return '正在删除$name…';
+  }
+
+  @override
+  String fileOpDeletedSoFar(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已移除$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchInSubfoldersHint => '搜索所有子文件夹…';
+
+  @override
+  String get deepSearchEnabledTooltip => '正在搜索子文件夹——点击以仅搜索当前文件夹';
+
+  @override
+  String get deepSearchDisabledTooltip => '正在搜索当前文件夹——点击以搜索子文件夹';
+
+  @override
+  String get filterAction => '筛选';
+
+  @override
+  String get bookmarkAction => '收藏';
+
+  @override
+  String get unbookmarkAction => '取消收藏';
+
+  @override
+  String get bookmarkSelectedAction => '收藏所选项';
+
+  @override
+  String get unbookmarkSelectedAction => '取消收藏所选项';
+
+  @override
+  String bookmarkedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已收藏$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unbookmarkedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已取消收藏$count个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get showBookmarkBarLabel => '显示收藏栏';
+
+  @override
+  String get showBookmarkBarDesc => '在收藏栏或侧边栏中显示已收藏的项目';
+
+  @override
+  String get bookmarkBarSectionHeader => '收藏栏';
+
+  @override
+  String get noBookmarksYet => '尚未收藏任何项目';
+
+  @override
+  String get reorderBookmarksTitle => '重新排列收藏项';
+
+  @override
+  String get reorderBookmarksDesc => '拖动项目以在收藏栏中重新排序';
+
+  @override
+  String get drawerBookmarksSectionTitle => '收藏';
+
+  @override
+  String get openAction => '打开';
+
+  @override
+  String get bookmarkTargetMissing => '收藏的项目已不存在';
+
+  @override
+  String get navBarVaultsLabel => '保险库';
+
+  @override
+  String get navBarToolsLabel => '工具';
+
+  @override
+  String get toolsScreenTitle => '工具';
+
+  @override
+  String get toolsSectionContainerUtilities => '容器实用工具';
+
+  @override
+  String get toolsSectionFileCryptography => '文件加密';
+
+  @override
+  String get toolsSectionStorageDiagnostics => '存储与诊断';
+
+  @override
+  String get toolContainerSplitterTitle => '拆分与合并';
+
+  @override
+  String get toolContainerSplitterSubtitle => '将容器拆分为多个块，或重新合并它们';
+
+  @override
+  String get toolContainerRepairTitle => '检查与修复';
+
+  @override
+  String get toolContainerRepairSubtitle => '诊断头部或文件系统问题';
+
+  @override
+  String get toolSingleFileCryptoTitle => '加密/解密文件';
+
+  @override
+  String get toolSingleFileCryptoSubtitle => '无需完整容器即可保护一个或多个文件';
+
+  @override
+  String get toolStorageAnalyzerTitle => '存储分析器';
+
+  @override
+  String get toolStorageAnalyzerSubtitle => '查看已挂载保险库中哪些内容占用了空间';
+
+  @override
+  String get toolDuplicateFinderTitle => '重复文件查找器';
+
+  @override
+  String get toolDuplicateFinderSubtitle => '查找并删除字节完全相同的重复文件以回收空间';
+
+  @override
+  String get toolHashVerifierTitle => '文件校验和与哈希验证器';
+
+  @override
+  String get toolHashVerifierSubtitle => '使用MD5/SHA校验和验证大文件未损坏';
+
+  @override
+  String get hashVerifierModeCompute => '计算';
+
+  @override
+  String get hashVerifierModeVerify => '验证';
+
+  @override
+  String get hashVerifierSelectSourceTitle => '选择文件来源';
+
+  @override
+  String get hashVerifierAlgorithmsLabel => '算法';
+
+  @override
+  String get hashVerifierNoAlgorithmSelected => '请至少选择一种算法';
+
+  @override
+  String get hashVerifierFilesLabel => '待哈希的文件';
+
+  @override
+  String hashVerifierFilesQueuedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已选择$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierComputeButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '计算$count个哈希值',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierCancelButton => '取消';
+
+  @override
+  String hashVerifierBatchProgressLabel(Object current, Object total) {
+    return '文件 $current/$total';
+  }
+
+  @override
+  String get hashVerifierCancelledMessage => '已取消。';
+
+  @override
+  String hashVerifierComputeErrorsMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个文件哈希计算失败',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierCopiedMessage => '已复制到剪贴板';
+
+  @override
+  String get hashVerifierExportManifestButton => '导出为清单文件';
+
+  @override
+  String get hashVerifierExportAlgorithmLabel => '清单算法';
+
+  @override
+  String hashVerifierExportSuccessMessage(Object path) {
+    return '已保存到$path';
+  }
+
+  @override
+  String hashVerifierExportFailedMessage(Object error) {
+    return '导出失败：$error';
+  }
+
+  @override
+  String get hashVerifierLoadManifestButton => '加载清单文件';
+
+  @override
+  String get hashVerifierChangeManifestButton => '更改';
+
+  @override
+  String get hashVerifierManifestLabel => '清单文件';
+
+  @override
+  String hashVerifierManifestEntryCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个条目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierAutoAddFolderButton => '添加此文件夹中的所有文件';
+
+  @override
+  String get hashVerifierAddFilesToVerifyButton => '添加待验证文件';
+
+  @override
+  String get hashVerifierVerifyAllButton => '全部验证';
+
+  @override
+  String hashVerifierVerifyProgressLabel(Object current, Object total) {
+    return '正在验证文件 $current/$total';
+  }
+
+  @override
+  String hashVerifierSummaryMessage(
+    Object ok,
+    Object mismatch,
+    Object missing,
+  ) {
+    return '匹配$ok个，不匹配$mismatch个，缺失$missing个';
+  }
+
+  @override
+  String get hashVerifierStatusMatch => '匹配';
+
+  @override
+  String get hashVerifierStatusMismatch => '不匹配';
+
+  @override
+  String get hashVerifierStatusMissing => '文件未添加';
+
+  @override
+  String get hashVerifierStatusPending => '尚未验证';
+
+  @override
+  String get hashVerifierExpectedLabel => '预期值';
+
+  @override
+  String get hashVerifierActualLabel => '实际值';
+
+  @override
+  String hashVerifierExtraFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有$count个未列入清单的额外文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierNoManifestLoadedMessage => '加载清单文件以开始';
+
+  @override
+  String get hashVerifierManifestParseEmptyMessage => '此文件中未找到任何校验和条目';
+
+  @override
+  String hashVerifierLoadManifestFailedMessage(Object error) {
+    return '无法读取清单文件：$error';
+  }
+
+  @override
+  String hashVerifierAutoAddedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已从保险库文件夹添加$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierModeVault => '保险库';
+
+  @override
+  String get hashVerifierVaultPickerLabel => '保险库';
+
+  @override
+  String get hashVerifierVaultNoVaultsMessage => '当前没有已挂载的保险库';
+
+  @override
+  String get hashVerifierCheckEntireVaultButton => '检查整个保险库';
+
+  @override
+  String get hashVerifierVaultScanningLabel => '正在扫描保险库…';
+
+  @override
+  String hashVerifierVaultFilesDiscoveredLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已发现$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierVaultConfirmTitle => '检查整个保险库？';
+
+  @override
+  String hashVerifierVaultConfirmFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierVaultConfirmWarning => '此保险库中的每个文件都将被读取。';
+
+  @override
+  String get hashVerifierVaultEmptyMessage => '此保险库没有可检查的文件';
+
+  @override
+  String get hashVerifierVaultStartButton => '开始检查';
+
+  @override
+  String hashVerifierVaultHashingProgressLabel(Object current, Object total) {
+    return '正在检查 $current / $total';
+  }
+
+  @override
+  String get hashVerifierVaultCompleteTitle => '保险库检查完成';
+
+  @override
+  String hashVerifierVaultCompleteFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已检查$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultCompleteBytesLabel(Object size) {
+    return '已处理$size';
+  }
+
+  @override
+  String hashVerifierVaultCompleteSucceededLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个成功',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultCompleteFailedLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count个失败',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultElapsedLabel(Object time) {
+    return '已用时间：$time';
+  }
+
+  @override
+  String get hashVerifierVaultCancelledMessage => '保险库检查已取消。';
+
+  @override
+  String hashVerifierVaultFailedMessage(Object error) {
+    return '保险库检查失败：$error';
+  }
+
+  @override
+  String get hashVerifierVaultNewCheckButton => '新检查';
+
+  @override
+  String get hashVerifierVaultActionComputeTitle => '计算整个保险库';
+
+  @override
+  String get hashVerifierVaultActionComputeSubtitle => '对保险库中的每个文件计算哈希值';
+
+  @override
+  String get hashVerifierVaultActionVerifyTitle => '验证整个保险库';
+
+  @override
+  String get hashVerifierVaultActionVerifySubtitle => '将保险库中的每个文件与已加载的清单进行核对';
+
+  @override
+  String get hashVerifierVaultChangeActionButton => '更改';
+
+  @override
+  String get hashVerifierVaultVerifyButton => '验证整个保险库';
+
+  @override
+  String get hashVerifierVaultVerifyRequiresVaultManifestMessage =>
+      '验证整个保险库需要从保险库内部加载的清单文件。';
+
+  @override
+  String get duplicateFinderTargetLabel => '目标保险库';
+
+  @override
+  String get duplicateFinderTargetAllVaults => '所有已打开的保险库';
+
+  @override
+  String get duplicateFinderStartScan => '开始扫描';
+
+  @override
+  String get duplicateFinderCancelScan => '取消扫描';
+
+  @override
+  String get duplicateFinderRescan => '重新扫描';
+
+  @override
+  String get duplicateFinderScanningStage1 => '第1阶段：正在索引并按大小分组...';
+
+  @override
+  String get duplicateFinderScanningStage2 => '第2阶段：正在检查部分文件头...';
+
+  @override
+  String get duplicateFinderScanningStage3 => '第3阶段：正在验证完整字节哈希...';
+
+  @override
+  String get duplicateFinderScanComplete => '扫描完成';
+
+  @override
+  String get duplicateFinderNoDuplicatesTitle => '未找到重复文件';
+
+  @override
+  String get duplicateFinderNoDuplicatesMessage => '已扫描保险库中的所有文件均包含唯一的字节内容。';
+
+  @override
+  String get duplicateFinderSelectRedundant => '选择冗余项';
+
+  @override
+  String get duplicateFinderSelectAll => '全选';
+
+  @override
+  String get duplicateFinderDeselectAll => '取消全选';
+
+  @override
+  String get duplicateFinderOriginalLabel => '原始文件';
+
+  @override
+  String get duplicateFinderDuplicateLabel => '重复项';
+
+  @override
+  String get duplicateFinderConfirmDeleteTitle => '删除重复文件？';
+
+  @override
+  String get duplicateFinderSearchHint => '按文件名或路径搜索重复项...';
+
+  @override
+  String get toolNotImplementedYetMessage => '此工具尚未连接到原生引擎——请在未来的更新中查看。';
+
+  @override
+  String get splitJoinModeSplit => '拆分';
+
+  @override
+  String get splitJoinModeJoin => '合并';
+
+  @override
+  String get splitSourceFileLabel => '源文件';
+
+  @override
+  String get splitDestinationFolderLabel => '目标文件夹';
+
+  @override
+  String get splitChunkSizeLabel => '分块大小';
+
+  @override
+  String get splitChunkSizeCustomLabel => '自定义大小（MB）';
+
+  @override
+  String get splitChunkSizeFourMb => '4 MB';
+
+  @override
+  String get splitChunkSizeCloud8mb => '8 MB';
+
+  @override
+  String get splitChunkSizeCloud32mb => '32 MB';
+
+  @override
+  String get splitChunkSizeCloud => '100 MB';
+
+  @override
+  String get splitChunkSizeFat32 => '2 GB';
+
+  @override
+  String get splitChunkSizeFourGb => '4 GB';
+
+  @override
+  String get splitChunkSizeCustom => '自定义';
+
+  @override
+  String get splitContainerButton => '拆分容器';
+
+  @override
+  String get joinFirstPartLabel => '第一部分';
+
+  @override
+  String get joinOutputFileNameLabel => '输出文件名';
+
+  @override
+  String get joinContainerButton => '合并文件';
+
+  @override
+  String get chooseFileButton => '选择文件';
+
+  @override
+  String get chooseFolderButton => '选择文件夹';
+
+  @override
+  String get noFileSelectedLabel => '未选择文件';
+
+  @override
+  String get noFolderSelectedLabel => '未选择文件夹';
+
+  @override
+  String splitJoinOperationProgress(String done, String total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get splitContainerSuccessMessage => '容器拆分成功';
+
+  @override
+  String get joinContainerSuccessMessage => '文件合并成功';
+
+  @override
+  String get cryptoDirectionEncrypt => '加密';
+
+  @override
+  String get cryptoDirectionDecrypt => '解密';
+
+  @override
+  String get singleFileCryptoInputFileLabel => '输入文件';
+
+  @override
+  String get singleFileCryptoCipherLabel => '加密算法';
+
+  @override
+  String get singleFileCryptoDeleteOriginalLabel => '加密后删除原始文件';
+
+  @override
+  String singleFileCryptoEncryptButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '加密$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoDecryptButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '解密$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoSuccessMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '完成——已处理$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoPartialFailureMessage(
+    Object succeeded,
+    Object total,
+    Object failed,
+  ) {
+    return '$total个文件中已处理$succeeded个——$failed个失败';
+  }
+
+  @override
+  String get singleFileCryptoAddFilesButton => '添加文件';
+
+  @override
+  String get singleFileCryptoClearFilesButton => '清除';
+
+  @override
+  String singleFileCryptoFilesQueuedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已选择$count个文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoBatchProgressLabel(Object current, Object total) {
+    return '文件 $current/$total';
+  }
+
+  @override
+  String get repairTargetStepTitle => '选择目标';
+
+  @override
+  String get repairTargetUnmountedFileOption => '未挂载的文件';
+
+  @override
+  String get repairTargetUnmountedFileSubtitle => '在您尚未打开的容器上恢复备份头';
+
+  @override
+  String get repairTargetMountedVolumeSubtitle => '对已打开的保险库运行文件系统检查';
+
+  @override
+  String get repairNoMountedVolumes => '当前没有已挂载的保险库';
+
+  @override
+  String get repairScanButton => '运行诊断扫描';
+
+  @override
+  String get repairChangeTargetButton => '更改目标';
+
+  @override
+  String get repairDiagnosisHealthy => '未发现问题';
+
+  @override
+  String get repairDiagnosisHeaderCorrupted => '头部已损坏';
+
+  @override
+  String get repairDiagnosisFilesystemDirty => '文件系统不干净／未正常卸载';
+
+  @override
+  String get repairRestoreBackupHeaderButton => '恢复备份头';
+
+  @override
+  String get repairRunFilesystemCheckButton => '运行文件系统检查与修复';
+
+  @override
+  String get repairActionSucceededMessage => '修复已成功完成';
+
+  @override
+  String get repairActionFailedMessage => '修复操作未成功';
+
+  @override
+  String get storageAnalyzerTargetLabel => '卷';
+
+  @override
+  String get storageAnalyzerNoTargetsTitle => '没有可分析的内容';
+
+  @override
+  String get storageAnalyzerNoTargetsMessage => '请先挂载一个保险库，然后返回此处查看其存储明细。';
+
+  @override
+  String storageAnalyzerUsedOfTotal(String used, String total) {
+    return '已用$used，共$total';
+  }
+
+  @override
+  String get storageAnalyzerHeaviestFilesHeader => '最大文件';
+
+  @override
+  String get storageAnalyzerBreakdownHeader => '按文件类型';
+
+  @override
+  String get storageAnalyzerScanningMessage => '正在扫描卷…';
+
+  @override
+  String storageAnalyzerScanTruncatedNotice(String count) {
+    return '扫描在$count个文件后提前停止——结果可能不完整。';
+  }
+
+  @override
+  String get storageAnalyzerNoFilesFound => '未找到文件';
+
+  @override
+  String get storageCategoryImages => '图片';
+
+  @override
+  String get storageCategoryVideos => '视频';
+
+  @override
+  String get storageCategoryAudio => '音频';
+
+  @override
+  String get storageCategoryDocuments => '文档';
+
+  @override
+  String get storageCategoryArchives => '压缩包';
+
+  @override
+  String get storageCategoryOther => '其他';
+
+  @override
+  String get keyfilePassphraseGeneratorTitle => '密钥文件与密码短语生成器';
+
+  @override
+  String get keyfilePassphraseGeneratorSubtitle =>
+      '生成Diceware密码短语、自定义密码和高熵密钥文件';
+
+  @override
+  String get tabPassphrase => '密码短语';
+
+  @override
+  String get tabKeyfile => '密钥文件';
+
+  @override
+  String get modeDiceware => 'Diceware密码短语';
+
+  @override
+  String get modeCustomPassword => '自定义密码';
+
+  @override
+  String get keyfileTypeBinary => '二进制密钥文件（.key）';
+
+  @override
+  String get keyfileTypeImage => '噪点图像密钥文件（.png）';
+
+  @override
+  String get copyPassphraseSuccess => '密码短语已复制到安全剪贴板';
+
+  @override
+  String get copyFingerprintSuccess => 'SHA-256指纹已复制到剪贴板';
+
+  @override
+  String get saveKeyfileToVault => '保存到已挂载的保险库';
+
+  @override
+  String get exportKeyfileToStorage => '导出到设备存储';
+
+  @override
+  String get keyfileNoOpenVaultsMessage => '没有可用的已打开保险库。请先挂载一个保险库。';
+
+  @override
+  String get keyfileSelectDestinationVaultTitle => '选择目标保险库';
+
+  @override
+  String keyfileVolumeIdLabel(Object volId) {
+    return '卷ID：$volId';
+  }
+
+  @override
+  String keyfileExportSuccessMessage(Object path) {
+    return '密钥文件已导出到$path';
+  }
+
+  @override
+  String keyfileExportFailedMessage(Object error) {
+    return '导出失败：$error';
+  }
+
+  @override
+  String keyfileSavedToVaultMessage(Object vaultName, Object path) {
+    return '密钥文件已保存到$vaultName：$path';
+  }
+
+  @override
+  String get keyfileWriteFailedMessage => '无法将密钥文件写入保险库';
+
+  @override
+  String keyfileSaveErrorMessage(Object error) {
+    return '保存到保险库时出错：$error';
+  }
+
+  @override
+  String get passphraseGeneratedSecretLabel => '生成的密钥';
+
+  @override
+  String get copyToClipboardTooltip => '复制到剪贴板';
+
+  @override
+  String get generateNewTooltip => '重新生成';
+
+  @override
+  String get passphraseStrengthWeak => '弱';
+
+  @override
+  String get passphraseStrengthGood => '良好';
+
+  @override
+  String get passphraseStrengthStrong => '强';
+
+  @override
+  String get passphraseStrengthUnbreakable => '无法破解';
+
+  @override
+  String get passphraseCrackTimeInstant => '小于1秒';
+
+  @override
+  String get passphraseCrackTimeShort => '几天/几个月';
+
+  @override
+  String get passphraseCrackTimeCenturies => '数个世纪';
+
+  @override
+  String get passphraseCrackTimeMillionsOfYears => '数百万年';
+
+  @override
+  String passphraseStrengthLabel(Object label) {
+    return '强度：$label';
+  }
+
+  @override
+  String passphraseEntropyBitsLabel(Object bits) {
+    return '熵值$bits位';
+  }
+
+  @override
+  String passphraseCrackTimeLabel(Object crackTime) {
+    return '预计破解时间：$crackTime';
+  }
+
+  @override
+  String get dicewareOptionsTitle => 'EFF Diceware选项';
+
+  @override
+  String dicewareWordCountLabel(Object count) {
+    return '单词数：$count个';
+  }
+
+  @override
+  String dicewareWordCountBitsLabel(Object bits) {
+    return '$bits位';
+  }
+
+  @override
+  String dicewareWordCountSliderLabel(Object count) {
+    return '$count个单词';
+  }
+
+  @override
+  String get dicewareWordSeparatorLabel => '单词分隔符';
+
+  @override
+  String get dicewareSeparatorHyphen => '连字符（-）';
+
+  @override
+  String get dicewareSeparatorSpace => '空格（ ）';
+
+  @override
+  String get dicewareSeparatorUnderscore => '下划线（_）';
+
+  @override
+  String get dicewareSeparatorDot => '点（.）';
+
+  @override
+  String get dicewareSeparatorSlash => '斜杠（/）';
+
+  @override
+  String get dicewareWordCasingLabel => '单词大小写';
+
+  @override
+  String get dicewareCasingLowercase => '小写';
+
+  @override
+  String get dicewareCasingTitleCase => '首字母大写';
+
+  @override
+  String get dicewareCasingUppercase => '大写';
+
+  @override
+  String get dicewareAppendDigitLabel => '附加随机数字（0-9）';
+
+  @override
+  String get dicewareAppendSymbolLabel => '附加随机符号（!@#\$%）';
+
+  @override
+  String get customPasswordOptionsTitle => '自定义密码选项';
+
+  @override
+  String customPasswordLengthLabel(Object length) {
+    return '长度：$length个字符';
+  }
+
+  @override
+  String customPasswordLengthSliderLabel(Object length) {
+    return '$length个字符';
+  }
+
+  @override
+  String get customPasswordUppercaseLabel => '大写字母（A-Z）';
+
+  @override
+  String get customPasswordLowercaseLabel => '小写字母（a-z）';
+
+  @override
+  String get customPasswordNumbersLabel => '数字（0-9）';
+
+  @override
+  String get customPasswordSymbolsLabel => '符号（!@#\$%^&*）';
+
+  @override
+  String get customPasswordExcludeAmbiguousLabel => '排除易混淆字符（1、l、I、0、O）';
+
+  @override
+  String get keyfileBinarySizeTitle => '二进制密钥文件大小';
+
+  @override
+  String get keyfileImageResolutionTitle => '噪点图像分辨率';
+
+  @override
+  String get keyfilePresetBytes64 => '64字节（VeraCrypt标准）';
+
+  @override
+  String get keyfilePresetBytes256 => '256字节';
+
+  @override
+  String get keyfilePresetBytes2048 => '2 KB';
+
+  @override
+  String get keyfilePresetBytes64kb => '64 KB';
+
+  @override
+  String get keyfilePresetBytes1mb => '1 MB（最大限制）';
+
+  @override
+  String get keyfilePresetRes64 => '64×64像素（约16 KB）';
+
+  @override
+  String get keyfilePresetRes256 => '256×256像素（约256 KB）';
+
+  @override
+  String get keyfilePresetRes512 => '512×512像素（约1 MB）';
+
+  @override
+  String get keyfileGenerateNewTooltip => '生成新密钥文件';
+
+  @override
+  String keyfileSizeLabel(Object size) {
+    return '大小：$size';
+  }
+
+  @override
+  String get keyfileFingerprintLabel => 'SHA-256指纹';
+
+  @override
+  String get keyfileCopyFingerprintTooltip => '复制指纹';
+
+  @override
+  String get duplicateFinderNoVaultsTitle => '没有已挂载的保险库';
+
+  @override
+  String get duplicateFinderNoVaultsMessage => '请先解锁并挂载至少一个保险库容器，以扫描重复文件。';
+
+  @override
+  String duplicateFinderConfirmDeleteMessage(Object count, Object size) {
+    return '确定要从您的保险库中永久删除$count个重复文件（$size）吗？此操作无法撤销。';
+  }
+
+  @override
+  String get duplicateFinderDeletePermanentlyButton => '永久删除';
+
+  @override
+  String duplicateFinderDeleteSuccessMessage(Object count) {
+    return '已成功删除$count个重复文件。';
+  }
+
+  @override
+  String get duplicateFinderIntroTitle => '三阶段字节级完全匹配查找';
+
+  @override
+  String get duplicateFinderIntroSubtitle => '无论文件名如何，都能检测出内容完全相同的文件。';
+
+  @override
+  String get duplicateFinderStagesDescription =>
+      '• 第1阶段：按大小分组（即时元数据扫描）\n• 第2阶段：部分文件头检查（16 KB SHA-256文件头）\n• 第3阶段：完整哈希验证（精确的SHA-256字节匹配）';
+
+  @override
+  String get duplicateFinderScanningVaultFallback => '正在扫描保险库...';
+
+  @override
+  String duplicateFinderProcessingFileLabel(Object fileName) {
+    return '正在处理：$fileName';
+  }
+
+  @override
+  String duplicateFinderScanStatsLabel(
+    Object scanned,
+    Object groups,
+    Object saved,
+  ) {
+    return '已扫描文件：$scanned | 发现重复：$groups组（$saved）';
+  }
+
+  @override
+  String duplicateFinderGroupsFoundLabel(Object count) {
+    return '发现$count个重复组';
+  }
+
+  @override
+  String duplicateFinderGroupsSummaryLabel(Object copies, Object saved) {
+    return '发现$copies份副本 • 可节省$saved存储空间';
+  }
+
+  @override
+  String duplicateFinderVaultsSelectedLabel(Object count) {
+    return '已选择$count个保险库';
+  }
+
+  @override
+  String duplicateFinderGroupTitleLabel(
+    Object groupIndex,
+    Object size,
+    Object count,
+  ) {
+    return '第$groupIndex组：$size（发现$count份副本）';
+  }
+
+  @override
+  String duplicateFinderRecoverableSpaceLabel(Object size) {
+    return '可恢复空间：$size';
+  }
+
+  @override
+  String get duplicateFinderPreviewFileTooltip => '预览文件';
+
+  @override
+  String duplicateFinderPreviewFailedMessage(Object fileName) {
+    return '无法打开$fileName的文件预览';
+  }
+
+  @override
+  String duplicateFinderPreviewErrorMessage(Object error) {
+    return '预览文件时出错：$error';
+  }
+
+  @override
+  String duplicateFinderFilesSelectedLabel(Object count) {
+    return '已选择$count个文件';
+  }
+
+  @override
+  String duplicateFinderBytesToBeFreedLabel(Object size) {
+    return '将释放$size';
+  }
+
+  @override
+  String duplicateFinderDeleteSelectedButton(Object count) {
+    return '删除所选（$count）';
+  }
+
+  @override
+  String get vaultBrowserSwitchVaultTooltip => '切换保险库';
+
+  @override
+  String get vaultBrowserRootFolderLabel => '根文件夹';
+
+  @override
+  String vaultFilePickerTitle(Object vaultName) {
+    return '选择文件（$vaultName）';
+  }
+
+  @override
+  String get vaultFilePickerEmptyMessage => '文件夹为空';
+
+  @override
+  String vaultFilePickerConfirmButton(Object count) {
+    return '选择$count个文件';
+  }
+
+  @override
+  String vaultFolderPickerTitle(Object vaultName) {
+    return '选择文件夹（$vaultName）';
+  }
+
+  @override
+  String get vaultFolderPickerEmptyMessage => '此处没有子文件夹';
+
+  @override
+  String get vaultFolderPickerRootLabel => '根目录';
+
+  @override
+  String get vaultFolderPickerConfirmRootButton => '选择根文件夹';
+
+  @override
+  String vaultFolderPickerConfirmNamedButton(Object folderName) {
+    return '选择“$folderName”';
+  }
+
+  @override
+  String get singleFileCryptoSelectInputTitle => '选择输入文件';
+
+  @override
+  String get singleFileCryptoFromDeviceTitle => '从设备存储';
+
+  @override
+  String get singleFileCryptoFromDeviceSubtitle => '使用系统文件选择器从设备中选取文件';
+
+  @override
+  String get singleFileCryptoFromVaultTitle => '从已挂载的保险库';
+
+  @override
+  String get singleFileCryptoFromVaultSubtitle => '从已打开的加密容器中选取文件';
+
+  @override
+  String get singleFileCryptoSelectDestinationTitle => '选择目标文件夹';
+
+  @override
+  String get singleFileCryptoDeviceFolderTitle => '设备存储文件夹';
+
+  @override
+  String get singleFileCryptoDeviceFolderSubtitle => '将输出保存到设备存储中的文件夹';
+
+  @override
+  String get singleFileCryptoVaultFolderTitle => '已挂载的保险库文件夹';
+
+  @override
+  String get singleFileCryptoVaultFolderSubtitle => '将输出保存在已打开的加密容器内';
+
+  @override
+  String get toolsSectionBackupSync => '备份与同步';
+
+  @override
+  String get toolVaultSyncTitle => '保险库同步';
+
+  @override
+  String get toolVaultSyncSubtitle => '比较两个保险库并复制缺失或更新的内容';
+
+  @override
+  String get vaultSyncNoVaultsTitle => '没有已挂载的保险库';
+
+  @override
+  String get vaultSyncNoVaultsMessage => '请至少挂载一个保险库以比较和同步其文件。';
+
+  @override
+  String get vaultSyncLeftLabel => '左侧';
+
+  @override
+  String get vaultSyncRightLabel => '右侧';
+
+  @override
+  String get vaultSyncTapToSelect => '点击选择保险库和文件夹';
+
+  @override
+  String get vaultSyncSwapTooltip => '交换左右两侧';
+
+  @override
+  String get vaultSyncSameLocationWarning => '左侧和右侧必须是不同的文件夹。';
+
+  @override
+  String get vaultSyncIntroTitle => '比较两个保险库';
+
+  @override
+  String get vaultSyncIntroSubtitle =>
+      '选择左侧和右侧的保险库（或同一保险库中的两个文件夹），以查看每一侧缺失、已修改或较新的内容。';
+
+  @override
+  String get vaultSyncCompareButton => '比较';
+
+  @override
+  String get vaultSyncComparingLabel => '正在比较保险库…';
+
+  @override
+  String vaultSyncCompareStatsLabel(Object dirs, Object entries) {
+    return '已扫描文件夹：$dirs | 发现差异：$entries';
+  }
+
+  @override
+  String get vaultSyncCancelCompareButton => '取消';
+
+  @override
+  String get vaultSyncInSyncTitle => '已同步';
+
+  @override
+  String vaultSyncInSyncMessage(Object count) {
+    return '所有$count个匹配文件在两侧完全相同。';
+  }
+
+  @override
+  String get vaultSyncRecompareButton => '重新比较';
+
+  @override
+  String vaultSyncDifferencesFoundLabel(Object count) {
+    return '发现$count处差异';
+  }
+
+  @override
+  String vaultSyncInSyncCountLabel(Object count) {
+    return '$count个文件在两侧已经匹配';
+  }
+
+  @override
+  String vaultSyncBadgeOnlyLeft(Object count) {
+    return '仅左侧有$count个';
+  }
+
+  @override
+  String vaultSyncBadgeOnlyRight(Object count) {
+    return '仅右侧有$count个';
+  }
+
+  @override
+  String vaultSyncBadgeLeftNewer(Object count) {
+    return '左侧较新$count个';
+  }
+
+  @override
+  String vaultSyncBadgeRightNewer(Object count) {
+    return '右侧较新$count个';
+  }
+
+  @override
+  String vaultSyncBadgeConflicts(Object count) {
+    return '需审核$count个';
+  }
+
+  @override
+  String get vaultSyncDirectionLabel => '同步方向';
+
+  @override
+  String get vaultSyncDirectionTwoWay => '双向（推荐）';
+
+  @override
+  String get vaultSyncDirectionTwoWaySubtitle => '将每个文件复制到缺失该文件或副本较旧的一侧';
+
+  @override
+  String get vaultSyncDirectionLeftToRight => '左侧 → 右侧（单向）';
+
+  @override
+  String get vaultSyncDirectionLeftToRightSubtitle =>
+      '将新增和更新的文件从左侧推送到右侧；绝不更改左侧';
+
+  @override
+  String get vaultSyncDirectionRightToLeft => '右侧 → 左侧（单向）';
+
+  @override
+  String get vaultSyncDirectionRightToLeftSubtitle =>
+      '将新增和更新的文件从右侧推送到左侧；绝不更改右侧';
+
+  @override
+  String get vaultSyncSearchHint => '搜索差异';
+
+  @override
+  String get vaultSyncStatusOnlyLeft => '仅左侧';
+
+  @override
+  String get vaultSyncStatusOnlyRight => '仅右侧';
+
+  @override
+  String get vaultSyncStatusLeftNewer => '左侧较新';
+
+  @override
+  String get vaultSyncStatusRightNewer => '右侧较新';
+
+  @override
+  String get vaultSyncStatusConflict => '需审核';
+
+  @override
+  String get vaultSyncStatusTypeMismatch => '类型不匹配';
+
+  @override
+  String get vaultSyncFolderOnlyLeftDetail => '文件夹——仅左侧';
+
+  @override
+  String get vaultSyncFolderOnlyRightDetail => '文件夹——仅右侧';
+
+  @override
+  String vaultSyncBothSidesDetail(
+    Object leftSize,
+    Object leftDate,
+    Object rightSize,
+    Object rightDate,
+  ) {
+    return '左：$leftSize · $leftDate  →  右：$rightSize · $rightDate';
+  }
+
+  @override
+  String get vaultSyncTypeMismatchTooltip => '一侧是文件，另一侧是文件夹——请在文件浏览器中手动处理';
+
+  @override
+  String get vaultSyncChangeActionTooltip => '更改同步操作';
+
+  @override
+  String get vaultSyncActionCopyToRight => '复制 → 右侧';
+
+  @override
+  String get vaultSyncActionCopyToLeft => '复制 → 左侧';
+
+  @override
+  String get vaultSyncActionSkip => '跳过';
+
+  @override
+  String vaultSyncChangesQueuedLabel(Object count) {
+    return '已排队$count项更改';
+  }
+
+  @override
+  String get vaultSyncSyncNowButton => '立即同步';
+
+  @override
+  String get vaultSyncConfirmTitle => '开始同步？';
+
+  @override
+  String vaultSyncConfirmMessage(Object count, Object bytes) {
+    return '这将在两侧之间复制$count个项目（共$bytes）。同名的现有文件将被覆盖。';
+  }
+
+  @override
+  String vaultSyncStartedMessage(Object count) {
+    return '同步已开始——已排队$count个项目';
+  }
+
+  @override
+  String vaultSyncPickLocationTitle(Object side) {
+    return '选择$side保险库和文件夹';
+  }
+
+  @override
+  String get vaultSyncOverlapWarning =>
+      'Left and Right must not be the same folder or nested inside each other.';
+
+  @override
+  String vaultSyncPlaintextWarning(Object targets) {
+    return 'Files copied out of a vault to $targets will be stored unencrypted.';
+  }
+
+  @override
+  String get vaultSyncStorageSelectorLabel => 'Storage';
+
+  @override
+  String get vaultSyncTargetKindVault => 'Encrypted vault';
+
+  @override
+  String get vaultSyncTargetKindDevice => 'Device storage · not encrypted';
+
+  @override
+  String get vaultSyncTargetKindProvider => 'Document provider · not encrypted';
+
+  @override
+  String get vaultSyncAddStorageTooltip => 'Add storage location';
+
+  @override
+  String get vaultSyncEnableLocalStorageTooltip =>
+      'Enable Local Storage access';
+
+  @override
+  String get vaultSyncNoStoragesTitle => 'No storage to sync yet';
+
+  @override
+  String get vaultSyncNoStoragesMessage =>
+      'Add a folder or document provider with the + button, or mount a vault.';
+
+  @override
+  String get vaultSyncReadOnlyBadge => '只读';
+
+  @override
+  String get vaultSyncReadOnlyTooltip => '此保险库以只读方式挂载——无法向其中复制文件';
+
+  @override
+  String get vaultSyncSyncingButton => '正在同步…';
+
+  @override
+  String get vaultSyncNotEnoughSpaceTitle => '空间不足';
+
+  @override
+  String vaultSyncNotEnoughSpaceMessage(
+    Object side,
+    Object required,
+    Object free,
+  ) {
+    return '$side空间不足——需要$required，仅剩$free可用。';
+  }
+
+  @override
+  String get removeMasterPasswordTitle => '移除主密码';
+
+  @override
+  String get confirmRemoveMasterPasswordMessage => '请输入您当前的主密码以确认移除：';
+
+  @override
+  String get authenticateToRemoveMasterPassword => '进行身份验证以移除主密码';
+
+  @override
+  String get incorrectPassword => '密码错误';
+
+  @override
+  String get rememberPerFolderLayoutLabel => '记住各文件夹的布局与排序';
+
+  @override
+  String get rememberPerFolderLayoutDesc => '单独保存每个文件夹的视图布局（列表、网格、瀑布流）和排序方式';
+
+  @override
+  String get defaultFolderLayoutLabel => '默认文件夹布局';
+
+  @override
+  String get fileInfoAction => '信息';
+
+  @override
+  String get goToLocationAction => '转到所在位置';
+
+  @override
+  String get copyPathAction => '复制路径';
+
+  @override
+  String get automationSectionHeader => '自动化';
+
+  @override
+  String get automationTileTitle => '自动化';
+
+  @override
+  String get automationTileSubtitle => '允许自动化解锁、锁定、导入或导出此保险库的文件';
+
+  @override
+  String get automationScreenTitle => '自动化（Tasker / MacroDroid）';
+
+  @override
+  String get automationUsbUnsupportedMessage => 'USB连接的保险库尚不支持自动化。';
+
+  @override
+  String get automationThisVaultSectionHeader => '此保险库';
+
+  @override
+  String get automationAccessLabel => '自动化访问权限';
+
+  @override
+  String get automationPasswordSectionHeader => '自动化密码';
+
+  @override
+  String get automationPasswordStoredHint =>
+      '已为无人值守的UNLOCK_VAULT调用存储了密码。保存新密码即可替换，或保存空字段以清除它——自动化也可以直接在广播中提供密码，而不依赖此设置。';
+
+  @override
+  String get automationPasswordNotStoredHint =>
+      '可选。若未存储密码，自动化必须在每次UNLOCK_VAULT广播中提供一个。';
+
+  @override
+  String get automationNewPasswordFieldLabel => '新密码';
+
+  @override
+  String get automationPasswordFieldLabel => '密码';
+
+  @override
+  String get automationClearPasswordButton => '清除已存储的密码';
+
+  @override
+  String get automationSavePasswordButton => '保存密码';
+
+  @override
+  String get automationTokenSectionHeader => 'API令牌';
+
+  @override
+  String get automationTokenDescription =>
+      '由所有已启用自动化访问权限的保险库共享。自动化会在每次广播时将其发回；令牌错误或缺失会被静默忽略，不会报错。';
+
+  @override
+  String get automationRegenerateTokenButton => '重新生成令牌';
+
+  @override
+  String get automationRegenerateTokenDialogTitle => '重新生成令牌？';
+
+  @override
+  String get automationRegenerateTokenDialogMessage =>
+      '在您用新令牌更新之前，任何使用当前令牌的Tasker配置文件或MacroDroid宏都将静默失效。';
+
+  @override
+  String get automationRegenerateConfirmLabel => '重新生成';
+
+  @override
+  String get automationTokenRegeneratedMessage => '令牌已重新生成。';
+
+  @override
+  String get automationRegenerateTokenFailedMessage => '无法重新生成令牌。';
+
+  @override
+  String get automationUpdateSettingsFailedMessage => '无法更新自动化设置。';
+
+  @override
+  String get automationSavePasswordFailedMessage => '无法保存自动化密码。';
+
+  @override
+  String get automationPasswordClearedMessage => '自动化密码已清除。';
+
+  @override
+  String get automationPasswordSavedMessage => '自动化密码已保存。';
+
+  @override
+  String get automationConfigSectionHeader => '配置字符串';
+
+  @override
+  String get automationConfigIntro =>
+      '点击下方任意值即可复制。在Tasker中，使用“Send Intent”操作；在MacroDroid中，使用Intent Type设置为Broadcast的“Intent”操作——而非Activity或Service，后者会因“unable to find explicit activity class”而失败。';
+
+  @override
+  String get automationConfigPackageLabel => '包名';
+
+  @override
+  String get automationConfigClassLabel => '接收器类';
+
+  @override
+  String get automationConfigVaultUriLabel => '此保险库的URI';
+
+  @override
+  String get automationConfigActionsSectionHeader => '广播操作';
+
+  @override
+  String get automationActionUnlockLabel => '解锁保险库';
+
+  @override
+  String get automationActionLockLabel => '锁定保险库';
+
+  @override
+  String get automationActionImportLabel => '导入文件';
+
+  @override
+  String get automationActionExportLabel => '导出文件';
+
+  @override
+  String get automationActionWipeLabel => '清除文件';
+
+  @override
+  String get automationActionEmergencyLockLabel => '紧急锁定 (级别 1)';
+
+  @override
+  String get automationActionEmergencyPurgeLabel => '紧急清除';
+
+  @override
+  String get automationDocCommentFootnote =>
+      '完整的附加参数和结果广播约定记录在VaultAutomationReceiver.kt中。';
+
+  @override
+  String get automationTierOffLabel => '关闭';
+
+  @override
+  String get automationTierOffSubtitle => '自动化无法访问此保险库';
+
+  @override
+  String get automationTierLifecycleLabel => '仅解锁／锁定';
+
+  @override
+  String get automationTierLifecycleSubtitle => '自动化只能解锁和锁定此保险库，不能执行其他操作';
+
+  @override
+  String get automationTierFullLabel => '解锁／锁定 + 文件导入导出 + 同步';
+
+  @override
+  String get automationTierFullSubtitle => '此保险库解锁期间，自动化还可以同步已配置的文件夹并导入或导出文件';
+
+  @override
+  String get automationTutorialLinkLabel => '阅读完整的分步教程';
+
+  @override
+  String get showHiddenFilesLabel => '显示隐藏文件';
+
+  @override
+  String get showHiddenFilesDesc => '显示点文件和系统文件夹';
+
+  @override
+  String get dontAskAgain => '不再询问';
+
+  @override
+  String get deleteAfterImportLabel => '导入后删除文件';
+
+  @override
+  String get deleteAfterImportModeAsk => '每次询问';
+
+  @override
+  String get deleteAfterImportModeAskSubtitle => '导入后询问是否删除原始文件';
+
+  @override
+  String get deleteAfterImportModeKeep => '保留原始文件（不删除）';
+
+  @override
+  String get deleteAfterImportModeKeepSubtitle => '永不删除原始文件，且不再询问';
+
+  @override
+  String get deleteAfterImportModeDelete => '自动删除原始文件';
+
+  @override
+  String get deleteAfterImportModeDeleteSubtitle => '导入后自动从设备中删除原始文件';
+
+  @override
+  String get deleteAfterImportVaultSettingLabel => '此保险库的导入后文件删除设置';
+
+  @override
+  String get deleteAfterImportInheritGlobal => '继承全局默认设置';
+
+  @override
+  String deleteAfterImportInheritGlobalSubtitle(String mode) {
+    return '当前使用全局默认设置：$mode';
+  }
+
+  @override
+  String get deleteAfterImportVaultAsk => '每次询问';
+
+  @override
+  String get deleteAfterImportVaultKeep => '始终保留源文件';
+
+  @override
+  String get deleteAfterImportVaultDelete => '始终删除源文件';
+
+  @override
+  String get wizardBackButton => '返回';
+
+  @override
+  String get wizardNextButton => '下一步';
+
+  @override
+  String get wizardStepTypeTitle => '类型';
+
+  @override
+  String get wizardStepBasicInfoTitle => '基本信息';
+
+  @override
+  String get wizardStepAdvancedTitle => '高级';
+
+  @override
+  String get wizardStepReviewTitle => '回顾';
+
+  @override
+  String get wizardCreateTypePrompt => '你想创建什么？';
+
+  @override
+  String get wizardChooseFormatPrompt => '选择容器格式';
+
+  @override
+  String get wizardEncryptionDetailsRowTitle => '加密详情';
+
+  @override
+  String get wizardHiddenVolumeRowSubtitleConfigured => '已配置——点按查看';
+
+  @override
+  String get wizardHiddenVolumeRowSubtitleNeedsSetup => '点按进行设置';
+
+  @override
+  String get wizardSummaryTitle => '摘要';
+
+  @override
+  String get wizardSummaryPasswordLabel => '密码';
+
+  @override
+  String get wizardPasswordSetValue => '已设置';
+
+  @override
+  String get wizardPasswordNotSetValue => '未设置（使用密钥文件）';
+
+  @override
+  String get wizardSummaryKeyfilesLabel => '密钥文件';
+
+  @override
+  String get wizardSummaryPimDefaultValue => '默认';
+
+  @override
+  String get wizardSummaryPimLabel => 'PIM';
+
+  @override
+  String get wizardSummaryDriveLabel => 'USB 驱动器';
+
+  @override
+  String get sectionKeyStorageIntegration => '密钥存储与系统访问';
+
+  @override
+  String get sectionMaskMode => '伪装模式';
+
+  @override
+  String get advancedOptionsTitle => '高级选项';
+
+  @override
+  String get audioTrackTitle => '音轨';
+
+  @override
+  String get noAudioTracksAvailable => '没有可用的音轨';
+
+  @override
+  String trackNumberLabel(int number) {
+    return '轨道 $number';
+  }
+
+  @override
+  String subtitleTrackNumberLabel(int number) {
+    return '字幕 $number';
+  }
+
+  @override
+  String get offLabel => '关闭';
+
+  @override
+  String get externalSubtitlesLabel => '外部字幕 (.srt/.vtt)';
+
+  @override
+  String get externalLabel => '外部';
+
+  @override
+  String get subtitleSizeLabel => '大小';
+
+  @override
+  String get subtitleSizeSmall => '小';
+
+  @override
+  String get subtitleSizeMedium => '中';
+
+  @override
+  String get subtitleSizeLarge => '大';
+
+  @override
+  String get subtitleSizeExtraLarge => '特大';
+
+  @override
+  String get subtitlePositionLabel => '位置';
+
+  @override
+  String get subtitlePositionBottom => '底部';
+
+  @override
+  String get subtitlePositionLower => '下方';
+
+  @override
+  String get subtitlePositionCenter => '居中';
+
+  @override
+  String get subtitlePositionTop => '顶部';
+
+  @override
+  String get editImageAction => '编辑图片';
+
+  @override
+  String get imageEditorUnsupportedFormatMessage => '此图片格式不支持编辑。';
+
+  @override
+  String get cropToolLabel => '裁剪';
+
+  @override
+  String get drawToolLabel => '绘制';
+
+  @override
+  String get textToolLabel => '文本';
+
+  @override
+  String get redactToolLabel => '遮盖';
+
+  @override
+  String get rotateLeftTooltip => '向左旋转';
+
+  @override
+  String get rotateRightTooltip => '向右旋转';
+
+  @override
+  String get cropAspectFreeLabel => '自由';
+
+  @override
+  String get cropAspectSquareLabel => '正方形';
+
+  @override
+  String get cropAspectOriginalLabel => '原始比例';
+
+  @override
+  String get applyCropTooltip => '应用裁剪';
+
+  @override
+  String get annotationColorTooltip => '颜色';
+
+  @override
+  String get annotationStrokeWidthTooltip => '笔画粗细';
+
+  @override
+  String get clearAnnotationsTooltip => '清除所有注释';
+
+  @override
+  String get resetImageTooltip => '重置为原图';
+
+  @override
+  String get resetImageConfirmTitle => '重置图片？';
+
+  @override
+  String get resetImageConfirmMessage => '这将放弃本次会话中所做的所有裁剪和绘制更改。';
+
+  @override
+  String get addTextAnnotationTitle => '添加文字';
+
+  @override
+  String get addTextAnnotationHint => '输入一些内容…';
+
+  @override
+  String get textToolHint => '点按图片以添加文字';
+
+  @override
+  String get saveImageSheetTitle => '保存更改';
+
+  @override
+  String get saveAsNewFileOption => '另存为新文件';
+
+  @override
+  String get saveAsNewFileDescription => '保留原始文件不变';
+
+  @override
+  String get overwriteOriginalOption => '覆盖原文件';
+
+  @override
+  String get overwriteOriginalDescription => '替换原始文件';
+
+  @override
+  String get newFileNameLabel => '文件名';
+
+  @override
+  String get imageEditorPngNoteMessage => '编辑后的图片将保存为 PNG 格式。';
+
+  @override
+  String get imageSavedMessage => '图片已保存';
+
+  @override
+  String imageSaveFailedMessage(String error) {
+    return '无法保存图片：$error';
+  }
+
+  @override
+  String get advancedRenameButton => '高级';
+
+  @override
+  String get advancedRenameBatchTitle => '批量重命名';
+
+  @override
+  String get advancedRenameRulesTab => '规则';
+
+  @override
+  String advancedRenamePreviewTab(int count) {
+    return '预览 ($count)';
+  }
+
+  @override
+  String get advancedRenameSearchReplaceTitle => '查找和替换';
+
+  @override
+  String get advancedRenameFindTextLabel => '查找文本';
+
+  @override
+  String get advancedRenameFindTextHint => '输入要匹配的文本或模式…';
+
+  @override
+  String get advancedRenameReplaceWithLabel => '替换为';
+
+  @override
+  String get advancedRenameReplaceWithHint => '新文本或变量…';
+
+  @override
+  String get advancedRenameInsertVariableTooltip => '插入动态变量标记';
+
+  @override
+  String get advancedRenameDateTimeTokens => '日期和时间标记';
+
+  @override
+  String advancedRenameStandardDate(String token) {
+    return '标准日期 ($token)';
+  }
+
+  @override
+  String advancedRenameYearFourDigit(String token) {
+    return '4 位年份 ($token)';
+  }
+
+  @override
+  String advancedRenameMonth(String token) {
+    return '月份 ($token)';
+  }
+
+  @override
+  String advancedRenameDayOfMonth(String token) {
+    return '日期 ($token)';
+  }
+
+  @override
+  String advancedRenameTime(String token) {
+    return '时间 ($token)';
+  }
+
+  @override
+  String get advancedRenameDynamicIdentifiers => '动态标识符';
+
+  @override
+  String advancedRenameUniqueUuid(String token) {
+    return '唯一 UUID v4 ($token)';
+  }
+
+  @override
+  String get advancedRenameRandomAlphanumeric => '随机字母数字（8 位）';
+
+  @override
+  String get advancedRenameRandomDigits => '随机数字（6 位）';
+
+  @override
+  String get advancedRenameEmbeddedCounter => '内嵌计数器';
+
+  @override
+  String advancedRenamePaddedCounter(String token) {
+    return '补零计数器 ($token)';
+  }
+
+  @override
+  String get advancedRenameRegex => '正则表达式';
+
+  @override
+  String get advancedRenameMatchCase => '区分大小写';
+
+  @override
+  String get advancedRenameAllOccurrences => '所有匹配项';
+
+  @override
+  String get advancedRenameScopeFormatting => '范围与格式';
+
+  @override
+  String get advancedRenameApplyChangesTo => '应用更改到';
+
+  @override
+  String get advancedRenameFilename => '文件名';
+
+  @override
+  String get advancedRenameExtension => '扩展名';
+
+  @override
+  String get advancedRenameBoth => '两者';
+
+  @override
+  String get advancedRenameCaseTransformation => '大小写转换';
+
+  @override
+  String get advancedRenameNoChange => '不更改';
+
+  @override
+  String get advancedRenameLowercase => '小写';
+
+  @override
+  String get advancedRenameUppercase => '大写';
+
+  @override
+  String get advancedRenameTitleCase => '标题大小写';
+
+  @override
+  String get advancedRenameCapitalize => '首字母大写';
+
+  @override
+  String get advancedRenameSequentialCounter => '顺序计数器';
+
+  @override
+  String get advancedRenameCounterDescription => '在文件名前面或后面添加顺序编号';
+
+  @override
+  String get advancedRenameSuffix => '后缀（末尾）';
+
+  @override
+  String get advancedRenamePrefix => '前缀（开头）';
+
+  @override
+  String get advancedRenameStartAt => '起始值';
+
+  @override
+  String get advancedRenameDigits => '位数';
+
+  @override
+  String get advancedRenameDigitsHint => '例如 2 (01)';
+
+  @override
+  String get advancedRenameSeparator => '分隔符';
+
+  @override
+  String get advancedRenameSeparatorHint => '_ or -';
+
+  @override
+  String get advancedRenameLivePreview => '实时预览';
+
+  @override
+  String get advancedRenameDeselect => '取消选择';
+
+  @override
+  String get advancedRenameSelectAll => '全选';
+
+  @override
+  String get advancedRenameNoFilesSelected => '未选择任何文件';
+
+  @override
+  String get advancedRenameNameConflictDetected => '检测到名称冲突';
+
+  @override
+  String get advancedRenameCheckPreviewToFix => '请查看“预览”标签页以修复';
+
+  @override
+  String get advancedRenameReadyToRename => '准备好重命名';
+
+  @override
+  String get advancedRenameErrorsDetected => '检测到错误';
+
+  @override
+  String advancedRenameApply(int count) {
+    return '应用 ($count)';
+  }
+
+  @override
+  String get advancedRenameNameCollisionWithinBatch => '批处理内名称冲突。';
+
+  @override
+  String get advancedRenameCollidesWithUnselectedFile => '与未选中的文件冲突。';
+
+  @override
+  String advancedRenameReadyCount(int valid, int total) {
+    return '$valid 个已准备好重命名（共 $total 个）';
+  }
+
+  @override
+  String advancedRenameReadyOfTotal(int valid, int total) {
+    return '$total 个中有 $valid 个已就绪';
+  }
+
+  @override
+  String advancedRenameRenamedItems(int succeeded, int failed) {
+    return '已重命名 $succeeded 个项目（$failed 个失败）。';
+  }
+
+  @override
+  String advancedRenameSuccessfullyRenamed(int count) {
+    return '已成功重命名 $count 个项目。';
+  }
+
+  @override
+  String get advancedRenameMonthsFull =>
+      '一月|二月|三月|四月|五月|六月|七月|八月|九月|十月|十一月|十二月';
+
+  @override
+  String get advancedRenameMonthsAbbr =>
+      '1月|2月|3月|4月|5月|6月|7月|8月|9月|10月|11月|12月';
+
+  @override
+  String get advancedRenameDaysFull => '星期一|星期二|星期三|星期四|星期五|星期六|星期日';
+
+  @override
+  String get advancedRenameDaysAbbr => '周一|周二|周三|周四|周五|周六|周日';
+
+  @override
+  String get advancedRenameResolveConflicts => '应用前请解决名称冲突';
+
+  @override
+  String advancedRenameChangedCount(int changed, int total) {
+    return '$total 个中的 $changed 个';
+  }
+
+  @override
+  String get automationKeyfilesPimSectionHeader => '密钥文件与 PIM';
+
+  @override
+  String get automationKeyfilesPimDescription =>
+      '与上面的自动化密码一同存储，并以相同方式用于 UNLOCK_VAULT 调用——适用于通常使用密钥文件和/或非默认 PIM（而非仅密码）解锁的 VeraCrypt/LUKS 保险库。';
+
+  @override
+  String get automationSavePimButton => '保存 PIM';
+
+  @override
+  String get automationCameraSectionHeader => '相机自动化';
+
+  @override
+  String get automationCameraDescription =>
+      '允许自动化为此保险库触发 TAKE_PHOTO / START_RECORDING / STOP_RECORDING / START_AUDIO_RECORDING / STOP_AUDIO_RECORDING。即使在完全访问权限下也默认关闭——与文件导入/导出不同，拍照完全不需要任何屏幕提示，因此这是一个单独的、需要明确开启的选项。';
+
+  @override
+  String get automationAllowCameraCapture => '允许相机拍摄';
+
+  @override
+  String get automationOverlayPermissionTitle => '在其他应用上层显示';
+
+  @override
+  String get automationOverlayPermissionMessage =>
+      'Android 14+ 上的后台相机拍摄需要“在其他应用上层显示”权限。请授予此权限，以便在屏幕锁定或应用处于后台时允许自动拍摄。';
+
+  @override
+  String get automationPimSavedMessage => 'PIM 已保存';
+
+  @override
+  String get automationActionImportFolderLabel => '导入文件夹';
+
+  @override
+  String get automationActionExportFolderLabel => '导出文件夹';
+
+  @override
+  String get automationActionTakePhotoLabel => '拍照';
+
+  @override
+  String get automationActionStartRecordingLabel => '开始录制';
+
+  @override
+  String get automationActionStopRecordingLabel => '停止录制';
+
+  @override
+  String get automationActionStartAudioRecordingLabel => '开始录制音频';
+
+  @override
+  String get automationActionStopAudioRecordingLabel => '停止录制音频';
+
+  @override
+  String get filePropertiesSectionHeader => '文件属性';
+
+  @override
+  String get fullPathLabel => '完整路径';
+
+  @override
+  String get sizeLabel => '大小';
+
+  @override
+  String get modifiedLabel => '修改时间';
+
+  @override
+  String get vaultLabel => '保险库';
+
+  @override
+  String get mediaDimensionsSectionHeader => '媒体与尺寸';
+
+  @override
+  String get resolutionLabel => '分辨率';
+
+  @override
+  String get aspectRatioLabel => '宽高比';
+
+  @override
+  String get formatLabel => '格式';
+
+  @override
+  String get exifCameraDataSectionHeader => 'EXIF 与相机数据';
+
+  @override
+  String get cameraLabel => '相机';
+
+  @override
+  String get lensLabel => '镜头';
+
+  @override
+  String get dateTakenLabel => '拍摄日期';
+
+  @override
+  String get shutterSpeedLabel => '快门速度';
+
+  @override
+  String get apertureLabel => '光圈';
+
+  @override
+  String get isoLabel => 'ISO';
+
+  @override
+  String get focalLengthLabel => '焦距';
+
+  @override
+  String get flashLabel => '闪光灯';
+
+  @override
+  String get softwareLabel => '软件';
+
+  @override
+  String get gpsLocationLabel => 'GPS 位置';
+
+  @override
+  String get integrityChecksumSectionHeader => '完整性与校验和';
+
+  @override
+  String get computingHashMessage => '正在计算哈希值…';
+
+  @override
+  String get tapCalculateToVerifyMessage => '点按“计算”以验证';
+
+  @override
+  String get calculateButton => '计算';
+
+  @override
+  String get copyDiagnosticsButton => '复制诊断信息';
+
+  @override
+  String get closeButton => '关闭';
+
+  @override
+  String get hwAcceleratedBadge => '硬件加速';
+
+  @override
+  String get swDecoderBadge => '软件解码器';
+
+  @override
+  String get videoDecoderHardwareSection => '视频解码器与硬件';
+
+  @override
+  String get decoderNameLabel => '解码器名称';
+
+  @override
+  String get accelerationLabel => '加速方式';
+
+  @override
+  String get hardwareGpuDirect => '硬件（GPU 直连）';
+
+  @override
+  String get softwareCpuFallback => '软件（CPU 回退）';
+
+  @override
+  String get unknownValue => '未知';
+
+  @override
+  String get framerateLabel => '帧率';
+
+  @override
+  String get variableOrUnknown => '可变／未知';
+
+  @override
+  String get videoCodecLabel => '视频编解码器';
+
+  @override
+  String get autoDetected => '自动检测';
+
+  @override
+  String get colorFormatLabel => '色彩格式';
+
+  @override
+  String get initLatencyLabel => '初始化延迟';
+
+  @override
+  String get audioEngineSection => '音频引擎';
+
+  @override
+  String get audioDecoderLabel => '音频解码器';
+
+  @override
+  String get audioCodecLabel => '音频编解码器';
+
+  @override
+  String get pipelineHealthSection => '处理管线与健康状态';
+
+  @override
+  String get playbackStateLabel => '播放状态';
+
+  @override
+  String get decryptedBufferLabel => '解密缓冲区';
+
+  @override
+  String secondsCached(String seconds) {
+    return '已缓存 $seconds 秒';
+  }
+
+  @override
+  String get droppedFramesLabel => '丢帧数';
+
+  @override
+  String nFrames(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 帧',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sourceStorageLabel => '源存储';
+
+  @override
+  String directJniStreamSource(int volId) {
+    return '直接 C++ JNI 流（volId=$volId）';
+  }
+
+  @override
+  String get archivesTabLabel => '压缩包';
+
+  @override
+  String get filesTabLabel => '文件';
+
+  @override
+  String get filesPermissionMessage => '允许访问以浏览您设备上的文件。';
+
+  @override
+  String get filesEmptyTitle => '此处没有文件';
+
+  @override
+  String get filesEmptyMessage => '此文件夹为空。';
+
+  @override
+  String get filesNewFolderTooltip => '新建文件夹';
+
+  @override
+  String get filesNewFolderDialogTitle => '新建文件夹';
+
+  @override
+  String get filesNameHint => '名称';
+
+  @override
+  String get filesCreate => '创建';
+
+  @override
+  String get filesRename => '重命名';
+
+  @override
+  String get filesDelete => '删除';
+
+  @override
+  String get filesShare => '分享';
+
+  @override
+  String get filesCopy => '复制';
+
+  @override
+  String get filesMove => '移动';
+
+  @override
+  String get filesDeleteConfirmTitle => '永久删除？';
+
+  @override
+  String get filesChooseDestinationTitle => '选择文件夹';
+
+  @override
+  String get filesMoveHere => '移动到此处';
+
+  @override
+  String get filesCopyHere => '复制到此处';
+
+  @override
+  String get filesSelectAllTooltip => '全选';
+
+  @override
+  String get filesCloseSelectionTooltip => '关闭';
+
+  @override
+  String get filesFolderCreated => '文件夹已创建';
+
+  @override
+  String get filesCreateFolderFailed => '无法创建文件夹';
+
+  @override
+  String get filesRenamed => '已重命名';
+
+  @override
+  String get filesRenameFailed => '无法重命名';
+
+  @override
+  String get filesNameAlreadyExists => '该名称已被占用';
+
+  @override
+  String get filesDeleted => '已删除';
+
+  @override
+  String get filesDeleteFailed => '无法删除';
+
+  @override
+  String get filesMoved => '已移动';
+
+  @override
+  String get filesMoveFailed => '无法移动';
+
+  @override
+  String get filesCopied => '已复制';
+
+  @override
+  String get filesCopyFailed => '无法复制';
+
+  @override
+  String get filesOpenFailed => '无法打开此文件';
+
+  @override
+  String get filesShareFailed => '无法分享此文件';
+
+  @override
+  String get filesFilterTooltip => '筛选';
+
+  @override
+  String get filesFilterAll => '所有文件';
+
+  @override
+  String get filesFilterImages => '图片';
+
+  @override
+  String get filesFilterVideos => '视频';
+
+  @override
+  String get filesFilterAudio => '音频';
+
+  @override
+  String get filesFilterDocuments => '文档';
+
+  @override
+  String get filesTextTooLarge => '此文件过大，无法在此预览。';
+
+  @override
+  String get filesTextSaved => '已保存';
+
+  @override
+  String get filesTextSaveFailed => '无法保存';
+
+  @override
+  String get toolHeaderBackupTitle => '头部备份';
+
+  @override
+  String get toolHeaderBackupSubtitle => '备份或恢复容器头部及保险库配置';
+
+  @override
+  String get headerBackupModeExport => '保存备份';
+
+  @override
+  String get headerBackupModeRestore => '恢复备份';
+
+  @override
+  String get headerBackupPickExportTarget => '选择要备份的目标。';
+
+  @override
+  String get headerBackupPickRestoreTarget => '选择要将备份恢复到的目标。';
+
+  @override
+  String get headerBackupTargetContainerSubtitle => 'VeraCrypt、LUKS1 或 LUKS2';
+
+  @override
+  String get headerBackupTargetFolderSubtitle =>
+      'gocryptfs、CryFS 或 Cryptomator';
+
+  @override
+  String get headerBackupExportInfoBanner =>
+      '容器的头部包含其密钥材料——如果丢失（坏道、写入损坏），即使数据区域完好无损也无法恢复。文件夹保险库在其根目录的一个小型配置文件中保存相同的内容。请将此备份保存在与容器本身分开的地方。';
+
+  @override
+  String get headerBackupRestoreInfoBanner =>
+      '恢复将使用备份覆盖目标的当前头部（或配置文件）——首先会验证备份对此格式是否真实有效，但请确保您选择了正确的目标。';
+
+  @override
+  String headerBackupUnhealthyExportWarning(String diagnosis) {
+    return '此容器状态异常（$diagnosis）。现在备份意味着备份将包含相同的问题。如果可以，请先运行“检查与修复”——或者如果这是您保存它的唯一机会，也可以仍然进行备份。';
+  }
+
+  @override
+  String get headerBackupBackUpAnyway => '仍然备份';
+
+  @override
+  String get headerBackupExportHeader => '导出头部';
+
+  @override
+  String get headerBackupSavedBanner => '备份已保存。请将其保存在与此容器分开的地方。';
+
+  @override
+  String get headerBackupSaveBackupFile => '保存备份文件';
+
+  @override
+  String get headerBackupPickBackupFile => '选择备份文件';
+
+  @override
+  String get headerBackupMismatchFolderVaultError => '此备份适用于文件夹保险库，但所选目标是容器文件。';
+
+  @override
+  String get headerBackupMismatchContainerFileError =>
+      '此备份适用于容器文件，但所选目标是文件夹保险库。';
+
+  @override
+  String get headerBackupRestoredSuccess => '头部已恢复。';
+
+  @override
+  String get headerBackupRestore => '恢复';
+
+  @override
+  String headerBackupBackedUpAt(String date) {
+    return '备份于 $date';
+  }
+
+  @override
+  String get headerBackupLogIdle => '控制台日志输出保持空闲...';
+
+  @override
+  String get compositeCreateScreenTitle => '创建复合容器';
+
+  @override
+  String get compositeProcessingStatus => '正在处理…';
+
+  @override
+  String compositeCarrierFilesCountHeader(int count) {
+    return '载体文件 ($count)';
+  }
+
+  @override
+  String get compositeAddCarrierFilesTitle => '添加载体文件';
+
+  @override
+  String get compositeAddCarrierFilesSubtitle => '选择图片、视频、音频或文档';
+
+  @override
+  String get compositeBrowseButtonLabel => '浏览';
+
+  @override
+  String compositeCarrierAllocatableSubtitle(String format, String size) {
+    return '$format • 可分配：$size';
+  }
+
+  @override
+  String get compositeCarrierAnalyzingStatus => '正在分析…';
+
+  @override
+  String get compositeTotalUsableCapacityHeader => '总可用容量';
+
+  @override
+  String compositeCapacityDistributedSubtitle(int count) {
+    return '分布在 $count 个文件中（按 512 字节扇区对齐）';
+  }
+
+  @override
+  String get compositePimFieldLabel => 'PIM（个人迭代乘数）';
+
+  @override
+  String get compositePimFieldHelper => '留空或填 0 以使用标准默认迭代次数';
+
+  @override
+  String get compositeRememberContainerTitle => '记住此容器';
+
+  @override
+  String get compositeRememberContainerSubtitle =>
+      '将其固定在仪表板上，下次无需重新选择这些文件。在本地以加密形式保存关联的文件列表。';
+
+  @override
+  String get compositeEncryptionAndFilesystemHeader => '加密与文件系统';
+
+  @override
+  String get compositeEncryptionAlgorithmLabel => '加密算法';
+
+  @override
+  String get compositeHashAlgorithmLabel => '哈希算法 (KDF)';
+
+  @override
+  String get compositeFilesystemTypeLabel => '文件系统类型';
+
+  @override
+  String get compositeQuickFormatTitle => '快速格式化';
+
+  @override
+  String get compositeQuickFormatSubtitle => '跳过对载体已分配空间的零填充';
+
+  @override
+  String get compositeCreateContainerButton => '创建容器';
+
+  @override
+  String get compositeCreateSuccessMessage => '复合容器创建成功！';
+
+  @override
+  String compositeDefaultContainerName(int count) {
+    return '复合容器 ($count 个文件)';
+  }
+
+  @override
+  String get compositeAlreadyHaveUnlockPrompt => '已有复合容器？解锁并挂载';
+
+  @override
+  String compositeBadgeMultipleCarriers(int count) {
+    return '复合（$count 个载体）';
+  }
+
+  @override
+  String get compositeBadgeSingleCarrier => '复合载体（已选 1 个）';
+
+  @override
+  String get compositeBadgeDefault => '复合容器';
+
+  @override
+  String get compositeSingleCarrierWarningBanner =>
+      '检测到复合载体。复合容器需要其所有载体文件才能解锁。';
+
+  @override
+  String get compositeSelectAllCarriersButton => '选择所有载体';
+
+  @override
+  String get compositeCarriersMissingTitle => '缺少复合载体';
+
+  @override
+  String get compositeCarriersMissingExplanation => '无法再访问一个或多个载体文件，或者它们已被移动。';
+
+  @override
+  String get compositeRelocateCarriersButton => '重新定位载体文件';
+
+  @override
+  String get passwordOptionalFieldLabel => '密码（可选）';
+
+  @override
+  String get plainDiskImagePasswordHint => '无需密码 — 此磁盘镜像未加密';
+
+  @override
+  String get compositePasswordHint => '输入复合容器密码';
+
+  @override
+  String get generateStrongPasswordTooltip => '生成强密码';
+
+  @override
+  String get cryfsBlockSizeDefaultLabel => '32 KiB（默认）';
+
+  @override
+  String get hiddenVolumeConfiguredInNextStepNotice => '隐藏卷参数将在下一步中配置。';
+
+  @override
+  String get hiddenVolumeExplanationBanner =>
+      '隐藏卷位于外层卷的空闲空间内。其密码和密钥文件必须与外层卷不同。';
+
+  @override
+  String get hiddenVolumeCredentialsSectionHeader => '隐藏卷凭据';
+
+  @override
+  String get hiddenVolumeSizeAndFormatSectionHeader => '隐藏卷大小与格式';
+
+  @override
+  String get shareSheetIntegrationTitle => '分享菜单集成';
+
+  @override
+  String get shareSheetIntegrationSubtitle =>
+      '允许其他应用通过 Android 分享菜单直接将文件存入保管库。';
+
+  @override
+  String get shareSheetIntegrationUpdateErrorMessage => '无法更新分享菜单集成设置。';
+
+  @override
+  String get autoLockOnShareImportTitle => '分享导入后自动锁定';
+
+  @override
+  String get autoLockOnShareImportSubtitle =>
+      '如果保险库是专门为导入共享文件而解锁的，则在导入完成后自动重新锁定';
+
+  @override
+  String get shareImportExpiredMessage => '无导入内容 — 分享请求已过期。';
+
+  @override
+  String get sharedFileDefaultDisplayName => '共享文件';
+
+  @override
+  String importingSharedFilesMessage(int count, String destination) {
+    return '正在将 $count 个文件导入至 $destination';
+  }
+
+  @override
+  String sharedFileSavedMessage(int count, String destination) {
+    return '已将 $count 个文件保存到 $destination';
+  }
+
+  @override
+  String get sharedFileSaveFailedMessage => '无法保存共享文件。';
+
+  @override
+  String get saveToVaultTitle => '保存至保管库';
+
+  @override
+  String get noVaultsAvailableAddFromDashboardPrompt => '暂无保管库。请先在仪表板添加一个。';
+
+  @override
+  String get vaultStatusUnlocked => '已解锁';
+
+  @override
+  String get vaultStatusLocked => '已锁定';
+
+  @override
+  String get compositeCarrierGrowthSectionHeader => '隐蔽性与容量';
+
+  @override
+  String get compositeCarrierGrowthSliderTitle => '载体文件增幅';
+
+  @override
+  String compositeCarrierGrowthPercentLabel(int percent) {
+    return '每个文件 +$percent%';
+  }
+
+  @override
+  String get compositeCarrierGrowthUltraStealthDesc =>
+      '极高隐蔽 (~5%)：文件体积几乎无变化，与相机传感器的自然噪点差异完全无法区分。';
+
+  @override
+  String get compositeCarrierGrowthRecommendedDesc =>
+      '推荐 (~10%)：在隐蔽性与实用的保险库容量之间取得良好平衡。';
+
+  @override
+  String get compositeCarrierGrowthHighCapacityDesc =>
+      '高容量 (~20%+)：最大限度提高保险库空间，但载体文件的增大较为明显。';
+
+  @override
+  String get emergencyPanicTitle => '紧急恐慌与胁迫防御';
+
+  @override
+  String get emergencyPanicSubtitle => '恐慌触发器、快捷设置磁贴、PanicKit 与胁迫解锁';
+
+  @override
+  String get sectionPanicTiers => '恐慌清除等级';
+
+  @override
+  String get panicTierSessionLabel => '级别 1：会话清除';
+
+  @override
+  String get panicTierSessionSubtitle => '卸载所有保险库，内存归零，并清除已记住的保险库密码与凭据';
+
+  @override
+  String get panicTierCredentialLabel => '级别 2：凭据清除';
+
+  @override
+  String get panicTierCredentialSubtitle =>
+      '清空仪表盘保险库列表，重置主锁定与应用设置，并清除 Keystore';
+
+  @override
+  String get panicTierNuclearLabel => '级别 3：彻底销毁 (Nuclear Wipe)';
+
+  @override
+  String get panicTierNuclearSubtitle => '对所有应用内部存储覆零粉碎，随后请求系统卸载应用';
+
+  @override
+  String get panicQuickTileTitle => '快捷设置磁贴';
+
+  @override
+  String get panicQuickTileSubtitle => '启用系统快捷设置磁贴以立即触发所配置的恐慌级别';
+
+  @override
+  String get triggerPanicNowTitle => '立即触发恐慌';
+
+  @override
+  String get triggerPanicNowSubtitle => '立即执行已配置的恐慌清除级别';
+
+  @override
+  String get triggerPanicConfirmTitle => '触发紧急恐慌？';
+
+  @override
+  String triggerPanicConfirmMessage(String tier) {
+    return '这将立即执行$tier。打开的容器和凭据将根据该级别被清除。';
+  }
+
+  @override
+  String get triggerPanicButton => '触发恐慌';
+
+  @override
+  String get sectionPanicBootTrigger => 'Wipe on Reboot';
+
+  @override
+  String get panicBootTriggerLevelLabel => '重启时运行的级别';
+
+  @override
+  String get panicBootTriggerArmTitle => '为下次启动准备';
+
+  @override
+  String panicBootTriggerArmedSubtitle(Object tier) {
+    return '已就绪 — 下次设备启动时将自动运行 $tier，随后解除准备';
+  }
+
+  @override
+  String get panicBootTriggerDisarmedSubtitle => '关闭 — 设备将正常重启';
+
+  @override
+  String get panicBootTriggerConfirmTitle => '是否准备重启时擦除？';
+
+  @override
+  String panicBootTriggerConfirmMessage(Object tier) {
+    return '下次设备启动时（包括普通重启或自动更新），在您打开应用之前，$tier 将自动运行。此操作仅执行一次，随后会自动解除准备。';
+  }
+
+  @override
+  String get panicBootTriggerArmButton => '准备';
+
+  @override
+  String get panicBootTriggerArmedSuccessMessage => '启动触发器已准备就绪';
+
+  @override
+  String get panicBootTriggerDisarmedSuccessMessage => '启动触发器已解除';
+
+  @override
+  String get sectionPanicKit => 'PanicKit 响应程序';
+
+  @override
+  String get panicKitEnableTitle => 'PanicKit 响应程序';
+
+  @override
+  String get panicKitEnableSubtitle => '允许已配对的外部恐慌应用（如 Ripple、Wasted）触发恐慌';
+
+  @override
+  String get panicKitEnforcePairingTitle => '强制应用配对';
+
+  @override
+  String get panicKitEnforcePairingSubtitle => '在每次触发广播中验证包身份与 SHA-256 证书摘要';
+
+  @override
+  String get panicKitPairedAppLabel => '已配对的触发应用';
+
+  @override
+  String get panicKitNoAppPaired => '未配对触发应用';
+
+  @override
+  String get panicKitUnpairButton => '解除配对';
+
+  @override
+  String get panicKitUnpairSuccess => '已解除 PanicKit 触发应用配对';
+
+  @override
+  String get sectionDuressUnlock => '主锁定胁迫解锁';
+
+  @override
+  String get duressMasterPasswordRequired => '配置胁迫解锁前，必须在安全设置中启用主密码。';
+
+  @override
+  String get duressPasswordTitle => '胁迫密码';
+
+  @override
+  String get duressPasswordConfiguredSubtitle => '已启用 — 在锁定屏幕上输入此密码将触发胁迫操作';
+
+  @override
+  String get duressPasswordNotConfiguredSubtitle => '在锁定屏幕输入专用密码以触发紧急操作';
+
+  @override
+  String get removeDuressPasswordButton => '移除胁迫密码';
+
+  @override
+  String get duressPasswordSetSuccess => '已配置胁迫密码';
+
+  @override
+  String get duressPasswordRemovedSuccess => '已移除胁迫密码';
+
+  @override
+  String get duressPinConfiguredTitle => '胁迫 PIN 码';
+
+  @override
+  String get duressPinConfiguredSubtitle => '已启用 — 在键盘上输入此 PIN 码将触发胁迫操作';
+
+  @override
+  String get duressPinNotConfiguredSubtitle => '在键盘输入专用 PIN 码以触发紧急操作';
+
+  @override
+  String get removeDuressPinButton => '移除胁迫 PIN 码';
+
+  @override
+  String get duressPinSetSuccess => '已配置胁迫 PIN 码';
+
+  @override
+  String get duressPinRemovedSuccess => '已移除胁迫 PIN 码';
+
+  @override
+  String get duressPatternTitle => '胁迫图案';
+
+  @override
+  String get duressPatternConfiguredSubtitle => '已启用 — 绘制此图案将触发胁迫操作';
+
+  @override
+  String get duressPatternNotConfiguredSubtitle => '在锁定屏幕绘制专用图案以触发紧急操作';
+
+  @override
+  String get removeDuressPatternButton => '移除胁迫图案';
+
+  @override
+  String get duressPatternSetSuccess => '已配置胁迫图案';
+
+  @override
+  String get duressPatternRemovedSuccess => '已移除胁迫图案';
+
+  @override
+  String get duressMatchesMasterPasswordError => '胁迫密码不能与主密码相同';
+
+  @override
+  String get duressMatchesMasterPinError => '不能与主PIN码相同';
+
+  @override
+  String get duressMatchesMasterPatternError => '不能与主图案相同';
+
+  @override
+  String get masterMatchesDuressPasswordError => '主密码不能与胁迫密码相同';
+
+  @override
+  String get masterMatchesDuressPinError => '不能与胁迫PIN码相同';
+
+  @override
+  String get masterMatchesDuressPatternError => '不能与胁迫图案相同';
+
+  @override
+  String get toolCompositeContainerTitle => '复合容器';
+
+  @override
+  String get toolCompositeContainerSubtitle => '跨多个媒体文件嵌入并挂载加密保险库';
+
+  @override
+  String get compositePasswordChangeNotSupportedMessage => '复合容器不支持修改密码';
+
+  @override
+  String get compositeNoCarrierFilesFoundError => '未找到复合容器的载体文件';
+
+  @override
+  String get compositeIncorrectCredentialsOrCarrierMismatchError =>
+      '凭据不正确或载体文件集不匹配';
+
+  @override
+  String get incorrectCredentialsOrInvalidContainer => '凭据不正确或无效的容器';
+
+  @override
+  String get repairTargetFolderVaultOption => '文件夹保险库';
+
+  @override
+  String get repairTargetFolderVaultSubtitle => 'gocryptfs、CryFS 或 Cryptomator';
+
+  @override
+  String get repairFolderVaultHealthyDeepScan => '未发现问题 —— 所有文件的内容均已验证。';
+
+  @override
+  String get repairFolderVaultHealthyStructureOnly =>
+      '未发现结构性问题。使用密码运行深度扫描以同时验证文件内容。';
+
+  @override
+  String repairFolderVaultIssuesCount(num count) {
+    return '发现 $count 个问题';
+  }
+
+  @override
+  String get repairFolderVaultStructureOnlySuffix => '（仅结构 —— 运行深度扫描以进行完整内容检查）';
+
+  @override
+  String get repairDeepScanWithPasswordButton => '使用密码深度扫描';
+
+  @override
+  String repairFolderVaultSummary(
+    Object fixed,
+    Object recovered,
+    Object removed,
+  ) {
+    return '修复摘要：已修复 $fixed 项，已恢复 $recovered 项至 /LOST+FOUND，已清理 $removed 项。';
+  }
+
+  @override
+  String get repairAndRecoverVaultButton => '修复并恢复保险库';
+
+  @override
+  String get repairScanAgainButton => '重新扫描';
+
+  @override
+  String panicPurgeCompletedMessage(Object count) {
+    return '紧急清除完成（已锁定 $count 个）。';
+  }
+
+  @override
+  String get usbPermissionRequiredError => '需要 USB 权限';
+
+  @override
+  String get logcatScrollToBottomTooltip => '滚动到底部';
+
+  @override
+  String logcatLinesCount(num count) {
+    return '$count 行';
+  }
+
+  @override
+  String get compositeSpaceTooSmallError => '可分配空间过小（至少需要 300 KB）';
+
+  @override
+  String get compositeInitializingStatusMessage => '正在初始化复合 VeraCrypt 卷…';
+
+  @override
+  String get compositeCreationFailedError => '创建复合容器失败';
+
+  @override
+  String get compositeSelectCarriersFirstError => '请先选择载体文件';
+
+  @override
+  String get compositePasswordOrKeyfileRequiredError => '需要密码或密钥文件';
+
+  @override
+  String get compositeMountingStatusMessage => '正在挂载复合卷…';
+
+  @override
+  String get compositeAuthFailedOrCarrierMismatchError => '身份验证失败或载体文件集不匹配';
+
+  @override
+  String get layoutModeColumnedList => '分栏列表';
+
+  @override
+  String get longFileNameDisplayLabel => '长文件名显示';
+
+  @override
+  String get longFileNameDisplayDesc => '选择超出空间时长文件名的缩略方式';
+
+  @override
+  String get longFileNameEllipsizeStartLabel => '省略开头';
+
+  @override
+  String get longFileNameEllipsizeStartDesc => '截断开头部分，保持末尾和文件扩展名可见。';
+
+  @override
+  String get longFileNameEllipsizeMiddleLabel => '省略中间';
+
+  @override
+  String get longFileNameEllipsizeMiddleDesc => '截断中间部分，保持开头和文件扩展名可见。';
+
+  @override
+  String get longFileNameEllipsizeEndLabel => '省略末尾';
+
+  @override
+  String get longFileNameEllipsizeEndDesc => '截断末尾部分，保持开头可见。';
+
+  @override
+  String get longFileNameMarqueeLabel => '跑马灯滚动';
+
+  @override
+  String get longFileNameMarqueeDesc => '完整文件名左右缓慢滚动展示。';
+
+  @override
+  String get showItemActionsMenuLabel => '显示项目三点操作菜单';
+
+  @override
+  String get showItemActionsMenuDesc => '在列表视图中的文件和文件夹上显示三点操作按钮';
+
+  @override
+  String get gridAspectRatioLabel => '网格宽高比';
+
+  @override
+  String get gridAspectSquareLabel => '1:1 (正方形)';
+
+  @override
+  String get gridAspectLandscapeLabel => '16:9 (横向)';
+
+  @override
+  String get gridAspectPortraitLabel => '9:16 (纵向)';
+
+  @override
+  String get fileFolderDisplaySectionHeader => '文件与文件夹显示';
+
+  @override
+  String get navigationBarsSectionHeader => '导航与栏';
+
+  @override
+  String get columnedListViewColumnsSectionHeader => '分栏列表列项';
+
+  @override
+  String get autoHideAppBarLabel => '滚动时自动隐藏应用栏';
+
+  @override
+  String get autoHideAppBarDesc => '向下滚动时隐藏顶部栏以最大化查看空间';
+
+  @override
+  String get useFabForToolbarLabel => '使用浮动按钮作为工具栏';
+
+  @override
+  String get useFabForToolbarDesc => '用单个浮动按钮替换底部工具栏以最大化查看空间';
+
+  @override
+  String get bottomSelectionBarLabel => '在底部显示选择栏';
+
+  @override
+  String get bottomSelectionBarDesc => '在底部而非顶部显示选择工具栏';
+
+  @override
+  String get clipboardFabTapToPaste => '点按粘贴，长按查看详情';
+
+  @override
+  String get storageLocationsTitle => '存储位置';
+
+  @override
+  String get storageLocationsSubtitle => '内部存储、SD卡和文档提供程序';
+
+  @override
+  String get storageLocationsSelectPrompt => '选择当前存储';
+
+  @override
+  String get addStorageLocationTitle => '添加存储位置';
+
+  @override
+  String get addStorageLocationSubtitle => '添加外部SD卡、U盘或文件夹';
+
+  @override
+  String get documentProviderSafLabel => '文档提供程序 (SAF)';
+
+  @override
+  String get externalStorageLabel => '外部存储';
+
+  @override
+  String get renameStorageLocationTitle => '重命名位置';
+
+  @override
+  String get removeStorageLocationTitle => '移除位置';
+
+  @override
+  String removeStorageLocationConfirm(String name) {
+    return '是否从存储位置移除“$name”？原文件不会被删除。';
+  }
+
+  @override
+  String get storageLocationAddedSnack => '已添加存储位置';
+
+  @override
+  String get storageLocationUnresolvedError => '无法直接访问该位置。请确认已授予存储权限。';
+
+  @override
+  String get storageLocationSelfReferenceError =>
+      '这已经是本应用某个保险库自身的存储，无法再作为外部位置添加。请改为从保险库列表中打开它。';
+
+  @override
+  String get internalStorageSubtitle => '内部存储';
+
+  @override
+  String get mediaViewerActionPlayPause => '播放 / 暂停';
+
+  @override
+  String get mediaViewerActionPlaybackMode => '播放模式';
+
+  @override
+  String get mediaViewerActionBookmark => '书签';
+
+  @override
+  String get mediaViewerActionDiagnostics => '诊断';
+
+  @override
+  String get mediaViewerCustomizeControls => '自定义控制...';
+
+  @override
+  String get mediaViewerControlsTitle => '媒体播放器控制';
+
+  @override
+  String get mediaViewerControlsReset => '媒体控制已重置为默认值';
+
+  @override
+  String get mediaViewerTransportDisplay => '传输和显示';
+
+  @override
+  String get mediaViewerShowScrubberTitle => '显示进度条';
+
+  @override
+  String get mediaViewerShowScrubberDesc => '显示位置和持续时间时间轴滑块';
+
+  @override
+  String get mediaViewerShowCenterTransportTitle => '显示中央控制';
+
+  @override
+  String get mediaViewerShowCenterTransportDesc => '在中央显示大型播放/暂停按钮';
+
+  @override
+  String get mediaViewerShowPrevNextTitle => '显示上一个和下一个按钮';
+
+  @override
+  String get mediaViewerShowPrevNextDesc => '关闭以仅保留单个播放按钮';
+
+  @override
+  String get mediaViewerShowStatusBadgeTitle => '显示状态徽章';
+
+  @override
+  String get mediaViewerShowStatusBadgeDesc => '显示幻灯片延迟和静态图片指示器';
+
+  @override
+  String get mediaViewerTopBarSection => '顶部栏';
+
+  @override
+  String get mediaViewerBottomBarSection => '底部栏';
+
+  @override
+  String get mediaViewerUnpinnedSection => '未固定（折叠菜单）';
+
+  @override
+  String get mediaViewerAllControlsPinned => '所有控件均已固定。';
+
+  @override
+  String get mediaPlayerControlsTitle => '媒体播放器控制';
+
+  @override
+  String get resumePlaybackTitle => '恢复播放';
+
+  @override
+  String get resumePlaybackAskEveryTime => '每次询问';
+
+  @override
+  String get resumePlaybackNever => '从不';
+
+  @override
+  String get resumePlaybackAlways => '总是';
+
+  @override
+  String get resumePlaybackPromptTitle => '恢复播放？';
+
+  @override
+  String resumePlaybackPromptMessage(String position) {
+    return '从 $position 继续播放？';
+  }
+
+  @override
+  String get resumePlaybackStartOver => '从头开始';
+
+  @override
+  String get resumePlaybackResume => '继续';
+
+  @override
+  String get pictureInPictureTitle => '自动画中画';
+
+  @override
+  String get pictureInPictureSubtitle => '播放视频时离开应用将自动进入画中画';
+
+  @override
+  String get pictureInPictureAction => '画中画';
+
+  @override
+  String get mediaViewerActionLockControls => '锁定控件';
+
+  @override
+  String get mediaViewerHoldToUnlock => '长按解锁';
+
+  @override
+  String get keepAudioPlayingTitle => '关闭后继续播放音频';
+
+  @override
+  String get keepAudioPlayingSubtitle => '离开播放器后音频仍在后台播放，可通过通知控制';
+
+  @override
+  String get mediaControlsResetSuccess => '媒体控制已重置为默认设置';
+
+  @override
+  String get playbackAndDisplayHeader => '播放与显示';
+
+  @override
+  String get showProgressBarTitle => '显示进度条（快进快退滑块）';
+
+  @override
+  String get showProgressBarSubtitle => '用于视频和音频的时间轴滑块';
+
+  @override
+  String get scrubPreviewStyleTitle => '拖动预览样式';
+
+  @override
+  String get scrubPreviewMiniBoxLabel => '迷你小窗';
+
+  @override
+  String get scrubPreviewMiniBoxDesc => '在进度条上方显示小缩略图';
+
+  @override
+  String get scrubPreviewFullscreenLabel => '全屏';
+
+  @override
+  String get scrubPreviewFullscreenDesc => '拖动进度条时，大画面铺满整个屏幕';
+
+  @override
+  String get showTransportControlsOnPhotosTitle => '在照片上显示播放控制';
+
+  @override
+  String get showTransportControlsOnPhotosSubtitle => '启用图像幻灯片控制（关闭以使用极简视图）';
+
+  @override
+  String get statusBadgeTitle => '状态徽章';
+
+  @override
+  String get statusBadgeSubtitle => '显示幻灯片计时器或静态照片指示器';
+
+  @override
+  String get topBarActionsHeader => '顶部栏操作';
+
+  @override
+  String get topBarActionsEmptyHint => '将操作拖动到此处以固定到顶部栏';
+
+  @override
+  String get bottomDockActionsHeader => '底部 Dock 操作';
+
+  @override
+  String get bottomDockActionsEmptyHint => '将操作拖动到此处以固定到底部 Dock';
+
+  @override
+  String get moreMenuActionsHeader => '“更多”菜单（•••）操作';
+
+  @override
+  String get moreMenuActionsEmptyHint => '将操作拖动到此处以添加到顶部栏下拉菜单';
+
+  @override
+  String get advancedSettingsActionsHeader => '高级设置操作（溢出）';
+
+  @override
+  String get advancedSettingsActionsEmptyHint => '将操作拖动到此处以添加到高级设置面板';
+
+  @override
+  String get dropHereAtEnd => '拖放到末尾';
+
+  @override
+  String get dragItemsHereToAdd => '+ 拖动项目到此处以添加到此区域';
+
+  @override
+  String get moveToAdvancedSettingsTooltip => '移动到高级设置';
+
+  @override
+  String get noVaultsMounted => '未挂载任何保险库';
+
+  @override
+  String get vaultsMountedSummary => '个已挂载保险库';
+
+  @override
+  String get dashboardNavLabel => '仪表板';
+
+  @override
+  String get vaultsSectionTitle => '保险库';
+
+  @override
+  String get vaultStatusMounted => '已挂载';
+
+  @override
+  String get lockVaultTooltip => '锁定保险库';
+
+  @override
+  String get lockAllVaultsTitle => '全部锁定';
+
+  @override
+  String get safProviderLabel => 'SAF 提供程序';
+
+  @override
+  String get singleFileCryptoTitle => '单文件加密';
+
+  @override
+  String get singleFileCryptoSubtitle => '在保险库外加密或解密';
+
+  @override
+  String get passwordGeneratorTitle => '密码生成器';
+
+  @override
+  String get contentsLabel => '内容';
+
+  @override
+  String get totalSizeLabel => '总大小';
+
+  @override
+  String folderItemCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个项目',
+      zero: '空',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calculatingFolderStats => '正在计算…';
+
+  @override
+  String get videoGesturesHeader => '视频手势与缩放';
+
+  @override
+  String get swipeToSeekTitle => '滑动快进/快退';
+
+  @override
+  String get swipeToSeekSubtitle => '在屏幕上水平滑动以调整进度。在播放列表中，必须使用导航按钮而不是通过滑动来切换项目';
+
+  @override
+  String get swipeToDismissTitle => '滑动关闭';
+
+  @override
+  String get swipeToDismissSubtitle => '向下滑动即可关闭查看器。播放列表垂直滚动时，请改为左右滑动';
+
+  @override
+  String get edgeSwipeBrightnessTitle => '边缘滑动调节亮度';
+
+  @override
+  String get edgeSwipeBrightnessSubtitle => '在左侧边缘附近滑动以调节屏幕亮度';
+
+  @override
+  String get edgeSwipeVolumeTitle => '边缘滑动调节音量';
+
+  @override
+  String get edgeSwipeVolumeSubtitle => '在右侧边缘附近滑动以调节音量';
+
+  @override
+  String get edgeSwipeHudTitle => '显示手势指示器';
+
+  @override
+  String get edgeSwipeHudSubtitle => '滑动时显示百分比浮层';
+
+  @override
+  String get edgeSwipeWidthTitle => '边缘区域宽度';
+
+  @override
+  String get pinchZoomOutTitle => '允许缩小画面';
+
+  @override
+  String get pinchZoomOutSubtitle => '捏合以将视频缩小至原始尺寸以下';
+
+  @override
+  String get minZoomTitle => '最小缩放比例';
+
+  @override
+  String get holdSpeedMultiplierTitle => '长按倍速快进';
+
+  @override
+  String get holdSpeedMultiplierSubtitle => '长按视频播放画面时的快进速度';
+
+  @override
+  String get defaultAspectRatioTitle => '默认画面比例';
+
+  @override
+  String get defaultAspectRatioSubtitle => '打开视频时自动应用';
+
+  @override
+  String get aspectRatioModeLabel => '画面比例';
+
+  @override
+  String get aspectRatioBestFit => '最佳适应';
+
+  @override
+  String get aspectRatioFill => '填充';
+
+  @override
+  String get aspectRatio16x9 => '16:9';
+
+  @override
+  String get aspectRatio4x3 => '4:3';
+
+  @override
+  String get aspectRatioCentre => '居中';
+
+  @override
+  String get autoSyncMenuAction => '自动同步…';
+
+  @override
+  String get autoSyncSheetTitle => '自动同步';
+
+  @override
+  String get autoSyncSheetIntro =>
+      '自动让此文件夹与另一个文件夹保持一致。如果同一文件在两侧都被修改，则会保留两个版本，除非您在下方另行选择。';
+
+  @override
+  String get autoSyncTargetSection => '同步对象';
+
+  @override
+  String get autoSyncChooseFolder => '选择文件夹';
+
+  @override
+  String get autoSyncTargetNotSetHere => '此规则是在另一台设备上设置的。请选择要在此设备上使用的文件夹。';
+
+  @override
+  String get autoSyncPickerSideLabel => '同步目标';
+
+  @override
+  String get autoSyncDirectionSection => '方向';
+
+  @override
+  String get autoSyncDirectionTwoWay => '双向';
+
+  @override
+  String get autoSyncDirectionTwoWayHint => '任一侧的更改都会复制到另一侧。';
+
+  @override
+  String get autoSyncDirectionVaultToTarget => '保险库到文件夹';
+
+  @override
+  String get autoSyncDirectionVaultToTargetHint =>
+      '用于备份：文件夹跟随保险库。在文件夹中所做的更改不会复制回来。';
+
+  @override
+  String get autoSyncDirectionTargetToVault => '文件夹到保险库';
+
+  @override
+  String get autoSyncDirectionTargetToVaultHint =>
+      '用于导入：保险库跟随文件夹。在保险库中所做的更改不会复制回来。';
+
+  @override
+  String get autoSyncConflictSection => '如果两侧都修改了同一文件';
+
+  @override
+  String get autoSyncConflictKeepBoth => '保留两个版本';
+
+  @override
+  String get autoSyncConflictKeepBothHint => '另一个版本会以重命名副本的形式保留在两侧。';
+
+  @override
+  String get autoSyncConflictKeepNewer => '保留较新的';
+
+  @override
+  String get autoSyncConflictKeepNewerHint => '无法判断哪个较新时，会同时保留两者。';
+
+  @override
+  String get autoSyncConflictVaultWins => '以保险库版本为准';
+
+  @override
+  String get autoSyncConflictVaultWinsHint => '文件夹中的版本将被替换。';
+
+  @override
+  String get autoSyncConflictTargetWins => '以文件夹版本为准';
+
+  @override
+  String get autoSyncConflictTargetWinsHint => '保险库中的版本将被替换。';
+
+  @override
+  String get autoSyncOptionsSection => '选项';
+
+  @override
+  String get autoSyncOnUnlockTitle => '保险库解锁时同步';
+
+  @override
+  String get autoSyncLiveTitle => '解锁期间保持同步';
+
+  @override
+  String get autoSyncLiveSubtitle => '在保险库打开期间会不时检查更改。并非每项更改都会立即被发现。';
+
+  @override
+  String get autoSyncDeleteTitle => '同时同步删除';
+
+  @override
+  String get autoSyncDeleteSubtitle => '在一侧删除的文件也会在另一侧删除。如果某个文件夹意外显示为空，则会暂停删除。';
+
+  @override
+  String get autoSyncDeleteSourceAfterImportTitle => '导入后删除源文件';
+
+  @override
+  String get autoSyncDeleteSourceAfterImportSubtitle =>
+      '仅适用于从文件夹同步到保险库。保险库副本写入完成且 SHA-256 校验和匹配后，才会删除源文件。';
+
+  @override
+  String get autoSyncIgnoreLabel => '跳过匹配的文件和文件夹';
+
+  @override
+  String get autoSyncIgnoreHelper =>
+      '每行一个规则：*.tmp 匹配任意位置的名称；node_modules 跳过该文件夹及其内容；Projects/old 跳过同步根目录下的该路径及其中所有内容。';
+
+  @override
+  String get autoSyncNeverSynced => '尚未同步';
+
+  @override
+  String autoSyncLastSynced(String time) {
+    return '上次同步：$time';
+  }
+
+  @override
+  String autoSyncReportSummary(int copied, int deleted, int kept) {
+    return '已复制 $copied · 已删除 $deleted · 保留冲突 $kept';
+  }
+
+  @override
+  String autoSyncReportFailed(int count) {
+    return '无法同步的文件：$count';
+  }
+
+  @override
+  String get autoSyncReportDeletionsPaused => '由于某个文件夹意外显示为空，或将要删除的文件过多，已暂停删除。';
+
+  @override
+  String get autoSyncReportIncomplete => '无法读取文件夹的一部分，因此这些文件保持原样。';
+
+  @override
+  String get autoSyncSyncNow => '立即同步';
+
+  @override
+  String get autoSyncRemove => '移除自动同步';
+
+  @override
+  String get autoSyncRemoveTitle => '移除自动同步？';
+
+  @override
+  String get autoSyncRemoveMessage => '此文件夹将停止同步。两个文件夹中的文件保持原样。';
+
+  @override
+  String get autoSyncSaved => '自动同步已保存';
+
+  @override
+  String get autoSyncStarted => '已开始同步';
+
+  @override
+  String get autoSyncRemoved => '已移除自动同步';
+
+  @override
+  String get autoSyncSaveFailed => '无法保存自动同步设置';
+
+  @override
+  String get autoSyncUnavailable => '此保险库当前无法同步。';
+
+  @override
+  String get autoSyncProblemNoTarget => '请选择要同步的文件夹。';
+
+  @override
+  String get autoSyncProblemOverlapsTarget => '要同步的文件夹不能位于此文件夹内，也不能包含此文件夹。';
+
+  @override
+  String get autoSyncProblemOverlapsOtherRule => '此文件夹或其上级、下级文件夹已设置自动同步。';
+
+  @override
+  String get autoSyncProblemTargetIsVault =>
+      '此文件夹包含某个保险库的加密数据。请先解锁该保险库，然后改为从保险库列表中选择它。';
+
+  @override
+  String get autoSyncReadOnlyNotice => '此保险库为只读，无法保存自动同步。';
+
+  @override
+  String get autoSyncConfigUnreadable => '无法读取此保险库已保存的自动同步设置。';
+
+  @override
+  String autoSyncBannerRunning(String target, int done, int total) {
+    return '正在与 $target 同步 · $done/$total';
+  }
+
+  @override
+  String get autoSyncBannerAttention => '部分文件夹未能完全同步。请打开文件夹的自动同步设置查看详情。';
+
+  @override
+  String get autoSyncNotificationTitle => '正在同步文件夹';
+
+  @override
+  String autoSyncNotificationProgress(int done, int total) {
+    return '$done/$total 个文件';
+  }
+
+  @override
+  String get sectionQuickCapture => '快速捕获';
+
+  @override
+  String get quickCaptureSettingsTitle => '快速捕获';
+
+  @override
+  String get quickCaptureSettingsSubtitle => '用于直接捕获到保险库的快捷设置磁贴和主屏幕快捷方式';
+
+  @override
+  String get quickCaptureTileToggleTitle => '快捷设置磁贴';
+
+  @override
+  String get quickCaptureTileToggleSubtitle =>
+      '直接从快捷设置打开相机，无需输入PIN码或图案。保存任何内容前，您仍需选择并解锁一个保险库。';
+
+  @override
+  String get quickCaptureAddShortcutTitle => '添加到主屏幕';
+
+  @override
+  String get quickCaptureAddShortcutSubtitle => '如果您的启动器支持，将\"快速捕获\"图标固定到主屏幕';
+
+  @override
+  String get quickCaptureShortcutRequestedMessage => '已请求——请查看您的主屏幕';
+
+  @override
+  String get quickCaptureShortcutUnsupportedMessage => '您的启动器不支持固定快捷方式';
+
+  @override
+  String quickCaptureSavedToast(String name, String destination) {
+    return '已将 $name 保存至 $destination';
+  }
+
+  @override
+  String get cardSwipeActionsTitle => '卡片滑动操作';
+
+  @override
+  String get cardSwipeActionsSubtitle => '滑动保险库卡片以快速显示编辑和移除操作';
+
+  @override
+  String get cameraQualitySd => '480p (标清)';
+
+  @override
+  String get cameraQualityHd => '720p (高清)';
+
+  @override
+  String get cameraQualityFhd => '1080p (全高清)';
+
+  @override
+  String get cameraQualityUhd => '4K (超高清)';
+
+  @override
+  String get cameraPhotoResMax => '完整 (最高分辨率)';
+
+  @override
+  String get cameraPhotoResHigh => '500 万像素 (高)';
+
+  @override
+  String get cameraPhotoResMedium => '200 万像素 (中)';
+
+  @override
+  String get cameraPhotoResLow => '120 万像素 (低)';
+
+  @override
+  String get cameraLensWide => '广角';
+
+  @override
+  String get cameraLensInfrared => '红外';
+
+  @override
+  String get cameraLensFront => '前置';
+
+  @override
+  String get appLockBehaviorTitle => '应用锁定行为';
+
+  @override
+  String get lockAppOnScreenOffTitle => '屏幕熄灭时锁定应用';
+
+  @override
+  String get lockAppOnScreenOffSubtitle => '屏幕熄灭时立即显示锁定屏幕';
+
+  @override
+  String get settingsHubSecuritySubtitle => '主密码锁定、生物识别及自动锁定';
+
+  @override
+  String get settingsHubStorageSubtitle => '存储访问、后台服务及分享菜单';
+
+  @override
+  String get settingsHubFileHandlingSubtitle => '自动打开、缩略图及文件关联';
+
+  @override
+  String get settingsHubAppearanceSubtitle => '主题、OLED纯黑及语言';
+
+  @override
+  String get settingsHubAdvancedSubtitle => '设置备份、调试日志及Logcat';
+
+  @override
+  String get toolPasswordInterchangeTitle => '导入 / 导出密码';
+
+  @override
+  String get toolPasswordInterchangeSubtitle =>
+      '在 KeePass、Bitwarden 和其他密码管理器之间迁移登录信息、卡片和备忘录';
+
+  @override
+  String get toolsSectionPasswordManager => '密码管理器';
+
+  @override
+  String get passwordInterchangeExportTab => '导出';
+
+  @override
+  String get passwordInterchangeImportTab => '导入';
+
+  @override
+  String get passwordInterchangeSourceHeader => '来源';
+
+  @override
+  String get passwordInterchangeChooseFolder => '选择保险库文件夹';
+
+  @override
+  String get passwordInterchangeIncludeSubfolders => '包含子文件夹';
+
+  @override
+  String get passwordInterchangeFormatHeader => '格式';
+
+  @override
+  String get passwordInterchangeFormatLabel => '文件格式';
+
+  @override
+  String get passwordInterchangeMasterPassword => '主密码';
+
+  @override
+  String get passwordInterchangeConfirmPassword => '确认密码';
+
+  @override
+  String get passwordInterchangePasswordsDontMatch => '密码不匹配';
+
+  @override
+  String get passwordInterchangeRunExport => '导出';
+
+  @override
+  String passwordInterchangeExportReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个项目已准备好导出',
+      one: '1 个项目已准备好导出',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeSaveToDevice => '保存到设备…';
+
+  @override
+  String get passwordInterchangeSaved => '已保存。';
+
+  @override
+  String get passwordInterchangeFileHeader => '文件';
+
+  @override
+  String get passwordInterchangeChooseFile => '选择文件…';
+
+  @override
+  String get passwordInterchangeReadFile => '读取文件';
+
+  @override
+  String passwordInterchangeFoundItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '找到 $count 个项目',
+      one: '找到 1 个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeSelectAll => '全选';
+
+  @override
+  String get passwordInterchangeSelectNone => '取消全选';
+
+  @override
+  String passwordInterchangeWarningsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 行无法读取',
+      one: '1 行无法读取',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeDestinationHeader => '保存到';
+
+  @override
+  String get passwordInterchangeMirrorFolders => '重新创建文件夹';
+
+  @override
+  String passwordInterchangeRunImport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '导入 $count 个项目',
+      one: '导入 1 个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String passwordInterchangeImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已导入 $count 个项目',
+      one: '已导入 1 个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String passwordInterchangeSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已跳过 $count 个项目',
+      one: '已跳过 1 个项目',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String autoLockIndicatorLocksAfter(String duration) {
+    return '闲置锁定: $duration';
+  }
+
+  @override
+  String get autoLockIndicatorLocksOnScreenOff => '屏幕熄灭锁定';
+
+  @override
+  String get autoLockIndicatorNeverLocks => '不会自动锁定';
+
+  @override
+  String autoLockIndicatorLocksAfterTooltip(String duration) {
+    return '闲置 $duration 后锁定（使用应用时重置）';
+  }
+
+  @override
+  String get badgeExperimental => '实验性';
+
+  @override
+  String get createCompositeHintPrompt => '想通过将文件库分块附加到普通文件来隐藏它吗？';
+
+  @override
+  String get createCompositeHintAction => '打开复合卷向导';
+
+  @override
+  String get plainDiskImageNotice => '检测到未加密的磁盘映像。装载此卷无需密码。';
+
+  @override
+  String storageLocationUnavailable(String name) {
+    return '存储位置“$name”不可用或已断开连接。';
+  }
+
+  @override
+  String get cameraEditPhotoTooltip => '编辑照片';
+
+  @override
+  String get cameraTrimVideoTooltip => '裁剪视频';
+
+  @override
+  String get cameraDiscardMediaTooltip => '丢弃';
+
+  @override
+  String get cameraSaveMediaTooltip => '保存到保险库';
+
+  @override
+  String get cameraContinueCaptureTooltip => '再拍一张照片';
+
+  @override
+  String cameraBatchCount(int count) {
+    return '$count张照片';
+  }
+
+  @override
+  String get cameraReviewPhotosTooltip => '查看已拍摄照片';
+
+  @override
+  String get vaultItemTypeAuthenticator => 'Authenticator';
+
+  @override
+  String get fieldIssuer => 'Issuer';
+
+  @override
+  String get fieldAuthenticatorAccount => 'Account';
+
+  @override
+  String get fieldSecretKey => 'Secret Key';
+
+  @override
+  String get fieldTotpAlgorithm => 'Algorithm (default: SHA1)';
+
+  @override
+  String get fieldTotpDigits => 'Digits (default: 6)';
+
+  @override
+  String get fieldTotpPeriod => 'Refresh Interval, seconds (default: 30)';
+
+  @override
+  String get authenticatorScreenTitle => 'Authenticator';
+
+  @override
+  String get authenticatorAppBarTooltip => 'Authenticator codes';
+
+  @override
+  String get authenticatorEmptyStateTitle => 'No authenticator codes yet';
+
+  @override
+  String get authenticatorEmptyStateMessage =>
+      'Add a TOTP secret to a password item, or create a standalone Authenticator item, in any unlocked vault to see live codes here.';
+
+  @override
+  String get authenticatorNoVaultsUnlockedMessage =>
+      'Unlock a vault to see its authenticator codes here.';
+
+  @override
+  String get authenticatorCodeLabel => 'Code';
+
+  @override
+  String get authenticatorInvalidSecretError => 'Invalid secret';
+
+  @override
+  String get authenticatorAddButtonTooltip => 'Add authenticator';
+
+  @override
+  String get authenticatorChooseVaultTitle => 'Choose a vault';
+
+  @override
+  String get authenticatorOpenItemTooltip => 'Open item';
+
+  @override
+  String get authenticatorNextCodeLabel => '下一个验证码';
+
+  @override
+  String get authenticatorNextCodePrefix => '下一个';
+
+  @override
+  String get authenticatorCopyNextCodeTooltip => '复制下一个验证码';
+
+  @override
+  String get authenticatorSettingsTitle => '验证器设置';
+
+  @override
+  String get authenticatorEnableTitle => '启用验证器';
+
+  @override
+  String get authenticatorEnableSubtitle => '自动扫描已挂载的保险库以查找双重验证码';
+
+  @override
+  String get authenticatorShowCodesTitle => '显示验证码';
+
+  @override
+  String get authenticatorShowCodesSubtitle => '直接显示数字而非为了隐私进行遮挡';
+
+  @override
+  String get authenticatorSearchPlacementLabel => '搜索栏位置';
+
+  @override
+  String get authenticatorPlacementBottom => '底部';
+
+  @override
+  String get authenticatorPlacementTop => '顶部';
+
+  @override
+  String get authenticatorInterchangeSection => '导入与导出';
+
+  @override
+  String get scanQrCodeTooltip => '扫描二维码';
+
+  @override
+  String get qrScannerTitle => '扫描二维码';
+
+  @override
+  String get qrScannerHint => '将二维码对齐在框内';
+
+  @override
+  String get qrCodeScannedSuccess => '二维码扫描成功';
+
+  @override
+  String get invalidQrCodeError => '无效的双重验证二维码';
+
+  @override
+  String get immediateAutoLockOptionSubtitle => '屏幕熄灭或应用进入后台时立即锁定';
+
+  @override
+  String get autoLockIndicatorLocksImmediately => '立即锁定';
+
+  @override
+  String get quickActionLockModeTitle => '快捷操作后锁定';
+
+  @override
+  String get quickActionLockModeSubtitle => '从快捷捕获或分享保存时的保险库锁定行为';
+
+  @override
+  String get quickActionLockModeLeaveAsFoundLabel => '保持原有状态';
+
+  @override
+  String get quickActionLockModeLeaveAsFoundSubtitle => '仅在保存前处于锁定状态时锁定';
+
+  @override
+  String get quickActionLockModeAlwaysLockLabel => '始终锁定';
+
+  @override
+  String get quickActionLockModeAlwaysLockSubtitle => '保存后立即锁定保险库';
+
+  @override
+  String get quickActionLockModeLeaveOpenLabel => '保持解锁';
+
+  @override
+  String get quickActionLockModeLeaveOpenSubtitle => '保持保险库开启并遵循自动锁定计时器';
+
+  @override
+  String get textEditorThemeMenuItem => '编辑器外观…';
+
+  @override
+  String get textEditorThemeSheetTitle => '编辑器外观';
+
+  @override
+  String get textEditorBackgroundSectionTitle => '背景';
+
+  @override
+  String get textEditorSyntaxThemeSectionTitle => '语法主题';
+
+  @override
+  String get textEditorBackgroundMatchTheme => '跟随主题';
+
+  @override
+  String get textEditorBackgroundAmoledBlack => 'AMOLED 纯黑';
+
+  @override
+  String get textEditorBackgroundDarkSlate => '深青灰';
+
+  @override
+  String get textEditorBackgroundClassicLight => '经典浅色';
+
+  @override
+  String get textEditorBackgroundSepia => '复古羊皮纸 (Sepia)';
+
+  @override
+  String get textEditorSyntaxThemeAuto => '自动';
+
+  @override
+  String get textEditorSyntaxThemeOneDark => 'One Dark';
+
+  @override
+  String get textEditorSyntaxThemeDracula => 'Dracula';
+
+  @override
+  String get textEditorSyntaxThemeGithubLight => 'GitHub Light';
+
+  @override
+  String get textEditorSyntaxThemeMonokai => 'Monokai';
+
+  @override
+  String get textEditorSyntaxThemeNord => 'Nord';
+
+  @override
+  String get textEditorRelativeLineNumbersLabel => '相对行号';
+
+  @override
+  String get textEditorRelativeLineNumbersDescription => '显示每行相对于光标的距离，而非绝对行号';
+
+  @override
+  String get textEditorAutoSaveLabel => '自动保存';
+
+  @override
+  String get textEditorAutoSaveDescription => '停止输入时自动保存更改';
+
+  @override
+  String get cutTooltip => '剪切';
+
+  @override
+  String get textEditorShowLineNumbersLabel => '显示行号';
+
+  @override
+  String get textEditorShowLineNumbersDescription => '在左侧边缘显示代码行号';
+
+  @override
+  String get textEditorShowAccessoryBarLabel => '显示键盘辅助快捷栏';
+
+  @override
+  String get textEditorShowAccessoryBarDescription => '在软键盘上方显示符号和编辑工具';
+
+  @override
+  String textEditorFontSizeLabel(int size) {
+    return '字体大小: $size pt';
+  }
+
+  @override
+  String get textEditorCustomizeKeyBarLabel => '自定义快捷符号';
+
+  @override
+  String get textEditorCustomizeKeyBarDescription => '编辑和重新排列键盘上方的符号';
+
+  @override
+  String get textEditorCustomizeKeyBarTitle => '自定义符号';
+
+  @override
+  String get textEditorCustomizeKeyBarHint => '用空格分隔符号';
+
+  @override
+  String get textEditorSaveAsMenuItem => '另存为…';
+
+  @override
+  String get textEditorSaveAsDialogTitle => '另存为';
+
+  @override
+  String get textEditorSaveAsFileNameLabel => '文件名';
+
+  @override
+  String get textEditorSaveAsButton => '另存为';
+
+  @override
+  String get textEditorFileAlreadyExistsError => '此处已存在同名文件';
+
+  @override
+  String get textEditorProjectFilesTitle => '项目文件';
+
+  @override
+  String get textEditorCloseTabTooltip => '关闭标签页';
+
+  @override
+  String get textEditorResetToDefault => '恢复默认设置';
+
+  @override
+  String get textEditorLivePreviewTitle => '实时预览';
+
+  @override
+  String get textEditorWordWrap => '自动换行';
+
+  @override
+  String get textEditorReadOnly => '只读';
+
+  @override
+  String get selectImageTitle => '选择图片';
+
+  @override
+  String get noImagesFoundMessage => '此文件夹中未找到图片。';
+
+  @override
+  String get textEditorShowSymbolsBarLabel => '显示符号栏';
+
+  @override
+  String get textEditorShowSymbolsBarDescription => '显示快速输入符号与标点栏';
+
+  @override
+  String get textEditorShowActionsBarLabel => '显示操作栏';
+
+  @override
+  String get textEditorShowActionsBarDescription => '显示编辑器快捷操作按钮栏';
+
+  @override
+  String get textEditorCustomizeActionsLabel => '自定义操作按钮';
+
+  @override
+  String get textEditorCustomizeActionsDescription => '选择并重排编辑器快捷操作';
+
+  @override
+  String get textEditorCustomizeActionsTitle => '自定义操作';
+
+  @override
+  String get actionUndo => '撤销';
+
+  @override
+  String get actionRedo => '重做';
+
+  @override
+  String get actionCursorLeft => '光标向左';
+
+  @override
+  String get actionCursorRight => '光标向右';
+
+  @override
+  String get actionSelectWord => '选择单词';
+
+  @override
+  String get actionCopy => '复制';
+
+  @override
+  String get actionCut => '剪切';
+
+  @override
+  String get actionPaste => '粘贴';
+
+  @override
+  String get actionFind => '查找与替换';
+
+  @override
+  String get actionWordWrap => '自动换行';
+
+  @override
+  String get actionGoToLine => '跳转到行';
+
+  @override
+  String get actionGoToStart => '跳转至开头';
+
+  @override
+  String get actionGoToEnd => '跳转至末尾';
+
+  @override
+  String get actionIndent => '增加缩进';
+
+  @override
+  String get actionOutdent => '减少缩进';
+
+  @override
+  String get actionFormat => '格式化代码';
+
+  @override
+  String get actionReadOnly => '只读';
+
+  @override
+  String get screenLockOnlyAutoLockOption => '仅屏幕锁定';
+
+  @override
+  String get screenLockOnlyAutoLockOptionSubtitle => '仅在屏幕关闭时锁定 — 应用进入后台时不锁定';
+
+  @override
+  String get authenticatorScanQrSubtitle => '扫描单个验证码或 Google 身份验证器转移二维码';
+
+  @override
+  String get authenticatorImportBackupsSubtitle =>
+      '从 Aegis、2FAS、Bitwarden、Ente、Proton 或 andOTP 备份导入';
+
+  @override
+  String authenticatorGoogleAuthImportSuccess(int count) {
+    return '已从 Google 身份验证器导入 $count 个账号';
+  }
+
+  @override
+  String get authenticatorMultiQrTitle => '检测到其他二维码';
+
+  @override
+  String get authenticatorMultiQrMessage =>
+      'Google 身份验证器将此导出分成了多个二维码。现在扫描下一个吗？';
+
+  @override
+  String get authenticatorScanNextQr => '扫描下一个';
+
+  @override
+  String authenticatorGoogleAuthImportError(String error) {
+    return '导入 Google 身份验证器二维码失败：$error';
+  }
+
+  @override
+  String get passwordInterchangeOptionalPasswordHelper => '仅当此备份受密码保护时才需要';
+
+  @override
+  String authenticatorSingleAccountImportedHint(String title) {
+    return '已填入第一个账号（$title）。若要导入所有账号，请在身份验证器界面中扫描。';
+  }
+
+  @override
+  String get authenticatorHotpReadOnlyError => '此保管库为只读状态，因此无法推进 HOTP 计数器。';
+
+  @override
+  String get authenticatorHotpSaveError => '无法保存新的 HOTP 计数器。';
+
+  @override
+  String get authenticatorGenerateNextCode => '生成下一个验证码';
+
+  @override
+  String get actionSelectAll => '全选';
+
+  @override
+  String get textEditorSelectAllMenuItem => '全选';
+
+  @override
+  String get textEditorShowCaretScrubberLabel => '显示光标滑块';
+
+  @override
+  String get textEditorShowCaretScrubberDescription => '用于精确定位光标的滑动条';
+
+  @override
+  String get textEditorShowStatusBarLabel => '显示状态栏';
+
+  @override
+  String get textEditorShowStatusBarDescription => '在底部显示行数和字符数';
+
+  @override
+  String textEditorCursorPosition(int line, int column) {
+    return '第 $line 行，第 $column 列';
+  }
+
+  @override
+  String get textEditorNewFileTooltip => '新建文件';
+
+  @override
+  String get textEditorCloseTab => '关闭';
+
+  @override
+  String get textEditorCloseOtherTabs => '关闭其他';
+
+  @override
+  String get textEditorCloseAllTabs => '关闭所有';
+
+  @override
+  String get textEditorRevertToSaved => '还原到已保存状态';
+
+  @override
+  String get textEditorRevertDialogTitle => '放弃更改？';
+
+  @override
+  String get textEditorRevertDialogMessage => '放弃所有未保存的编辑并从保管库中重新加载文件？';
+
+  @override
+  String get revertButton => '还原';
+
+  @override
+  String get textEditorNewFolderTooltip => '新建文件夹';
+
+  @override
+  String get textEditorNewFolderDialogTitle => '新建文件夹';
+
+  @override
+  String get textEditorNewFolderFieldLabel => '文件夹名称';
+
+  @override
+  String get textEditorRenameMenuItem => '重命名';
+
+  @override
+  String get textEditorRenameDialogTitle => '重命名';
+
+  @override
+  String get textEditorMoveToMenuItem => '移动到...';
+
+  @override
+  String get textEditorMoveToDialogTitle => '移动到文件夹';
+
+  @override
+  String get textEditorMoveHereButton => '移动到此处';
+
+  @override
+  String get textEditorDeleteMenuItem => '删除';
+
+  @override
+  String textEditorDeleteConfirmTitle(String name) {
+    return '删除 $name？';
+  }
+
+  @override
+  String textEditorDeleteConfirmMessage(String name) {
+    return '确定要删除“$name”吗？此操作无法撤消。';
+  }
+
+  @override
+  String get videoEditorEditAction => 'Edit video';
+
+  @override
+  String get videoEditorExportAction => 'Export';
+
+  @override
+  String get videoEditorTimelineLabel => 'Video timeline';
+
+  @override
+  String get videoEditorSetStart => 'Set start';
+
+  @override
+  String get videoEditorSetEnd => 'Set end';
+
+  @override
+  String get videoEditorAddSegment => 'Add';
+
+  @override
+  String get videoEditorSplit => 'Split';
+
+  @override
+  String get videoEditorDeleteSegment => 'Delete';
+
+  @override
+  String get videoEditorModeKeep => 'Keep';
+
+  @override
+  String get videoEditorModeCutOut => 'Cut out';
+
+  @override
+  String get videoEditorNoSegments =>
+      'No segments yet. Move the playhead and tap Add.';
+
+  @override
+  String videoEditorOutputSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Output: $count clips · $duration',
+      one: 'Output: 1 clip · $duration',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String videoEditorSnapNote(String start, String end) {
+    return 'Lossless cut starts on a keyframe: $start – $end';
+  }
+
+  @override
+  String get videoEditorBoundaryInvalid =>
+      'That would leave the segment too short.';
+
+  @override
+  String get videoEditorNoRoom => 'There is no room for a segment here.';
+
+  @override
+  String get videoEditorNothingToExport => 'Nothing to export.';
+
+  @override
+  String get videoEditorReadOnly =>
+      'This vault is read-only, so the edited video can\'t be saved.';
+
+  @override
+  String videoEditorLoadFailed(String message) {
+    return 'Couldn\'t open this video: $message';
+  }
+
+  @override
+  String get videoEditorZoomIn => 'Zoom in';
+
+  @override
+  String get videoEditorZoomOut => 'Zoom out';
+
+  @override
+  String get videoEditorZoomFit => 'Fit to screen';
+
+  @override
+  String get videoEditorPrevFrame => '上一帧';
+
+  @override
+  String get videoEditorNextFrame => '下一帧';
+
+  @override
+  String get videoEditorPrevKeyframe => 'Previous keyframe';
+
+  @override
+  String get videoEditorNextKeyframe => 'Next keyframe';
+
+  @override
+  String get videoEditorExporting => 'Exporting video';
+
+  @override
+  String videoEditorCutting(int current, int total) {
+    return 'Cutting clip $current of $total';
+  }
+
+  @override
+  String get videoEditorCuttingOne => 'Cutting…';
+
+  @override
+  String get videoEditorSaving => 'Saving…';
+
+  @override
+  String videoEditorSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Saved $count videos',
+      one: 'Saved 1 video',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorAudioDropped =>
+      'Some audio tracks couldn\'t be copied.';
+
+  @override
+  String videoEditorExportFailed(String message) {
+    return 'Export failed: $message';
+  }
+
+  @override
+  String get videoEditorExportCancelled => 'Export cancelled';
+
+  @override
+  String get videoEditorExportTitle => 'Export';
+
+  @override
+  String videoEditorExportSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clips · $duration',
+      one: '1 clip · $duration',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorExportSingle => 'Save as new video';
+
+  @override
+  String get videoEditorExportSingleHint => 'The original stays untouched.';
+
+  @override
+  String get videoEditorExportMerge => 'Merge into one video';
+
+  @override
+  String get videoEditorExportMergeHint =>
+      'Clips are joined in timeline order.';
+
+  @override
+  String get videoEditorExportSeparate => 'Save as separate videos';
+
+  @override
+  String videoEditorExportSeparateHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new files',
+      one: 'One new file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorLosslessNote =>
+      'Cuts are lossless, so nothing is re-encoded. Each clip starts at the nearest keyframe before your start point and ends at the next keyframe after your end point. The thin bars under the timeline show exactly what will be saved.';
+
+  @override
+  String get videoEditorAnalyzing => '正在分析视频…';
+
+  @override
+  String get videoEditorDiscardTitle => '放弃编辑？';
+
+  @override
+  String get videoEditorDiscardMessage => '你有未保存的更改。确定要放弃吗？';
+
+  @override
+  String get videoEditorDiscardAction => '放弃';
+
+  @override
+  String get videoEditorPreviewCut => '预览剪辑';
+
+  @override
+  String get videoEditorSegments => '片段';
+
+  @override
+  String get videoEditorReplaceOriginal => '替换原视频';
+
+  @override
+  String get videoEditorReplaceOriginalHint => '原视频将被导出的剪辑内容替换。';
+
+  @override
+  String get videoEditorCustomFileName => '输出文件名';
+
+  @override
+  String get videoEditorSubtitlesWarning => '注意：无损导出无法保留内嵌字幕轨。';
+
+  @override
+  String get videoEditorRemoveSection => '删除片段';
+
+  @override
+  String get fileSkinScreenTitle => '文件管理器皮肤';
+
+  @override
+  String get fileSkinSectionHeader => '外观';
+
+  @override
+  String get fileSkinEntryTitle => '皮肤';
+
+  @override
+  String get fileSkinPreviewHeader => '预览';
+
+  @override
+  String get fileSkinPresetsHeader => '皮肤';
+
+  @override
+  String get fileSkinFoldersHeader => '文件夹';
+
+  @override
+  String get fileSkinFilesHeader => '文件';
+
+  @override
+  String get fileSkinTextHeader => '文本';
+
+  @override
+  String get fileSkinIconStyleLabel => '图标样式';
+
+  @override
+  String get fileSkinContainerLabel => '图标背景';
+
+  @override
+  String get fileSkinIconColorLabel => '图标颜色';
+
+  @override
+  String get fileSkinCustomIconColorLabel => '自定义图标颜色';
+
+  @override
+  String get fileSkinNameColorLabel => '名称颜色';
+
+  @override
+  String get fileSkinDetailsColorLabel => '详细信息颜色';
+
+  @override
+  String get fileSkinMonospaceLabel => '等宽名称';
+
+  @override
+  String get fileSkinMonospaceDesc => '对文件和文件夹名称使用等宽字体';
+
+  @override
+  String get fileSkinIconFamilyDefault => '默认';
+
+  @override
+  String get fileSkinIconFamilyFilled => '实心';
+
+  @override
+  String get fileSkinIconFamilyRounded => '圆角';
+
+  @override
+  String get fileSkinIconFamilyOutlined => '轮廓';
+
+  @override
+  String get fileSkinIconFamilySharp => '直角';
+
+  @override
+  String get fileSkinContainerFilled => '实心';
+
+  @override
+  String get fileSkinContainerOutlined => '轮廓';
+
+  @override
+  String get fileSkinContainerNone => '无';
+
+  @override
+  String get fileSkinColorAuto => '自动';
+
+  @override
+  String get fileSkinColorAccent => '主题强调色';
+
+  @override
+  String get fileSkinColorNeutral => '中性';
+
+  @override
+  String get fileSkinColorCustom => '自定义';
+
+  @override
+  String get fileSkinColorDefault => '默认';
+
+  @override
+  String get fileSkinColorHexLabel => '十六进制颜色';
+
+  @override
+  String get fileSkinPresetClassic => '经典';
+
+  @override
+  String get fileSkinPresetMinimalOutline => '极简轮廓';
+
+  @override
+  String get fileSkinPresetFrames => '边框';
+
+  @override
+  String get fileSkinPresetVivid => '鲜艳';
+
+  @override
+  String get fileSkinPresetTerminal => '终端';
+
+  @override
+  String get fileSkinPresetCustom => '自定义';
+
+  @override
+  String get compositeArchiveCarrierBlockingWarning =>
+      '要继续，请从所选文件中移除压缩包。压缩包不能用作组合保险库的载体，因为添加保险库可能会损坏它。';
+
+  @override
+  String get compositeArchiveCarrierRowWarning => '不支持此压缩包，请将其从所选文件中移除。';
+
+  @override
+  String videoEditorSelectedSegmentSummary(
+    int current,
+    int total,
+    String start,
+    String end,
+    String duration,
+  ) {
+    return '片段 $current/$total：$start – $end ($duration)';
+  }
+
+  @override
+  String get videoEditorKeepModeDescription => '导出选中的片段并舍弃其余部分。';
+
+  @override
+  String get videoEditorCutOutModeDescription => '移除选中的片段并导出剩余视频。';
+
+  @override
+  String get tapEdgesToNavigateTitle => '点按屏幕边缘进行导航';
+
+  @override
+  String get tapEdgesToNavigateSubtitle => '点按左侧或右侧边缘以显示上一个或下一个媒体项目。';
+
+  @override
+  String get doubleTapPlayPauseTitle => '双击播放/暂停';
+
+  @override
+  String get doubleTapPlayPauseSubtitle =>
+      '双击视频或音频画面中央可播放或暂停，而不是缩放。缩放时点按显示的缩放比例可重置视图。';
+
+  @override
+  String get doubleTapSkipTitle => '双击跳转';
+
+  @override
+  String get doubleTapSkipSubtitle => '双击视频左侧或右侧可快退或快进。继续点按可跳转更多。';
+
+  @override
+  String get doubleTapSkipDurationTitle => '跳转时长';
+
+  @override
+  String get loopPlaylistTitle => '循环播放列表';
+
+  @override
+  String get loopPlaylistSubtitle => '导航或播放列表时，到达末尾后继续从第一个项目开始。';
+
+  @override
+  String get showFileNamesInMediaNotificationTitle => '在媒体通知中显示文件名';
+
+  @override
+  String get showFileNamesInMediaNotificationSubtitle =>
+      '在通知、锁屏和已连接的设备上显示解密后的文件名。';
+
+  @override
+  String get textEditorEncodingTooltip => '文本编码';
+
+  @override
+  String get textEditorEncodingEncodeError => '部分字符无法使用此编码保存。';
+
+  @override
+  String get textEditorShowTabBarLabel => '显示编辑器标签页';
+
+  @override
+  String get textEditorShowTabBarDescription => '显示或隐藏已打开文件的标签页。你也可以通过侧边栏切换文件。';
+
+  @override
+  String get textEditorAutoHideTabBarLabel => '滚动时隐藏标签页';
+
+  @override
+  String get textEditorAutoHideTabBarDescription => '向下滚动时隐藏标签栏，向上滚动时重新显示。';
+
+  @override
+  String get lockWaitingForOperationsMessage => '正在等待当前操作完成后再锁定…';
+
+  @override
+  String get mirrorSyncActivityLabel => '正在将保险库更改保存到存储空间';
+
+  @override
+  String get seekGestureSensitivityTitle => '搜索手势灵敏度';
+
+  @override
+  String get volumeGestureSensitivityTitle => '音量手势灵敏度';
+
+  @override
+  String get brightnessGestureSensitivityTitle => '亮度手势灵敏度';
+
+  @override
+  String get thumbnailSettingsHeader => '缩略图生成';
+
+  @override
+  String get thumbnailGenerationStrategyTitle => '缩略图帧策略';
+
+  @override
+  String get thumbnailFirstFrameOption => '第一帧';
+
+  @override
+  String get thumbnailPercentageFrameOption => '指定位置的帧';
+
+  @override
+  String get thumbnailHybridOption => '混合（跳过空白开头）';
+
+  @override
+  String get thumbnailFramePositionTitle => '首选帧位置';
+
+  @override
+  String get volumeBoostHeader => '音量增强';
+
+  @override
+  String get volumeBoostTitle => '启用音量增强';
+
+  @override
+  String get volumeBoostSubtitle => '将视频的微弱音频提高到播放器正常音量以上。';
+
+  @override
+  String get volumeBoostGainTitle => '增强幅度';
+
+  @override
+  String get decoderSelectionHeader => '解码器选择';
+
+  @override
+  String get videoDecoderTitle => '视频解码器';
+
+  @override
+  String get audioDecoderTitle => '音频解码器';
+
+  @override
+  String get decoderAutoOption => '自动';
+
+  @override
+  String get decoderHardwareOption => '硬件';
+
+  @override
+  String get decoderSoftwareOption => '软件';
+
+  @override
+  String get decoderFfmpegOption => 'FFmpeg';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningTitle => '要删除本地存储根目录中的文件吗？';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningMessage =>
+      '此单向同步会扫描整个本地存储根目录。启用“导入后删除源文件”后，复制到保险库的文件在通过 SHA-256 校验后可能会从设备中删除。只有在确实要删除这些原始文件时才继续。';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningConfirm => '我已了解';
+
+  @override
+  String get autoSyncScheduledTitle => '保险库锁定时每天运行';
+
+  @override
+  String get autoSyncScheduledSubtitle =>
+      '应用关闭后也会在后台运行。Android 可能会延迟任务或停止长时间运行的任务。同步完成后会重新锁定保险库。';
+
+  @override
+  String get autoSyncScheduledSetupRequired => '需要启用完整自动化权限并保存保险库密码。';
+
+  @override
+  String get autoSyncScheduledConfigure => '设置后台访问权限';
+
+  @override
+  String get autoSyncScheduleWarningTitle => '启用计划同步？';
+
+  @override
+  String get autoSyncScheduleWarningMessage =>
+      '应用每天会在后台解锁此保险库一次，并在同步后重新锁定。Android 可能会延迟任务。如果启用了导入后删除，只有在保险库副本写入完成且文件大小与 SHA-256 校验和匹配后，才会删除源文件。';
+
+  @override
+  String get autoSyncScheduleEnable => '启用计划';
+
+  @override
+  String get autoSyncScheduleNotificationRequired =>
+      '请允许通知，以便 Android 在后台同步时显示“正在同步保险库...”。';
+
+  @override
+  String get autoSyncScheduleFailed => '规则已保存，但无法启用计划同步。';
+
+  @override
+  String get autoSyncSavedScheduled => '规则和每日计划已保存。';
+
+  @override
+  String get autoSyncScheduledTimeTitle => 'Daily run time';
+
+  @override
+  String get autoSyncScheduledTimeSubtitle =>
+      'Device local time. For a quick test, choose a time a minute or two from now; Android may run it later.';
+
+  @override
+  String get autoSyncExactAlarmAccessTitle => '允许每日同步使用精确闹钟？';
+
+  @override
+  String get autoSyncExactAlarmAccessMessage =>
+      'Android 需要“闹钟和提醒”访问权限，才能在应用关闭时于你选择的时间启动 Vault Explorer 的每日同步。请在下一屏允许访问，返回此处后再次开启计划同步。';
+
+  @override
+  String get autoSyncExactAlarmAccessOpen => '打开设置';
+
+  @override
+  String get autoSyncExactAlarmAccessUnavailable =>
+      '无法打开 Android 闹钟设置。请在系统设置中为 Vault Explorer 启用“闹钟和提醒”，然后重试。';
+
+  @override
+  String get localStoragePermissionTitle => '允许访问本地存储';
+
+  @override
+  String get localStorageGrantAccess => '授予访问权限';
+
+  @override
+  String get hideStorageLocationsTitle => '隐藏存储位置？';
+
+  @override
+  String get hideStorageLocationsPrompt =>
+      '尚未授予“所有文件访问”权限。要从侧边栏隐藏本地存储和已添加的位置吗？你可以在设置中重新显示。';
+
+  @override
+  String get hide => '隐藏';
+
+  @override
+  String get mediaViewerActionAdjustments => '调整';
+
+  @override
+  String get adjustmentsSheetTitle => '调整';
+
+  @override
+  String get adjustmentBrightness => '亮度';
+
+  @override
+  String get adjustmentContrast => '对比度';
+
+  @override
+  String get adjustmentSaturation => '饱和度';
+
+  @override
+  String get adjustmentHue => '色调';
+
+  @override
+  String get adjustmentGamma => '伽马';
+
+  @override
+  String get adjustmentsApplyToAll => '应用到所有文件';
+
+  @override
+  String get adjustmentsCompareHold => '按住以对比';
+
+  @override
+  String get adjustmentPresetVivid => '鲜艳';
+
+  @override
+  String get adjustmentPresetBlackAndWhite => '黑白';
+
+  @override
+  String get adjustmentPresetWarm => '暖色';
+
+  @override
+  String get adjustmentPresetCool => '冷色';
+
+  @override
+  String get videoFilePropertiesSectionHeader => '视频与音频';
+
+  @override
+  String get durationLabel => '时长';
+
+  @override
+  String get rotationLabel => '旋转';
+
+  @override
+  String get videoBitrateLabel => '视频码率';
+
+  @override
+  String get audioBitrateLabel => '音频码率';
+
+  @override
+  String get sampleRateLabel => '采样率';
+
+  @override
+  String get audioChannelsLabel => '音频声道';
+
+  @override
+  String get subtitleTracksLabel => '字幕轨道';
+
+  @override
+  String get skinActionAccent => '操作强调色';
+
+  @override
+  String get skinEmphasisForActionIconsActiveControlsProgressAndLinks =>
+      '用于操作图标、活动控件、进度和链接的强调。';
+
+  @override
+  String get skinTextAndIconsOnAccentButtons => '强调按钮上的文本和图标';
+
+  @override
+  String get skinForegroundForButtonsFilledWithTheActionAccentColor =>
+      '使用操作强调色填充的按钮的前景色。';
+
+  @override
+  String get skinSelectionAndIconTileBackground => '选定项和图标平铺背景';
+
+  @override
+  String get skinSelectedFilesAndVaultFormat076e52 =>
+      '选定文件和保管库格式图标平铺使用此颜色。悬浮按钮填充有其独立设置。';
+
+  @override
+  String get skinTextAndIconsOnSelectionColors => '选择颜色上的文本和图标';
+
+  @override
+  String get skinForegroundForIconTilesAndOtherPrimaryContainerSurfaces =>
+      '图标平铺及其他主要容器表面的前景色。';
+
+  @override
+  String get skinSteadyMainAccent => '固定主强调色';
+
+  @override
+  String get skinAPrimaryAccentThatStaysTheSameInLightAndDarkSurfaces =>
+      '在浅色和深色表面上保持一致的主要强调色。';
+
+  @override
+  String get skinMutedSteadyMainAccent => '柔和固定主强调色';
+
+  @override
+  String get skinASofterVersionOfTheSteadyPrimaryAccent => '固定主要强调色的更柔和版本。';
+
+  @override
+  String get skinTextOnSteadyMainAccent => '固定主强调色上的文本';
+
+  @override
+  String get skinForegroundForPrimaryFixedColors => '主要固定颜色的前景色。';
+
+  @override
+  String get skinMutedTextOnSteadyMainAccent => '固定主强调色上的柔和文本';
+
+  @override
+  String get skinSecondaryForegroundForPrimaryFixedColors => '主要固定颜色的辅助前景色。';
+
+  @override
+  String get skinSecondaryAccent => '辅助强调色';
+
+  @override
+  String get skinSupportingActionsAndLessProminentHighlights => '次要操作和较不显著的高亮。';
+
+  @override
+  String get skinTextOnSecondaryAccent => '辅助强调色上的文本';
+
+  @override
+  String get skinLabelsAndIconsOnSecondaryColoredAreas => '辅助颜色区域上的标签和图标。';
+
+  @override
+  String get skinSecondaryBackground => '次要背景';
+
+  @override
+  String get skinSoftFillForSupportingContent => '辅助内容的柔和填充。';
+
+  @override
+  String get skinTextOnSecondaryBackgrounds => '次要背景上的文本';
+
+  @override
+  String get skinForegroundForSecondaryContainers => '次要容器的前景色。';
+
+  @override
+  String get skinSteadySecondaryAccent => '固定辅助强调色';
+
+  @override
+  String get skinASecondaryAccentThatStaysTheSameAcrossSurfaces =>
+      '在不同表面间保持一致的辅助强调色。';
+
+  @override
+  String get skinMutedSteadySecondaryAccent => '柔和固定辅助强调色';
+
+  @override
+  String get skinASofterVersionOfTheSteadySecondaryAccent => '固定辅助强调色的更柔和版本。';
+
+  @override
+  String get skinTextOnSteadySecondaryAccent => '固定辅助强调色上的文本';
+
+  @override
+  String get skinForegroundForSecondaryFixedColors => '辅助固定颜色的前景色。';
+
+  @override
+  String get skinMutedTextOnSteadySecondaryAccent => '固定辅助强调色上的柔和文本';
+
+  @override
+  String get skinSecondaryForegroundForSecondaryFixedColors => '辅助固定颜色的辅助前景色。';
+
+  @override
+  String get skinExtraAccentColor => '附加强调色';
+
+  @override
+  String get skinDecorativeHighlightsAndContrastingAccents => '装饰性高亮与对比强调。';
+
+  @override
+  String get skinTextOnExtraAccent => '附加强调色上的文本';
+
+  @override
+  String get skinLabelsAndIconsOnTertiaryColoredAreas => '第三级颜色区域上的标签和图标。';
+
+  @override
+  String get skinExtraAccentBackground => '附加强调背景';
+
+  @override
+  String get skinSoftFillForTertiaryContent => '第三级内容的柔和填充。';
+
+  @override
+  String get skinTextOnExtraAccentBackgrounds => '附加强调背景上的文本';
+
+  @override
+  String get skinForegroundForTertiaryContainers => '第三级容器的前景色。';
+
+  @override
+  String get skinSteadyExtraAccent => '固定附加强调色';
+
+  @override
+  String get skinATertiaryAccentThatStaysTheSameAcrossSurfaces =>
+      '在不同表面间保持一致的第三级强调色。';
+
+  @override
+  String get skinMutedSteadyExtraAccent => '柔和固定附加强调色';
+
+  @override
+  String get skinASofterVersionOfTheSteadyTertiaryAccent => '固定第三级强调色的更柔和版本。';
+
+  @override
+  String get skinTextOnSteadyExtraAccent => '固定附加强调色上的文本';
+
+  @override
+  String get skinForegroundForTertiaryFixedColors => '第三级固定颜色的前景色。';
+
+  @override
+  String get skinMutedTextOnSteadyExtraAccent => '固定附加强调色上的柔和文本';
+
+  @override
+  String get skinSecondaryForegroundForTertiaryFixedColors => '第三级固定颜色的辅助前景色。';
+
+  @override
+  String get skinErrorColor => '错误颜色';
+
+  @override
+  String get skinErrorsDestructiveActionsAndInvalidInput => '错误、破坏性操作和无效输入。';
+
+  @override
+  String get skinTextOnErrorColor => '错误颜色上的文本';
+
+  @override
+  String get skinLabelsAndIconsOnErrorColoredAreas => '错误颜色区域上的标签和图标。';
+
+  @override
+  String get skinErrorBackground => '错误背景';
+
+  @override
+  String get skinSoftFillBehindErrorMessages => '错误消息背后的柔和填充。';
+
+  @override
+  String get skinTextOnErrorBackgrounds => '错误背景上的文本';
+
+  @override
+  String get skinForegroundForErrorContainers => '错误容器的前景色。';
+
+  @override
+  String get skinPageBackground => '页面背景';
+
+  @override
+  String get skinTheMainBackgroundBehindAppContent => '应用内容背后的主要背景。';
+
+  @override
+  String get skinMainTextAndIcons => '主文本和图标';
+
+  @override
+  String get skinPrimaryContentDrawnOnPageAndCardBackgrounds =>
+      '在页面和卡片背景上绘制的主要内容。';
+
+  @override
+  String get skinDimmedBackground => '暗淡背景';
+
+  @override
+  String get skinTheDarkestNeutralSurfaceLayer => '最暗的中性表面层。';
+
+  @override
+  String get skinBrightBackground => '明亮背景';
+
+  @override
+  String get skinTheLightestNeutralSurfaceLayer => '最亮的中性表面层。';
+
+  @override
+  String get skinDeepestCardLayer => '最深卡片层';
+
+  @override
+  String get skinTheLowestAndQuietestSurfaceContainer => '层级最低、最隐蔽的表面容器。';
+
+  @override
+  String get skinLowCardLayer => '低层卡片层';
+
+  @override
+  String get skinSubtleCardsAndRecessedAreas => '微妙的卡片和凹陷区域。';
+
+  @override
+  String get skinStandardCardLayer => '标准卡片层';
+
+  @override
+  String get skinCommonCardsAndGroupedContent => '常规卡片和分组内容。';
+
+  @override
+  String get skinRaisedCardLayer => '凸起卡片层';
+
+  @override
+  String get skinRaisedCardsMenusAndAppBars => '凸起卡片、菜单和应用栏。';
+
+  @override
+  String get skinTopCardLayer => '顶层卡片层';
+
+  @override
+  String get skinProminentPanelsAndSelectedSurfaces => '醒目面板和选定表面。';
+
+  @override
+  String get skinSecondaryTextAndIcons => '次要文本和图标';
+
+  @override
+  String get skinDetailsHintsAndSupportingLabels => '详细信息、提示和辅助标签。';
+
+  @override
+  String get skinStrongBorder => '粗边框';
+
+  @override
+  String get skinVisibleBordersAndSeparators => '可见边框和分隔线。';
+
+  @override
+  String get skinSubtleBorder => '精细边框';
+
+  @override
+  String get skinQuietOutlinesAndLowEmphasisSeparators => '柔和轮廓与低强调分隔线。';
+
+  @override
+  String get skinShadowTint => '阴影色调';
+
+  @override
+  String get skinTintUsedByElevatedSurfaces => '凸起表面使用的色调。';
+
+  @override
+  String get skinModalBackdrop => '模态背景遮罩';
+
+  @override
+  String get skinTintBehindDialogsAndModalSheets => '对话框和模态面板背后的底色。';
+
+  @override
+  String get skinInvertedSurface => '反转表面';
+
+  @override
+  String get skinAContrastingSurfaceForInverseElements => '用于反转元素的高对比度表面。';
+
+  @override
+  String get skinTextOnInvertedSurfaces => '反转表面上的文本';
+
+  @override
+  String get skinForegroundUsedOverInverseSurfaces => '在反转表面上使用的前景色。';
+
+  @override
+  String get skinInvertedMainAccent => '反转主强调色';
+
+  @override
+  String get skinPrimaryAccentUsedOnInverseSurfaces => '在反转表面上使用的主要强调色。';
+
+  @override
+  String get skinElevationTint => '仰角高度色调';
+
+  @override
+  String get skinTintAppliedToElevatedSurfaces => '应用于凸起表面的色调。';
+
+  @override
+  String get skinSuccessColor => '成功颜色';
+
+  @override
+  String get skinCompletedActionsAndPositiveStatus => '已完成的操作和良好状态。';
+
+  @override
+  String get skinTextOnSuccessColor => '成功颜色上的文本';
+
+  @override
+  String get skinForegroundForSuccessColoredContent => '成功颜色内容的前景色。';
+
+  @override
+  String get skinSuccessBackground => '成功背景';
+
+  @override
+  String get skinSoftFillBehindPositiveStatusMessages => '正面状态消息背后的柔和填充。';
+
+  @override
+  String get skinTextOnSuccessBackgrounds => '成功背景上的文本';
+
+  @override
+  String get skinForegroundForSuccessContainers => '成功容器的前景色。';
+
+  @override
+  String get skinWarningColor => '警告颜色';
+
+  @override
+  String get skinCautionAttentionAndPendingStatus => '注意、警示和待处理状态。';
+
+  @override
+  String get skinTextOnWarningColor => '警告颜色上的文本';
+
+  @override
+  String get skinForegroundForWarningColoredContent => '警告颜色内容的前景色。';
+
+  @override
+  String get skinWarningBackground => '警告背景';
+
+  @override
+  String get skinSoftFillBehindWarningMessages => '警告消息背后的柔和填充。';
+
+  @override
+  String get skinTextOnWarningBackgrounds => '警告背景上的文本';
+
+  @override
+  String get skinForegroundForWarningContainers => '警告容器的前景色。';
+
+  @override
+  String get skinBookmarkColor => '书签颜色';
+
+  @override
+  String get skinSavedAndBookmarkedItems => '已保存和添加书签的项目。';
+
+  @override
+  String get skinMainActions => '主要操作';
+
+  @override
+  String get skinPrimaryButtonsSelectionsAndFixedPrimaryAccents =>
+      '主要按钮、选择和固定主强调色。';
+
+  @override
+  String get skinSupportingAccents => '辅助强调色';
+
+  @override
+  String get skinSecondaryAndTertiaryHighlightsAndTheirTextColors =>
+      '辅助和第三级高亮及其文本颜色。';
+
+  @override
+  String get skinErrorMessagesAndDestructiveOrInvalidStates =>
+      '错误消息以及破坏性或无效状态。';
+
+  @override
+  String get skinPagesCardsAndText => '页面、卡片和文本';
+
+  @override
+  String get skinAppBackgroundsCardsMenusAndForegroundText =>
+      '应用背景、卡片、菜单和前景文本。';
+
+  @override
+  String get skinBordersAndOverlays => '边框和覆层';
+
+  @override
+  String get skinOutlinesShadowsAndModalBackdrops => '轮廓、阴影和模态遮罩。';
+
+  @override
+  String get skinTapAnyPreviewElement => '点按任意预览元素';
+
+  @override
+  String get skinChooseAnAppFileOrEditorColorToSeeWhatItControls =>
+      '选择应用、文件或编辑器颜色以查看其控制的内容。';
+
+  @override
+  String get skinCustomizeSkin => '自定义皮肤';
+
+  @override
+  String get skinLight => '浅色';
+
+  @override
+  String get skinDark => '深色';
+
+  @override
+  String get skinApp => '应用';
+
+  @override
+  String get skinEditor => '编辑器';
+
+  @override
+  String get skinSkinDetails => '皮肤详情';
+
+  @override
+  String get skinNameYourSkinAndChooseWhichPaletteToEdit => '命名您的皮肤并选择要编辑的调色板。';
+
+  @override
+  String get skinSkinName => '皮肤名称';
+
+  @override
+  String get skinMyCustomSkin => '我的自定义皮肤';
+
+  @override
+  String get skinLightColors => '浅色调';
+
+  @override
+  String get skinDarkColors => '深色调';
+
+  @override
+  String get skinPageAndActions => '页面与操作';
+
+  @override
+  String get skinTheMainBackgroundTextAndActionColors => '主要背景、文本和操作颜色。';
+
+  @override
+  String get skinAppBar => '应用栏';
+
+  @override
+  String get skinTheTopNavigationBarIsIndependentFromCardsAndPages =>
+      '顶部导航栏独立于卡片和页面。';
+
+  @override
+  String get skinTopBarFillColor => '顶栏填充颜色。';
+
+  @override
+  String get skinTitleAndIcons => '标题和图标';
+
+  @override
+  String get skinTopBarTextAndIconColor => '顶栏文本和图标颜色。';
+
+  @override
+  String get skinFloatingActionButton => '悬浮操作按钮';
+
+  @override
+  String get skinItsFillAndIconColorAreSeparateFromSelectionColors =>
+      '其填充和图标颜色独立于选择颜色。';
+
+  @override
+  String get skinButtonFill => '按钮填充';
+
+  @override
+  String get skinBackgroundOfTheRoundButton => '圆形“+”按钮的背景。';
+
+  @override
+  String get skinButtonIcon => '按钮图标';
+
+  @override
+  String get skinIconColorOnTheRoundButton => '圆形“+”按钮上的图标颜色。';
+
+  @override
+  String get skinDashboardVaultCards => '仪表盘保管库卡片';
+
+  @override
+  String get skinSetTheBackgroundForLockedAndMountedVaultCards =>
+      '设置锁定和挂载的保管库卡片的背景。';
+
+  @override
+  String get skinLockedVaultCard => '已锁定保管库卡片';
+
+  @override
+  String get skinNeutralVaultCardFill => '中性保管库卡片填充。';
+
+  @override
+  String get skinMountedVaultCard => '已挂载保管库卡片';
+
+  @override
+  String get skinSeparateFillForAnUnlockedMountedVault => '已解锁并挂载的保管库的独立填充。';
+
+  @override
+  String get skinFineTuneAppColors => '微调应用颜色';
+
+  @override
+  String get skinAdvancedMaterialColorsForLessCommonElements =>
+      '用于不常用元素的高级 Material 颜色。';
+
+  @override
+  String get skinStatusAndBookmarkColors => '状态和书签颜色';
+
+  @override
+  String get skinColorsForSuccessWarningsErrorsAndBookmarks =>
+      '用于成功、警告、错误和书签的颜色。';
+
+  @override
+  String get skinTheCustomSkinIsActive971ce3 =>
+      '自定义皮肤立即生效，同时文件管理器和编辑器已设置为沿用应用皮肤。';
+
+  @override
+  String get skinCustomColorTapToChangeOrReset => '自定义颜色 — 点击可修改或重置为默认值。';
+
+  @override
+  String get skinTapTheColorCircleToChooseAColor => '点按色圈以选择颜色。';
+
+  @override
+  String get skinAppBarBackground => '应用栏背景';
+
+  @override
+  String get skinTheDashboardAndOtherAppBarsUseThisIndependentColor =>
+      '仪表盘及其他应用栏使用此独立颜色。';
+
+  @override
+  String get skinDashboardMenuIcon => '仪表盘菜单图标';
+
+  @override
+  String get skinTheHamburgerButtonUsesTheAppBarIconColor => '汉堡菜单按钮使用应用栏图标颜色。';
+
+  @override
+  String get skinDashboardTitle => '仪表盘标题';
+
+  @override
+  String get skinTheDashboardTitleUsesTheAppBarForegroundColor =>
+      '仪表盘标题使用应用栏前景色。';
+
+  @override
+  String get skinActionLabelAndIcon => '操作标签和图标';
+
+  @override
+  String get skinTheActionAccentColorsLabelsb08a63 => '操作强调色用于“添加保管库”等标签及其图标。';
+
+  @override
+  String get skinDashboardAddButton => '仪表盘添加按钮';
+
+  @override
+  String get skinTheButtonFillAndPlusIconHaveSeparateSkinColors =>
+      '按钮填充和加号图标具有单独的皮肤颜色。';
+
+  @override
+  String get skinVaultCardAndIconBackground => '保管库卡片和图标背景';
+
+  @override
+  String get skinTheIconTileUsesPrimary5c2f93 =>
+      '图标平铺使用 Primary container。挂载的保管库卡片将该颜色与凸起表面混合。';
+
+  @override
+  String get skinVaultFormatIconColor => '保管库格式图标颜色';
+
+  @override
+  String get skinVaultFormatInitialsUseOnPrimaryContainer =>
+      '保管库格式首字母使用 On primary container。';
+
+  @override
+  String get skinVaultStorageDetails => '保管库存储详情';
+
+  @override
+  String get skinFreeSpaceAndCapacityUseTheSupportingTextColor =>
+      '可用空间和总容量使用辅助文本颜色。';
+
+  @override
+  String get skin17GBFree5GB => '剩余 1.7 GB / 5 GB';
+
+  @override
+  String get skinVaultStorageProgress => '保管库存储进度';
+
+  @override
+  String get skinTheProgressBarUsesTheba7c98 =>
+      '进度条使用应用强调色，并在存储空间变满时切换为第三级颜色和错误颜色。';
+
+  @override
+  String get skinLockActionBackground => '锁定操作背景';
+
+  @override
+  String get skinTheMountedVaultLockButtonUsesPrimaryContainer =>
+      '挂载保管库的锁定按钮使用 Primary container。';
+
+  @override
+  String get skinVaultActionsIconColor => '保管库操作图标颜色';
+
+  @override
+  String get skinTheOverflowMenuUsesTheSupportingIconColor => '溢出菜单使用辅助图标颜色。';
+
+  @override
+  String get skinMountedVaultCardBackground => '已挂载保管库卡片背景';
+
+  @override
+  String get skinThisIsTheBackgroundOfa8d0d3 => '这是挂载保管库卡片的背景。其图标平铺仍使用主操作颜色。';
+
+  @override
+  String get skinLockedVaultCardBackground => '已锁定保管库卡片背景';
+
+  @override
+  String get skinThisColorIsIndependentFromTheAppBarAndMountedVaultCard =>
+      '此颜色独立于应用栏和挂载的保管库卡片。';
+
+  @override
+  String get skinLockedVaultFormatIcon => '锁定保管库格式图标';
+
+  @override
+  String get skinLockedVaultIconsUseTheSupportingTextAndIconColor =>
+      '锁定保管库图标使用辅助文本和图标颜色。';
+
+  @override
+  String get skinSharedArchive => '共享存档';
+
+  @override
+  String get skinLockedVaultStatusText => '锁定保管库状态文本';
+
+  @override
+  String get skinTheLockedStatusLabelUsesTheSupportingTextColor =>
+      '锁定状态标签使用辅助文本颜色。';
+
+  @override
+  String get skinLockedVaultActionsIcon => '锁定保管库操作图标';
+
+  @override
+  String get skinVaultActionsMenuBackground => '保管库操作菜单背景';
+
+  @override
+  String get skinTheEditAndRemovePopupUsesTheMenuSurfaceColor =>
+      '“编辑”和“移除”弹出窗口使用菜单表面颜色。';
+
+  @override
+  String get skinEditMenuItem => '“编辑”菜单项';
+
+  @override
+  String get skinTheEditActionUsesTheRegularForegroundColor => '“编辑”操作使用常规前景色。';
+
+  @override
+  String get skinRemoveMenuItem => '“移除”菜单项';
+
+  @override
+  String get skinDestructiveActionsUseTheErrorColor => '破坏性操作使用错误颜色。';
+
+  @override
+  String get skinFileManagerAppBar => '文件管理器应用栏';
+
+  @override
+  String get skinFileBrowserToolbarsUseTheSameAppBarBackground =>
+      '文件浏览器工具栏使用相同的应用栏背景。';
+
+  @override
+  String get skinFileManagerBackButton => '文件管理器返回按钮';
+
+  @override
+  String get skinToolbarNavigationIconsUseThisColor => '工具栏导航图标使用此颜色。';
+
+  @override
+  String get skinFileManagerTitle => '文件管理器标题';
+
+  @override
+  String get skinTheCurrentFolderNameUsesTheAppBarForeground =>
+      '当前文件夹名称使用应用栏前景色。';
+
+  @override
+  String get skinFileManagerAppBarActions => '文件管理器应用栏操作';
+
+  @override
+  String get skinToolbarActionsUseThisIconColor => '工具栏操作使用此图标颜色。';
+
+  @override
+  String get skinProjects => '项目';
+
+  @override
+  String get skinFolder12Items => '文件夹 · 12 项';
+
+  @override
+  String get skinTextFile4KB => '文本文件 · 4 KB';
+
+  @override
+  String get skinCompressedFile28MB => '压缩文件 · 28 MB';
+
+  @override
+  String get skin3Items => '3 项';
+
+  @override
+  String get skinFileManagerAddButton => '文件管理器添加按钮';
+
+  @override
+  String get skinAddButtonIconColor => '添加按钮图标颜色';
+
+  @override
+  String get skinThePlusIconUsesTheButtonForegroundColor => '加号图标使用按钮前景色。';
+
+  @override
+  String get skinEditorFileName => '编辑器文件名';
+
+  @override
+  String get skinTheEditorToolbarUsesTheAppForegroundColor => '编辑器工具栏使用应用前景色。';
+
+  @override
+  String get skinDartUTF8Ln3Col12 => ' 第 3 行，第 12 列';
+
+  @override
+  String get skinTheMainBackgroundBehindThisScreen => '此屏幕背后的主要背景。';
+
+  @override
+  String get skinFolderIconColor => '文件夹图标颜色';
+
+  @override
+  String get skinFileIconColor => '文件图标颜色';
+
+  @override
+  String get skinText => ' : ';
+
+  @override
+  String get skinFolderNameColor => '文件夹名称颜色';
+
+  @override
+  String get skinFileNameColor => '文件名称颜色';
+
+  @override
+  String get skinFileDetailsColor => '文件详细信息颜色';
+
+  @override
+  String get skinTheSmallerDateSizeAndTypeLabelsUseThisColor =>
+      '较小的日期、大小和类型标签使用此颜色。';
+
+  @override
+  String get skinFileOverflowButton => '文件更多选项按钮';
+
+  @override
+  String get skinEachRowSThreeDotButtonUsesTheSupportingIconColor =>
+      '每行的三点按钮使用辅助图标颜色。';
+
+  @override
+  String get skinSelectedFileRow => '选定文件行';
+
+  @override
+  String get skinSelectedRowsUseATranslucente0ff21 =>
+      '选定行使用半透明的主容器高亮；文件列表本身保持在页面背景上。';
+
+  @override
+  String get skinFileActionsMenuBackground => '文件操作菜单背景';
+
+  @override
+  String get skinTheFileActionsPopupUsesTheMenuSurfaceColor =>
+      '文件操作弹出窗口使用菜单表面颜色。';
+
+  @override
+  String get skinOpenFileMenuItem => '“打开文件”菜单项';
+
+  @override
+  String get skinRegularFileActionsUseTheMainTextColor => '常规文件操作使用主文本颜色。';
+
+  @override
+  String get skinOpen => '打开';
+
+  @override
+  String get skinDeleteFileMenuItem => '“删除文件”菜单项';
+
+  @override
+  String get skinEditorBackground => '编辑器背景';
+
+  @override
+  String get skinTheCanvasColorBehindTheCode => '代码背后的画布颜色。';
+
+  @override
+  String get skinEditorLineNumbers => '编辑器行号';
+
+  @override
+  String get skinTheGutterAndLineNumbersBesideTheCode => '代码旁边的边槽和行号。';
+
+  @override
+  String get skinEditorTextColor => '代码文本颜色';
+
+  @override
+  String get skinTheDefaultCodeAndEditorTextColor =>
+      '普通代码的默认文本颜色；语法高亮文本使用各自的颜色。';
+
+  @override
+  String get skinEditorCursor => '编辑器光标';
+
+  @override
+  String get skinTheInsertionCaretColor => '插入光标颜色。';
+
+  @override
+  String get skinEditorSelectionHighlight => '编辑器选中高亮';
+
+  @override
+  String get skinTheBackgroundUsedToHighlightSelectedCode => '用于高亮所选代码的背景。';
+
+  @override
+  String get skinEditorKeywords => '关键字';
+
+  @override
+  String get skinEditorKeywordsExplanation =>
+      '诸如 class、void、return 和 if 等语言关键字。';
+
+  @override
+  String get skinEditorTypes => '类型与类';
+
+  @override
+  String get skinEditorTypesExplanation => '类名、类型和接口。';
+
+  @override
+  String get skinEditorStrings => '字符串';
+
+  @override
+  String get skinEditorStringsExplanation => '带引号的文本和字符串字面量。';
+
+  @override
+  String get skinEditorNumbers => '数字与值';
+
+  @override
+  String get skinEditorNumbersExplanation => '数值字面量、布尔值和常量。';
+
+  @override
+  String get skinEditorFunctions => '函数与方法';
+
+  @override
+  String get skinEditorFunctionsExplanation => '函数名称、方法调用和内置函数。';
+
+  @override
+  String get skinEditorComments => '注释';
+
+  @override
+  String get skinEditorCommentsExplanation => '代码注释和文档块。';
+
+  @override
+  String get textEditorColorsSectionTitle => '编辑器颜色与字体';
+
+  @override
+  String get textEditorSyntaxColorsSectionTitle => '语法元素颜色';
+
+  @override
+  String get textEditorColorsCustomized => '已启用自定义颜色';
+
+  @override
+  String get textEditorResetColors => '将颜色重置为默认值';
+
+  @override
+  String get textEditorFollowAppSkinNotice => '编辑器颜色遵循当前应用皮肤。';
+
+  @override
+  String get textEditorCustomizeColorsIndependently => '单独自定义颜色';
+
+  @override
+  String get textEditorDefaultFromTheme => '默认（来自主题）';
+
+  @override
+  String get skinFileManager => '文件管理器';
+
+  @override
+  String get skinFolderAndFileGlyphsTilesAndLabelColors => '文件夹和文件的字形、平铺及标签颜色。';
+
+  @override
+  String get skinDetailsTextColor => '详细信息文本颜色';
+
+  @override
+  String get skinUseTheAppSSupportingTextColor => '使用应用的辅助文本颜色';
+
+  @override
+  String get skinCustomColor => '自定义颜色';
+
+  @override
+  String get skinMonospaceFileNames => '等宽字体文件名';
+
+  @override
+  String get skinBackgroundBehindTheIcon => '图标背后的背景';
+
+  @override
+  String get skinIconColorSource => '图标颜色来源';
+
+  @override
+  String get skinUseTheAppSMainTextColor => '使用应用的主文本颜色';
+
+  @override
+  String get skinTextEditor => '文本编辑器';
+
+  @override
+  String get skinCanvasGutterCursorSelectionBackgroundAndSyntaxTemplate =>
+      '画布、边槽、光标、选中项、背景和语法模板。';
+
+  @override
+  String get skinGutterAndLineNumbers => '边槽与行号';
+
+  @override
+  String get skinCursor => '光标';
+
+  @override
+  String get skinSelection => '选中项';
+
+  @override
+  String get skinEditorBackgroundTemplate => '编辑器背景模板';
+
+  @override
+  String get skinSyntaxTemplate => '语法模板';
+
+  @override
+  String get skinTapTheColorCircleToChooseAColor246981 => '点按色圈以选择颜色';
+
+  @override
+  String get skinDefaultVaultExplorerIcons => '默认 Vault Explorer 图标';
+
+  @override
+  String get skinSolidIcons => '实心图标';
+
+  @override
+  String get skinRoundedIcons => '圆角图标';
+
+  @override
+  String get skinOutlineIcons => '轮廓图标';
+
+  @override
+  String get skinSquareCornerIcons => '直角图标';
+
+  @override
+  String get skinTintedTileBehindTheIcon => '图标背后的着色平铺';
+
+  @override
+  String get skinOutlinedTileBehindTheIcon => '图标背后的轮廓平铺';
+
+  @override
+  String get skinNoTile => '无平铺';
+
+  @override
+  String get skinAutomaticFileTypeOrFolderColor => '自动 (文件类型或文件夹颜色)';
+
+  @override
+  String get skinUseTheMainAppAccent => '使用应用主强调色';
+
+  @override
+  String get skinUseAMutedNeutralColor => '使用柔和中性色';
+
+  @override
+  String get skinChooseAColorBelow => '在下方选择颜色';
+
+  @override
+  String get skinUseTheSyntaxThemeBackground => '使用语法主题背景';
+
+  @override
+  String get skinPureBlack => '纯黑';
+
+  @override
+  String get skinDarkSlate => '深灰石';
+
+  @override
+  String get skinCleanWhite => '纯净白';
+
+  @override
+  String get skinWarmSepia => '暖乌贼墨褐';
+
+  @override
+  String get skinAutomaticMatchLightOrDarkMode => '自动 (匹配浅色或深色模式)';
+
+  @override
+  String get skinSkinExported => '皮肤已导出。';
+
+  @override
+  String get skinSkinsExported => '皮肤已导出。';
+
+  @override
+  String get skinRemoveSkin => '移除皮肤？';
+
+  @override
+  String get skinAppSkin => '应用皮肤';
+
+  @override
+  String get skinImportSkins => '导入皮肤';
+
+  @override
+  String get skinExportSkins => '导出皮肤';
+
+  @override
+  String get skinChooseACoordinatedLookForTheAppFileManagerAndEditor =>
+      '为应用、文件管理器和编辑器选择协调统一的外观。 ';
+
+  @override
+  String get skinLightAndDarkSystemThemesUseMatchingPaletteVariants =>
+      '浅色和深色系统主题使用相匹配的调色板变体。';
+
+  @override
+  String get skinEditCurrentSkin => '编辑当前皮肤';
+
+  @override
+  String get skinCreateASkinFromThisLook => '根据此外观创建皮肤';
+
+  @override
+  String get skinYourSkins => '您的皮肤';
+
+  @override
+  String get skinCustomAppFileManagerAndEditorColors => '自定义应用、文件管理器和编辑器颜色';
+
+  @override
+  String get skinMaterialColorsWithLightAndDarkVariants =>
+      '具有浅色和深色变体的 Material 颜色';
+
+  @override
+  String get skinTrueBlackEditorAndDarkf97e8f => '纯黑编辑器和深色应用表面，搭配 OLED 强调色调色板';
+
+  @override
+  String get skinYourEditableAppFileManagerAndEditorColors =>
+      '可编辑的应用、文件管理器和编辑器颜色';
+
+  @override
+  String get skinSkinActions => '皮肤操作';
+
+  @override
+  String get skinEditSkin => '编辑皮肤';
+
+  @override
+  String get skinExportSkin => '导出皮肤';
+
+  @override
+  String get skinRemoveSkinf09101 => '移除皮肤';
+
+  @override
+  String get skinDragAroundTheRingTo868d62 => '在色环上拖动以选择色相，然后在内部移动以调整明暗。';
+
+  @override
+  String get skinQuickColors => '快捷颜色';
+
+  @override
+  String get skinEnterAnExactColor => '输入准确颜色';
+
+  @override
+  String get skinOptionalRGBOrARGBValue => '可选的 RGB 或 ARGB 值';
+
+  @override
+  String get skinRGBARGB => 'RGB / ARGB';
+
+  @override
+  String get skinUseThisValue => '使用此值';
+
+  @override
+  String get skinDefaultLightDark => '默认 浅色 / 深色';
+
+  @override
+  String get skinOLEDPureBlack => 'OLED 纯黑';
+
+  @override
+  String get skinCustomSkin => '自定义皮肤';
+
+  @override
+  String skinImportSucceeded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已导入 # 个皮肤。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String skinImportFailed(String error) {
+    return '无法导入皮肤：$error';
+  }
+
+  @override
+  String skinExportFailed(String error) {
+    return '无法导出皮肤：$error';
+  }
+
+  @override
+  String skinRemoveConfirmation(String skin) {
+    return '“$skin”将从您保存的皮肤中移除。';
+  }
+
+  @override
+  String skinSelectPreviewElement(String title) {
+    return '选择 $title';
+  }
+
+  @override
+  String skinIconColorForItem(String item) {
+    return '$item 图标颜色';
+  }
+
+  @override
+  String skinNameColorForItem(String item) {
+    return '$item 名称颜色';
+  }
+
+  @override
+  String get skinFileIconColorSettingDescription => '此颜色由文件管理器部分中的图标颜色设置控制。';
+
+  @override
+  String get skinFileNameColorSettingDescription => '此颜色由文件管理器部分中的名称颜色设置控制。';
+
+  @override
+  String get skinExportedSingle => '皮肤已导出。';
+
+  @override
+  String get skinExportedMultiple => '皮肤已导出。';
+
+  @override
+  String get skinExportSkinsOnly => '仅皮肤';
+
+  @override
+  String get skinExportSkinsOnlySubtitle => '颜色和图标样式。可放心分享。';
+
+  @override
+  String get skinExportSkinsAndInterface => '皮肤和界面';
+
+  @override
+  String get skinExportSkinsAndInterfaceSubtitle =>
+      '同时保存主题模式、工具栏和网格布局、编辑器外观以及媒体查看器布局。供您自己备份使用。';
+
+  @override
+  String get skinAppearanceExported => '皮肤和界面已导出。';
+
+  @override
+  String get skinImportInterfaceTitle => '应用界面设置？';
+
+  @override
+  String get skinImportInterfaceMessage =>
+      '此文件还包含界面设置。应用后将替换您当前的主题模式、工具栏和网格布局、编辑器外观以及媒体查看器布局。';
+
+  @override
+  String get skinImportInterfaceApply => '应用';
+
+  @override
+  String get skinImportInterfaceSkip => '仅皮肤';
+
+  @override
+  String get skinInterfaceApplied => '界面设置已应用。';
+
+  @override
+  String get automationBatteryHintTitle => '允许后台启动';
+
+  @override
+  String get automationBatteryHintMessage =>
+      '当 VaultExplorer 完全关闭时，Android 可能会阻止自动化解锁此保险库。请将 VaultExplorer 的电池用量设置为“无限制”，以便 Tasker、MacroDroid 和其他应用可以在后台解锁。';
+
+  @override
+  String get automationBatteryHintButton => '打开应用设置';
+
+  @override
+  String get automationBatterySettingsOpenFailedMessage =>
+      '无法打开应用设置。请前往 设置 > 应用 > VaultExplorer > 电池 并选择“无限制”。';
+
+  @override
+  String get skinPreviewMountedVaultName => '个人保险库';
+
+  @override
+  String get skinPreviewVaultName => '保险库标题';
+
+  @override
+  String get skinMainTextColorAlsoColorsRegularMenuItems =>
+      '保险库标题和常规菜单操作共享应用的主要文本颜色。';
+
+  @override
+  String get skinStatusBannerExamples => '状态横幅';
+
+  @override
+  String get skinSuccessBanner => '成功横幅';
+
+  @override
+  String get skinWarningBanner => '警告横幅';
+
+  @override
+  String get skinErrorBanner => '错误横幅';
+
+  @override
+  String get skinSuccessBannerUsesSuccessContainer => '横幅填充和消息使用成功颜色。';
+
+  @override
+  String get skinWarningBannerUsesWarningContainer => '横幅填充和消息使用警告颜色。';
+
+  @override
+  String get skinErrorBannerUsesErrorContainer => '横幅填充和消息使用错误颜色。';
+
+  @override
+  String get skinPreviewChangesSaved => '更改已保存';
+
+  @override
+  String get skinPreviewStorageAlmostFull => '存储空间几乎已满';
+
+  @override
+  String get skinPreviewCouldNotUnlockVault => '无法解锁保险库';
+
+  @override
+  String get skinSurfaceAndBorderExamples => '表面和边框';
+
+  @override
+  String get skinFileRowDetailsColor => '文件行详细信息颜色';
+
+  @override
+  String get skinFileActionOverflowIconColor => '文件行操作图标颜色';
+
+  @override
+  String get skinMatchingElementsHighlightTogether => '具有相同颜色的其他预览元素也会同时高亮显示。';
+
+  @override
+  String get skinStatusBannerTextColor => '横幅文本使用此颜色。';
+
+  @override
+  String get apkOpenPackageInstaller => '软件包安装程序';
+
+  @override
+  String get apkOpenPackageInstallerSubtitle => '将此应用安装到你的设备';
+
+  @override
+  String get apkOpenAsZip => '作为 ZIP 打开';
+
+  @override
+  String get apkOpenAsZipSubtitle => '浏览其中的文件并解压';
+
+  @override
+  String get audioEditorEditAction => '编辑音频';
+
+  @override
+  String get audioEditorTimelineLabel => '音频时间轴';
+
+  @override
+  String get audioEditorAnalyzing => '正在读取音频…';
+
+  @override
+  String audioEditorLoadFailed(String message) {
+    return '无法打开此音频文件：$message';
+  }
+
+  @override
+  String get audioEditorReadOnly => '此保险库为只读，无法保存编辑后的音频。';
+
+  @override
+  String get audioEditorExporting => '正在导出音频';
+
+  @override
+  String audioEditorSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已保存 $count 个音频文件',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get audioEditorExportMerge => '合并为一个文件';
+
+  @override
+  String get audioEditorExportSeparate => '保存为多个独立文件';
+
+  @override
+  String get audioEditorReplaceOriginal => '替换原音频';
+
+  @override
+  String get audioEditorReplaceOriginalHint => '原文件将被导出的剪辑结果替换。';
+
+  @override
+  String get audioEditorLosslessNote =>
+      '剪辑无损：音频直接复制而不重新编码，因此音质不变。剪辑点会落在最近的音频帧上，与你设置的位置相差几毫秒。标签和封面不会保留。';
+
+  @override
+  String get audioEditorCutOutModeDescription => '移除选中的片段并导出剩余部分。';
+
+  @override
+  String audioEditorUnsupportedFormat(String format) {
+    return '$format 文件无法在此设备上编辑，因此此文件可在此播放，但无法导出。';
+  }
+
+  @override
+  String get audioEditorPrevCutPoint => '上一个剪辑点';
+
+  @override
+  String get audioEditorNextCutPoint => '下一个剪辑点';
+
+  @override
+  String audioEditorReencodeBanner(String format) {
+    return '$format 音频无法按原样复制，导出时将重新编码为 AAC (.m4a)。';
+  }
+
+  @override
+  String get audioEditorReencodeNote =>
+      '此格式无法按原样复制，因此导出的音频会重新编码为 AAC。音质仍然很高，但与原文件并非逐位相同。剪辑点会精确落在你设置的位置。标签和封面不会保留。';
+
+  @override
+  String get mediaViewerActionAbLoop => 'A-B 循环';
+
+  @override
+  String abLoopStartMarkedMessage(String time) {
+    return 'A 点已设为 $time。再次轻按以设置 B 点。';
+  }
+
+  @override
+  String abLoopStartedMessage(String start, String end) {
+    return '正在循环 $start – $end';
+  }
+
+  @override
+  String get abLoopEndTooCloseMessage => 'B 点必须在 A 点之后。请快进后再次轻按。';
+
+  @override
+  String get abLoopClearedMessage => 'A-B 循环已关闭';
+
+  @override
+  String get skinEditorPanelBackground => '编辑器面板背景';
+
+  @override
+  String get skinEditorPanelBackgroundDescription => '编辑器侧边栏和更多操作菜单共用的背景。';
+
+  @override
+  String get skinFollowAppSkin => '跟随应用皮肤';
+
+  @override
+  String get fileSkinFollowAppSkinDescription => '文件和文件夹样式跟随当前应用皮肤。';
+
+  @override
+  String get fileSkinUseIndependentStylesDescription =>
+      '这些选项用于设置文件管理器自己的样式。如果文件管理器正在跟随应用皮肤，更改下方的预设或样式会关闭“跟随应用皮肤”。';
+
+  @override
+  String get fileSkinManagedByAppSkinTitle => '文件管理器正在跟随应用皮肤';
+
+  @override
+  String get fileSkinManagedByAppSkinDescription =>
+      '预览使用当前应用皮肤。更改下方的预设或样式后，会保存独立的文件管理器皮肤，并关闭“跟随应用皮肤”。';
+
+  @override
+  String get skinFileManagerIndependentTitle => '文件管理器使用独立皮肤';
+
+  @override
+  String get skinFileManagerIndependentDescription =>
+      '文件管理器使用独立皮肤时，此应用皮肤中的文件和文件夹样式更改不会显示在那里。开启“跟随应用皮肤”即可在文件管理器中应用此皮肤。';
+
+  @override
+  String get skinChooseOrCreateSkin => '选择或创建皮肤';
+
+  @override
+  String get skinSkinShortcutCustomDescription =>
+      '编辑应用全局颜色和共享标记。此页面上的组件覆盖设置会保留。';
+
+  @override
+  String get skinSkinShortcutPresetDescription => '浏览内置皮肤，或根据当前外观创建自定义皮肤。';
+
+  @override
+  String get textEditorUseIndependentAppearanceDescription =>
+      '在下方选择独立的编辑器背景和语法主题。';
+
+  @override
+  String get fileSkinComponentStyling => '组件样式';
+
+  @override
+  String get textEditorStyling => '编辑器样式';
+
+  @override
+  String get audioFilePropertiesSectionHeader => '音频';
+
+  @override
+  String get audioTagsSectionHeader => '曲目信息';
+
+  @override
+  String get artistLabel => '艺术家';
+
+  @override
+  String get albumLabel => '专辑';
+
+  @override
+  String get yearLabel => '年份';
+
+  @override
+  String get genreLabel => '流派';
+
+  @override
+  String get audioTrackLabel => '曲目';
+
+  @override
+  String get bitDepthLabel => '位深度';
+
+  @override
+  String get colorModeLabel => '色彩模式';
+
+  @override
+  String get transparencyLabel => '透明度';
+
+  @override
+  String get animationLabel => '动画';
+
+  @override
+  String get orientationLabel => '方向';
+
+  @override
+  String get densityLabel => '像素密度';
+
+  @override
+  String get encodingLabel => '编码';
+
+  @override
+  String get skinEditorCodeTextColorDescription => '普通代码的默认文本颜色。语法高亮文本保留各自的颜色。';
+
+  @override
+  String get skinEditorInterfaceText => '编辑器界面文字';
+
+  @override
+  String get skinEditorInterfaceTextDescription => '编辑器工具栏、侧边栏、菜单和状态栏中的文字与图标。';
+
+  @override
+  String get equalizerTitle => '均衡器';
+
+  @override
+  String get equalizerPresetCustom => '自定义';
+
+  @override
+  String get equalizerPreampLabel => '前置放大';
+
+  @override
+  String get equalizerPreventClippingTitle => '防止削波';
+
+  @override
+  String get equalizerPreventClippingSubtitle => '仅在必要范围内降低整体音量，避免增强的频段失真';
+
+  @override
+  String get equalizerPresetFlat => '平坦';
+
+  @override
+  String get equalizerPresetBassBoost => '低音增强';
+
+  @override
+  String get equalizerPresetTrebleBoost => '高音增强';
+
+  @override
+  String get equalizerPresetVoice => '人声';
+
+  @override
+  String get equalizerPresetRock => '摇滚';
+
+  @override
+  String get equalizerPresetPop => '流行';
+
+  @override
+  String get equalizerPresetJazz => '爵士';
+
+  @override
+  String get equalizerPresetClassical => '古典';
+
+  @override
+  String get equalizerPresetElectronic => '电子';
+
+  @override
+  String get equalizerPresetLoudness => '响度';
+
+  @override
+  String get audioRecorder => '录音机';
+
+  @override
+  String get audioCapturedEncrypted => '音频已保存';
+
+  @override
+  String get audioMicPermissionRequiredMessage => '录制音频需要麦克风权限。';
+
+  @override
+  String get audioRecordingAllowMicrophone => '允许使用麦克风';
+
+  @override
+  String get audioRecordingStartTooltip => '开始录制';
+
+  @override
+  String get audioRecordingStopTooltip => '停止录制';
+
+  @override
+  String get audioRecordingPauseTooltip => '暂停';
+
+  @override
+  String get audioRecordingResumeTooltip => '继续';
+
+  @override
+  String get audioRecordingPausedLabel => '已暂停';
+
+  @override
+  String get audioRecordingDiscardTitle => '放弃录音？';
+
+  @override
+  String get audioRecordingDiscardMessage => '此录音尚未保存，将被永久删除。';
+
+  @override
+  String get skinAreaDashboard => '仪表盘';
+
+  @override
+  String get skinAreaDashboardDescription => '打开应用后显示的保险库列表及其卡片。';
+
+  @override
+  String get skinAreaDrawer => '侧边菜单';
+
+  @override
+  String get skinAreaDrawerDescription => '包含保险库和快捷方式的侧滑菜单。';
+
+  @override
+  String get skinAreaFilesDescription => '已解锁保险库内的文件浏览器。';
+
+  @override
+  String get skinAreaEditorDescription =>
+      '文本和代码编辑器的工具栏。画布和语法高亮颜色可在下方的编辑器主题中设置。';
+
+  @override
+  String get skinAreaToolsDescription => '“工具”标签页以及从中打开的所有工具。';
+
+  @override
+  String get skinAreaSettingsDescription => '“设置”标签页及其子页面。';
+
+  @override
+  String get skinSharedPaletteTitle => '共享调色板';
+
+  @override
+  String get skinSharedPaletteShort => '共享';
+
+  @override
+  String get skinSharedPaletteDescription =>
+      '每个页面在未单独设置时继承的颜色。没有独立设置的屏幕（例如解锁和相机）直接使用这些颜色。';
+
+  @override
+  String get skinSharedBarDescription => '未单独设置的每个页面的顶部栏。';
+
+  @override
+  String get skinSharedFabDescription => '未单独设置的每个页面的圆形添加按钮。';
+
+  @override
+  String get skinPagesTitle => '页面颜色';
+
+  @override
+  String get skinPagesDescription => '每个页面保留自己的颜色。修改一个页面绝不会影响其他页面。';
+
+  @override
+  String get skinResetPageColors => '重置页面颜色';
+
+  @override
+  String get skinTokenBackground => '页面背景';
+
+  @override
+  String get skinTokenBackgroundHint => '此页面所有元素背后的画布。';
+
+  @override
+  String get skinTokenText => '主要文本';
+
+  @override
+  String get skinTokenTextHint => '此页面上的标题、名称和正文文本。';
+
+  @override
+  String get skinTokenTextSecondary => '次要文本和图标';
+
+  @override
+  String get skinTokenTextSecondaryHint => '副标题、详细信息、提示和低对比度图标。';
+
+  @override
+  String get skinTokenAppBar => '顶部栏';
+
+  @override
+  String get skinTokenAppBarHint => '此页面顶部栏的填充颜色。';
+
+  @override
+  String get skinTokenOnAppBar => '顶部栏文本和图标';
+
+  @override
+  String get skinTokenOnAppBarHint => '顶部栏标题和图标的颜色。';
+
+  @override
+  String get skinTokenCard => '卡片和行';
+
+  @override
+  String get skinTokenCardHint => '卡片、列表行和分组面板。';
+
+  @override
+  String get skinTokenCardActive => '活动卡片';
+
+  @override
+  String get skinTokenCardActiveHint => '高亮显示的卡片，例如已解锁的保险库。';
+
+  @override
+  String get skinTokenRaised => '标签和控件';
+
+  @override
+  String get skinTokenRaisedHint => '搜索框、标签、缩略图和图标图块。';
+
+  @override
+  String get skinTokenOverlay => '菜单、对话框和面板';
+
+  @override
+  String get skinTokenOverlayHint => '从此页面打开的弹出菜单、对话框和底部面板。';
+
+  @override
+  String get skinTokenAccent => '强调色';
+
+  @override
+  String get skinTokenAccentHint => '按钮、链接、进度条和活动图标。';
+
+  @override
+  String get skinTokenOnAccent => '强调色上的文本';
+
+  @override
+  String get skinTokenOnAccentHint => '强调色填充按钮上的标签和图标。';
+
+  @override
+  String get skinTokenSelection => '选中项';
+
+  @override
+  String get skinTokenSelectionHint => '选中的行和高亮的图标图块。';
+
+  @override
+  String get skinTokenOnSelection => '选中项上的文本';
+
+  @override
+  String get skinTokenOnSelectionHint => '选中项目上显示的图标和文本。';
+
+  @override
+  String get skinTokenDivider => '分隔线';
+
+  @override
+  String get skinTokenDividerHint => '细分割线和微弱边框。';
+
+  @override
+  String get skinTokenOutline => '轮廓';
+
+  @override
+  String get skinTokenOutlineHint => '轮廓按钮和输入框上更清晰的边框。';
+
+  @override
+  String get skinTokenFab => '圆形添加按钮';
+
+  @override
+  String get skinTokenFabHint => '圆形添加按钮的填充颜色。';
+
+  @override
+  String get skinTokenOnFab => '圆形添加按钮图标';
+
+  @override
+  String get skinTokenOnFabHint => '圆形添加按钮上的加号图标。';
+
+  @override
+  String get skinPreviewConfirm => '确认';
+
+  @override
+  String get skinPreviewCancelButton => '取消';
+
+  @override
+  String get skinPreviewSaveButton => '保存';
+
+  @override
+  String get skinPreviewRunButton => '运行';
+
+  @override
+  String get skinPreviewPasteButton => '粘贴到此处';
+
+  @override
+  String get skinPreviewUnlockButton => '解锁';
+
+  @override
+  String get skinPreviewSortChip => '排序：名称';
+
+  @override
+  String get skinPreviewSearchChip => '搜索文件';
+
+  @override
+  String get skinPreviewPinnedBadge => '已置顶';
+
+  @override
+  String get skinPreviewVaultsHeader => '保险库';
+
+  @override
+  String get skinPreviewToolsSection => '文件密码学';
+
+  @override
+  String get skinPreviewToolOne => '密钥文件与密码短语生成器';
+
+  @override
+  String get skinPreviewToolOneHint => '生成密码和密钥文件';
+
+  @override
+  String get skinPreviewToolTwo => '校验和与哈希验证器';
+
+  @override
+  String get skinPreviewToolTwoHint => '验证大文件是否损坏';
+
+  @override
+  String get skinPreviewSettingsSection => '安全';
+
+  @override
+  String get skinPreviewSettingOne => '应用锁';
+
+  @override
+  String get skinPreviewSettingOneHint => '生物识别与自动锁定';
+
+  @override
+  String get skinPreviewSettingTwo => '存储';
+
+  @override
+  String get skinPreviewSettingTwoHint => '外部存储与云桥接';
+
+  @override
+  String get inPlaceEditDone => '完成';
+
+  @override
+  String get inPlaceEditTitle => '排列控制项';
+
+  @override
+  String get inPlaceEditHint => '在工具栏之间拖动操作或点击进行排列';
+
+  @override
+  String get inPlaceEditAvailable => '可用操作';
+
+  @override
+  String get inPlaceEditTopDock => '顶部栏';
+
+  @override
+  String get inPlaceEditBottomDock => '底部栏';
+
+  @override
+  String get inPlaceEditDragToRemove => '拖动至此移除';
+
+  @override
+  String get inPlaceEditAddToTop => '添加至顶部栏';
+
+  @override
+  String get inPlaceEditAddToBottom => '添加至底部栏';
+
+  @override
+  String get inPlaceEditEmptyDock => '将操作拖放至此处';
+
+  @override
+  String get inPlaceEditPlayerSettings => '播放器设置';
+
+  @override
+  String get inPlaceEditMoveToMore => '移动至“更多”菜单';
+
+  @override
+  String get inPlaceEditMoveToAdvanced => '移动至高级设置';
+
+  @override
+  String get inPlaceEditHideAction => '隐藏操作';
+
+  @override
+  String get inPlaceEditHidden => '已隐藏';
+
+  @override
+  String get textEditorAutoHideAppBarLabel => '自动隐藏应用栏';
+
+  @override
+  String get textEditorAutoHideAppBarDescription => '编辑时隐藏顶部栏以最大化垂直空间';
+
+  @override
+  String get textEditorCopyToMenuItem => '复制到...';
+
+  @override
+  String get textEditorCopyToDialogTitle => '复制到文件夹';
+
+  @override
+  String get textEditorCopyHereButton => '复制到此处';
+
+  @override
+  String get textEditorDuplicateMenuItem => '创建副本';
+
+  @override
+  String get textEditorCopiedSuccessfully => '复制成功';
+
+  @override
+  String get textEditorSearchFilesHint => '筛选文件…';
+
+  @override
+  String get audioRecordingQualityLabel => '音频录制质量';
+
+  @override
+  String get audioRecordingQualityVoice => '语音';
+
+  @override
+  String get audioRecordingQualityStandard => '标准';
+
+  @override
+  String get audioRecordingQualityHigh => '高';
+
+  @override
+  String audioRecordingQualityDetails(String bitrate, String sampleRate) {
+    return 'AAC · $bitrate kbps · $sampleRate kHz · 单声道';
+  }
+
+  @override
+  String get audioEditorCompressTitle => '文件大小';
+
+  @override
+  String get audioEditorCompressOriginal => '原始';
+
+  @override
+  String audioEditorCompressEstimate(String size) {
+    return '预计大小：约 $size';
+  }
+
+  @override
+  String get audioEditorCompressNote =>
+      '音频会以更低的码率重新编码为 AAC，文件更小，但音质会有所下降。剪辑点会精确落在你设置的位置。标签和封面不会保留。';
+
+  @override
+  String get entropyStepTitle => '添加随机性';
+
+  @override
+  String get entropyIntro =>
+      '请在面板上以不规则、多样的方式滑动手指。你的滑动会与设备自带的安全随机数生成器一同混入加密密钥和盐值，而不是取代它。';
+
+  @override
+  String get entropyPadHint => '在此用手指涂画';
+
+  @override
+  String get entropyPadSemantics => '随机性面板。用手指在上面滑动以收集随机动作。';
+
+  @override
+  String entropyProgress(int percent) {
+    return '正在收集随机性… $percent%';
+  }
+
+  @override
+  String get entropyComplete => '已收集足够的随机性。可继续滑动以增加更多，或直接继续。';
+
+  @override
+  String get entropySkippedStatus => '已跳过。仅使用设备的安全随机数生成器。再次在面板上涂画即可重新添加随机性。';
+
+  @override
+  String get entropyPoolLabel => '随机池';
+
+  @override
+  String get entropySkip => '跳过，仅使用设备生成器';
+
+  @override
+  String get entropyReviewLabel => '随机性';
+
+  @override
+  String get entropyReviewUserAdded => '触摸动作 + 设备生成器';
+
+  @override
+  String get entropyReviewDeviceOnly => '仅设备生成器';
+
+  @override
+  String get automationCaptureSectionHeader => '相机与麦克风';
+
+  @override
+  String get automationAllowCaptureTitle => '允许相机和麦克风捕获';
+
+  @override
+  String get automationAllowCaptureSubtitle => '照片、视频和音频录制';
+
+  @override
+  String get automationPermissionsSectionHeader => '权限';
+
+  @override
+  String get automationPermissionsIntro =>
+      '这些是 Android 系统权限，因此适用于整个应用，而不仅限于此保管库。此处仅列出此保管库配置所能使用的权限及其当前状态。';
+
+  @override
+  String get automationPermSetupNeededTitle => '需要设置';
+
+  @override
+  String get automationPermAlmostReadyTitle => '即将就绪';
+
+  @override
+  String get automationPermReadyTitle => '已就绪';
+
+  @override
+  String get automationPermReadyMessage => '此保管库自动化所需的所有设置均已就绪。';
+
+  @override
+  String get automationPermGrantButton => '授予';
+
+  @override
+  String get automationPermGranted => '已授予';
+
+  @override
+  String get automationPermTagRequired => '必需';
+
+  @override
+  String get automationPermTagRecommended => '推荐';
+
+  @override
+  String get automationPermTagOptional => '可选';
+
+  @override
+  String get automationPermDeniedMessage =>
+      '未授予权限。如果 Android 不再弹出提示，请在应用设置中开启。';
+
+  @override
+  String get automationPermSettingsOpenFailedMessage =>
+      '无法打开应用设置。请前往“设置 > 应用 > VaultExplorer > 权限”。';
+
+  @override
+  String get automationPermBatteryTitle => '无限制电池使用';
+
+  @override
+  String get automationPermBatteryDescription =>
+      '允许在 VaultExplorer 完全关闭时通过自动化解锁此保管库。若未开启，Android 可能会拦截该操作。';
+
+  @override
+  String get automationPermNotificationsTitle => '通知';
+
+  @override
+  String get automationPermNotificationsDescription =>
+      '显示导入、导出和同步的进度，以及录制运行中的状态指示器。';
+
+  @override
+  String get automationPermAllFilesTitle => '所有文件访问权限';
+
+  @override
+  String get automationPermAllFilesDescription =>
+      '允许导入和导出操作使用普通文件路径（例如 /storage/emulated/0/…）。content:// 链接无需此权限。';
+
+  @override
+  String get automationPermCameraTitle => '相机';
+
+  @override
+  String get automationPermCameraDescription => '用于自动化拍摄的照片和录制的视频。';
+
+  @override
+  String get automationPermMicrophoneTitle => '麦克风';
+
+  @override
+  String get automationPermMicrophoneDescription => '用于录音和视频伴音。拍照和录像捕获时也会进行检查。';
+
+  @override
+  String get automationPermOverlayDescription =>
+      '仅在 Android 14+ 上自动化应用通过广播（Broadcast）启动照片或视频捕获时才需要。若直接针对捕获 Activity，则不需要。';
+
+  @override
+  String automationPermSetupNeededMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '缺少 $count 项必需权限。在授予权限之前，部分自动化操作将会失败。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String automationPermAlmostReadyMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '仍有 $count 项推荐设置未开启。自动化仍可运行，但可能不够稳定。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resetSizeOnLayoutChangeLabel => '切换布局时重置大小';
+
+  @override
+  String get resetSizeOnLayoutChangeDesc => '切换布局时，将列表缩放比例以及网格/瀑布流的列数恢复为默认值';
+
+  @override
+  String get thumbnailUseGlobalDefaultDesc =>
+      '遵循应用设置中的缩略图默认值，因此在那里所做的更改也会应用到此保险库。';
+
+  @override
+  String get resetVaultThumbnailsTitle => '将所有保险库重置为默认值';
+
+  @override
+  String get resetVaultThumbnailsSubtitle => '让所有保险库（包括有自己设置的）都遵循上方的缩略图默认值。';
+
+  @override
+  String resetVaultThumbnailsConfirmMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 个保险库使用了自己的缩略图设置。要让它们改为遵循默认值吗？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resetVaultThumbnailsDone(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个保险库现在已遵循默认值',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String thumbnailGlobalInContainerConfirmMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个保险库遵循此默认值，并将开始把缩略图存储在保险库内。这样会更慢，且无法用于只读保险库。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanAdjustCornersTitle => '调整边角';
+
+  @override
+  String get scanResultTitle => '已扫描页面';
+
+  @override
+  String get scanAutoDetectButton => '自动检测';
+
+  @override
+  String get scanFullImageButton => '完整图像';
+
+  @override
+  String get scanFilterColor => '彩色';
+
+  @override
+  String get scanFilterGrayscale => '灰度';
+
+  @override
+  String get scanHintSearching => '请将相机对准文档';
+
+  @override
+  String get scanHintFound => '已检测到文档';
+
+  @override
+  String get scanNoDocumentFound => '未检测到文档。请拖动边角以贴合页面。';
+
+  @override
+  String get scanProcessingFailed => '无法处理此页面';
+
+  @override
+  String get scanDetectingEdges => '正在检测边缘…';
+
+  @override
+  String get scanOutputPdf => 'PDF';
+
+  @override
+  String get scanOutputImages => '图片';
+
+  @override
+  String get scanPdfFailed => '无法创建PDF';
+
+  @override
+  String get settingsSearchHint => '搜索设置';
+
+  @override
+  String get settingsSearchClear => '清除搜索';
+
+  @override
+  String get settingsSearchNoResults => '没有匹配的设置';
+
+  @override
+  String get settingsSearchNoResultsHint => '请尝试其他关键词，或检查拼写。';
+
+  @override
+  String get settingsSearchUnavailable => '此选项仅在开启相关设置后显示。';
+
+  @override
+  String createArchiveCompressingSubtitle(String count, String size) {
+    return '正在压缩 $count ($size)';
+  }
+
+  @override
+  String createArchiveInsufficientSpace(String required, String available) {
+    return '可用空间不足 — 需要 $required，仅剩 $available。';
+  }
+
+  @override
+  String get createArchiveMediaRecommendation =>
+      '检测到已压缩的媒体文件。已自动选择“仅存储”以节省 CPU 和电量。';
+
+  @override
+  String get createArchiveNameLabel => '压缩包名称';
+
+  @override
+  String get createArchiveNameHint => 'archive';
+
+  @override
+  String get createArchiveSelectFormatTooltip => '选择格式';
+
+  @override
+  String get createArchiveSecuritySection => '安全';
+
+  @override
+  String get createArchivePasswordLabel => '密码（可选）';
+
+  @override
+  String get createArchivePasswordHintText => '输入密码';
+
+  @override
+  String get createArchiveConfirmPasswordLabel => '确认密码';
+
+  @override
+  String get createArchiveConfirmPasswordHint => '重复输入密码';
+
+  @override
+  String get passphraseStrengthFair => '一般';
+
+  @override
+  String get createArchiveEncryptFilenamesNeedsPassword => '预览文件需要密码';
+
+  @override
+  String get createArchiveEncryptFilenamesActive => '在解锁之前隐藏文件列表';
+
+  @override
+  String get createArchiveAdvancedOptions => '高级选项';
+
+  @override
+  String get createArchiveCompressionLevel => '压缩等级';
+
+  @override
+  String get createArchiveSplitHintZip =>
+      '将保存为 .z01、.z02 … 以及最后的 .zip。请将所有分卷放在同一文件夹中。';
+
+  @override
+  String get createArchiveSplitHintSevenZip =>
+      '将保存为 .7z.001、.7z.002 … 请将所有分卷放在同一文件夹中。';
+
+  @override
+  String get createArchiveSplitVolumes => '分卷压缩';
+
+  @override
+  String get createArchiveSplitVolumeNone => '无';
+
+  @override
+  String get createArchiveCustomVolumeSizeLabel => '自定义分卷大小 (MB)';
+
+  @override
+  String get createArchiveCustomVolumeSizeHint => '例如 50';
+
+  @override
+  String get archiveCompressionStoreTitle => '仅存储 (0) — 不压缩';
+
+  @override
+  String get archiveCompressionStoreDesc => '即时打包，最适合视频、音乐和压缩文件';
+
+  @override
+  String get archiveCompressionFastTitle => '快速 (1–3) — 速度快';
+
+  @override
+  String get archiveCompressionFastDesc => '日常分享的快速压缩';
+
+  @override
+  String get archiveCompressionNormalTitle => '标准 (5) — 均衡';
+
+  @override
+  String get archiveCompressionNormalDesc => '压缩比与速度的最佳平衡';
+
+  @override
+  String get archiveCompressionUltraTitle => '极限 (9) — 最小体积';
+
+  @override
+  String get archiveCompressionUltraDesc => '体积最小，压缩速度较慢';
+
+  @override
+  String get officeViewerErrorTitle => '无法预览此文档';
+
+  @override
+  String get officeViewerEncrypted => '此文档受密码保护，无法预览已加密的 Office 文件。';
+
+  @override
+  String get officeViewerUnsupported => '无法读取此文件。文件可能已损坏，或使用了查看器不支持的格式。';
+
+  @override
+  String get officeViewerTooLarge => '此文档过大，无法在应用内预览。';
+
+  @override
+  String get officeViewerSpeakerNotes => '演讲者备注';
+
+  @override
+  String get fileAssocDocumentViewer => '应用内文档查看器';
+
+  @override
+  String get viewOfficeDocumentsInApp =>
+      '在应用内预览 Word、Excel、PowerPoint 和 OpenDocument 文件';
+
+  @override
+  String get archiveCompressionMethodLabel => '压缩方法';
+
+  @override
+  String get archiveMethodLzma2Desc => '综合表现最佳的选择。.tar.xz 也使用该方法。';
+
+  @override
+  String get archiveMethodLzmaDesc => '7-Zip 较早的方法。.tar.lzma 也使用该方法。';
+
+  @override
+  String get archiveMethodDeflateDesc =>
+      '速度最快，但文件较大，兼容性最广。ZIP 和 .tar.gz 也使用该方法。';
+
+  @override
+  String archiveMethodFixedInfo(String format, String method) {
+    return '$format 始终使用 $method 压缩。';
+  }
+
+  @override
+  String get archiveMethodMoreInSevenZip => '7-Zip 压缩包支持 LZMA2 和 LZMA。';
+
+  @override
+  String get archiveMethodStoreNote => '仅存储不进行压缩，因此无需选择压缩方法。';
+
+  @override
+  String get browserTabsEnabledTitle => '使用文件管理器标签页';
+
+  @override
+  String get browserTabsEnabledSubtitle => '保持多个位置处于打开状态并在它们之间切换。';
+
+  @override
+  String get browserTabNew => '新标签页';
+
+  @override
+  String get browserTabClose => '关闭标签页';
+
+  @override
+  String get browserTabCloseOthers => '关闭其他标签页';
+
+  @override
+  String get browserTabDuplicate => '复制标签页';
+
+  @override
+  String get browserTabMoveToOtherPane => '移到另一个窗格';
+
+  @override
+  String get browserTabSwitchPrevious => '切换到上一个标签页';
+
+  @override
+  String get browserTabOpenInNewTab => '在新标签页中打开';
+
+  @override
+  String browserTabLimitReached(int max) {
+    return '已达到标签页上限（$max）';
+  }
+
+  @override
+  String get browserTabCloseToLeft => '关闭左侧标签页';
+
+  @override
+  String get browserTabCloseToRight => '关闭右侧标签页';
+
+  @override
+  String get browserTabCloseAll => '关闭所有';
+
+  @override
+  String get dualPaneEnabledTitle => '使用双栏视图';
+
+  @override
+  String get dualPaneEnabledSubtitle => '屏幕足够宽时并排显示两个已打开的标签页。需要启用文件管理器标签页。';
+
+  @override
+  String get pressBackAgainToExit => '再按一次返回键退出';
+
+  @override
+  String get tabEdgeSwipeLabel => '标签页滑动手势';
+
+  @override
+  String get tabSwipeBetweenTabsTitle => '在标签页之间滑动';
+
+  @override
+  String get tabSwipeBetweenTabsOnDesc => '在文件夹上左右滑动，可切换到下一个或上一个标签页。';
+
+  @override
+  String get tabSwipeBetweenTabsOffDesc => '只能从标签栏切换标签页。下面两种滑动手势将在屏幕任意位置生效。';
+
+  @override
+  String get tabSwipeRightOnFirstTab => '在第一个标签页向右滑动';
+
+  @override
+  String get tabSwipeRightAnywhere => '在任意位置向右滑动';
+
+  @override
+  String get tabSwipeLeftOnLastTab => '在最后一个标签页向左滑动';
+
+  @override
+  String get tabSwipeLeftAnywhere => '在任意位置向左滑动';
+
+  @override
+  String get tabSwipeActionNewTab => '新建标签页';
+
+  @override
+  String get tabSwipeActionOpenDrawer => '打开侧边菜单';
+
+  @override
+  String get tabSwipeActionLoopFirst => '循环到第一个标签页';
+
+  @override
+  String get tabSwipeActionLoopLast => '循环到最后一个标签页';
+
+  @override
+  String get tabSwipeActionNothing => '不执行任何操作';
+
+  @override
+  String get tabSwipeRightNothingDesc => '仍可从屏幕左边缘或菜单按钮打开侧边菜单。';
+
+  @override
+  String get tabSwipeRightLoopDesc =>
+      '可从屏幕左边缘或菜单按钮打开侧边菜单。只有一个标签页时，该滑动会直接打开侧边菜单。';
+
+  @override
+  String get tabSwipeNewTabsFromStripDesc => '仍可从标签栏新建标签页。';
+
+  @override
+  String get tabSwipePreviewFirstTab => '第一个标签页';
+
+  @override
+  String get tabSwipePreviewLastTab => '最后一个标签页';
+
+  @override
+  String get appBarAtBottomLabel => '将应用栏显示在底部';
+
+  @override
+  String get appBarAtBottomDesc => '将应用栏从屏幕顶部移到底部，方便用拇指操作。';
+
+  @override
+  String get selectByIconLabel => '点按图标选择';
+
+  @override
+  String get selectByIconDesc => '在列表视图中，点按文件或文件夹的图标即可将其选中。关闭后，点按图标不会有任何反应。';
+
+  @override
+  String get showFileExtensionsLabel => '显示文件扩展名';
+
+  @override
+  String get showFileExtensionsDesc => '在文件名末尾显示扩展名。搜索时始终显示扩展名。';
+
+  @override
+  String get itemActionsMenuTitle => '项目操作';
+
+  @override
+  String get itemActionsMenuDesc => '选择在项目菜单和选择菜单中显示哪些操作，以及它们的显示顺序。';
+
+  @override
+  String get itemActionsQuickRowHeader => '快捷操作行';
+
+  @override
+  String get itemActionsMenuListHeader => '菜单列表';
+
+  @override
+  String get itemActionsMoveToQuickRow => '移到快捷操作行';
+
+  @override
+  String get itemActionsMoveToMenuList => '移到菜单列表';
+
+  @override
+  String get skinEditStarted => '皮肤编辑器已开启。在任意界面使用悬浮按钮即可选取并更改颜色。';
+
+  @override
+  String get skinEditSaved => '皮肤已保存';
+
+  @override
+  String get skinEditPickTooltip => '选取要更改颜色的元素';
+
+  @override
+  String get skinEditPickStopTooltip => '停止选取，正常使用应用';
+
+  @override
+  String get skinEditDoneTooltip => '保存并关闭皮肤编辑器';
+
+  @override
+  String get skinEditHint => '点按任意元素即可更改其颜色。再次点按吸管可正常使用应用。';
+
+  @override
+  String get skinEditLayersTitle => '此处的颜色';
+
+  @override
+  String get skinEditAlsoUsedBy => '同一颜色还用于';
+
+  @override
+  String get skinEditClosest => '此颜色没有完全匹配的皮肤颜色，这是最接近的一个。';
+
+  @override
+  String get skinEditNoMatch => '此处没有直接使用皮肤颜色。请从列表中选择颜色。';
+
+  @override
+  String get skinEditAllColors => '所有颜色';
+
+  @override
+  String get skinEditBackToEditor => '返回颜色编辑器';
+
+  @override
+  String get skinEditStatusInherited => '继承';
+
+  @override
+  String get skinEditReset => '重置';
+
+  @override
+  String get skinEditMoreOptions => '所有颜色和选项';
+
+  @override
+  String get skinEditCollapse => '收起面板';
+
+  @override
+  String get skinEditExpand => '展开面板';
+
+  @override
+  String skinEditPageColors(String page) {
+    return '$page的颜色';
+  }
+
+  @override
+  String get skinEditDockTop => '将面板移到顶部';
+
+  @override
+  String get skinEditDockBottom => '将面板移到底部';
+
+  @override
+  String get skinEditEditorIndependent =>
+      '文本编辑器使用自己的颜色，因此在它跟随应用皮肤之前，这里的更改不会显示在其中。';
+
+  @override
+  String get cameraKeepShootingTooltip => '拍摄后继续拍摄';
+
+  @override
+  String get cameraSegmentLengthOff => '关闭';
+
+  @override
+  String cameraSegmentLengthMinutes(int minutes) {
+    return '$minutes 分钟';
+  }
+
+  @override
+  String get cameraSegmentLengthTooltip => '将录制分段并在录制时自动保存';
+
+  @override
+  String get cameraSegmentSpaceMessage => '保险箱可用空间不足。录制已停止；未能保存的分段已保留以供查看。';
+
+  @override
+  String get audioSegmentedStopTitle => '停止录音？';
+
+  @override
+  String get audioSegmentedStopMessage => '目前已录制的分段已保存在保险箱中。是否立即停止并保存剩余部分？';
+
+  @override
+  String get audioSegmentedStopAction => '停止并保存';
+
+  @override
+  String get audioUnsavedPartsTitle => '部分分段未保存';
+
+  @override
+  String audioUnsavedPartsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '有 $count 个录制分段未能保存。请释放空间后重试，或将其舍弃。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get segmentRetrySave => '重试';
+
+  @override
+  String get imageEditorActionAuto => '自动';
+
+  @override
+  String get imageEditorActionFlip => '翻转';
+
+  @override
+  String get imageEditorActionRotate => '旋转';
+
+  @override
+  String get imageEditorActionColor => '颜色';
+
+  @override
+  String get imageEditorActionSize => '大小';
+
+  @override
+  String get imageEditorActionOpacity => '不透明度';
+
+  @override
+  String get imageEditorActionStyle => '样式';
+
+  @override
+  String get imageEditorExportSave => '导出 / 保存';
+
+  @override
+  String get imageEditorRevertOriginal => '恢复原始';
+
+  @override
+  String get imageEditorTuneImageToolLabel => '调整图片';
+
+  @override
+  String get imageEditorLooksToolLabel => '样式';
+
+  @override
+  String get imageEditorLookCurrent => '当前';
+
+  @override
+  String get imageEditorLookPortrait => '肖像';
+
+  @override
+  String get imageEditorLookDramatic => '戏剧';
+
+  @override
+  String get imageEditorLookVintage => '复古';
+
+  @override
+  String get imageEditorTuneAmbiance => '氛围';
+
+  @override
+  String get imageEditorTuneWarmth => '色温';
+
+  @override
+  String get imageEditorTuneShadows => '阴影';
+
+  @override
+  String get imageEditorCropAspectDin => 'DIN';
+
+  @override
+  String get imageEditorAngle => '角度';
+
+  @override
+  String get fontSizeSmall => '小';
+
+  @override
+  String get fontSizeMedium => '中';
+
+  @override
+  String get fontSizeLarge => '大';
+
+  @override
+  String get fontSizeExtraLarge => '特大';
+
+  @override
+  String get imageEditorTextPlaceholder => '双击此处更改文字';
+
+  @override
+  String get imageEditorFontSizePreview => '示例预览 ABC 123';
+
+  @override
+  String imageEditorPhotoLabel(int index) {
+    return '照片 $index';
+  }
+
+  @override
+  String get cameraPauseRecordingTooltip => '暂停录制';
+
+  @override
+  String get cameraResumeRecordingTooltip => '继续录制';
+
+  @override
+  String get cameraSnapshotTooltip => '录制时拍照';
+
+  @override
+  String get cameraPauseFailedMessage => '无法暂停或恢复录制';
+
+  @override
+  String get floatingPlayerTitle => '悬浮视频播放器';
+
+  @override
+  String get floatingPlayerSubtitle =>
+      '播放视频时关闭播放器，视频会在可拖动的小窗口中继续播放。离开应用后将进入画中画，并提供仅音频按钮';
+
+  @override
+  String get floatingPlayerExpandTooltip => '展开';
+
+  @override
+  String get floatingPlayerAudioOnly => '仅音频';
+
+  @override
+  String get floatingPlayerShowVideo => '显示视频';
+
+  @override
+  String get masterLockTitle => '主锁';
+
+  @override
+  String get masterLockInactiveSubtitle => '打开应用时需要密码、PIN或图案';
+
+  @override
+  String get masterLockChooseTitle => '选择应用的锁定方式';
+
+  @override
+  String get masterLockBackupTitle => '添加备用解锁方式';
+
+  @override
+  String get masterLockBackupMessage => '生物识别解锁需要密码、PIN或图案作为备用方式。请选择一种一并设置。';
+
+  @override
+  String get masterCredentialPassword => '密码';
+
+  @override
+  String get masterCredentialPin => 'PIN';
+
+  @override
+  String get masterCredentialPattern => '图案';
+
+  @override
+  String get masterCredentialSet => '已设置';
+
+  @override
+  String get masterCredentialNotSet => '未设置';
+
+  @override
+  String get duressMasterLockRequired => '配置胁迫解锁前，必须在安全设置中启用主锁。';
+
+  @override
+  String get skinTokenGroupSurface => '表面';
+
+  @override
+  String get skinTokenGroupContent => '文本与图标';
+
+  @override
+  String get skinTokenGroupBorder => '边框';
+
+  @override
+  String get skinTokenGroupChrome => '顶栏';
+
+  @override
+  String get skinTokenGroupAction => '按钮';
+
+  @override
+  String get skinTokenGroupControl => '开关与滑块';
+
+  @override
+  String get skinTokenGroupChoice => '标签与分段';
+
+  @override
+  String get skinTokenGroupSelection => '选中项';
+
+  @override
+  String get skinTokenGroupOverlay => '菜单、对话框与底栏';
+
+  @override
+  String get skinTokenGroupFloating => '浮动元素';
+
+  @override
+  String get skinTokenSurfacePage => '页面背景';
+
+  @override
+  String get skinTokenSurfacePageHint => '本页面所有内容背后的画布。';
+
+  @override
+  String get skinTokenSurfaceCard => '卡片与行';
+
+  @override
+  String get skinTokenSurfaceCardHint => '卡片、列表行和分组面板。';
+
+  @override
+  String get skinTokenSurfaceCardActive => '活动卡片';
+
+  @override
+  String get skinTokenSurfaceCardActiveHint => '高亮显示的卡片，如已解锁的保管库。';
+
+  @override
+  String get skinTokenSurfaceTile => '磁贴与缩略图';
+
+  @override
+  String get skinTokenSurfaceTileHint => '缩略图占位符、图标磁贴和代码块。';
+
+  @override
+  String get skinTokenSurfaceField => '输入框';
+
+  @override
+  String get skinTokenSurfaceFieldHint => '文本输入框和搜索栏的填充色。';
+
+  @override
+  String get skinTokenContentPrimary => '主要文本';
+
+  @override
+  String get skinTokenContentPrimaryHint => '标题、名称和正文。';
+
+  @override
+  String get skinTokenContentSecondary => '次要文本';
+
+  @override
+  String get skinTokenContentSecondaryHint => '副标题、详情和提示。';
+
+  @override
+  String get skinTokenContentIcon => '图标';
+
+  @override
+  String get skinTokenContentIconHint => '不在按钮或栏上的普通图标。';
+
+  @override
+  String get skinTokenBorderDivider => '分割线';
+
+  @override
+  String get skinTokenBorderDividerHint => '行与部分之间的细线。';
+
+  @override
+  String get skinTokenBorderOutline => '轮廓';
+
+  @override
+  String get skinTokenBorderOutlineHint => '轮廓按钮和未选中文本框的边框。';
+
+  @override
+  String get skinTokenBorderFocus => '聚焦环';
+
+  @override
+  String get skinTokenBorderFocusHint => '正在编辑的文本框边框。';
+
+  @override
+  String get skinTokenChromeTopBar => '顶栏';
+
+  @override
+  String get skinTokenChromeTopBarHint => '顶栏的填充色。';
+
+  @override
+  String get skinTokenChromeOnTopBar => '顶栏文本与图标';
+
+  @override
+  String get skinTokenChromeOnTopBarHint => '顶栏上的标题与图标颜色。';
+
+  @override
+  String get skinTokenActionPrimary => '填充按钮';
+
+  @override
+  String get skinTokenActionPrimaryHint => '填充按钮的背景色。';
+
+  @override
+  String get skinTokenActionOnPrimary => '填充按钮标签';
+
+  @override
+  String get skinTokenActionOnPrimaryHint => '填充按钮上的文本和图标。';
+
+  @override
+  String get skinTokenActionTonal => '突起按钮';
+
+  @override
+  String get skinTokenActionTonalHint => '突起和色调按钮的填充色。';
+
+  @override
+  String get skinTokenActionOnTonal => '突起按钮标签';
+
+  @override
+  String get skinTokenActionOnTonalHint => '突起按钮上的文本和图标。';
+
+  @override
+  String get skinTokenActionText => '文本与轮廓按钮';
+
+  @override
+  String get skinTokenActionTextHint => '文本按钮、轮廓按钮和链接的文字颜色。';
+
+  @override
+  String get skinTokenControlActive => '控件开启状态';
+
+  @override
+  String get skinTokenControlActiveHint => '开启时的开关滑轨、选中的复选框与单选框、滑块与进度条填充色。';
+
+  @override
+  String get skinTokenControlOnActive => '开关滑块与对勾';
+
+  @override
+  String get skinTokenControlOnActiveHint => '开启状态的开关滑块以及复选框内的勾选标记。';
+
+  @override
+  String get skinTokenControlTrack => '控件滑轨';
+
+  @override
+  String get skinTokenControlTrackHint => '关闭时的开关滑轨以及滑块和进度条的未填充部分。';
+
+  @override
+  String get skinTokenControlInactive => '控件关闭状态';
+
+  @override
+  String get skinTokenControlInactiveHint => '关闭状态的开关滑块以及未勾选框的边框。';
+
+  @override
+  String get skinTokenChoiceBackground => '标签';
+
+  @override
+  String get skinTokenChoiceBackgroundHint => '未选中的标签和分段的填充色。';
+
+  @override
+  String get skinTokenChoiceSelected => '选中标签';
+
+  @override
+  String get skinTokenChoiceSelectedHint => '选中的标签或分段的填充色。';
+
+  @override
+  String get skinTokenChoiceOnSelected => '选中标签文本';
+
+  @override
+  String get skinTokenChoiceOnSelectedHint => '选中的标签或分段上的文本与图标。';
+
+  @override
+  String get skinTokenChoiceBorder => '标签边框';
+
+  @override
+  String get skinTokenChoiceBorderHint => '标签和分段按钮的轮廓。';
+
+  @override
+  String get skinTokenSelectionFill => '选中行';
+
+  @override
+  String get skinTokenSelectionFillHint => '选中的文件和行，以及高亮的图标磁贴。';
+
+  @override
+  String get skinTokenSelectionOn => '选中行文本与图标';
+
+  @override
+  String get skinTokenSelectionOnHint => '选中行上绘制的文本与图标。';
+
+  @override
+  String get skinTokenOverlayMenu => '菜单';
+
+  @override
+  String get skinTokenOverlayMenuHint => '弹窗菜单、下拉菜单和上下文菜单。';
+
+  @override
+  String get skinTokenOverlayOnMenu => '菜单文本';
+
+  @override
+  String get skinTokenOverlayOnMenuHint => '菜单中的文本与图标。';
+
+  @override
+  String get skinTokenOverlayDialog => '对话框';
+
+  @override
+  String get skinTokenOverlayDialogHint => '对话框的填充色。';
+
+  @override
+  String get skinTokenOverlayOnDialog => '对话框标题';
+
+  @override
+  String get skinTokenOverlayOnDialogHint => '对话框的标题文本。';
+
+  @override
+  String get skinTokenOverlaySheet => '底部工作表';
+
+  @override
+  String get skinTokenOverlaySheetHint => '底部工作表的填充色。';
+
+  @override
+  String get skinTokenOverlayOnSheet => '底部工作表文本';
+
+  @override
+  String get skinTokenOverlayOnSheetHint => '底部工作表中的文本与图标。';
+
+  @override
+  String get skinTokenOverlayScrim => '对话框背景遮罩';
+
+  @override
+  String get skinTokenOverlayScrimHint => '对话框和底部工作表背后的变暗遮罩。';
+
+  @override
+  String get skinTokenFloatingFab => '圆形添加按钮';
+
+  @override
+  String get skinTokenFloatingFabHint => '圆形添加按钮的填充色。';
+
+  @override
+  String get skinTokenFloatingOnFab => '圆形添加按钮图标';
+
+  @override
+  String get skinTokenFloatingOnFabHint => '圆形添加按钮上的图标。';
+
+  @override
+  String get skinTokenFloatingToast => '提示条';
+
+  @override
+  String get skinTokenFloatingToastHint => '底部弹出的信息提示条的填充色。';
+
+  @override
+  String get skinTokenFloatingOnToast => '提示条文本';
+
+  @override
+  String get skinTokenFloatingOnToastHint => '信息提示条上的文本与图标。';
+
+  @override
+  String get skinTokenFloatingTooltip => '工具提示';
+
+  @override
+  String get skinTokenFloatingTooltipHint => '工具提示的填充色。';
+
+  @override
+  String get skinTokenFloatingOnTooltip => '工具提示文本';
+
+  @override
+  String get skinTokenFloatingOnTooltipHint => '工具提示中的文本。';
+
+  @override
+  String get skinTokenGroupAccent => '强调色';
+
+  @override
+  String get skinTokenGroupStatus => '状态与错误';
+
+  @override
+  String get skinTokenSurfacePanel => '面板';
+
+  @override
+  String get skinTokenSurfacePanelHint => '由标准卡片小部件制成的卡片、书签栏、网格单元格和信息表。';
+
+  @override
+  String get skinTokenChromeBar => '栏与标签条';
+
+  @override
+  String get skinTokenChromeBarHint => '操作栏、标签条、选择栏和底部栏。';
+
+  @override
+  String get skinTokenAccentPrimary => '强调';
+
+  @override
+  String get skinTokenAccentPrimaryHint => '高亮、文本中的链接、微型强调图标和角标。';
+
+  @override
+  String get skinTokenAccentSecondary => '次要强调';
+
+  @override
+  String get skinTokenAccentSecondaryHint => '次要高亮和标签。';
+
+  @override
+  String get skinTokenAccentTertiary => '三级强调';
+
+  @override
+  String get skinTokenAccentTertiaryHint => '三级高亮和标签。';
+
+  @override
+  String get skinTokenAccentTertiaryContainer => '三级强调填充';
+
+  @override
+  String get skinTokenAccentTertiaryContainerHint => '三级高亮背后的填充色。';
+
+  @override
+  String get skinTokenAccentOnTertiaryContainer => '三级强调填充文本';
+
+  @override
+  String get skinTokenAccentOnTertiaryContainerHint => '三级填充上的文本与图标。';
+
+  @override
+  String get skinTokenStatusDanger => '错误与删除';
+
+  @override
+  String get skinTokenStatusDangerHint => '错误文本、删除操作和错误边框。';
+
+  @override
+  String get skinTokenStatusOnDanger => '错误颜色上的文本';
+
+  @override
+  String get skinTokenStatusOnDangerHint => '在错误颜色上绘制的文本与图标。';
+
+  @override
+  String get skinTokenStatusDangerContainer => '错误信息填充';
+
+  @override
+  String get skinTokenStatusDangerContainerHint => '错误信息和横幅的填充色。';
+
+  @override
+  String get skinTokenStatusOnDangerContainer => '错误信息文本';
+
+  @override
+  String get skinTokenStatusOnDangerContainerHint => '错误信息中的文本与图标。';
+
+  @override
+  String get skinTokenStatusInfo => '提示信息填充';
+
+  @override
+  String get skinTokenStatusInfoHint => '提示横幅的填充色。';
+
+  @override
+  String get skinTokenStatusOnInfo => '提示信息文本';
+
+  @override
+  String get skinTokenStatusOnInfoHint => '提示横幅中的文本与图标。';
+}

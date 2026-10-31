@@ -1,0 +1,437 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:vaultexplorer/data/models/browser_layout_mode.dart';
+import 'package:vaultexplorer/data/models/container_sort_mode.dart';
+import 'package:vaultexplorer/data/models/playlist_scroll_mode.dart';
+import 'package:vaultexplorer/data/services/app_settings_service.dart';
+import 'package:vaultexplorer/features/browser/mixins/sort_mixin.dart';
+
+// Tests for the AppSettings model itself -- pure in-memory JSON/copyWith
+// logic, no file I/O. AppSettingsService's actual read/write to disk (via
+// path_provider + dart:io File) isn't covered here; that would need a
+// path_provider mock similar to how VaultItemsServiceTest fakes the
+// injected VaultLifecycleApi/VaultFileIoApi, and is a reasonable next
+// step but a separate one.
+void main() {
+  group('AppSettings defaults', () {
+    test('a freshly-constructed instance has the documented defaults', () {
+      final s = AppSettings();
+      expect(s.useMasterPassword, isFalse);
+      expect(s.masterUnlockMethod, MasterUnlockMethod.password);
+      expect(s.videoAutoPlay, isTrue);
+      expect(s.blockScreenshots, isTrue);
+      expect(s.lockContainersOnScreenLock, isTrue);
+      expect(s.defaultDerivedKeyCacheEnabled, isFalse);
+      expect(s.autoLockMins, 0);
+      expect(s.autoLockScreenLockOnly, isFalse);
+      expect(s.appLockScreenLockOnly, isFalse);
+      expect(s.defaultLayoutMode, BrowserLayoutMode.detailed);
+      expect(s.containerSortMode, ContainerSortMode.manual);
+      expect(s.themeMode, ThemeMode.system);
+      expect(s.defaultFileSortBy, SortBy.name);
+      expect(s.defaultFileSortAscending, isTrue);
+      expect(s.playlistScrollMode, PlaylistScrollMode.horizontal);
+      expect(s.deleteAfterImportMode, DeleteAfterImportMode.ask);
+      expect(s.audioRecordingQuality, AudioRecordingQuality.standard);
+      expect(s.languageCode, isNull);
+      expect(s.extensionPreferences, isEmpty);
+      expect(s.masterPasswordHash, isNull);
+      expect(s.masterPasswordSalt, isNull);
+      expect(s.masterPatternHash, isNull);
+      expect(s.masterPinHash, isNull);
+      expect(s.needsHashUpgrade, isFalse);
+    });
+
+    test('playlistScrollDirection is derived from playlistScrollMode', () {
+      final s = AppSettings();
+      expect(s.playlistScrollDirection, Axis.horizontal);
+    });
+  });
+
+  group('AppSettings JSON round-trip', () {
+    test('every field set to a non-default value survives toJson -> '
+        'fromJson', () {
+      final original = AppSettings(
+        useMasterPassword: true,
+        masterUnlockMethod: MasterUnlockMethod.biometrics,
+        defaultDocumentProvider: true,
+        videoAutoPlay: false,
+        blockScreenshots: false,
+        keepVaultsRunningInBackground: true,
+        lockContainersOnScreenLock: false,
+        defaultDerivedKeyCacheEnabled: true,
+        autoLockMins: 5,
+        autoLockScreenLockOnly: true,
+        appLockScreenLockOnly: true,
+        defaultLayoutMode: BrowserLayoutMode.masonry,
+        containerSortMode: ContainerSortMode.newest,
+        themeMode: ThemeMode.dark,
+        useDynamicColor: true,
+        autoOpenOnUnlock: true,
+        defaultFileSortBy: SortBy.date,
+        defaultFileSortAscending: false,
+        htmlEnableJavaScript: true,
+        playlistScrollMode: PlaylistScrollMode.verticalContinuous,
+        languageCode: 'de',
+        debugLoggingEnabled: true,
+        deleteAfterImportMode: DeleteAfterImportMode.delete,
+        audioRecordingQuality: AudioRecordingQuality.voice,
+        extensionPreferences: {'txt': 'com.example.editor'},
+      );
+
+      final roundTripped = AppSettings.fromJson(original.toJson());
+
+      expect(roundTripped.useMasterPassword, original.useMasterPassword);
+      expect(roundTripped.masterUnlockMethod, original.masterUnlockMethod);
+      expect(roundTripped.defaultDocumentProvider, original.defaultDocumentProvider);
+      expect(roundTripped.videoAutoPlay, original.videoAutoPlay);
+      expect(roundTripped.blockScreenshots, original.blockScreenshots);
+      expect(roundTripped.keepVaultsRunningInBackground, original.keepVaultsRunningInBackground);
+      expect(roundTripped.lockContainersOnScreenLock, original.lockContainersOnScreenLock);
+      expect(roundTripped.defaultDerivedKeyCacheEnabled, original.defaultDerivedKeyCacheEnabled);
+      expect(roundTripped.autoLockMins, original.autoLockMins);
+      expect(roundTripped.autoLockScreenLockOnly, original.autoLockScreenLockOnly);
+      expect(roundTripped.appLockScreenLockOnly, original.appLockScreenLockOnly);
+      expect(roundTripped.defaultLayoutMode, original.defaultLayoutMode);
+      expect(roundTripped.containerSortMode, original.containerSortMode);
+      expect(roundTripped.themeMode, original.themeMode);
+      expect(roundTripped.useDynamicColor, original.useDynamicColor);
+      expect(roundTripped.autoOpenOnUnlock, original.autoOpenOnUnlock);
+      expect(roundTripped.defaultFileSortBy, original.defaultFileSortBy);
+      expect(roundTripped.defaultFileSortAscending, original.defaultFileSortAscending);
+      expect(roundTripped.htmlEnableJavaScript, original.htmlEnableJavaScript);
+      expect(roundTripped.playlistScrollMode, original.playlistScrollMode);
+      expect(roundTripped.languageCode, original.languageCode);
+      expect(roundTripped.debugLoggingEnabled, original.debugLoggingEnabled);
+      expect(roundTripped.deleteAfterImportMode, original.deleteAfterImportMode);
+      expect(roundTripped.audioRecordingQuality, original.audioRecordingQuality);
+      expect(roundTripped.extensionPreferences, original.extensionPreferences);
+    });
+
+    test('toJson never includes the master password/pattern/PIN hash '
+        'material -- those are only ever persisted via secure storage, '
+        'never the plain settings file', () {
+      final s = AppSettings(
+        masterPasswordHash: 'somehash',
+        masterPasswordSalt: 'somesalt',
+        masterPatternHash: 'somepatternhash',
+        masterPinHash: 'somepinhash',
+      );
+      final json = s.toJson();
+      expect(json.containsKey('masterPasswordHash'), isFalse);
+      expect(json.containsKey('masterPasswordSalt'), isFalse);
+      expect(json.containsKey('masterPatternHash'), isFalse);
+      expect(json.containsKey('masterPinHash'), isFalse);
+      expect(json.containsKey('_masterPasswordHash'), isFalse);
+      expect(json.containsKey('_masterPasswordSalt'), isFalse);
+      expect(json.containsKey('_masterPatternHash'), isFalse);
+      expect(json.containsKey('_masterPinHash'), isFalse);
+    });
+
+    test('fromJson ignores masterPasswordHash/masterPasswordSalt/'
+        'masterPatternHash/masterPinHash even if somehow present in the '
+        'input -- confirms the only way to end up with hash material on '
+        'an AppSettings is via the constructor (i.e. AppSettingsService '
+        'loading it from secure storage separately), never from the '
+        'settings JSON itself', () {
+      final s = AppSettings.fromJson({
+        'masterPasswordHash': 'shouldbeignored',
+        'masterPasswordSalt': 'shouldalsobeignored',
+        'masterPatternHash': 'shouldbeignoredtoo',
+        'masterPinHash': 'andthistoo',
+      });
+      expect(s.masterPasswordHash, isNull);
+      expect(s.masterPasswordSalt, isNull);
+      expect(s.masterPatternHash, isNull);
+      expect(s.masterPinHash, isNull);
+    });
+
+    group('masterUnlockMethod', () {
+      test('every MasterUnlockMethod value survives toJson -> fromJson', () {
+        for (final method in MasterUnlockMethod.values) {
+          final s = AppSettings(masterUnlockMethod: method);
+          expect(AppSettings.fromJson(s.toJson()).masterUnlockMethod, method);
+        }
+      });
+
+      test('a settings file with no masterUnlockMethod key and no legacy '
+          'masterPasswordIsFingerprint key defaults to password', () {
+        expect(
+          AppSettings.fromJson({}).masterUnlockMethod,
+          MasterUnlockMethod.password,
+        );
+      });
+
+      test('migrates a pre-pattern/PIN settings file: legacy '
+          'masterPasswordIsFingerprint: true with no masterUnlockMethod '
+          'key becomes MasterUnlockMethod.biometrics', () {
+        expect(
+          AppSettings.fromJson({
+            'masterPasswordIsFingerprint': true,
+          }).masterUnlockMethod,
+          MasterUnlockMethod.biometrics,
+        );
+      });
+
+      test('migrates a pre-pattern/PIN settings file: legacy '
+          'masterPasswordIsFingerprint: false with no masterUnlockMethod '
+          'key becomes MasterUnlockMethod.password', () {
+        expect(
+          AppSettings.fromJson({
+            'masterPasswordIsFingerprint': false,
+          }).masterUnlockMethod,
+          MasterUnlockMethod.password,
+        );
+      });
+
+      test('masterUnlockMethod present takes priority over the legacy '
+          'masterPasswordIsFingerprint key', () {
+        expect(
+          AppSettings.fromJson({
+            'masterUnlockMethod': 'pin',
+            'masterPasswordIsFingerprint': true,
+          }).masterUnlockMethod,
+          MasterUnlockMethod.pin,
+        );
+      });
+    });
+
+    test('blockScreenshots is on when the key is absent, but an explicit '
+        'opt-out (false) is preserved', () {
+      expect(AppSettings.fromJson({}).blockScreenshots, isTrue);
+      expect(
+        AppSettings.fromJson({'blockScreenshots': false}).blockScreenshots,
+        isFalse,
+      );
+      expect(
+        AppSettings.fromJson(
+          AppSettings(blockScreenshots: false).toJson(),
+        ).blockScreenshots,
+        isFalse,
+      );
+    });
+
+    test('fromJson({}) does not throw and produces sensible fallbacks', () {
+      final s = AppSettings.fromJson({});
+      expect(s.useMasterPassword, isFalse);
+      expect(s.videoAutoPlay, isTrue);
+      expect(s.blockScreenshots, isTrue);
+      expect(s.autoLockMins, 0);
+      expect(s.autoLockScreenLockOnly, isFalse);
+      expect(s.appLockScreenLockOnly, isFalse);
+      expect(s.defaultLayoutMode, BrowserLayoutMode.detailed);
+      expect(s.containerSortMode, ContainerSortMode.manual);
+      expect(s.themeMode, ThemeMode.system);
+      expect(s.defaultFileSortBy, SortBy.name);
+      expect(s.playlistScrollMode, PlaylistScrollMode.horizontal);
+      expect(s.deleteAfterImportMode, DeleteAfterImportMode.ask);
+      expect(s.audioRecordingQuality, AudioRecordingQuality.standard);
+      expect(s.extensionPreferences, isEmpty);
+    });
+
+    test('a non-string value inside extensionPreferences throws rather '
+        'than being silently dropped or coerced -- pinning current '
+        'behavior; if a hand-edited or foreign settings file could '
+        'plausibly contain one, this is worth hardening', () {
+      expect(
+        () => AppSettings.fromJson({
+          'extensionPreferences': {'txt': 123},
+        }),
+        throwsA(isA<TypeError>()),
+      );
+    });
+
+    group('playlistScrollMode / legacy playlistScrollDirection fallback', () {
+      test('reads the legacy playlistScrollDirection key when '
+          'playlistScrollMode is absent', () {
+        expect(
+          AppSettings.fromJson({'playlistScrollDirection': 'vertical'})
+              .playlistScrollMode,
+          PlaylistScrollMode.verticalPage,
+        );
+      });
+
+      test('playlistScrollMode takes priority when both keys are present',
+          () {
+        expect(
+          AppSettings.fromJson({
+            'playlistScrollMode': 'verticalContinuous',
+            'playlistScrollDirection': 'horizontal',
+          }).playlistScrollMode,
+          PlaylistScrollMode.verticalContinuous,
+        );
+      });
+
+      test('both absent defaults to horizontal', () {
+        expect(AppSettings.fromJson({}).playlistScrollMode, PlaylistScrollMode.horizontal);
+      });
+    });
+  });
+
+  group('AppSettings.needsHashUpgrade', () {
+    test('no hash at all -> false', () {
+      expect(AppSettings().needsHashUpgrade, isFalse);
+    });
+
+    test('an 8-character hash with no salt -> true (the legacy marker)', () {
+      final s = AppSettings(masterPasswordHash: '12345678');
+      expect(s.needsHashUpgrade, isTrue);
+    });
+
+    test('an 8-character hash with an empty-string salt -> true', () {
+      final s = AppSettings(masterPasswordHash: '12345678', masterPasswordSalt: '');
+      expect(s.needsHashUpgrade, isTrue);
+    });
+
+    test('an 8-character hash WITH a real salt -> false, already upgraded',
+        () {
+      final s = AppSettings(masterPasswordHash: '12345678', masterPasswordSalt: 'abc');
+      expect(s.needsHashUpgrade, isFalse);
+    });
+
+    test('a hash of any other length -> false, regardless of salt', () {
+      final s = AppSettings(masterPasswordHash: 'a-much-longer-modern-hash-value');
+      expect(s.needsHashUpgrade, isFalse);
+    });
+  });
+
+  group('AppSettings master lock', () {
+    test('a password, a PIN or a pattern alone is enough to make the lock '
+        'active', () {
+      expect(
+        AppSettings(useMasterPassword: true, masterPasswordHash: 'h')
+            .masterLockActive,
+        isTrue,
+      );
+      expect(
+        AppSettings(useMasterPassword: true, masterPinHash: 'n').masterLockActive,
+        isTrue,
+      );
+      expect(
+        AppSettings(useMasterPassword: true, masterPatternHash: 'p')
+            .masterLockActive,
+        isTrue,
+      );
+    });
+
+    test('the flag without any credential, or a credential without the '
+        'flag, is no lock', () {
+      expect(AppSettings(useMasterPassword: true).masterLockActive, isFalse);
+      expect(AppSettings(masterPinHash: 'n').masterLockActive, isFalse);
+    });
+
+    test('configuredMasterCredentials lists what is set in gate order, and '
+        'masterFallbackFor skips the credential being shown', () {
+      final s = AppSettings(masterPatternHash: 'p', masterPasswordHash: 'h');
+
+      expect(s.configuredMasterCredentials, [
+        MasterUnlockMethod.password,
+        MasterUnlockMethod.pattern,
+      ]);
+      expect(s.masterFallbackFor(MasterUnlockMethod.password),
+          MasterUnlockMethod.pattern);
+      expect(s.masterFallbackFor(MasterUnlockMethod.pattern),
+          MasterUnlockMethod.password);
+      // Biometrics are not a credential, so the first one that is set is the
+      // way back from them.
+      expect(s.masterFallbackFor(MasterUnlockMethod.biometrics),
+          MasterUnlockMethod.password);
+      expect(
+        AppSettings(masterPinHash: 'n').masterFallbackFor(MasterUnlockMethod.pin),
+        isNull,
+      );
+    });
+
+    test('biometrics are never a credential in their own right', () {
+      final s = AppSettings(masterPinHash: 'n');
+
+      expect(MasterUnlockMethod.biometrics.isCredential, isFalse);
+      expect(s.hasMasterCredentialFor(MasterUnlockMethod.biometrics), isFalse);
+      expect(s.hasMasterCredentialFor(MasterUnlockMethod.pin), isTrue);
+      expect(s.hasMasterCredentialFor(MasterUnlockMethod.pattern), isFalse);
+    });
+  });
+
+  group('AppSettings.copyWith', () {
+    test('with no arguments, every field is unchanged', () {
+      final original = AppSettings(
+        useMasterPassword: true,
+        autoLockMins: 7,
+        themeMode: ThemeMode.dark,
+        masterPasswordHash: 'h',
+        masterPasswordSalt: 's',
+      );
+      final copy = original.copyWith();
+
+      expect(copy.useMasterPassword, original.useMasterPassword);
+      expect(copy.autoLockMins, original.autoLockMins);
+      expect(copy.themeMode, original.themeMode);
+      expect(copy.masterPasswordHash, original.masterPasswordHash);
+      expect(copy.masterPasswordSalt, original.masterPasswordSalt);
+    });
+
+    test('changing one field leaves the others alone', () {
+      final original = AppSettings(autoLockMins: 1, useMasterPassword: true);
+      final copy = original.copyWith(autoLockMins: 10);
+
+      expect(copy.autoLockMins, 10);
+      expect(copy.useMasterPassword, isTrue); // unchanged
+    });
+
+    test('omitting masterPasswordSalt in copyWith preserves the existing '
+        'salt rather than clearing it', () {
+      final original = AppSettings(masterPasswordHash: 'h1', masterPasswordSalt: 's1');
+      final copy = original.copyWith(masterPasswordHash: 'h2');
+
+      expect(copy.masterPasswordHash, 'h2');
+      expect(copy.masterPasswordSalt, 's1');
+    });
+
+    test('omitting masterPatternHash/masterPinHash in copyWith preserves '
+        'them rather than clearing them -- e.g. switching '
+        'masterUnlockMethod away from pattern via copyWith alone (without '
+        'going through AppSettingsService.clearMasterPattern) does not '
+        'silently drop the stored hash', () {
+      final original = AppSettings(
+        masterUnlockMethod: MasterUnlockMethod.pattern,
+        masterPatternHash: 'p1',
+        masterPinHash: 'n1',
+      );
+      final copy = original.copyWith(
+        masterUnlockMethod: MasterUnlockMethod.biometrics,
+      );
+
+      expect(copy.masterUnlockMethod, MasterUnlockMethod.biometrics);
+      expect(copy.masterPatternHash, 'p1');
+      expect(copy.masterPinHash, 'n1');
+    });
+
+    test('the playlistScrollDirection convenience parameter can silently '
+        'downgrade an existing verticalContinuous setting to verticalPage '
+        '-- Axis only has two values, so passing '
+        'Axis.vertical can\'t distinguish "paged" from "continuous". '
+        'Passing playlistScrollMode explicitly avoids this; this test '
+        'documents the trade-off rather than asserting it\'s a bug.', () {
+      final original = AppSettings(playlistScrollMode: PlaylistScrollMode.verticalContinuous);
+      final copy = original.copyWith(playlistScrollDirection: Axis.vertical);
+      expect(copy.playlistScrollMode, PlaylistScrollMode.verticalPage);
+    });
+
+    test('passing playlistScrollMode explicitly overrides '
+        'playlistScrollDirection', () {
+      final original = AppSettings(playlistScrollMode: PlaylistScrollMode.horizontal);
+      final copy = original.copyWith(
+        playlistScrollMode: PlaylistScrollMode.verticalContinuous,
+        playlistScrollDirection: Axis.horizontal,
+      );
+      expect(copy.playlistScrollMode, PlaylistScrollMode.verticalContinuous);
+    });
+
+    test('omitting both playlistScrollMode and playlistScrollDirection '
+        'keeps the current mode untouched', () {
+      final original = AppSettings(playlistScrollMode: PlaylistScrollMode.verticalContinuous);
+      final copy = original.copyWith(autoLockMins: 3);
+      expect(copy.playlistScrollMode, PlaylistScrollMode.verticalContinuous);
+    });
+  });
+}

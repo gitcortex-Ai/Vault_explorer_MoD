@@ -1,0 +1,82 @@
+import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/theme/app_theme.dart';
+import 'package:vaultexplorer/data/models/media_viewer_action.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/media_viewer_action_glyph.dart';
+
+class MediaViewerActionButton extends StatelessWidget {
+  final MediaViewerAction action;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final bool isHighlighted;
+  final Color? highlightColor;
+  final String? customTooltip;
+  final IconData? customIcon;
+
+  final double size;
+
+  const MediaViewerActionButton({
+    super.key,
+    required this.action,
+    required this.onTap,
+    this.onLongPress,
+    this.isHighlighted = false,
+    this.highlightColor,
+    this.customTooltip,
+    this.customIcon,
+    this.size = 40.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = context.colors;
+    final activeColor = highlightColor ?? cs.primary;
+    final iconColor =
+        isHighlighted ? _legibleOnDark(activeColor) : Colors.white;
+    final tooltip = customTooltip ?? action.getLocalizedLabel(context.l10n);
+
+    return Tooltip(
+      message: tooltip,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Material(
+          color: isHighlighted
+              ? _legibleOnDark(activeColor).withValues(alpha: 0.22)
+              : Colors.white.withValues(alpha: 0.12),
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onTap();
+            },
+            onLongPress: onLongPress != null
+                ? () {
+                    HapticFeedback.mediumImpact();
+                    onLongPress!();
+                  }
+                : null,
+            child: Center(
+              child: MediaViewerActionGlyph(
+                action: action,
+                icon: customIcon,
+                size: AppIconSize.standard,
+                color: iconColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Lifts [color]'s lightness until it is clearly readable on the dark scrim.
+  static Color _legibleOnDark(Color color) {
+    const minLightness = 0.72;
+    final hsl = HSLColor.fromColor(color);
+    if (hsl.lightness >= minLightness) return color;
+    return hsl.withLightness(minLightness).toColor();
+  }
+}

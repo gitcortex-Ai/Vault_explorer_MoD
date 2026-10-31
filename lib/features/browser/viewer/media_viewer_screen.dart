@@ -1,0 +1,4521 @@
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vaultexplorer/core/api/vault_engine_events.dart';
+import 'package:vaultexplorer/core/api/vault_file_io_api.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/filesystem/local_storage_container.dart';
+import 'package:vaultexplorer/core/services/playback_throttle_controller.dart';
+import 'package:vaultexplorer/core/utils/raw_entry.dart';
+import 'package:vaultexplorer/core/utils/ve_log.dart';
+import 'package:vaultexplorer/core/utils/format_utils.dart';
+import 'package:vaultexplorer/core/widgets/thumbnail/async_thumbnail.dart';
+import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/models/playlist_transition_effect.dart';
+import 'package:vaultexplorer/data/models/playlist_scroll_mode.dart';
+import 'package:vaultexplorer/data/models/scrub_preview_style.dart';
+import 'package:vaultexplorer/data/models/thumbnail_cache_mode.dart';
+import 'package:vaultexplorer/data/models/thumbnail_quality.dart';
+import 'package:vaultexplorer/data/models/video_aspect_ratio_mode.dart';
+import 'package:vaultexplorer/data/models/resume_playback_mode.dart';
+import 'package:vaultexplorer/data/models/audio_equalizer_settings.dart';
+import 'package:vaultexplorer/data/models/media_decoder_mode.dart';
+import 'package:vaultexplorer/data/services/app_settings_service.dart';
+import 'package:vaultexplorer/data/services/app_secure_storage.dart';
+import 'package:vaultexplorer/data/models/vault_marks.dart';
+import 'package:vaultexplorer/features/browser/controllers/file_browser_pins_bookmarks_controller.dart';
+import 'package:vaultexplorer/data/services/file_manager_toolbar_service.dart';
+import 'package:vaultexplorer/data/services/thumbnail_cache_service.dart';
+import 'package:vaultexplorer/data/services/media_aspect_ratio_cache.dart';
+import 'package:vaultexplorer/data/services/video_thumbnail_fetcher.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/features/browser/browser_dialogs.dart';
+import 'package:vaultexplorer/features/browser/mixins/sort_mixin.dart';
+import 'package:vaultexplorer/features/browser/viewer/carousel_geometry.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_viewer_constants.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_viewer_lock_controller.dart';
+import 'package:vaultexplorer/data/services/session_lock_controller.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_playback_paths.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_session_bridge.dart';
+import 'package:vaultexplorer/features/browser/viewer/background_playback/background_playback_host.dart';
+import 'package:vaultexplorer/features/browser/viewer/pip/picture_in_picture_bridge.dart';
+import 'package:vaultexplorer/features/browser/viewer/pip/picture_in_picture_coordinator.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_prefetch_controller.dart';
+import 'package:vaultexplorer/features/browser/viewer/playlist_controller.dart';
+import 'package:vaultexplorer/features/browser/viewer/playlist_swipe_claim.dart';
+import 'package:vaultexplorer/features/browser/viewer/screen_brightness_bridge.dart';
+import 'package:vaultexplorer/features/browser/viewer/video_playback_manager.dart';
+import 'package:vaultexplorer/features/browser/viewer/video_scrub_preview_controller.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/ab_loop_toast.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/file_info_sheet.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/image_page_item.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/media_player_widget.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/media_viewer_lock_overlay.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/media_viewer_top_bar.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/media_viewer_bottom_controls.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/media_viewer_in_place_layout_editor.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/advanced_settings_sheet.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/audio_equalizer_sheet.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/media_diagnostics_sheet.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/swipe_to_dismiss_layer.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/video_scrub_fullscreen_layer.dart';
+import 'package:vaultexplorer/features/image_editor/image_editor_screen.dart';
+import 'package:vaultexplorer/features/video_editor/video_editor_screen.dart';
+import 'package:vaultexplorer/features/audio_editor/audio_editor_screen.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/playlist_carousel_overlay.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/playlist_transition_transformer.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_viewer_session_controller.dart';
+import 'package:vaultexplorer/features/browser/viewer/models/ab_loop_state.dart';
+import 'package:vaultexplorer/features/browser/viewer/models/viewer_adjustments.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/adjustments_sheet.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/color_adjust_filter.dart';
+import 'package:vaultexplorer/features/settings/file_manager_toolbar_settings_controller.dart';
+import 'package:vaultexplorer/data/models/media_viewer_action.dart';
+import 'package:vaultexplorer/data/models/media_viewer_toolbar_config.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/media_viewer_toolbar_settings_screen.dart';
+
+export 'package:vaultexplorer/features/browser/viewer/media_viewer_session_controller.dart'
+    show VideoPlaybackMode;
+import '../../../core/theme/app_theme.dart';
+import 'native_video_controller.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area_scope.dart';
+
+class MediaViewerScreen extends ConsumerStatefulWidget {
+  final MountedContainer container;
+  final List<String> mediaFiles;
+  final int initialIndex;
+  final String? startingFolder;
+  final ThumbnailQuality thumbnailQuality;
+  final ThumbnailCacheMode thumbnailCacheMode;
+  final String? mediaFilter;
+  final SortBy sortBy;
+  final bool sortAscending;
+  final Set<String>? pinnedPaths;
+  final ValueChanged<String>? onCurrentFileChanged;
+  final ValueChanged<String>? onFileDeleted;
+
+  /// A media file staged from an archive. It is short-lived, so mutation,
+  /// export, bookmark, and playlist actions must not be available.
+  final bool isArchivePreview;
+
+  const MediaViewerScreen({
+    super.key,
+    required this.container,
+    required this.mediaFiles,
+    required this.initialIndex,
+    this.startingFolder,
+    this.thumbnailQuality = ThumbnailQuality.defaultQuality,
+    required this.thumbnailCacheMode,
+    this.mediaFilter,
+    this.sortBy = SortBy.name,
+    this.sortAscending = true,
+    this.pinnedPaths,
+    this.onCurrentFileChanged,
+    this.onFileDeleted,
+    this.isArchivePreview = false,
+  });
+
+  bool get _isPreviewOnly => isArchivePreview;
+
+  @override
+  ConsumerState<MediaViewerScreen> createState() => _MediaViewerScreenState();
+}
+
+/// How the viewer is closing with respect to the floating player.
+enum _FloatingClose {
+  /// Not closing that way.
+  none,
+
+  /// Handing the video to the floating player, which could not be told where
+  /// the video is: no Hero flight back to the thumbnail, but nothing flies in
+  /// either; the window just appears when the viewer is gone.
+  withoutFlight,
+
+  /// Handing the video over, and the floating window is flying out of it: the
+  /// viewer must not draw its own copy as well.
+  flying,
+}
+
+/// The viewer growing out of the floating window it was opened from. First
+/// only [from] (the window's video, where the viewer's own is still hidden
+/// while it is measured), then [dest] (where the viewer's video really is),
+/// [origin] (where the media layer sits on screen) and the [animation].
+class _ExpandFlight {
+  final Rect from;
+  final Rect? dest;
+  final Offset origin;
+  final Animation<double>? animation;
+
+  const _ExpandFlight({
+    required this.from,
+    this.dest,
+    this.origin = Offset.zero,
+    this.animation,
+  });
+}
+
+/// Clips to a rounded rectangle anywhere in the box, not only the box itself.
+class _RRectClipper extends CustomClipper<RRect> {
+  final Rect rect;
+  final double radius;
+
+  const _RRectClipper(this.rect, this.radius);
+
+  @override
+  RRect getClip(Size size) =>
+      RRect.fromRectAndRadius(rect, Radius.circular(radius));
+
+  @override
+  bool shouldReclip(covariant _RRectClipper oldClipper) =>
+      oldClipper.rect != rect || oldClipper.radius != radius;
+}
+
+class _MediaViewerScreenState extends ConsumerState<MediaViewerScreen>
+    with TickerProviderStateMixin {
+  late final VaultFileIoApi _fileIoApi;
+  late final VaultEngineEvents _engineEvents;
+  late final MediaPrefetchController _prefetchController;
+
+  late final PlaylistController _playlistController;
+  late final VideoPlaybackManager _playbackManager;
+  late PageController _pageController;
+  late ScrollController _listScrollController;
+  late final TransformationController _continuousTransformationController;
+  double _continuousScale = 1.0;
+  AnimationController? _continuousZoomAnimationController;
+  Animation<Matrix4>? _continuousZoomAnimation;
+  TapDownDetails? _continuousDoubleTapDetails;
+  final ValueNotifier<ScrollPhysics> _swipePhysicsNotifier =
+      ValueNotifier<ScrollPhysics>(const BouncingScrollPhysics());
+
+  /// Hands a swipe that an item claims for the playlist pager to the pager as
+  /// a drag, so the page follows the finger and a drag that falls short is
+  /// cancelled. See [PlaylistSwipeClaimLayer].
+  late final PlaylistSwipeDrag _playlistSwipeDrag = PlaylistSwipeDrag(
+    positionOf: () =>
+        _pageController.hasClients && _pageController.positions.length == 1
+        ? _pageController.position
+        : null,
+    canClaim: _canClaimPlaylistSwipe,
+    crossAxisYieldRatio: _playlistSwipeCrossAxisYield,
+  );
+
+  /// Whether a finger may swipe the playlist pager right now. Frozen scroll
+  /// physics mean something else owns the touch: a zoomed item, a pinch, a
+  /// brightness, volume or seek drag, a page change under way.
+  bool _canClaimPlaylistSwipe() =>
+      mounted &&
+      !_scrollMode.isContinuous &&
+      _playlistController.playlist.length > 1 &&
+      _swipePhysicsNotifier.value is! NeverScrollableScrollPhysics;
+
+  /// How clearly a drag has to lean across the paging axis before the pager's
+  /// claim leaves it to the recognizer that owns drags in that direction:
+  /// swipe to dismiss (which always works across the paging axis) or, in a
+  /// vertical playlist, swipe to seek. Null when neither can start for this
+  /// touch, so the claim keeps taking drags of any direction: an L-shaped
+  /// swipe may well start out across the axis. Asked when a finger lands.
+  double? _playlistSwipeCrossAxisYield() {
+    final config = ref
+        .read(fileManagerToolbarSettingsProvider(null))
+        .config
+        .mediaViewerToolbarConfig;
+    // The same conditions the swipe-to-dismiss layer is enabled under.
+    if (config.swipeToDismissEnabled &&
+        !_isEditingLayout &&
+        !_controlsLocked &&
+        _canStartSwipeDismiss()) {
+      return kPlaylistSwipeDismissYieldRatio;
+    }
+    if (_scrollMode == PlaylistScrollMode.verticalPage &&
+        _isCurrentItemSwipeToSeekEnabled) {
+      return kPlaylistSwipeSeekYieldRatio;
+    }
+    return null;
+  }
+
+  /// 0..1 while a swipe-to-dismiss drag pulls the media away. Drives the
+  /// backdrop and viewer chrome fade while the actual image stays visible.
+  final ValueNotifier<double> _swipeDismissProgress = ValueNotifier<double>(
+    0.0,
+  );
+
+  /// Asked, as a close begins, where the video on screen is.
+  final VideoFrameProbe _videoProbe = VideoFrameProbe();
+
+  /// Set when the close hands the playing video to the floating player.
+  final ValueNotifier<_FloatingClose> _floatingClose =
+      ValueNotifier<_FloatingClose>(_FloatingClose.none);
+  AnimationController? _closeFade;
+  Timer? _floatingCloseGuard;
+
+  /// 0 while the viewer opens out of the floating window (backdrop and
+  /// controls not yet there), 1 otherwise. A factor of its own: the swipe
+  /// progress also fades the video itself, which must stay solid here.
+  final ValueNotifier<double> _openReveal = ValueNotifier<double>(1.0);
+
+  /// Set while the video grows out of the floating window.
+  final ValueNotifier<_ExpandFlight?> _expandFlight =
+      ValueNotifier<_ExpandFlight?>(null);
+  AnimationController? _expandController;
+
+  /// The media layer, as built while it is still waiting to be measured: its
+  /// position on screen is the origin the flight is worked out against.
+  BuildContext? _expandLayerContext;
+
+  /// The A-B repeat section of the video now playing. In memory only, and
+  /// emptied whenever another item (hence a fresh native player) takes over.
+  final ValueNotifier<AbLoopState> _abLoopNotifier = ValueNotifier<AbLoopState>(
+    AbLoopState.empty,
+  );
+  final ValueNotifier<String?> _abLoopToast = ValueNotifier<String?>(null);
+  Timer? _abLoopToastTimer;
+  final ValueNotifier<VideoPlaybackProgress> _videoProgressNotifier =
+      ValueNotifier<VideoPlaybackProgress>(const VideoPlaybackProgress());
+  // Carries the seekbar's current drag session to the fullscreen scrub
+  // preview layer (see ScrubPreviewStyle.fullscreen). Null between drags,
+  // and always null in mini-box mode.
+  final VideoScrubPreviewHost _scrubPreviewHost = VideoScrubPreviewHost(null);
+
+  bool _isEditingLayout = false;
+
+  /// Touch lock: while on, [MediaViewerLockOverlay] swallows every touch so a
+  /// stray tap or swipe can't pause, seek, zoom, switch item or close the
+  /// viewer. Lasts for this viewer only; it is never saved.
+  bool _controlsLocked = false;
+
+  /// Bumped to reveal the lock button without a touch (a back press while
+  /// locked).
+  final ValueNotifier<int> _lockNudge = ValueNotifier<int>(0);
+
+  // Raw pointer tracking so a second finger touching down immediately locks
+  // out swipe-to-next-item, before the gesture arena has a chance to let
+  // the PageView/ListView drag recognizer mistake the pinch for a swipe.
+  final Set<int> _activeTouchPointers = {};
+  final Map<int, Offset> _edgeTapStartPositions = {};
+  final Map<int, bool> _edgeTapDirections = {};
+  final Map<int, bool> _edgeTapStartedDuringTransition = {};
+  final Map<int, Offset> _loopSwipeStartPositions = {};
+  final Map<int, int> _loopSwipeStartIndices = {};
+  bool _multiTouchLock = false;
+  // Whether an item's InteractiveViewer currently considers itself zoomed
+  // or mid-interaction (reported via onZoomChanged). Kept separate from
+  // _multiTouchLock so either source can hold the lock independently.
+  bool _zoomInteractionLock = false;
+  String? _zoomLockFile;
+
+  int _activeMenuCount = 0;
+  late bool _wasEmpty;
+
+  // Coalesces bursts of `preloadAspectRatios` callbacks (one per file whose
+  // true aspect ratio was just learned) into a single setState per frame,
+  // same pattern as file_masonry_view.dart's `_scheduleRebuild`.
+  bool _hasPendingGeometryRebuild = false;
+  // Folder scope the background aspect-ratio preload was last kicked off
+  // for, so switching folders (which swaps `_playlistController.playlist`)
+  // re-runs it instead of leaving the new items on the 16:9 fallback.
+  String? _aspectRatioPreloadFolder;
+
+  Timer? _slideshowTimer;
+  Timer? _hideTimer;
+  Timer? _prefetchDebounceTimer;
+  Future<void> _playbackModeSaveQueue = Future<void>.value();
+  int _playbackModeInteractionRevision = 0;
+
+  final bool _autoPlay = true;
+  double _viewportWidth = 0.0;
+  double _viewportHeight = 0.0;
+  bool _isSwiping = false;
+  bool _isProgrammaticScrolling = false;
+  int _viewportCorrectionToken = 0;
+
+  NativeVideoController? _lastListenedController;
+  bool _wakelockEnabled = false;
+  bool _lockedRouteDismissalScheduled = false;
+
+  /// Prepared in [_prepareBackgroundPlaybackHandoff] when the person closes the
+  /// viewer with audio playing and "keep audio playing after closing" is on,
+  /// or with a video playing and the floating video player on; [dispose] gives
+  /// it to [BackgroundPlaybackHost] instead of releasing the player.
+  BackgroundPlaybackSession? _backgroundPlaybackHandoff;
+
+  /// The item whose already-running player this viewer took over from
+  /// background playback, so [_activateCurrentMedia] doesn't seek it back to a
+  /// saved position.
+  String? _adoptedFile;
+  int _transitionToken = 0;
+  int _resumeFlowToken = 0;
+  bool _resumeFlowStarted = false;
+  final Map<String, String> _resumePositionKeys = {};
+  final Map<String, Duration> _lastSavedPlaybackPositions = {};
+  int _screenOrientationModeIndex = 2;
+
+  Future<String> _resumePositionKey(String fileName) async {
+    final cached = _resumePositionKeys[fileName];
+    if (cached != null) return cached;
+    final key = await mediaResumePositionKey(
+      ref.read(vaultHashApiProvider),
+      widget.container.uri,
+      fileName,
+    );
+    _resumePositionKeys[fileName] = key;
+    return key;
+  }
+
+  Future<Duration?> _readResumePosition(String fileName) async {
+    try {
+      final key = await _resumePositionKey(fileName);
+      final raw = await AppSecureStorage.instance.read(key: key);
+      final milliseconds = int.tryParse(raw ?? '');
+      return milliseconds == null || milliseconds <= 0
+          ? null
+          : Duration(milliseconds: milliseconds);
+    } catch (e) {
+      VeLog.w('MediaViewer', 'Could not read saved playback position', e);
+      return null;
+    }
+  }
+
+  Future<void> _savePlaybackPosition(
+    String fileName,
+    Duration position, {
+    Duration? duration,
+  }) async {
+    if (widget._isPreviewOnly) return;
+    try {
+      final key = await _resumePositionKey(fileName);
+      if (!isResumePositionWorthKeeping(position, duration)) {
+        await AppSecureStorage.instance.delete(key: key);
+        _lastSavedPlaybackPositions.remove(fileName);
+      } else {
+        await AppSecureStorage.instance.write(
+          key: key,
+          value: position.inMilliseconds.toString(),
+        );
+        _lastSavedPlaybackPositions[fileName] = position;
+      }
+    } catch (e) {
+      VeLog.w('MediaViewer', 'Could not save playback position', e);
+    }
+  }
+
+  Future<void> _saveActivePlaybackPosition() async {
+    final fileName = _playbackManager.currentFileName;
+    final value = _playbackManager.activeController?.value;
+    if (fileName == null || value == null || !value.isInitialized) return;
+    await _savePlaybackPosition(
+      fileName,
+      value.position,
+      duration: value.duration,
+    );
+  }
+
+  Future<void> _resolveInitialPlayback(
+    NativeVideoController controller,
+    String fileName,
+    int flowToken,
+  ) async {
+    if (_resumeFlowStarted || !controller.value.isInitialized) return;
+    _resumeFlowStarted = true;
+    final config = await ref.read(fileManagerToolbarServiceProvider).load();
+    final mode = config.mediaViewerToolbarConfig.resumePlaybackMode;
+    final savedPosition = widget._isPreviewOnly
+        ? null
+        : await _readResumePosition(fileName);
+    if (!mounted ||
+        _closing ||
+        flowToken != _resumeFlowToken ||
+        controller != _playbackManager.activeController) {
+      return;
+    }
+
+    final duration = controller.value.duration;
+    final canResume =
+        savedPosition != null &&
+        savedPosition >= const Duration(seconds: 5) &&
+        duration > Duration.zero &&
+        savedPosition < duration - const Duration(seconds: 5);
+    var shouldResume = canResume && mode == ResumePlaybackMode.always;
+    if (canResume && mode == ResumePlaybackMode.askEveryTime) {
+      if (_isAppInBackground) {
+        // Nobody can answer the prompt (e.g. background playback moved on to
+        // an item with a saved position): start over rather than leave the
+        // playback stalled behind a dialog nobody can see.
+        shouldResume = false;
+      } else {
+        final answer = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(context.l10n.resumePlaybackPromptTitle),
+            content: Text(
+              context.l10n.resumePlaybackPromptMessage(
+                formatClockDuration(savedPosition),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(context.l10n.resumePlaybackStartOver),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(context.l10n.resumePlaybackResume),
+              ),
+            ],
+          ),
+        );
+        shouldResume = answer == true;
+      }
+    }
+    if (!mounted ||
+        _closing ||
+        flowToken != _resumeFlowToken ||
+        controller != _playbackManager.activeController) {
+      return;
+    }
+    if (shouldResume && savedPosition != null) {
+      if ((controller.value.position - savedPosition).abs() >
+          const Duration(seconds: 2)) {
+        try {
+          await controller.seekTo(savedPosition);
+        } catch (e) {
+          VeLog.w('MediaViewer', 'Could not resume playback position', e);
+        }
+      }
+    }
+    await controller.play();
+  }
+
+  String get _sessionKey => widget.container.uri;
+
+  MediaViewerSessionState get _session =>
+      ref.read(mediaViewerSessionProvider(_sessionKey));
+
+  MediaViewerSession get _sessionController =>
+      ref.read(mediaViewerSessionProvider(_sessionKey).notifier);
+
+  bool get _showUI => _session.showUI;
+  bool get _isCarouselVisible => _session.isCarouselVisible;
+  bool get _enableCarousel => _session.enableCarousel;
+  // Bookmarks and pins are the file browser's, shared through one provider,
+  // so a bookmark added here shows up there and vice versa. build() watches
+  // the provider; these read it, like the session getters above.
+  FileBrowserPinsBookmarksState get _marks =>
+      ref.read(fileBrowserPinsBookmarksProvider(widget.container.volId));
+  FileBrowserPinsBookmarks get _marksNotifier => ref.read(
+    fileBrowserPinsBookmarksProvider(widget.container.volId).notifier,
+  );
+  bool get _autoAdvance => _session.autoAdvance;
+  bool get _isAutoAdvancing => _session.isAutoAdvancing;
+  int get _slideshowDelaySeconds => _session.slideshowDelaySeconds;
+  VideoPlaybackMode get _videoPlaybackMode => _session.videoPlaybackMode;
+  double get _playbackSpeed => _session.playbackSpeed;
+  bool get _subtitlesEnabled => _session.subtitlesEnabled;
+  double get _subtitleFontSize => _session.subtitleFontSize;
+  double get _subtitleVerticalPosition => _session.subtitleVerticalPosition;
+  BoxFit get _imageFit => _session.imageFit;
+  VideoAspectRatioMode get _videoAspectRatioMode =>
+      _session.videoAspectRatioMode;
+  PlaylistTransitionEffect get _transitionEffect => _session.transitionEffect;
+  PlaylistScrollMode get _scrollMode => _session.scrollMode;
+  bool get _isMuted => _session.isMuted;
+  Map<String, int> get _rotations => _session.rotations;
+
+  /// Adjustments drawn for [path]: shared across files when apply-to-all is
+  /// on, and none while "hold to compare" is pressed.
+  ViewerAdjustments _adjustmentsFor(String path) =>
+      _session.effectiveAdjustmentsFor(path);
+  Map<String, int> get _imageReloadEpoch => _session.imageReloadEpoch;
+
+  static const _archivePreviewActions = {
+    MediaViewerAction.playPause,
+    MediaViewerAction.playbackSpeed,
+    MediaViewerAction.rotate90,
+    MediaViewerAction.screenOrientation,
+    MediaViewerAction.adjustments,
+    MediaViewerAction.mute,
+    MediaViewerAction.playbackMode,
+    MediaViewerAction.abLoop,
+    MediaViewerAction.subtitles,
+    MediaViewerAction.audioTrack,
+    MediaViewerAction.equalizer,
+    MediaViewerAction.aspectRatio,
+    MediaViewerAction.advancedSettings,
+    MediaViewerAction.diagnostics,
+    MediaViewerAction.lockControls,
+  };
+
+  MediaViewerToolbarConfig _effectiveToolbarConfig(
+    MediaViewerToolbarConfig config,
+  ) {
+    final hideCarouselAction = !_enableCarousel;
+    // No picture-in-picture button on a device without the feature.
+    final hidePictureInPicture = !PictureInPictureBridge.isSupported.value;
+    if (!widget._isPreviewOnly &&
+        !hideCarouselAction &&
+        !hidePictureInPicture) {
+      return config;
+    }
+    List<MediaViewerAction> filter(List<MediaViewerAction> actions) =>
+        actions.where((action) {
+          if (widget._isPreviewOnly &&
+              !_archivePreviewActions.contains(action)) {
+            return false;
+          }
+          if (hidePictureInPicture &&
+              action == MediaViewerAction.pictureInPicture) {
+            return false;
+          }
+          return !hideCarouselAction ||
+              action != MediaViewerAction.thumbnailCarousel;
+        }).toList();
+    return config.copyWith(
+      topBarActions: filter(config.topBarActions),
+      bottomBarActions: filter(config.bottomBarActions),
+      moreMenuActions: filter(config.moreMenuActions),
+      advancedSettingsActions: filter(config.advancedSettingsActions),
+      showPreviousNext: widget._isPreviewOnly ? false : config.showPreviousNext,
+      showStatusBadge: widget._isPreviewOnly ? false : config.showStatusBadge,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Warm the adjustment shader so the first slider drag already uses the
+    // gamma-capable path instead of the matrix fallback.
+    unawaited(ViewerAdjustShader.ensureLoaded());
+    _fileIoApi = ref.read(vaultFileIoApiProvider);
+    _engineEvents = ref.read(vaultEngineEventsProvider);
+    _prefetchController = MediaPrefetchController(
+      container: widget.container,
+      fileIoApi: _fileIoApi,
+      thumbnailCache: ref.read(thumbnailCacheServiceProvider),
+      thumbnailQuality: widget.thumbnailQuality,
+      thumbnailCacheMode: widget.thumbnailCacheMode,
+    );
+    ThumbnailConcurrency.videoLimiter.cancelAll();
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    _engineEvents.addUsbContainerDetachedListener(_onContainerDetached);
+    _mediaSessionSubscription = MediaSessionBridge.actions.listen(
+      _onMediaSessionAction,
+    );
+
+    BackgroundPlaybackHost.instance.registerViewer();
+    // Opening the very item that is still playing in the background: take the
+    // running player over instead of starting another one.
+    final carried =
+        widget._isPreviewOnly ||
+            widget.initialIndex < 0 ||
+            widget.initialIndex >= widget.mediaFiles.length
+        ? null
+        : BackgroundPlaybackHost.instance.takeMatching(
+            widget.container,
+            widget.mediaFiles[widget.initialIndex],
+          );
+
+    _playlistController = PlaylistController(
+      container: widget.container,
+      fileIoApi: _fileIoApi,
+      initialMediaFiles: widget.mediaFiles,
+      initialIndex: widget.initialIndex,
+      startingFolder: widget.startingFolder,
+      mediaFilter: widget.mediaFilter,
+      sortBy: widget.sortBy,
+      sortAscending: widget.sortAscending,
+      pinnedPaths: widget.pinnedPaths,
+    );
+    _wasEmpty = _playlistController.isEmpty;
+    _zoomLockFile = _playlistController.currentFile;
+    _playbackManager = carried?.playbackManager ?? VideoPlaybackManager();
+    if (carried != null) {
+      _adoptedFile = _playbackManager.currentFileName;
+      // The player is already past its resume decision; don't run it again.
+      _resumeFlowStarted = true;
+      // Opened from the floating player: the video grows out of the window
+      // instead of appearing full screen. Until it is drawn where the window
+      // is, the viewer's own copy stays hidden and the window stays up.
+      final from = carried.floatingPlayer
+          ? BackgroundPlaybackHost.instance.exit?.from
+          : null;
+      if (from != null) {
+        _openReveal.value = 0.0;
+        _expandFlight.value = _ExpandFlight(from: from);
+        unawaited(_runExpandFlight(from));
+      }
+    }
+    _pageController = PageController(initialPage: widget.initialIndex);
+    _listScrollController = ScrollController();
+    _continuousTransformationController = TransformationController();
+    _continuousTransformationController.addListener(
+      _onContinuousTransformationChanged,
+    );
+    _continuousZoomAnimationController =
+        AnimationController(
+          vsync: this,
+          duration: MediaViewerConstants.animationDuration,
+        )..addListener(() {
+          if (_continuousZoomAnimation != null) {
+            _isClampingContinuous = true;
+            _continuousTransformationController.value =
+                _continuousZoomAnimation!.value;
+            _isClampingContinuous = false;
+          }
+        });
+
+    _playlistController.addListener(_onPlaylistUpdate);
+    _playbackManager.activeControllerNotifier.addListener(
+      _onActiveVideoControllerChanged,
+    );
+    _playbackManager.currentFileNotifier.addListener(
+      _onCurrentMediaFileChanged,
+    );
+    _kickOffAspectRatioPreload();
+    if (carried != null) _onActiveVideoControllerChanged();
+
+    _loadConfig();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (carried != null && mounted) {
+        _sessionController.setPlaybackSpeed(carried.playbackSpeed);
+      }
+      unawaited(_activateCurrentMedia());
+      _startSlideshowTimerIfNeeded();
+      await PlaybackThrottleController.initGate;
+      if (mounted) _prefetchSurroundingItems();
+    });
+  }
+
+  StreamSubscription<MediaSessionAction>? _mediaSessionSubscription;
+
+  /// True while the app is minimized or the screen is off. No frames are
+  /// produced then, so anything that waits on an animation or on the end of a
+  /// frame would stall until the app returns -- including auto-advancing to
+  /// the next item during background playback.
+  bool get _isAppInBackground {
+    final state = WidgetsBinding.instance.lifecycleState;
+    return state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden;
+  }
+
+  /// Previous / Next on the media notification and lock screen act on the
+  /// playlist, so the native media session is told whether either exists.
+  void _syncMediaSessionNavigation() {
+    if (widget._isPreviewOnly) return;
+    final index = _playlistController.currentIndex;
+    final count = _playlistController.playlist.length;
+    final loop = _isPlaylistLoopEnabled;
+    unawaited(
+      MediaSessionBridge.setNavigation(
+        hasPrevious: count > 1 && (index > 0 || loop),
+        hasNext: count > 1 && (index < count - 1 || loop),
+        currentPosition: count > 1 ? index + 1 : 0,
+        totalItems: count > 1 ? count : 0,
+      ),
+    );
+  }
+
+  void _onMediaSessionAction(MediaSessionAction action) {
+    if (!mounted) return;
+    switch (action) {
+      case MediaSessionAction.next:
+        _navigateToNext();
+      case MediaSessionAction.previous:
+        _navigateToPrev();
+      case MediaSessionAction.stop:
+        _closeFromMediaSession();
+    }
+  }
+
+  /// Stop on the media notification / lock screen / a headset: playback and
+  /// the notification are already ended natively, so close the viewer too
+  /// rather than leaving a dead player to come back to. Disposing it is the
+  /// normal exit (saves the position, releases the player). The archive
+  /// preview never has a media session, so it ignores this.
+  void _closeFromMediaSession() {
+    if (widget._isPreviewOnly) return;
+    _backgroundPlaybackHandoff = null;
+    final route = ModalRoute.of(context);
+    if (route == null || !route.isActive) return;
+    final navigator = Navigator.of(context);
+    // Dismiss anything opened on top of the viewer (a sheet, a dialog) first.
+    navigator.popUntil((r) => identical(r, route));
+    if (!route.isFirst) navigator.pop();
+  }
+
+  /// Called when the person closes the viewer (back button or gesture) --
+  /// never for closes the app forces (app lock, locked or detached container,
+  /// the media notification's Stop), which must always end playback. When
+  /// "keep audio playing after closing" is on and audio is playing, prepares
+  /// the hand-off that [dispose] completes: the live player goes to
+  /// [BackgroundPlaybackHost] instead of being released. The same goes for a
+  /// playing video when the floating video player is on: it carries on in a
+  /// small window over the app (and in the picture-in-picture window once the
+  /// app is left). A video can also be sent to the system's window right away
+  /// with the picture-in-picture button, see [_enterPictureInPictureWindow].
+  /// Nothing that is paused is kept.
+  void _prepareBackgroundPlaybackHandoff() {
+    _backgroundPlaybackHandoff = null;
+    _floatingClose.value = _FloatingClose.none;
+    if (widget._isPreviewOnly || _playlistController.isEmpty) return;
+    if (ref.read(mediaViewerLockProvider(widget.container.volId))) return;
+    final file = _playbackManager.currentFileName;
+    final controller = _playbackManager.activeController;
+    if (file == null || controller == null || controller.isDisposed) return;
+    // Mid-transition: the player isn't on the item the playlist points at.
+    if (file != _playlistController.currentFile) return;
+    final isAudio = MediaViewerConstants.isAudio(file);
+    final isVideo = MediaViewerConstants.isVideo(file);
+    if (!isAudio && !isVideo) return;
+    final value = controller.value;
+    // Playing, or about to be. The player is opened with auto-play off and
+    // started only after it is initialized and the saved position has been
+    // looked up, so for the first moments of a video it is not "playing" yet;
+    // going back then used to drop the video instead of floating it. A video
+    // the person paused, one that has finished and one that failed are still
+    // let go.
+    if (value.hasError) return;
+    final finished =
+        value.duration > Duration.zero && value.position >= value.duration;
+    if (finished || !(value.isPlaying || !controller.pauseRequested)) return;
+    final config = ref
+        .read(fileManagerToolbarSettingsProvider(null))
+        .config
+        .mediaViewerToolbarConfig;
+    if (isAudio) {
+      if (!config.keepAudioPlayingAfterClose) return;
+      _backgroundPlaybackHandoff = _newBackgroundPlaybackSession(
+        pipWindow: false,
+      );
+    } else {
+      if (!config.floatingPlayerEnabled) return;
+      _backgroundPlaybackHandoff = _newBackgroundPlaybackSession(
+        pipWindow: false,
+        floatingPlayer: true,
+      );
+    }
+    if (_backgroundPlaybackHandoff != null && !value.isPlaying) {
+      // It was about to start, and the code that would have started it (this
+      // viewer's) is going away: whoever takes the player over must see that
+      // it plays.
+      unawaited(controller.playWhenReady());
+    }
+  }
+
+  bool _closingFromBackPress = false;
+
+  /// True once a close has begun. The start-up chain that would otherwise go
+  /// on to ask about resuming, seek and play (see [_resolveInitialPlayback])
+  /// stands down: with a hand-off the new owner starts the player itself, and
+  /// without one nothing should start in a viewer that is going away.
+  bool _closing = false;
+
+  /// A back press. Closes the viewer, handing the video to the floating
+  /// player (or the audio to the background) when there is one to hand over.
+  /// If the player does not exist yet, because the video was only just opened,
+  /// it waits for it, briefly: going back straight after opening a video
+  /// should still float it, not drop it.
+  Future<void> _closeFromBackPress() async {
+    if (_closingFromBackPress) return;
+    _closingFromBackPress = true;
+    _closing = true;
+    try {
+      await _waitForPlayerToExist();
+      if (!mounted) return;
+      _prepareBackgroundPlaybackHandoff();
+      _beginFloatingFlight();
+      Navigator.of(context).pop();
+    } finally {
+      _closingFromBackPress = false;
+    }
+  }
+
+  /// Returns once the player for the item on screen exists (or after a
+  /// moment, whichever is first). Only waits when there would be something to
+  /// hand over: a video with the floating player on, or an audio file with
+  /// "keep audio playing after closing" on.
+  Future<void> _waitForPlayerToExist() async {
+    if (widget._isPreviewOnly || _playlistController.isEmpty) return;
+    final file = _playlistController.currentFile;
+    final isVideo = MediaViewerConstants.isVideo(file);
+    final isAudio = MediaViewerConstants.isAudio(file);
+    if (!isVideo && !isAudio) return;
+    final config = ref
+        .read(fileManagerToolbarSettingsProvider(null))
+        .config
+        .mediaViewerToolbarConfig;
+    final wouldHandOver = isVideo
+        ? config.floatingPlayerEnabled
+        : config.keepAudioPlayingAfterClose;
+    if (!wouldHandOver) return;
+    bool exists() {
+      final controller = _playbackManager.activeController;
+      return controller != null &&
+          !controller.isDisposed &&
+          _playbackManager.currentFileName == file;
+    }
+
+    if (exists()) return;
+    final done = Completer<void>();
+    void check() {
+      if (!done.isCompleted && exists()) done.complete();
+    }
+
+    _playbackManager.activeControllerNotifier.addListener(check);
+    try {
+      await done.future.timeout(
+        const Duration(milliseconds: 1200),
+        onTimeout: () {},
+      );
+    } finally {
+      _playbackManager.activeControllerNotifier.removeListener(check);
+    }
+  }
+
+  /// The viewer's video growing out of the floating window it was opened
+  /// from, the reverse of [_beginFloatingFlight]. The window stays up, still
+  /// showing the video, while this finds out where the viewer's own video is;
+  /// then the viewer draws its copy at the window's rectangle (under the window,
+  /// so nothing shows), the window goes, and the copy grows into place as the
+  /// backdrop and the controls fade in.
+  Future<void> _runExpandFlight(Rect from) async {
+    // The video widget needs a few frames to come up on the adopted player.
+    Rect? dest;
+    for (var frame = 0; frame < 30 && dest == null; frame++) {
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+      dest = _videoProbe.measure();
+    }
+    final layer = _expandLayerContext;
+    final layerBox = layer != null && layer.mounted
+        ? layer.findRenderObject()
+        : null;
+    if (dest == null || layerBox is! RenderBox || !layerBox.attached) {
+      // Could not tell where the video lands: no flight, it simply shows.
+      _finishExpandFlight();
+      return;
+    }
+    final controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _expandController?.dispose();
+    _expandController = controller;
+    controller.addListener(() {
+      _openReveal.value = Curves.easeOut.transform(controller.value);
+    });
+    controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) _finishExpandFlight();
+    });
+    _expandFlight.value = _ExpandFlight(
+      from: from,
+      dest: dest,
+      origin: layerBox.localToGlobal(Offset.zero),
+      animation: controller,
+    );
+    unawaited(controller.forward());
+    // After the frame that first draws the viewer's copy over the window's
+    // spot, the window can go: the one frame in which both are drawn is not
+    // seen, they are the same picture in the same place.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      BackgroundPlaybackHost.instance.endFloatingExit();
+    });
+  }
+
+  void _finishExpandFlight() {
+    BackgroundPlaybackHost.instance.endFloatingExit();
+    if (!mounted) return;
+    _expandFlight.value = null;
+    _openReveal.value = 1.0;
+  }
+
+  /// The media layer of the item on screen during [_runExpandFlight]: hidden
+  /// while its place is measured, then scaled and moved so the video starts
+  /// exactly where the floating window had it, clipped to the window's rounded
+  /// shape and growing into its own.
+  Widget _expandFlightLayer(Widget media) {
+    return ValueListenableBuilder<_ExpandFlight?>(
+      valueListenable: _expandFlight,
+      child: media,
+      builder: (context, flight, child) {
+        if (flight == null) return child!;
+        final dest = flight.dest;
+        final animation = flight.animation;
+        if (dest == null || animation == null) {
+          _expandLayerContext = context;
+          return Opacity(opacity: 0.0, child: child);
+        }
+        final destLocal = dest.shift(-flight.origin);
+        final fromLocal = flight.from.shift(-flight.origin);
+        return AnimatedBuilder(
+          animation: animation,
+          child: child,
+          builder: (context, child) {
+            final e = Curves.easeInOutCubic.transform(animation.value);
+            final startScale = fromLocal.width / destLocal.width;
+            final scale = startScale + (1.0 - startScale) * e;
+            final center = Offset.lerp(fromLocal.center, destLocal.center, e)!;
+            final matrix = Matrix4.identity()
+              ..translate(
+                center.dx - scale * destLocal.center.dx,
+                center.dy - scale * destLocal.center.dy,
+              )
+              ..scale(scale, scale, 1.0);
+            // On screen the corners go from the window's 14 to square.
+            final radius = 14.0 * (1.0 - e) / scale;
+            return Transform(
+              transform: matrix,
+              child: ClipRRect(
+                clipper: _RRectClipper(destLocal, radius),
+                child: child,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Called as a close that hands the playing video to the floating player
+  /// begins, right before the route pops. Together, in the same frame (so
+  /// nothing flickers):
+  ///  * the floating window appears over the video, where it is *now* (a swipe
+  ///    may have moved it since it was last reported), and flies into its
+  ///    corner;
+  ///  * the viewer stops drawing its own copy of the video;
+  ///  * the viewer's Hero flight back to the file manager's thumbnail is off:
+  ///    the video is going to the floating player, not back to where it was
+  ///    opened from.
+  ///
+  /// [fadeChrome]: a swipe already fades the backdrop and the controls as it
+  /// goes; a back press does not, so this does it, quickly, to keep the
+  /// window's flight from happening over a black screen that lingers.
+  void _beginFloatingFlight({bool fadeChrome = true}) {
+    if (_backgroundPlaybackHandoff?.floatingPlayer != true) return;
+    final from = _videoProbe.measure();
+    if (from != null) {
+      BackgroundPlaybackHost.instance.beginFloatingEntry(
+        FloatingPlayerEntry(playbackManager: _playbackManager, from: from),
+      );
+    }
+    _floatingClose.value = from != null
+        ? _FloatingClose.flying
+        : _FloatingClose.withoutFlight;
+
+    final start = _swipeDismissProgress.value;
+    if (fadeChrome && start < 0.99) {
+      _closeFade?.dispose();
+      final fade = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 220),
+      );
+      _closeFade = fade;
+      fade.addListener(() {
+        _swipeDismissProgress.value =
+            start + (1.0 - start) * Curves.easeOut.transform(fade.value);
+      });
+      unawaited(fade.forward());
+    }
+
+    // The route normally goes in a moment. If the pop is swallowed, the viewer
+    // must not stay half-faded with its own video hidden.
+    _floatingCloseGuard?.cancel();
+    _floatingCloseGuard = Timer(const Duration(milliseconds: 1500), () {
+      if (!mounted) return;
+      _closeFade?.stop();
+      _floatingClose.value = _FloatingClose.none;
+      _swipeDismissProgress.value = 0.0;
+      BackgroundPlaybackHost.instance.endFloatingEntry();
+    });
+  }
+
+  BackgroundPlaybackSession _newBackgroundPlaybackSession({
+    required bool pipWindow,
+    bool floatingPlayer = false,
+  }) => BackgroundPlaybackSession(
+    providers: ProviderScope.containerOf(context, listen: false),
+    container: widget.container,
+    playlist: _playlistController,
+    playbackManager: _playbackManager,
+    playbackMode: _videoPlaybackMode,
+    playbackSpeed: _playbackSpeed,
+    isMuted: _isMuted,
+    thumbnailQuality: widget.thumbnailQuality,
+    thumbnailCacheMode: widget.thumbnailCacheMode,
+    startingFolder: widget.startingFolder,
+    mediaFilter: widget.mediaFilter,
+    sortBy: widget.sortBy,
+    sortAscending: widget.sortAscending,
+    pinnedPaths: widget.pinnedPaths,
+    pipWindow: pipWindow,
+    floatingPlayer: floatingPlayer,
+  );
+
+  bool _enteringPictureInPicture = false;
+
+  /// The viewer's picture-in-picture button: the app itself becomes Android's
+  /// PiP window around the video that is playing, with the viewer left open
+  /// underneath (tapping the window brings the app back to it; dismissing it
+  /// pauses the video). Nothing is handed to another window, which is what
+  /// keeps the transition continuous.
+  ///
+  /// Only if the system refuses that does it fall back to the older way: a
+  /// separate window activity takes the video, the viewer closes, and the live
+  /// player goes to [BackgroundPlaybackHost], which keeps it going and answers
+  /// the window being tapped (reopen the viewer) or dismissed (stop).
+  Future<void> _enterPictureInPictureWindow() async {
+    if (widget._isPreviewOnly ||
+        _enteringPictureInPicture ||
+        _playlistController.isEmpty) {
+      return;
+    }
+    final file = _playbackManager.currentFileName;
+    final controller = _playbackManager.activeController;
+    if (file == null ||
+        file != _playlistController.currentFile ||
+        !MediaViewerConstants.isVideo(file) ||
+        controller == null ||
+        controller.isDisposed) {
+      return;
+    }
+    final value = controller.value;
+    if (!value.isInitialized || value.hasError) return;
+    if (ref.read(mediaViewerLockProvider(widget.container.volId))) return;
+
+    _enteringPictureInPicture = true;
+    // First choice: the app itself becomes the window. It is the activity that
+    // is already playing this video, so nothing is handed over and the video
+    // carries on without a hitch (that is what looks like one continuous
+    // movement into the corner, as in YouTube). The viewer stays open
+    // underneath; tapping the window brings the app back to it.
+    if (await PictureInPictureCoordinator.instance.enterNow(this)) {
+      _enteringPictureInPicture = false;
+      return;
+    }
+    // Fallback, if the system would not do that: a separate window activity.
+    final ratio = pictureInPictureRatio(value.aspectRatio);
+    final lockController = ref.read(sessionLockControllerProvider);
+    bool entered = false;
+    try {
+      // The app is covered by the window's activity for a moment: that must
+      // not count as leaving it (lock timers, return to the decoy).
+      entered = await lockController.withLockSuppression(
+        () => PictureInPictureBridge.startWindow(
+          width: ratio.width,
+          height: ratio.height,
+        ),
+      );
+    } finally {
+      _enteringPictureInPicture = false;
+    }
+    if (!entered) return;
+    if (!mounted) {
+      unawaited(PictureInPictureBridge.closeWindow());
+      return;
+    }
+    // The video may have changed while the window came up.
+    final stillPlaying = _playbackManager.activeController;
+    if (stillPlaying == null ||
+        stillPlaying.isDisposed ||
+        _playbackManager.currentFileName != _playlistController.currentFile) {
+      unawaited(PictureInPictureBridge.closeWindow());
+      return;
+    }
+    _backgroundPlaybackHandoff = _newBackgroundPlaybackSession(pipWindow: true);
+    Navigator.of(context).pop();
+  }
+
+  int _activateToken = 0;
+  Future<void> _activateCurrentMedia() async {
+    if (_playlistController.isEmpty) return;
+    await _saveActivePlaybackPosition();
+    final file = _playlistController.currentFile;
+    try {
+      widget.onCurrentFileChanged?.call(file);
+    } catch (_) {
+      // Best-effort callback into the parent widget; a bug or edge case in
+      // its listener shouldn't break media activation here.
+    }
+    final token = ++_activateToken;
+    final isVid = MediaViewerConstants.isVideo(file);
+    final isAud = MediaViewerConstants.isAudio(file);
+    // The app has a single native player: let go of the one still playing in
+    // the background before this viewer starts one of its own.
+    if ((isVid || isAud) && BackgroundPlaybackHost.instance.needsRelease) {
+      await BackgroundPlaybackHost.instance.closeAndWait();
+      if (!mounted || token != _activateToken) return;
+    }
+    final isAdopted = _adoptedFile != null && _adoptedFile == file;
+    if ((isVid || isAud) && !isAdopted) {
+      // An adopted player is already initialized, so nothing would ever
+      // release this gate again.
+      PlaybackThrottleController.setInitializing();
+    }
+    await PlaybackThrottleController.setActive(isVid || isAud);
+    if (!mounted || token != _activateToken) return;
+    _updateSwipePhysics();
+    if (isVid || isAud) {
+      final playbackSettings = ref
+          .read(fileManagerToolbarSettingsProvider(null))
+          .config
+          .mediaViewerToolbarConfig;
+      // Before the native player is (re)initialized for this item, so the
+      // media session never advertises the previous item's neighbours.
+      _syncMediaSessionNavigation();
+      final mode = playbackSettings.resumePlaybackMode;
+      final savedPosition = widget._isPreviewOnly
+          ? null
+          : (_lastSavedPlaybackPositions[file] ??
+                await _readResumePosition(file));
+      // The saved position was awaited above: the viewer may have been closed
+      // (or the item changed) meanwhile, and a player created now would have no
+      // owner left to release it.
+      if (!mounted || token != _activateToken) return;
+      final canResume =
+          savedPosition != null && savedPosition >= const Duration(seconds: 5);
+      final shouldPreSeek =
+          canResume && mode == ResumePlaybackMode.always && !isAdopted;
+
+      unawaited(
+        _playbackManager.activate(
+          fileName: file,
+          volId: widget.container.volId,
+          // Local storage has no vault session for the native player to
+          // stream decrypted bytes from -- NativePlayerManager's local
+          // branch instead reads this as a real, absolute path straight
+          // off disk, so it needs the full path rather than one relative
+          // to the container root.
+          filePath: nativePlaybackPathFor(widget.container, file),
+          isLocalStorage: widget.container.isLocalStorage,
+          // Wait until the position preference and any resume prompt have
+          // been handled before starting audio/video output.
+          autoPlay: false,
+          playbackSpeed: _playbackSpeed,
+          looping: _videoPlaybackMode == VideoPlaybackMode.loop,
+          videoDecoderMode: playbackSettings.videoDecoderMode,
+          audioDecoderMode: playbackSettings.audioDecoderMode,
+          volumeBoostEnabled: playbackSettings.volumeBoostEnabled,
+          volumeBoostGainMb: playbackSettings.volumeBoostGainMb,
+          equalizer: playbackSettings.equalizer,
+          initialPosition: shouldPreSeek ? savedPosition : null,
+          // Background playback + media notification / lock screen controls,
+          // for vault items and plain local-storage items alike, but never
+          // for the archive preview.
+          mediaSession: !widget._isPreviewOnly,
+        ),
+      );
+    } else {
+      _playbackManager.pauseActive();
+    }
+  }
+
+  Future<void> _loadConfig() async {
+    final playbackModeRevision = _playbackModeInteractionRevision;
+    final config = await ref.read(fileManagerToolbarServiceProvider).load();
+    final appSettings = await ref
+        .read(appSettingsServiceProvider)
+        .loadSettings();
+    await _marksNotifier.ensureLoaded(widget.container);
+    if (mounted) {
+      final pinnedPaths = _marks.pinnedPaths;
+      unawaited(
+        MediaSessionBridge.setShowFileNamesInNotification(
+          config.mediaViewerToolbarConfig.showFileNamesInMediaNotification,
+        ),
+      );
+      _sessionController.setEnableCarousel(config.showMediaCarousel);
+      if (!config.showMediaCarousel) {
+        _sessionController.setCarouselVisible(false);
+      }
+      _sessionController.setTransitionEffect(config.playlistTransitionEffect);
+      _sessionController.setScrollMode(appSettings.playlistScrollMode);
+      _sessionController.setVideoAspectRatioMode(
+        config.mediaViewerToolbarConfig.defaultAspectRatioMode,
+      );
+      _sessionController.setIsMuted(appSettings.videoMuted);
+      if (playbackModeRevision == _playbackModeInteractionRevision) {
+        _updatePlaybackMode(appSettings.videoPlaybackMode, persist: false);
+      }
+
+      if (appSettings.videoMuted) {
+        _playbackManager.activeController?.setVolume(0);
+      }
+      if (pinnedPaths.isNotEmpty) {
+        _playlistController.updatePinnedPaths(Set<String>.from(pinnedPaths));
+      }
+
+      if (appSettings.playlistScrollMode.isContinuous) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _scrollToCurrentIndex(animate: false);
+        });
+      }
+    }
+  }
+
+  Uint8List? _prefetchedBytesFor(String fileName) {
+    return ref
+        .read(thumbnailCacheServiceProvider)
+        .peekMemory(widget.container, fileName, widget.thumbnailQuality);
+  }
+
+  void _onContainerDetached(int volId) {
+    if (!mounted || volId != widget.container.volId) return;
+    _backgroundPlaybackHandoff = null;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+  }
+
+  void _onPlaylistUpdate() {
+    if (!mounted) return;
+    final currentFile = _playlistController.currentFile;
+    if (currentFile != _zoomLockFile) {
+      _zoomLockFile = currentFile;
+      // Neighboring items reset their zoom as they become inactive. Clear
+      // the previous item's lock so the newly active image can dismiss now.
+      _zoomInteractionLock = false;
+      _updateSwipePhysics();
+    }
+    final nowEmpty = _playlistController.isEmpty;
+    if (nowEmpty != _wasEmpty) {
+      _wasEmpty = nowEmpty;
+      setState(() {});
+    }
+    _kickOffAspectRatioPreload();
+  }
+
+  void _scheduleGeometryRebuild() {
+    if (_hasPendingGeometryRebuild) return;
+    _hasPendingGeometryRebuild = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _hasPendingGeometryRebuild = false;
+      if (!mounted) return;
+      // Do not shift layout while the user is actively swiping or coasting
+      if (_isSwiping) return;
+      setState(() {});
+    });
+  }
+
+  // See MediaPrefetchController.preloadAspectRatios: on a cold open (no
+  // thumbnails decoded/cached yet), only the handful of items
+  // prefetchSurrounding has actually visited have a learned aspect ratio,
+  // so CarouselGeometry falls back to a fixed 16:9 guess for everything
+  // else -- a guess that can be badly wrong (e.g. wide panoramas) and
+  // whose error compounds across a long playlist's cumulative
+  // item-height sum, worst for a jump (filmstrip tap, or just scrolling)
+  // to an index the preload hasn't reached yet. Starting from
+  // currentIndex rather than 0 means wherever the viewer actually opened
+  // -- not necessarily the start of the playlist -- gets covered first,
+  // since that's the region the person is most likely to navigate into
+  // next. Kicked off once per distinct folder scope so re-entering the
+  // same folder doesn't repeat the walk.
+  void _kickOffAspectRatioPreload([int? startIndex]) {
+    final folder = _playlistController.selectedFolder;
+    final start = startIndex ?? _playlistController.currentIndex;
+    if (_aspectRatioPreloadFolder == folder && startIndex == null) return;
+    _aspectRatioPreloadFolder = folder;
+    final playlist = List<String>.from(_playlistController.playlist);
+    unawaited(
+      _prefetchController.preloadAspectRatios(
+        playlist,
+        startIndex: start,
+        isStillWanted: () =>
+            mounted && _playlistController.selectedFolder == folder,
+        onRatioLearned: _scheduleGeometryRebuild,
+      ),
+    );
+  }
+
+  int get _knownAspectRatioCount {
+    int count = 0;
+    for (final file in _playlistController.playlist) {
+      if (MediaAspectRatioCache.get(widget.container, file) != null) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  // Freezes measured item heights while the user is actively swiping or coasting
+  // so items do not resize mid-gesture and cause screen jitter.
+  final Map<int, double> _lockedExtents = {};
+
+  double _getItemExtent(int index, double vw, double vh) {
+    if (_isSwiping) {
+      final locked = _lockedExtents[index];
+      if (locked != null) return locked;
+      final h = _geometry.itemHeight(index, vw, vh);
+      _lockedExtents[index] = h;
+      return h;
+    }
+    return _geometry.itemHeight(index, vw, vh);
+  }
+
+  // Pure carousel layout math now lives in CarouselGeometry
+  // (carousel_geometry.dart) -- constructed fresh from current playlist/
+  // rotation state on each use since it's a cheap, immutable value object;
+  // no caching, same as when this was a handful of instance methods
+  // reading the same state directly.
+  CarouselGeometry get _geometry => CarouselGeometry(
+    playlist: _playlistController.playlist,
+    rotations: _rotations,
+    isAudio: MediaViewerConstants.isAudio,
+    aspectRatioFor: (fileName) =>
+        MediaAspectRatioCache.get(widget.container, fileName),
+  );
+
+  void _scrollToCurrentIndex({bool animate = false}) {
+    final index = _playlistController.currentIndex;
+    if (_scrollMode.isContinuous) {
+      if (_listScrollController.hasClients &&
+          _listScrollController.positions.length == 1 &&
+          _viewportHeight > 0) {
+        // Target offsets assume an un-zoomed list.
+        _resetContinuousZoom();
+        final target = _geometry.offsetForIndex(
+          index,
+          _viewportWidth,
+          _viewportHeight,
+        );
+        if (animate) {
+          _isProgrammaticScrolling = true;
+          _listScrollController
+              .animateTo(
+                target,
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+              )
+              .then((_) {
+                if (mounted) {
+                  _isProgrammaticScrolling = false;
+                  unawaited(_activateCurrentMedia());
+                  _onScrollEnd();
+                }
+              });
+        } else {
+          _isProgrammaticScrolling = true;
+          _listScrollController.jumpTo(target);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _isProgrammaticScrolling = false;
+              unawaited(_activateCurrentMedia());
+              _onScrollEnd();
+            }
+          });
+        }
+      }
+    } else {
+      if (_pageController.hasClients && _pageController.positions.length == 1) {
+        if (animate) {
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+          );
+        } else {
+          _pageController.jumpToPage(index);
+        }
+      }
+    }
+  }
+
+  void _onPlaylistChanged() {
+    _startHideTimer();
+    if (!_playlistController.isPlaylistMode) {
+      if (_isCarouselVisible) _toggleCarousel();
+      if (_autoAdvance) {
+        _updatePlaybackMode(VideoPlaybackMode.playOnce);
+      }
+    }
+
+    final oldController = _pageController;
+    _pageController = PageController(
+      initialPage: _playlistController.currentIndex,
+    );
+    if (oldController.hasClients) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        oldController.dispose();
+      });
+    } else {
+      oldController.dispose();
+    }
+    setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _scrollToCurrentIndex(animate: false);
+        _onScrollEnd();
+      }
+    });
+  }
+
+  void _onActiveVideoControllerChanged() {
+    // A new controller means a freshly initialised native player, which has
+    // no A-B loop registered, so drop the one shown here too.
+    _abLoopNotifier.value = AbLoopState.empty;
+    if (_lastListenedController != null) {
+      try {
+        _lastListenedController!.removeListener(_onControllerTickUpdate);
+      } catch (_) {
+        // removeListener() can throw if the controller was already
+        // disposed elsewhere; safe to ignore since this reference is being
+        // dropped regardless.
+      }
+    }
+
+    final controller = _playbackManager.activeController;
+    _lastListenedController = controller;
+
+    if (controller == null) {
+      _updateWakelock(false);
+      _syncPictureInPicture();
+      return;
+    }
+
+    controller.addListener(_onControllerTickUpdate);
+    _updateWakelock(controller.value.isPlaying);
+    _syncPictureInPicture();
+    // Each playlist item gets its own native controller, which otherwise
+    // starts at the platform's default volume -- reapply the persisted
+    // mute state here so toggling mute stays in effect as the person
+    // moves through the playlist, not just for the item it was set on.
+    controller.setVolume(_isMuted ? 0 : 100);
+  }
+
+  void _onCurrentMediaFileChanged() {
+    _videoProgressNotifier.value = const VideoPlaybackProgress();
+    _abLoopNotifier.value = AbLoopState.empty;
+    _abLoopToastTimer?.cancel();
+    _abLoopToast.value = null;
+    _resumeFlowToken++;
+    _resumeFlowStarted = false;
+    _adoptedFile = null;
+    _syncPictureInPicture();
+  }
+
+  /// Offers the video on screen to Android's picture-in-picture window (the
+  /// viewer's button enters it right away through the coordinator; the
+  /// "automatic" setting enters it on leaving the app), or withdraws it for
+  /// anything that isn't a video. Idempotent: the coordinator ignores repeats.
+  void _syncPictureInPicture() {
+    if (!mounted) return;
+    final coordinator = PictureInPictureCoordinator.instance;
+    final file = _playbackManager.currentFileName;
+    final controller = _playbackManager.activeController;
+    if (file == null ||
+        controller == null ||
+        controller.isDisposed ||
+        !MediaViewerConstants.isVideo(file)) {
+      coordinator.detach(this);
+      return;
+    }
+    final autoEnter = ref
+        .read(fileManagerToolbarSettingsProvider(null))
+        .config
+        .mediaViewerToolbarConfig
+        .pictureInPictureEnabled;
+    coordinator.attach(this, controller, autoEnter: autoEnter);
+  }
+
+  void _onControllerTickUpdate() {
+    final controller = _playbackManager.activeController;
+    if (controller == null || controller.value.hasError) return;
+
+    _updateWakelock(controller.value.isPlaying);
+
+    final isInitialized = controller.value.isInitialized;
+    if (!isInitialized) return;
+
+    final position = controller.value.position;
+    final duration = controller.value.duration;
+
+    final fileName = _playbackManager.currentFileName;
+    if (fileName != null) {
+      if (duration > Duration.zero) {
+        final lastSaved =
+            _lastSavedPlaybackPositions[fileName] ?? Duration.zero;
+        if (position.inSeconds - lastSaved.inSeconds >= 5) {
+          unawaited(
+            _savePlaybackPosition(fileName, position, duration: duration),
+          );
+        }
+      }
+      unawaited(
+        _resolveInitialPlayback(controller, fileName, _resumeFlowToken),
+      );
+    }
+
+    if (duration <= Duration.zero) return;
+
+    // While an A-B loop is active the video never ends: the native player
+    // jumps back to A instead. So neither whole-video repeat nor
+    // auto-advance may act on the position reaching the end.
+    if (_abLoopNotifier.value.isActive) return;
+
+    if (_videoPlaybackMode == VideoPlaybackMode.loop) {
+      if (controller.value.isPlaying && position >= duration) {
+        controller.seekTo(Duration.zero);
+        controller.play();
+        return;
+      }
+    }
+
+    if (_isAutoAdvancing) return;
+
+    if (_videoPlaybackMode == VideoPlaybackMode.playAndAdvance &&
+        position >= duration) {
+      _sessionController.setIsAutoAdvancing(true);
+      try {
+        controller.removeListener(_onControllerTickUpdate);
+      } catch (_) {
+        // Same reasoning as elsewhere in this file: removeListener() can
+        // throw on an already-disposed controller, and it's safe to
+        // ignore since playback is moving on regardless.
+      }
+      _playbackManager.pauseActive();
+      _cancelSlideshowTimer();
+      _slideshowTimer = Timer(const Duration(milliseconds: 300), () {
+        if (mounted && _videoPlaybackMode == VideoPlaybackMode.playAndAdvance) {
+          _autoAdvanceToNext();
+        } else {
+          _sessionController.setIsAutoAdvancing(false);
+        }
+      });
+    }
+  }
+
+  String _contentUriFor(String fileName) {
+    final volId = widget.container.volId;
+    final escapedPath = Uri.encodeComponent(fileName);
+    return 'content://com.aeidolon.vaultexplorer.documents/document/'
+        '$volId%3Afile%3A$escapedPath';
+  }
+
+  /// Debounces rapid swipes, then waits for [PlaybackThrottleController.initGate]
+  /// before prefetching neighboring thumbnails -- same ordering as the
+  /// initial-open path in [initState]. Skipping the wait lets a
+  /// transition's prefetch race the just-activated video's ExoPlayer
+  /// init: native video-thumbnail extraction reroutes to a
+  /// software-only codec while isPlaybackActive is set (see
+  /// extractVideoFrame in ThumbnailHandlers.kt), and that fallback path
+  /// occasionally hands back the wrong keyframe -- "success" there
+  /// isn't proof it's the *right* frame. See also the before/after
+  /// playback-active guard in [VideoThumbnailFetcher.fetch] (used by
+  /// _fetchVideoThumbnailForPrefetch), which stops such a frame from
+  /// being persisted even if one slips through this wait.
+  void _scheduleSurroundingPrefetch() {
+    _prefetchDebounceTimer?.cancel();
+    _prefetchDebounceTimer = Timer(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      unawaited(() async {
+        await PlaybackThrottleController.initGate;
+        if (mounted) _prefetchSurroundingItems();
+      }());
+    });
+  }
+
+  void _prefetchSurroundingItems() {
+    // Cache/service orchestration now lives in MediaPrefetchController
+    // (media_prefetch_controller.dart) -- isStillWanted re-checks current
+    // playlist/index state at call time rather than capturing it here,
+    // same as before this extraction.
+    _prefetchController.prefetchSurrounding(
+      _playlistController.currentIndex,
+      _playlistController.playlist,
+      isStillWanted: (fileName) {
+        if (!mounted) return false;
+        final idx = _playlistController.playlist.indexOf(fileName);
+        return idx != -1 && (idx - _playlistController.currentIndex).abs() <= 2;
+      },
+    );
+  }
+
+  Future<void> _transitionTo(
+    int index, {
+    bool animate = true,
+    Duration duration = const Duration(milliseconds: 250),
+    Curve curve = Curves.easeOutCubic,
+  }) async {
+    if (index < 0 || index >= _playlistController.playlist.length) return;
+    // Backgrounded (background playback auto-advancing, or Next pressed on
+    // the lock screen): no frames are produced, so an animation -- or waiting
+    // for the end of a frame -- would never complete and the transition would
+    // hang until the app returned. Jump instead; the item is activated (and
+    // starts playing) regardless of the page animation.
+    final inBackground = _isAppInBackground;
+    if (inBackground) animate = false;
+    final token = ++_transitionToken;
+    _cancelSlideshowTimer();
+    _startHideTimer();
+    _isProgrammaticScrolling = true;
+    _updateSwipePhysics();
+
+    _playlistController.updateIndex(index);
+    try {
+      widget.onCurrentFileChanged?.call(_playlistController.currentFile);
+    } catch (_) {
+      // Best-effort callback into the parent widget, same as in
+      // _activateCurrentMedia() above -- shouldn't break playlist
+      // navigation.
+    }
+    unawaited(_activateCurrentMedia());
+
+    _scheduleSurroundingPrefetch();
+    if (_scrollMode.isContinuous) {
+      _kickOffAspectRatioPreload(index);
+    }
+
+    if (_scrollMode.isContinuous) {
+      if (_listScrollController.hasClients &&
+          _listScrollController.positions.length == 1 &&
+          _viewportHeight > 0) {
+        // Target offsets assume an un-zoomed list.
+        _resetContinuousZoom();
+        final target = _geometry.offsetForIndex(
+          index,
+          _viewportWidth,
+          _viewportHeight,
+        );
+        if (animate) {
+          await _listScrollController.animateTo(
+            target,
+            duration: duration,
+            curve: curve,
+          );
+        } else {
+          _listScrollController.jumpTo(target);
+          if (!inBackground) await WidgetsBinding.instance.endOfFrame;
+        }
+      }
+    } else {
+      if (_pageController.hasClients && _pageController.positions.length == 1) {
+        if (animate) {
+          await _pageController.animateToPage(
+            index,
+            duration: duration,
+            curve: curve,
+          );
+        } else {
+          _pageController.jumpToPage(index);
+        }
+      }
+    }
+
+    if (!mounted || _transitionToken != token) return;
+
+    _isProgrammaticScrolling = false;
+    _updateSwipePhysics();
+    _isSwiping = false;
+    _sessionController.setIsAutoAdvancing(false);
+    final currentFile = _playlistController.currentFile;
+    if (MediaViewerConstants.isImage(currentFile)) {
+      _startSlideshowTimerIfNeeded();
+    }
+    if (_showUI) {
+      _startHideTimer();
+    }
+    setState(() {});
+  }
+
+  void _autoAdvanceToNext() {
+    final index = _playlistController.currentIndex;
+    final count = _playlistController.playlist.length;
+    if (count > 1 && (index < count - 1 || _isPlaylistLoopEnabled)) {
+      _transitionTo(
+        (index + 1) % count,
+        animate: true,
+        duration: const Duration(milliseconds: 550),
+        curve: Curves.easeInOutCubic,
+      );
+    } else {
+      _sessionController.setIsAutoAdvancing(false);
+    }
+  }
+
+  void _navigateToNext({bool animate = true}) {
+    final index = _playlistController.currentIndex;
+    final count = _playlistController.playlist.length;
+    if (count > 1 && (index < count - 1 || _isPlaylistLoopEnabled)) {
+      HapticFeedback.lightImpact();
+      _transitionTo((index + 1) % count, animate: animate);
+    }
+  }
+
+  void _navigateToPrev({bool animate = true}) {
+    final index = _playlistController.currentIndex;
+    final count = _playlistController.playlist.length;
+    if (count > 1 && (index > 0 || _isPlaylistLoopEnabled)) {
+      HapticFeedback.lightImpact();
+      _transitionTo((index - 1 + count) % count, animate: animate);
+    }
+  }
+
+  bool get _isPlaylistLoopEnabled => ref
+      .read(fileManagerToolbarSettingsProvider(null))
+      .config
+      .mediaViewerToolbarConfig
+      .loopPlaylist;
+
+  void _startSlideshowTimerIfNeeded() {
+    _cancelSlideshowTimer();
+    if (!_autoAdvance || _playlistController.isEmpty) return;
+    final currentFile = _playlistController.currentFile;
+    if (MediaViewerConstants.isImage(currentFile)) {
+      _slideshowTimer = Timer(Duration(seconds: _slideshowDelaySeconds), () {
+        if (mounted) _autoAdvanceToNext();
+      });
+    }
+  }
+
+  bool get _isCurrentItemSwipeToSeekEnabled {
+    if (_playlistController.isEmpty) return false;
+    final currentFile = _playlistController.currentFile;
+    if (!MediaViewerConstants.isVideo(currentFile)) return false;
+    final gestureConfig = ref
+        .read(fileManagerToolbarSettingsProvider(null))
+        .config
+        .mediaViewerToolbarConfig;
+    if (!_playlistController.isPlaylistMode) {
+      return true;
+    }
+    return gestureConfig.swipeToSeekEnabled;
+  }
+
+  /// The drag that closes the viewer is always the one opposite to the drag
+  /// that changes items, so the two never compete: swipe down when items
+  /// change sideways, swipe sideways when they change vertically. A single
+  /// item has no playlist to change, so it uses the default (down).
+  Axis get _swipeDismissAxis {
+    if (!_playlistController.isPlaylistMode) return Axis.vertical;
+    return _scrollMode.axis == Axis.horizontal
+        ? Axis.vertical
+        : Axis.horizontal;
+  }
+
+  /// Asked by the swipe-to-dismiss layer whenever a finger lands. Mirrors the
+  /// conditions under which item swiping is locked, plus a page change that
+  /// is still settling, so a pinch, a pan of a zoomed image or a half-finished
+  /// swipe is never mistaken for a dismiss.
+  bool _canStartSwipeDismiss() {
+    if (!mounted || _playlistController.isEmpty) return false;
+    if (_isEditingLayout ||
+        _multiTouchLock ||
+        _zoomInteractionLock ||
+        _isProgrammaticScrolling ||
+        _isSwiping) {
+      return false;
+    }
+    // Continuous mode reports "zoom ended" even while still zoomed in.
+    if (_scrollMode.isContinuous && _continuousScale > 1.01) return false;
+    return true;
+  }
+
+  /// Closes the viewer the way a deliberate back press does (see PopScope in
+  /// build), so background playback still hands over.
+  void _closeViewerFromSwipe() {
+    if (!mounted) return;
+    _closing = true;
+    _prepareBackgroundPlaybackHandoff();
+    _beginFloatingFlight(fadeChrome: false);
+    Navigator.of(context).pop();
+  }
+
+  // Recomputes the shared swipe-physics notifier from the lock sources:
+  // raw multi-touch (fires the instant a 2nd finger is detected), zoom/interaction
+  // state reported by the active media item, and horizontal swipe-to-seek gesture on videos.
+  // When the playlist is vertical, swipe-to-seek is orthogonal to the page scroll
+  // direction, so item-change gestures do not interfere with seek and stay enabled.
+  void _updateSwipePhysics() {
+    final swipeToSeekActive =
+        _scrollMode == PlaylistScrollMode.horizontal &&
+        _isCurrentItemSwipeToSeekEnabled;
+    final shouldLock =
+        _isEditingLayout ||
+        _multiTouchLock ||
+        _zoomInteractionLock ||
+        _isProgrammaticScrolling ||
+        swipeToSeekActive;
+    final desired = shouldLock
+        ? const NeverScrollableScrollPhysics()
+        : const BouncingScrollPhysics();
+    if (_swipePhysicsNotifier.value.runtimeType != desired.runtimeType) {
+      _swipePhysicsNotifier.value = desired;
+    }
+  }
+
+  void _onZoomInteractionChanged(bool allowSwipe) {
+    _zoomInteractionLock = !allowSwipe;
+    _updateSwipePhysics();
+  }
+
+  // ---- Continuous-mode zoom ------------------------------------------------
+  //
+  // The continuous list is zoomed by an InteractiveViewer wrapped around the
+  // ListView: "zoomed" means the list is drawn through a transform, it is not
+  // re-laid out. The list keeps scrolling normally underneath that transform.
+
+  /// See [CarouselGeometry.visibleCenterShift].
+  double _continuousVisibleCenterShift() {
+    final h = _viewportHeight;
+    final controller = _continuousTransformationController;
+    if (h <= 0 || controller.value.isIdentity()) return 0.0;
+    return CarouselGeometry.visibleCenterShift(
+      viewportHeight: h,
+      sceneTop: controller.toScene(Offset.zero).dy,
+      sceneBottom: controller.toScene(Offset(0, h)).dy,
+    );
+  }
+
+  /// Puts the continuous list back at 1x.
+  ///
+  /// With [keepCenter] the list is also scrolled so that whatever was in the
+  /// middle of the screen stays there, instead of the view snapping to a
+  /// different item. Pass `false` when the caller is about to reposition the
+  /// list itself anyway (e.g. after the viewport was resized).
+  bool _isClampingContinuous = false;
+
+  void _onContinuousTransformationChanged() {
+    if (_isClampingContinuous || !mounted) return;
+    final vw = _viewportWidth;
+    final vh = _viewportHeight;
+    if (vw <= 0 || vh <= 0) return;
+
+    final matrix = _continuousTransformationController.value;
+    final s = _getMatrixScale(matrix);
+    if (s <= 0) return;
+
+    final config = ref
+        .read(fileManagerToolbarSettingsProvider(null))
+        .config
+        .mediaViewerToolbarConfig;
+    final effectiveMinScale = config.pinchZoomOutEnabled
+        ? config.minVideoZoomScale.clamp(
+            MediaViewerConstants.minVideoZoomFloor,
+            1.0,
+          )
+        : 1.0;
+
+    // Hard floor for zoom-out
+    if (s < effectiveMinScale) {
+      final clampedS = effectiveMinScale;
+      final dx = vw * (1.0 - clampedS) / 2.0;
+      final dy = vh * (1.0 - clampedS) / 2.0;
+      _isClampingContinuous = true;
+      _continuousTransformationController.value = Matrix4.identity()
+        ..setTranslationRaw(dx, dy, 0.0)
+        ..scale(clampedS, clampedS, clampedS);
+      _isClampingContinuous = false;
+      return;
+    }
+
+    // Lock borders when zoomed in (s >= 1.0) across both X and Y
+    if (s >= 1.0) {
+      final scaledW = vw * s;
+      final scaledH = vh * s;
+      final currentTx = matrix.storage[12];
+      final currentTy = matrix.storage[13];
+
+      final double clampedTx = scaledW > vw
+          ? currentTx.clamp(vw - scaledW, 0.0)
+          : (vw - scaledW) / 2.0;
+      final double clampedTy = scaledH > vh
+          ? currentTy.clamp(vh - scaledH, 0.0)
+          : (vh - scaledH) / 2.0;
+
+      if ((currentTx - clampedTx).abs() > 0.001 ||
+          (currentTy - clampedTy).abs() > 0.001) {
+        _isClampingContinuous = true;
+        _continuousTransformationController.value = Matrix4.identity()
+          ..setTranslationRaw(clampedTx, clampedTy, 0.0)
+          ..scale(s, s, s);
+        _isClampingContinuous = false;
+      }
+    }
+  }
+
+  void _animateContinuousZoomTo(
+    Matrix4 targetMatrix, {
+    required bool toBaseline,
+  }) {
+    final controller = _continuousZoomAnimationController;
+    if (controller == null) {
+      _continuousTransformationController.value = targetMatrix;
+      return;
+    }
+
+    controller.stop();
+    _continuousZoomAnimation = Matrix4Tween(
+      begin: _continuousTransformationController.value,
+      end: targetMatrix,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutCubic));
+
+    controller.forward(from: 0.0).then((_) {
+      if (mounted) {
+        setState(() {
+          _continuousScale = _getMatrixScale(
+            _continuousTransformationController.value,
+          );
+        });
+        _onZoomInteractionChanged(toBaseline);
+      }
+    });
+  }
+
+  void _handleContinuousDoubleTap([TapDownDetails? details]) {
+    final currentScale = _getMatrixScale(
+      _continuousTransformationController.value,
+    );
+    final bool isDefaultZoom = (currentScale - 1.0).abs() < 0.01;
+
+    if (!isDefaultZoom) {
+      // Zoomed in or out: smoothly animate back to default 1.0x baseline
+      _animateContinuousZoomTo(Matrix4.identity(), toBaseline: true);
+      return;
+    }
+
+    // At default 1.0x: smoothly animate zoom in toward tapped point
+    const targetScale = 3.0;
+    final vw = _viewportWidth;
+    final vh = _viewportHeight;
+    if (vw <= 0 || vh <= 0) return;
+
+    final position = details?.localPosition ?? Offset(vw / 2, vh / 2);
+    final x = -position.dx * (targetScale - 1.0);
+    final y = -position.dy * (targetScale - 1.0);
+
+    final scaledW = vw * targetScale;
+    final scaledH = vh * targetScale;
+
+    final clampedTx = scaledW > vw
+        ? x.clamp(vw - scaledW, 0.0)
+        : (vw - scaledW) / 2.0;
+    final clampedTy = scaledH > vh
+        ? y.clamp(vh - scaledH, 0.0)
+        : (vh - scaledH) / 2.0;
+
+    final targetMatrix = Matrix4.identity()
+      ..setTranslationRaw(clampedTx, clampedTy, 0.0)
+      ..scale(targetScale, targetScale, targetScale);
+
+    _onZoomInteractionChanged(false);
+    _animateContinuousZoomTo(targetMatrix, toBaseline: false);
+  }
+
+  void _resetContinuousZoom({bool keepCenter = true, bool animate = false}) {
+    if (animate) {
+      _animateContinuousZoomTo(Matrix4.identity(), toBaseline: true);
+      return;
+    }
+
+    final controller = _continuousTransformationController;
+    if (controller.value.isIdentity()) {
+      _continuousScale = 1.0;
+      return;
+    }
+    final shift = keepCenter ? _continuousVisibleCenterShift() : 0.0;
+    _isClampingContinuous = true;
+    controller.value = Matrix4.identity();
+    _isClampingContinuous = false;
+    if (shift.abs() > 0.5 &&
+        _listScrollController.hasClients &&
+        _listScrollController.positions.length == 1) {
+      final position = _listScrollController.position;
+      position.jumpTo(
+        (position.pixels + shift)
+            .clamp(position.minScrollExtent, position.maxScrollExtent)
+            .toDouble(),
+      );
+    }
+    _onZoomInteractionChanged(true);
+    if (mounted) setState(() => _continuousScale = 1.0);
+  }
+
+  static double _getMatrixScale(Matrix4 matrix) {
+    final double x = matrix.storage[0];
+    final double y = matrix.storage[1];
+    return math.sqrt(x * x + y * y);
+  }
+
+  // Called on every raw pointer down, regardless of which gesture
+  // recognizer ends up winning the arena. This lets us lock out
+  // swipe-to-next-item the instant a second finger touches the screen,
+  // rather than waiting for InteractiveViewer's onInteractionStart (which
+  // can lose the arena race to the PageView/ListView drag recognizer when
+  // the two fingers of a pinch don't land in exactly the same frame).
+   void _handleTouchPointerDown(PointerDownEvent event) {
+    if (event.kind != PointerDeviceKind.touch || _isEditingLayout) return;
+    _activeTouchPointers.add(event.pointer);
+    if (_activeTouchPointers.length == 1 && !_zoomInteractionLock) {
+      final toolbarConfig = ref
+          .read(fileManagerToolbarSettingsProvider(null))
+          .config
+          .mediaViewerToolbarConfig;
+      final edgeWidth =
+          _viewportWidth * MediaViewerConstants.tapToNavigateEdgeFraction;
+      if (toolbarConfig.tapEdgesToNavigate && edgeWidth > 0) {
+        final x = event.localPosition.dx;
+        final bool? next = x <= edgeWidth
+            ? false
+            : x >= _viewportWidth - edgeWidth
+            ? true
+            : null;
+        if (next != null) {
+          _edgeTapStartPositions[event.pointer] = event.localPosition;
+          _edgeTapDirections[event.pointer] = next;
+          _edgeTapStartedDuringTransition[event.pointer] =
+              _isProgrammaticScrolling;
+        }
+      }
+    }
+    if (_activeTouchPointers.length == 1 &&
+        _isPlaylistLoopEnabled &&
+        !_zoomInteractionLock &&
+        !_isProgrammaticScrolling) {
+      final index = _playlistController.currentIndex;
+      if (_playlistController.playlist.length > 1 &&
+          (index == 0 || index == _playlistController.playlist.length - 1)) {
+        _loopSwipeStartPositions[event.pointer] = event.position;
+        _loopSwipeStartIndices[event.pointer] = index;
+      }
+    }
+    if (_activeTouchPointers.length >= 2 && !_multiTouchLock) {
+      _multiTouchLock = true;
+      _clearEdgeTapCandidates();
+      _loopSwipeStartPositions.clear();
+      _loopSwipeStartIndices.clear();
+      _updateSwipePhysics();
+    }
+  }
+
+  void _handleTouchPointerUp(PointerEvent event) {
+    if (event.kind != PointerDeviceKind.touch) return;
+    final edgeStart = _edgeTapStartPositions.remove(event.pointer);
+    final edgeDirection = _edgeTapDirections.remove(event.pointer);
+    final startedDuringTransition =
+        _edgeTapStartedDuringTransition.remove(event.pointer) ?? false;
+    final start = _loopSwipeStartPositions.remove(event.pointer);
+    final startIndex = _loopSwipeStartIndices.remove(event.pointer);
+    _activeTouchPointers.remove(event.pointer);
+    if (event is PointerUpEvent &&
+        edgeStart != null &&
+        edgeDirection != null &&
+        _activeTouchPointers.isEmpty &&
+        mounted) {
+      final tolerance = startedDuringTransition
+          ? math.max(MediaViewerConstants.tapToNavigateMovementTolerance, 48.0)
+          : MediaViewerConstants.tapToNavigateMovementTolerance;
+      if ((event.localPosition - edgeStart).distance <= tolerance) {
+        if (edgeDirection) {
+          _navigateToNext();
+        } else {
+          _navigateToPrev();
+        }
+      }
+    }
+    if (event is PointerUpEvent &&
+        start != null &&
+        startIndex != null &&
+        _activeTouchPointers.isEmpty &&
+        mounted) {
+      _maybeWrapPlaylistSwipe(start, startIndex, event.position);
+    }
+    if (_activeTouchPointers.isEmpty && _multiTouchLock) {
+      _multiTouchLock = false;
+      // In continuous mode the zoom lock only covers an active pinch (the
+      // list scrolls at any zoom level), so it must not outlive the fingers
+      // even if the pinch never reported its end.
+      if (_scrollMode.isContinuous) _zoomInteractionLock = false;
+      _updateSwipePhysics();
+    }
+  }
+
+  void _handleTouchPointerMove(PointerMoveEvent event) {
+    final start = _edgeTapStartPositions[event.pointer];
+    if (start == null) return;
+    final startedDuringTransition =
+        _edgeTapStartedDuringTransition[event.pointer] ?? false;
+    final tolerance = startedDuringTransition
+        ? math.max(MediaViewerConstants.tapToNavigateMovementTolerance, 48.0)
+        : MediaViewerConstants.tapToNavigateMovementTolerance;
+    if ((event.localPosition - start).distance > tolerance) {
+      _clearEdgeTapCandidate(event.pointer);
+    }
+  }
+
+  void _clearEdgeTapCandidate(int pointer) {
+    _edgeTapStartPositions.remove(pointer);
+    _edgeTapDirections.remove(pointer);
+    _edgeTapStartedDuringTransition.remove(pointer);
+  }
+
+  void _clearEdgeTapCandidates() {
+    _edgeTapStartPositions.clear();
+    _edgeTapDirections.clear();
+    _edgeTapStartedDuringTransition.clear();
+  }
+
+  /// The scroll direction of a pager that pages along [axis], as the framework
+  /// resolves it (a horizontal pager runs the other way in right-to-left).
+  AxisDirection _axisDirectionFor(Axis axis) {
+    if (axis == Axis.vertical) return AxisDirection.down;
+    return Directionality.of(context) == TextDirection.rtl
+        ? AxisDirection.left
+        : AxisDirection.right;
+  }
+
+  void _maybeWrapPlaylistSwipe(Offset start, int startIndex, Offset end) {
+    if (!_isPlaylistLoopEnabled ||
+        _zoomInteractionLock ||
+        _isProgrammaticScrolling) {
+      return;
+    }
+
+    final count = _playlistController.playlist.length;
+    if (count < 2 || _playlistController.currentIndex != startIndex) return;
+
+    final isContinuous = _scrollMode.isContinuous;
+    final axis = isContinuous ? Axis.vertical : _scrollMode.axis;
+    final axisDirection = _axisDirectionFor(axis);
+    final viewportExtent = axis == Axis.horizontal
+        ? _viewportWidth
+        : _viewportHeight;
+    // Paged modes judge the swipe the same way the pager does (overall
+    // movement, diagonals allowed), so swiping past the end behaves like
+    // swiping between any two items. The continuous list is browsed by free
+    // scrolling, where a short scroll that happens to start on the last item
+    // must not jump to the first, so it keeps the stricter test.
+    final direction = playlistSwipeDirection(
+      end - start,
+      axisDirection,
+      minDistance: isContinuous
+          ? math.max(48.0, viewportExtent * 0.12)
+          : kPlaylistSwipeMinDistance,
+      maxCrossRatio: isContinuous ? 1.0 : kPlaylistSwipeMaxCrossRatio,
+    );
+
+    if (startIndex == count - 1 && direction > 0) {
+      HapticFeedback.lightImpact();
+      _transitionTo(0);
+    } else if (startIndex == 0 && direction < 0) {
+      HapticFeedback.lightImpact();
+      _transitionTo(count - 1);
+    }
+  }
+
+  void _onScrollStart() {
+    if (!_isSwiping) {
+      _isSwiping = true;
+      _lockedExtents.clear();
+      _sessionController.setIsAutoAdvancing(false);
+      _playbackManager.activeController?.pause();
+      _cancelSlideshowTimer();
+    }
+  }
+
+  void _onScrollEnd() {
+    _isSwiping = false;
+    _lockedExtents.clear();
+    if (_playbackManager.currentFileNotifier.value !=
+        _playlistController.currentFile) {
+      unawaited(_activateCurrentMedia());
+    } else if (_autoPlay) {
+      _playbackManager.activeController?.play();
+    }
+    final currentFile = _playlistController.currentFile;
+    if (MediaViewerConstants.isImage(currentFile)) {
+      _startSlideshowTimerIfNeeded();
+    }
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    }
+    if (_showUI) {
+      _startHideTimer();
+    }
+  }
+
+  Future<void> _deleteCurrentFile() async {
+    _menuOpened();
+    final cs = Theme.of(context).colorScheme;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.deleteFileDialogTitle),
+        content: Text(context.l10n.deleteFilePermanentWarning),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: cs.error),
+            child: Text(context.l10n.delete),
+          ),
+        ],
+      ),
+    );
+    _menuClosed();
+
+    if (confirm != true) return;
+
+    final fileToDelete = _playlistController.currentFile;
+    bool success = false;
+    try {
+      success = await _fileIoApi.deleteFile(widget.container, fileToDelete);
+    } catch (e) {
+      VeLog.e(
+        'MediaViewerScreen',
+        'Delete failed for ${VeLog.censorName(fileToDelete)}',
+        e,
+      );
+    }
+
+    if (success) widget.onFileDeleted?.call(fileToDelete);
+
+    if (success && mounted) {
+      _sessionController.forgetFile(fileToDelete);
+      _playlistController.removeFile(fileToDelete);
+      if (_playlistController.isEmpty) {
+        Navigator.pop(context);
+        return;
+      }
+      if (_pageController.hasClients) {
+        final oldController = _pageController;
+        _pageController = PageController(
+          initialPage: _playlistController.currentIndex,
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          oldController.dispose();
+        });
+      }
+      setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _scrollToCurrentIndex(animate: false);
+          _prefetchSurroundingItems();
+          _onScrollEnd();
+        }
+      });
+      if (mounted) {
+        showAppSnackBar(
+          context,
+          message: context.l10n.mediaFileDeletedMessage,
+          tone: AppBannerTone.success,
+        );
+      }
+    } else if (mounted) {
+      showAppSnackBar(
+        context,
+        message: context.l10n.mediaFileDeleteFailedMessage,
+        tone: AppBannerTone.error,
+      );
+    }
+  }
+
+  bool get _isCurrentFileBookmark =>
+      _marks.isBookmarked(_playlistController.currentFile);
+
+  Future<void> _toggleBookmarkCurrentFile() async {
+    final file = _playlistController.currentFile;
+    final wasBookmark = _marks.isBookmarked(file);
+    await _marksNotifier.toggleBookmarks(widget.container, [
+      VaultBookmark(file, isDir: false),
+    ], bookmark: !wasBookmark);
+    if (mounted) {
+      showAppSnackBar(
+        context,
+        message: wasBookmark
+            ? context.l10n.unbookmarkedCount(1)
+            : context.l10n.bookmarkedCount(1),
+        tone: AppBannerTone.success,
+      );
+    }
+  }
+
+  Future<void> _openImageEditor() async {
+    _menuOpened();
+    final fileToEdit = _playlistController.currentFile;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ImageEditorScreen(
+          container: widget.container,
+          filePath: fileToEdit,
+          thumbnailQuality: widget.thumbnailQuality,
+        ),
+      ),
+    );
+    if (!mounted ||
+        ref.read(mediaViewerLockProvider(widget.container.volId))) {
+      return;
+    }
+    _menuClosed();
+    // Whether or not anything was actually saved, force this item's
+    // ImagePageItem to remount so it re-reads through FullResImageCache /
+    // ThumbnailCacheService rather than keep showing whatever bytes it
+    // already had in memory from before the editor opened. If nothing
+    // changed, those caches weren't touched and the remount just re-hits
+    // them -- cheap and correct either way.
+    _sessionController.bumpImageReloadEpoch(fileToEdit);
+  }
+
+  Future<void> _openVideoEditor() async {
+    final fileToEdit = _playlistController.currentFile;
+    if (!MediaViewerConstants.isVideo(fileToEdit)) return;
+    _menuOpened();
+    // The app has a single native player. Release the viewer's before the
+    // editor creates its own, and wait for that release to finish so it can't
+    // land on top of the editor's player.
+    _playbackManager.pauseActive();
+    await _playbackManager.invalidateActive();
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VideoEditorScreen(
+          container: widget.container,
+          filePath: fileToEdit,
+        ),
+      ),
+    );
+    if (!mounted ||
+        ref.read(mediaViewerLockProvider(widget.container.volId))) {
+      return;
+    }
+    _menuClosed();
+    // The editor has released the player by now (it does so before popping);
+    // bring this video back up.
+    unawaited(_activateCurrentMedia());
+  }
+
+  Future<void> _openAudioEditor() async {
+    final fileToEdit = _playlistController.currentFile;
+    if (!MediaViewerConstants.isAudio(fileToEdit)) return;
+    _menuOpened();
+    // The app has a single native player. Release the viewer's before the
+    // editor creates its own, and wait for that release to finish so it can't
+    // land on top of the editor's player.
+    _playbackManager.pauseActive();
+    await _playbackManager.invalidateActive();
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AudioEditorScreen(
+          container: widget.container,
+          filePath: fileToEdit,
+        ),
+      ),
+    );
+    if (!mounted ||
+        ref.read(mediaViewerLockProvider(widget.container.volId))) {
+      return;
+    }
+    _menuClosed();
+    // The editor has released the player by now (it does so before popping);
+    // bring this track back up.
+    unawaited(_activateCurrentMedia());
+  }
+
+  Future<void> _renameCurrentFile() async {
+    _menuOpened();
+    final fileToRename = _playlistController.currentFile;
+    final lastSlash = fileToRename.lastIndexOf('/');
+    final dirPath = lastSlash == -1 ? '' : fileToRename.substring(0, lastSlash);
+    final baseName = lastSlash == -1
+        ? fileToRename
+        : fileToRename.substring(lastSlash + 1);
+
+    var existingEntries = <RawEntry>[];
+    try {
+      final raw = await _fileIoApi.listDirectory(widget.container, dirPath);
+      if (raw != null) {
+        existingEntries = RawEntry.parseAll(raw);
+      }
+    } catch (e) {
+      VeLog.w(
+        'MediaViewerScreen',
+        'Directory listing failed at ${VeLog.censorUri(dirPath)} during rename conflict check',
+        e,
+      );
+    }
+
+    final currentEntry = existingEntries.firstWhere(
+      (e) => e.name == baseName,
+      orElse: () =>
+          RawEntry(name: baseName, isDir: false, sizeBytes: 0, modifiedSecs: 0),
+    );
+
+    if (!mounted) {
+      _menuClosed();
+      return;
+    }
+
+    await BrowserDialogs.showRename(
+      context,
+      container: widget.container,
+      oldEntries: [currentEntry],
+      existingEntries: existingEntries,
+      currentDirPath: dirPath,
+      onSuccess: () {},
+      onEntryRenamed: (oldPath, newPath) {
+        final rotation = _rotations[oldPath];
+        if (rotation != null) {
+          _sessionController.setRotation(newPath, rotation);
+        }
+        final adjustments = _session.adjustments[oldPath];
+        if (adjustments != null) {
+          _sessionController.moveAdjustments(oldPath, newPath);
+        }
+        _playbackManager.renameFile(oldPath, newPath);
+        _playlistController.renameFile(oldPath, newPath);
+        if (mounted) {
+          showAppSnackBar(
+            context,
+            message: context.l10n.mediaFileRenamedMessage,
+            tone: AppBannerTone.success,
+          );
+        }
+      },
+    );
+    _menuClosed();
+  }
+
+  void _handleMediaError(String fileName) {
+    if (fileName != _playlistController.currentFile) return;
+    _cancelSlideshowTimer();
+    _playbackManager.pauseActive();
+  }
+
+  void _cancelSlideshowTimer() {
+    _slideshowTimer?.cancel();
+    _slideshowTimer = null;
+  }
+
+  void _startHideTimer() {
+    _hideTimer?.cancel();
+    if (_activeMenuCount > 0) return;
+    _hideTimer = Timer(MediaViewerConstants.uiHideDelay, () {
+      final controller = _playbackManager.activeController;
+      if (mounted &&
+          controller != null &&
+          controller.value.isPlaying &&
+          _showUI &&
+          _activeMenuCount == 0) {
+        _setUIVisibility(false);
+      }
+    });
+  }
+
+  /// Turns the touch lock on or off. Locking tucks the chrome away; unlocking
+  /// brings it back.
+  void _setControlsLocked(bool locked) {
+    if (!mounted || _controlsLocked == locked) return;
+    setState(() => _controlsLocked = locked);
+    _hideTimer?.cancel();
+    _setUIVisibility(!locked);
+  }
+
+  void _setUIVisibility(bool show) {
+    // Nothing may bring the chrome back while locked; unlocking does.
+    if (show && _controlsLocked) return;
+    if (mounted) {
+      _sessionController.setShowUI(show);
+      if (show) {
+        SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.manual,
+          overlays: SystemUiOverlay.values,
+        );
+        _startHideTimer();
+      } else {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        _hideTimer?.cancel();
+      }
+    }
+  }
+
+  void _menuOpened() {
+    _activeMenuCount++;
+    _hideTimer?.cancel();
+  }
+
+  void _menuClosed() {
+    _activeMenuCount = (_activeMenuCount - 1).clamp(0, 999);
+    _startHideTimer();
+  }
+
+  Future<void> _showFileInfoHelper(VaultFileIoApi fileIoApi) async {
+    _menuOpened();
+    final file = _playlistController.currentFile;
+    final lastSlash = file.lastIndexOf('/');
+    final dirPath = lastSlash == -1 ? '' : file.substring(0, lastSlash);
+    final baseName = lastSlash == -1 ? file : file.substring(lastSlash + 1);
+    var existingEntries = <RawEntry>[];
+    try {
+      final raw = await fileIoApi.listDirectory(widget.container, dirPath);
+      if (raw != null) {
+        existingEntries = RawEntry.parseAll(raw);
+      }
+    } catch (e) {
+      VeLog.w(
+        'MediaViewerScreen',
+        'Directory listing failed at ${VeLog.censorUri(dirPath)} during file info lookup',
+        e,
+      );
+    }
+    final currentEntry = existingEntries.firstWhere(
+      (e) => e.name == baseName,
+      orElse: () =>
+          RawEntry(name: baseName, isDir: false, sizeBytes: 0, modifiedSecs: 0),
+    );
+    if (mounted) {
+      await FileInfoSheet.show(
+        context,
+        container: widget.container,
+        entry: currentEntry,
+        currentDirPath: dirPath,
+      );
+    }
+    _menuClosed();
+  }
+
+  IconData _screenOrientationIcon() => switch (_screenOrientationModeIndex) {
+    0 => Icons.stay_current_portrait_rounded,
+    1 => Icons.stay_current_landscape_rounded,
+    _ => Icons.screen_rotation_rounded,
+  };
+
+  void _cycleScreenOrientation() {
+    final nextMode = (_screenOrientationModeIndex + 1) % 3;
+    setState(() => _screenOrientationModeIndex = nextMode);
+
+    switch (nextMode) {
+      case 0:
+        SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      case 1:
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+      case 2:
+        SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    }
+  }
+
+  void _showDecoderPicker(BuildContext context) {
+    _menuOpened();
+    final l10n = context.l10n;
+    final isAudio = MediaViewerConstants.isAudio(
+      _playlistController.currentFile,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.sheet),
+        ),
+      ),
+      builder: (sheetContext) {
+        String selectedTab = isAudio ? 'audio' : 'video';
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final cs = Theme.of(context).colorScheme;
+            final mediaConfig = ref
+                .watch(fileManagerToolbarSettingsProvider(null))
+                .config
+                .mediaViewerToolbarConfig;
+            final isVideoSelected = selectedTab == 'video';
+            final currentMode = isVideoSelected
+                ? mediaConfig.videoDecoderMode
+                : mediaConfig.audioDecoderMode;
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.memory_rounded, color: cs.primary),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              l10n.decoderSelectionHeader,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    if (!isAudio) ...[
+                      const SizedBox(height: 12),
+                      Center(
+                        child: SegmentedButton<String>(
+                          segments: [
+                            ButtonSegment<String>(
+                              value: 'video',
+                              icon: const Icon(Icons.videocam_rounded),
+                              label: Text(l10n.videoDecoderTitle),
+                            ),
+                            ButtonSegment<String>(
+                              value: 'audio',
+                              icon: const Icon(Icons.audiotrack_rounded),
+                              label: Text(l10n.audioDecoderTitle),
+                            ),
+                          ],
+                          selected: {selectedTab},
+                          onSelectionChanged: (newSelection) {
+                            setSheetState(() {
+                              selectedTab = newSelection.first;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ] else ...[
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 8,
+                          top: 12,
+                          bottom: 4,
+                        ),
+                        child: Text(
+                          l10n.audioDecoderTitle,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                    for (final mode in MediaDecoderMode.values) ...[
+                      ListTile(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        selected: currentMode == mode,
+                        selectedTileColor: cs.primaryContainer.withValues(
+                          alpha: 0.3,
+                        ),
+                        title: Text(
+                          _decoderModeLabel(l10n, mode),
+                          style: TextStyle(
+                            fontWeight: currentMode == mode
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        trailing: currentMode == mode
+                            ? Icon(Icons.check_rounded, color: cs.primary)
+                            : null,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          final controller = ref.read(
+                            fileManagerToolbarSettingsProvider(null).notifier,
+                          );
+                          if (isVideoSelected) {
+                            controller.setMediaViewerVideoDecoderMode(mode);
+                          } else {
+                            controller.setMediaViewerAudioDecoderMode(mode);
+                          }
+                          Navigator.pop(sheetContext);
+                        },
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(_menuClosed);
+  }
+
+  /// The audio equalizer. Changes reach the native audio pipeline on every
+  /// slider tick, but are only persisted once the person lets go (see
+  /// [AudioEqualizerSheet]), so dragging doesn't queue encrypted writes.
+  void _showEqualizerSheet(BuildContext context) {
+    _menuOpened();
+    final settings = ref.read(fileManagerToolbarSettingsProvider(null).notifier);
+    final initial = ref
+        .read(fileManagerToolbarSettingsProvider(null))
+        .config
+        .mediaViewerToolbarConfig
+        .equalizer;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      // The band sliders are vertical, so a drag-to-dismiss sheet would fight
+      // them for the same gesture. Tap outside / back still closes it.
+      enableDrag: false,
+      constraints: const BoxConstraints(maxWidth: 640),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.sheet),
+        ),
+      ),
+      builder: (sheetContext) => AudioEqualizerSheet(
+        initial: initial,
+        onChanged: _applyEqualizerLive,
+        onCommit: (value) => unawaited(settings.setMediaViewerEqualizer(value)),
+      ),
+    ).whenComplete(_menuClosed);
+  }
+
+  void _applyEqualizerLive(AudioEqualizerSettings value) {
+    final controller = _playbackManager.activeController;
+    if (controller == null) return;
+    unawaited(
+      controller.setEqualizer(value).catchError((Object error) {
+        VeLog.w('MediaViewer', 'Could not apply the equalizer', error);
+      }),
+    );
+  }
+
+  static String _decoderModeLabel(
+    AppLocalizations l10n,
+    MediaDecoderMode mode,
+  ) {
+    return switch (mode) {
+      MediaDecoderMode.auto => l10n.decoderAutoOption,
+      MediaDecoderMode.hardware => l10n.decoderHardwareOption,
+      MediaDecoderMode.software => l10n.decoderSoftwareOption,
+      MediaDecoderMode.ffmpeg => l10n.decoderFfmpegOption,
+    };
+  }
+
+  void _showPlaylistOptionsMenu() {
+    _menuOpened();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.sheet),
+        ),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            final isPlaylist = _playlistController.isPlaylistMode;
+            final folderScope = _playlistController.selectedFolder;
+            final isThisFolderSelected =
+                isPlaylist && folderScope == 'Current Folder Only';
+            final isAllSelected = isPlaylist && folderScope == 'All';
+            final cs = Theme.of(context).colorScheme;
+            final l10n = context.l10n;
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        l10n.playlistOptionsTooltip,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: Icon(
+                        Icons.folder_outlined,
+                        color: isThisFolderSelected ? cs.primary : null,
+                      ),
+                      title: Text(l10n.thisFolderMenu),
+                      trailing: isThisFolderSelected
+                          ? Icon(Icons.check_rounded, color: cs.primary)
+                          : null,
+                      onTap: () async {
+                        final targetFile = _playlistController.currentFile;
+                        if (isThisFolderSelected) {
+                          _playlistController.disablePlaylist();
+                        } else {
+                          await _playlistController.enablePlaylist(
+                            'Current Folder Only',
+                          );
+                        }
+                        final newIndex = _playlistController.playlist.indexOf(
+                          targetFile,
+                        );
+                        if (newIndex != -1) {
+                          _playlistController.updateIndex(newIndex);
+                        }
+                        _onPlaylistChanged();
+                        setSheetState(() {});
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        Icons.folder_copy_outlined,
+                        color: isAllSelected ? cs.primary : null,
+                      ),
+                      title: Text(l10n.allInclSubfoldersMenu),
+                      trailing: isAllSelected
+                          ? Icon(Icons.check_rounded, color: cs.primary)
+                          : null,
+                      onTap: () async {
+                        final targetFile = _playlistController.currentFile;
+                        if (isAllSelected) {
+                          _playlistController.disablePlaylist();
+                        } else {
+                          await _playlistController.enablePlaylist('All');
+                        }
+                        final newIndex = _playlistController.playlist.indexOf(
+                          targetFile,
+                        );
+                        if (newIndex != -1) {
+                          _playlistController.updateIndex(newIndex);
+                        }
+                        _onPlaylistChanged();
+                        setSheetState(() {});
+                      },
+                    ),
+                    if (_playlistController.isPlaylistMode) ...[
+                      const Divider(),
+                      ListTile(
+                        leading: Icon(
+                          Icons.shuffle_rounded,
+                          color: _playlistController.isShuffled
+                              ? cs.primary
+                              : null,
+                        ),
+                        title: Text(
+                          _playlistController.isShuffled
+                              ? l10n.disableShuffleMenu
+                              : l10n.shufflePlaylistMenu,
+                        ),
+                        trailing: Switch(
+                          value: _playlistController.isShuffled,
+                          onChanged: (_) {
+                            final targetFile = _playlistController.currentFile;
+                            _playlistController.toggleShuffle();
+                            final newIndex = _playlistController.playlist
+                                .indexOf(targetFile);
+                            if (newIndex != -1) {
+                              _playlistController.updateIndex(newIndex);
+                            }
+                            _onPlaylistChanged();
+                            setSheetState(() {});
+                          },
+                        ),
+                        onTap: () {
+                          final targetFile = _playlistController.currentFile;
+                          _playlistController.toggleShuffle();
+                          final newIndex = _playlistController.playlist.indexOf(
+                            targetFile,
+                          );
+                          if (newIndex != -1) {
+                            _playlistController.updateIndex(newIndex);
+                          }
+                          _onPlaylistChanged();
+                          setSheetState(() {});
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8, bottom: 6),
+                        child: Text(
+                          l10n.playlistScrollModeMenu,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: SegmentedButton<PlaylistScrollMode>(
+                          segments: PlaylistScrollMode.values.map((mode) {
+                            return ButtonSegment<PlaylistScrollMode>(
+                              value: mode,
+                              icon: Icon(mode.icon, size: 16),
+                              label: Text(
+                                mode.getLocalizedLabel(l10n),
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                            );
+                          }).toList(),
+                          selected: {_scrollMode},
+                          onSelectionChanged: (newSelection) {
+                            final newMode = newSelection.first;
+                            _sessionController.setScrollMode(newMode);
+                            ref
+                                .read(appSettingsServiceProvider)
+                                .loadSettings()
+                                .then((s) {
+                                  ref
+                                      .read(appSettingsServiceProvider)
+                                      .saveSettings(
+                                        s.copyWith(playlistScrollMode: newMode),
+                                      );
+                                });
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                _scrollToCurrentIndex(animate: false);
+                              }
+                            });
+                            setSheetState(() {});
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    ).whenComplete(_menuClosed);
+  }
+
+  void _executeMediaAction(MediaViewerAction action) {
+    if (widget._isPreviewOnly && !_archivePreviewActions.contains(action)) {
+      return;
+    }
+    _startHideTimer();
+    final fileIoApi = ref.read(vaultFileIoApiProvider);
+    final isImage = MediaViewerConstants.isImage(
+      _playlistController.currentFile,
+    );
+
+    switch (action) {
+      case MediaViewerAction.playPause:
+        final controller = _playbackManager.activeController;
+        if (isImage) {
+          _updatePlaybackMode(
+            _autoAdvance
+                ? VideoPlaybackMode.playOnce
+                : VideoPlaybackMode.playAndAdvance,
+          );
+        } else if (controller != null) {
+          if (controller.value.isPlaying) {
+            controller.pause();
+          } else {
+            controller.play();
+          }
+        }
+        break;
+      case MediaViewerAction.previous:
+        _navigateToPrev();
+        break;
+      case MediaViewerAction.next:
+        _navigateToNext();
+        break;
+      case MediaViewerAction.mute:
+        _startHideTimer();
+        _sessionController.toggleMute();
+        _playbackManager.activeController?.setVolume(_isMuted ? 0 : 100);
+        ref.read(appSettingsServiceProvider).loadSettings().then((appSettings) {
+          ref
+              .read(appSettingsServiceProvider)
+              .saveSettings(appSettings.copyWith(videoMuted: _isMuted));
+        });
+        break;
+      case MediaViewerAction.playbackMode:
+        VideoPlaybackMode nextMode;
+        if (!_playlistController.isPlaylistMode) {
+          nextMode = _videoPlaybackMode == VideoPlaybackMode.loop
+              ? VideoPlaybackMode.playOnce
+              : VideoPlaybackMode.loop;
+        } else {
+          nextMode = switch (_videoPlaybackMode) {
+            VideoPlaybackMode.playOnce => VideoPlaybackMode.loop,
+            VideoPlaybackMode.loop => VideoPlaybackMode.playAndAdvance,
+            VideoPlaybackMode.playAndAdvance => VideoPlaybackMode.playOnce,
+          };
+        }
+        _updatePlaybackMode(nextMode);
+        break;
+      case MediaViewerAction.abLoop:
+        if (!isImage) unawaited(_advanceAbLoop());
+        break;
+      case MediaViewerAction.thumbnailCarousel:
+        if (_enableCarousel && _playlistController.isPlaylistMode) {
+          _toggleCarousel();
+        }
+        break;
+      case MediaViewerAction.rotate90:
+        _startHideTimer();
+        _sessionController.rotateClockwise(_playlistController.currentFile);
+        break;
+      case MediaViewerAction.pictureInPicture:
+        if (!isImage) unawaited(_enterPictureInPictureWindow());
+        break;
+      case MediaViewerAction.lockControls:
+        if (!_isEditingLayout) _setControlsLocked(true);
+        break;
+      case MediaViewerAction.playlistMenu:
+        _showPlaylistOptionsMenu();
+        break;
+      case MediaViewerAction.bookmark:
+        _toggleBookmarkCurrentFile();
+        break;
+      case MediaViewerAction.fileInfo:
+        _showFileInfoHelper(fileIoApi);
+        break;
+      case MediaViewerAction.openWithApp:
+        fileIoApi.openWithApp(
+          widget.container,
+          _playlistController.currentFile,
+        );
+        break;
+      case MediaViewerAction.editImage:
+        _openImageEditor();
+        break;
+      case MediaViewerAction.editVideo:
+        _openVideoEditor();
+        break;
+      case MediaViewerAction.editAudio:
+        _openAudioEditor();
+        break;
+      case MediaViewerAction.rename:
+        _renameCurrentFile();
+        break;
+      case MediaViewerAction.delete:
+        _deleteCurrentFile();
+        break;
+      case MediaViewerAction.diagnostics:
+        _showDiagnostics(context);
+        break;
+      case MediaViewerAction.advancedSettings:
+        _showAdvancedSettings(context, isImage);
+        break;
+      case MediaViewerAction.playbackSpeed:
+        _showAdvancedSettings(context, isImage, initialPage: 'playbackSpeed');
+        break;
+      case MediaViewerAction.imageFit:
+        _showAdvancedSettings(context, isImage, initialPage: 'imageFit');
+        break;
+      case MediaViewerAction.adjustments:
+        _showAdjustmentsSheet(context);
+        break;
+      case MediaViewerAction.aspectRatio:
+        _showAdvancedSettings(context, isImage, initialPage: 'aspectRatio');
+        break;
+      case MediaViewerAction.slideshowDelay:
+        _showAdvancedSettings(context, isImage, initialPage: 'slideshowDelay');
+        break;
+      case MediaViewerAction.subtitles:
+        _showAdvancedSettings(context, isImage, initialPage: 'subtitleTracks');
+        break;
+      case MediaViewerAction.audioTrack:
+        _showAdvancedSettings(context, isImage, initialPage: 'audioTracks');
+        break;
+      case MediaViewerAction.decoder:
+        _showDecoderPicker(context);
+        break;
+      case MediaViewerAction.equalizer:
+        _showEqualizerSheet(context);
+        break;
+      case MediaViewerAction.screenOrientation:
+        _cycleScreenOrientation();
+        break;
+    }
+  }
+
+  /// One press of the A-B repeat button: mark A, then mark B (which starts
+  /// repeating the section), then clear it.
+  Future<void> _advanceAbLoop() async {
+    final controller = _playbackManager.activeController;
+    if (controller == null ||
+        controller.isDisposed ||
+        !controller.value.isInitialized) {
+      return;
+    }
+
+    // The position shown in the UI is up to 200ms stale; ask the player for
+    // the exact one so A and B land where the person pressed.
+    final position =
+        await controller.getExactPosition() ?? controller.value.position;
+    if (!mounted ||
+        controller.isDisposed ||
+        _playbackManager.activeController != controller) {
+      return;
+    }
+
+    // Read after the await above, so a quick second press builds on the
+    // state the first one left rather than on a stale copy.
+    final result = _abLoopNotifier.value.advance(
+      position,
+      controller.value.duration,
+    );
+    final loop = result.state;
+
+    if (result.event == AbLoopEvent.endTooClose) {
+      // The playhead can't be before A (see setAbLoopStart), so this is a
+      // press within a hair of A: nothing to set yet. A tick is enough to
+      // show it registered.
+      unawaited(HapticFeedback.lightImpact());
+      return;
+    }
+
+    final l10n = context.l10n;
+    final message = switch (result.event) {
+      AbLoopEvent.startMarked => l10n.abLoopStartMarkedMessage(
+        formatClockDuration(loop.a!),
+      ),
+      AbLoopEvent.loopStarted => l10n.abLoopStartedMessage(
+        formatClockDuration(loop.a!),
+        formatClockDuration(loop.b!),
+      ),
+      AbLoopEvent.cleared => l10n.abLoopClearedMessage,
+      AbLoopEvent.endTooClose => '', // Returned above.
+    };
+
+    final previous = _abLoopNotifier.value;
+    _abLoopNotifier.value = loop;
+    try {
+      switch (result.event) {
+        case AbLoopEvent.loopStarted:
+          await controller.setAbLoop(loop.a!, loop.b!);
+          // B was marked at the playhead, so go straight back to A: the
+          // section starts repeating now rather than after the rest of the
+          // video has played.
+          await controller.seekTo(loop.a!);
+        case AbLoopEvent.cleared:
+          await controller.clearAbLoop();
+        case AbLoopEvent.startMarked:
+          // From here on nothing before A can be picked.
+          await controller.setAbLoopStart(loop.a!);
+        case AbLoopEvent.endTooClose:
+          break;
+      }
+    } catch (e) {
+      VeLog.w('MediaViewer', 'A-B repeat update failed', e);
+      _abLoopNotifier.value = previous;
+      return;
+    }
+
+    if (!mounted) return;
+    _showAbLoopToast(message);
+  }
+
+  /// Replaces whatever the A-B repeat toast is showing, so quick successive
+  /// presses never queue up or wait for the previous message to go away.
+  void _showAbLoopToast(String message) {
+    _abLoopToastTimer?.cancel();
+    _abLoopToast.value = message;
+    _abLoopToastTimer = Timer(const Duration(milliseconds: 1600), () {
+      _abLoopToast.value = null;
+    });
+  }
+
+  void _toggleCarousel() {
+    HapticFeedback.lightImpact();
+    final next = !_isCarouselVisible;
+    _sessionController.setCarouselVisible(next);
+    if (next) {
+      _menuOpened();
+    } else {
+      _menuClosed();
+    }
+  }
+
+  void _selectFromCarousel(int index) {
+    HapticFeedback.selectionClick();
+    _transitionTo(index, animate: false);
+  }
+
+  void _updatePlaybackMode(VideoPlaybackMode mode, {bool persist = true}) {
+    if (persist) {
+      _playbackModeInteractionRevision++;
+      _startHideTimer();
+      _persistVideoPlaybackMode(mode);
+    }
+    _sessionController.setVideoPlaybackMode(mode);
+    final autoAdvance = (mode == VideoPlaybackMode.playAndAdvance);
+    _sessionController.setAutoAdvance(autoAdvance);
+    if (autoAdvance) {
+      _startSlideshowTimerIfNeeded();
+    } else {
+      _cancelSlideshowTimer();
+    }
+    final controller = _playbackManager.activeController;
+    controller?.setLooping(mode == VideoPlaybackMode.loop);
+  }
+
+  void _persistVideoPlaybackMode(VideoPlaybackMode mode) {
+    final settingsService = ref.read(appSettingsServiceProvider);
+    _playbackModeSaveQueue = _playbackModeSaveQueue
+        .catchError((Object error) {
+          VeLog.w(
+            'MediaViewer',
+            'Could not persist video playback mode',
+            error,
+          );
+        })
+        .then((_) async {
+          final settings = await settingsService.loadSettings();
+          await settingsService.saveSettings(
+            settings.copyWith(videoPlaybackMode: mode),
+          );
+        });
+  }
+
+   void _openCustomizeControls() {
+    _menuOpened();
+    _cancelSlideshowTimer();
+    _playbackManager.pauseActive();
+    setState(() {
+      _isEditingLayout = true;
+    });
+    _updateSwipePhysics();
+  }
+
+  void _showAdvancedSettings(
+    BuildContext context,
+    bool isImage, {
+    String initialPage = 'main',
+  }) {
+    _menuOpened();
+
+    final toolbarSettings = ref.read(fileManagerToolbarSettingsProvider(null));
+    final mediaConfig = _effectiveToolbarConfig(
+      toolbarSettings.config.mediaViewerToolbarConfig,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return AdvancedSettingsSheet(
+          initialPage: initialPage,
+          actions: mediaConfig.advancedSettingsActions,
+          sessionKey: _sessionKey,
+          isMuted: _isMuted,
+          onExecuteAction: _executeMediaAction,
+          onCustomizeControls: _openCustomizeControls,
+          isPlaylistMode: _playlistController.isPlaylistMode,
+          isImage: isImage,
+          currentFileName: _playlistController.currentFile,
+          initialRotation: _rotations[_playlistController.currentFile] ?? 0,
+          initialImageFit: _imageFit,
+          initialSlideshowDelaySeconds: _slideshowDelaySeconds,
+          initialPlaybackSpeed: _playbackSpeed,
+          initialAspectRatioMode: _videoAspectRatioMode,
+          hasSubtitles: _playbackManager.isSubtitleAvailable(
+            _playlistController.currentFile,
+          ),
+          initialSubtitlesEnabled: _subtitlesEnabled,
+          initialSubtitleFontSize: _subtitleFontSize,
+          initialSubtitleVerticalPosition: _subtitleVerticalPosition,
+          videoController: _playbackManager.activeController,
+          onSubtitleFontSizeChanged: (size) {
+            _startHideTimer();
+            _sessionController.setSubtitleFontSize(size);
+          },
+          onSubtitleVerticalPositionChanged: (pos) {
+            _startHideTimer();
+            _sessionController.setSubtitleVerticalPosition(pos);
+          },
+          onRotationChanged: (rot) {
+            _startHideTimer();
+            _sessionController.setRotation(
+              _playlistController.currentFile,
+              rot,
+            );
+          },
+          onImageFitChanged: (fit) {
+            _startHideTimer();
+            _sessionController.setImageFit(fit);
+          },
+          onSlideshowDelayChanged: (delay) {
+            _startHideTimer();
+            _sessionController.setSlideshowDelaySeconds(delay);
+            if (_autoAdvance) {
+              _startSlideshowTimerIfNeeded();
+            }
+          },
+          onPlaybackSpeedChanged: (speed) {
+            _startHideTimer();
+            _sessionController.setPlaybackSpeed(speed);
+          },
+          onAspectRatioModeChanged: (mode) {
+            _startHideTimer();
+            _sessionController.setVideoAspectRatioMode(mode);
+          },
+          onSubtitlesEnabledChanged: (enabled) {
+            _startHideTimer();
+            _sessionController.setSubtitlesEnabled(enabled);
+          },
+        );
+      },
+    ).whenComplete(_menuClosed);
+  }
+
+  /// Shows compact adjustment controls over the live preview, using a side
+  /// panel in landscape and a short bottom sheet in portrait.
+  void _showAdjustmentsSheet(BuildContext context) {
+    _menuOpened();
+    final path = _playlistController.currentFile;
+    final size = MediaQuery.sizeOf(context);
+    final isLandscape = size.width > size.height;
+    final sheet = AdjustmentsSheet(
+      sessionKey: _sessionKey,
+      path: path,
+      showApplyToAll: _playlistController.isPlaylistMode,
+      onInteraction: _startHideTimer,
+      isSidebar: isLandscape,
+    );
+    void onClosed() {
+      // Never leave "hold to compare" stuck if the panel closes mid-press.
+      if (mounted) _sessionController.setCompareOriginal(false);
+      _menuClosed();
+    }
+
+    if (isLandscape) {
+      final panelWidth = (size.width * 0.42).clamp(280.0, 420.0).toDouble();
+      showGeneralDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel: MaterialLocalizations.of(
+          context,
+        ).modalBarrierDismissLabel,
+        barrierColor: Colors.transparent,
+        transitionDuration: MediaViewerConstants.animationDuration,
+        pageBuilder: (context, animation, secondaryAnimation) => SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) => Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Material(
+                elevation: 16,
+                borderRadius: const BorderRadiusDirectional.horizontal(
+                  start: Radius.circular(24),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: SizedBox(
+                  width: panelWidth.clamp(0.0, constraints.maxWidth).toDouble(),
+                  height: constraints.maxHeight,
+                  child: sheet,
+                ),
+              ),
+            ),
+          ),
+        ),
+        transitionBuilder: (context, animation, secondaryAnimation, child) =>
+            SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: Directionality.of(context) == TextDirection.rtl
+                        ? const Offset(-1, 0)
+                        : const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    ),
+                  ),
+              child: child,
+            ),
+      ).whenComplete(onClosed);
+    } else {
+      showModalBottomSheet<void>(
+        context: context,
+        barrierColor: Colors.transparent,
+        showDragHandle: true,
+        isScrollControlled: true,
+        constraints: BoxConstraints(maxHeight: size.height * 0.38),
+        builder: (context) => sheet,
+      ).whenComplete(onClosed);
+    }
+  }
+
+  void _showDiagnostics(BuildContext context) {
+    final controller = _playbackManager.activeController;
+    if (controller == null) return;
+    _menuOpened();
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      barrierDismissible: true,
+      builder: (context) {
+        return MediaDiagnosticsDialog(
+          fileName: _playlistController.currentFile,
+          controller: controller,
+          playbackSpeed: _playbackSpeed,
+        );
+      },
+    ).whenComplete(_menuClosed);
+  }
+
+  void _updateWakelock(bool enable) {
+    if (_wakelockEnabled != enable) {
+      _wakelockEnabled = enable;
+      _fileIoApi.setKeepScreenOn(enable);
+    }
+  }
+
+  void _dismissRouteAfterContainerLock() {
+    // A locked vault must never leave a player behind.
+    _backgroundPlaybackHandoff = null;
+    if (_lockedRouteDismissalScheduled) return;
+    _lockedRouteDismissalScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final route = ModalRoute.of(context);
+      if (route == null || !route.isActive) return;
+      // A media editor may be above this route. The editor handles the same
+      // lock event and removes itself; removing this route too prevents its
+      // locked black placeholder from being left over the dashboard.
+      Navigator.of(context).removeRoute(route);
+    });
+  }
+
+  @override
+  void dispose() {
+    unawaited(_saveActivePlaybackPosition());
+    unawaited(_mediaSessionSubscription!.cancel());
+    _engineEvents.removeUsbContainerDetachedListener(_onContainerDetached);
+    _playlistController.removeListener(_onPlaylistUpdate);
+    if (_lastListenedController != null) {
+      try {
+        _lastListenedController!.removeListener(_onControllerTickUpdate);
+      } catch (_) {
+        // Same as _onActiveVideoControllerChanged() above: safe to ignore,
+        // this controller is being torn down regardless.
+      }
+    }
+    _playbackManager.activeControllerNotifier.removeListener(
+      _onActiveVideoControllerChanged,
+    );
+    _playbackManager.currentFileNotifier.removeListener(
+      _onCurrentMediaFileChanged,
+    );
+    _updateWakelock(false);
+    _prefetchDebounceTimer?.cancel();
+    _cancelSlideshowTimer();
+    _hideTimer?.cancel();
+    _pageController.dispose();
+    _listScrollController.dispose();
+    _continuousZoomAnimationController?.dispose();
+    _floatingCloseGuard?.cancel();
+    _closeFade?.dispose();
+    _expandController?.dispose();
+    // The floating window must not outlive a viewer that never got to end it.
+    BackgroundPlaybackHost.instance.endFloatingExit();
+    _continuousTransformationController.removeListener(
+      _onContinuousTransformationChanged,
+    );
+    _continuousTransformationController.dispose();
+    PictureInPictureCoordinator.instance.detach(this);
+    // Closed with audio playing and "keep audio playing after closing" on:
+    // background playback takes the live player; otherwise it is released as
+    // always.
+    final handoff = _backgroundPlaybackHandoff;
+    _backgroundPlaybackHandoff = null;
+    final handedOff =
+        handoff != null && BackgroundPlaybackHost.instance.adopt(handoff);
+    // The window that flew out of this viewer is now the session's (or, if
+    // nothing was adopted, it has nothing left to show).
+    BackgroundPlaybackHost.instance.endFloatingEntry();
+    if (!handedOff) {
+      PlaybackThrottleController.setActive(false);
+      _playbackManager.dispose();
+    }
+    BackgroundPlaybackHost.instance.unregisterViewer();
+    _swipePhysicsNotifier.dispose();
+    _swipeDismissProgress.dispose();
+    _floatingClose.dispose();
+    _openReveal.dispose();
+    _expandFlight.dispose();
+    _lockNudge.dispose();
+    _videoProgressNotifier.dispose();
+    _abLoopNotifier.dispose();
+    _abLoopToastTimer?.cancel();
+    _abLoopToast.dispose();
+    _scrubPreviewHost.dispose();
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+    // Best-effort: don't let a brightness edge-swipe made in this viewer
+    // leak into the rest of the app once the person leaves it. Fire-and-
+    // forget since the screen is already tearing down.
+    unawaited(ScreenBrightnessBridge.clearOverride());
+    super.dispose();
+  }
+
+  Widget _buildMediaItem(int index) {
+    final fileName = _playlistController.playlist[index];
+    final contentUriString = _contentUriFor(fileName);
+    final prefetchedBytes = _prefetchedBytesFor(fileName);
+    if (!widget._isPreviewOnly && prefetchedBytes == null) {
+      unawaited(_prefetchController.prefetchThumbnail(fileName));
+    }
+    final isImg = MediaViewerConstants.isImage(fileName);
+    final isAudio = MediaViewerConstants.isAudio(fileName);
+    // Keep the zoom pill above the bottom controls while they are visible.
+    // The controls reserve the device safe-area inset at the bottom.
+    final zoomIndicatorBottomOffset = !_showUI
+        ? 16.0
+        : MediaQuery.paddingOf(context).bottom +
+              (isImg
+                  ? MediaViewerConstants.zoomIndicatorImageControlsClearance
+                  : MediaViewerConstants.zoomIndicatorVideoControlsClearance) +
+              (_enableCarousel && _isCarouselVisible
+                  ? PlaylistCarouselOverlay.height
+                  : 0.0);
+    final gestureConfig = ref
+        .read(fileManagerToolbarSettingsProvider(null))
+        .config
+        .mediaViewerToolbarConfig;
+    void onItemZoomChanged(bool allowSwipe) {
+      // PageView keeps neighboring items alive. Their zoom callbacks must not
+      // change whether the item currently on screen can be dismissed.
+      if (fileName != _playlistController.currentFile) return;
+      _onZoomInteractionChanged(allowSwipe);
+    }
+    final itemWidget = ValueListenableBuilder<double>(
+      valueListenable: _swipeDismissProgress,
+      child: Container(
+        color: Colors.transparent,
+        child: isImg
+          ? ImagePageItem(
+              key: ValueKey(
+                'image_${fileName}_${_imageReloadEpoch[fileName] ?? 0}',
+              ),
+              fileName: fileName,
+              prefetchedBytes: prefetchedBytes,
+              container: widget.container,
+              imageFit: _scrollMode.isContinuous ? BoxFit.contain : _imageFit,
+              rotationQuarterTurns: _rotations[fileName] ?? 0,
+              adjustments: _adjustmentsFor(fileName),
+              showUI: _showUI,
+              dismissProgress: _swipeDismissProgress,
+              zoomIndicatorBottomOffset: zoomIndicatorBottomOffset,
+              tapEdgesToNavigate: gestureConfig.tapEdgesToNavigate,
+              enableZoom: !_scrollMode.isContinuous,
+              pinchZoomOutEnabled: gestureConfig.pinchZoomOutEnabled,
+              minZoomScale: gestureConfig.minVideoZoomScale,
+              onToggleUI: _setUIVisibility,
+              onZoomChanged: onItemZoomChanged,
+              thumbnailQuality: widget.thumbnailQuality,
+              thumbnailCacheMode: widget.thumbnailCacheMode,
+              edgeSwipeBrightnessEnabled:
+                  gestureConfig.edgeSwipeBrightnessEnabled,
+              edgeSwipeHudEnabled: gestureConfig.edgeSwipeHudEnabled,
+              edgeSwipeWidthFraction: gestureConfig.edgeSwipeWidthFraction,
+              isActive: _playlistController.currentFile == fileName,
+              onSizeKnown: (w, h) {
+                if (_scrollMode.isContinuous) {
+                  _scheduleGeometryRebuild();
+                }
+              },
+              onError: () => _handleMediaError(fileName),
+            )
+          : MediaPlayerWidget(
+              key: ValueKey('player_$fileName'),
+              container: widget.container,
+              fileName: fileName,
+              contentUriString: contentUriString,
+              playbackManager: _playbackManager,
+              posterBytes: prefetchedBytes,
+              thumbnailQuality: widget.thumbnailQuality,
+              thumbnailCacheMode: widget.thumbnailCacheMode,
+              thumbnailGenerationStrategy:
+                  gestureConfig.thumbnailGenerationStrategy,
+              showUI: _showUI,
+              dismissProgress: _swipeDismissProgress,
+              tapEdgesToNavigate: gestureConfig.tapEdgesToNavigate,
+              doubleTapPlayPause: gestureConfig.doubleTapPlayPause,
+              zoomIndicatorBottomOffset: zoomIndicatorBottomOffset,
+              enableZoom: !_scrollMode.isContinuous,
+              onToggleUI: _setUIVisibility,
+              // 0 turns double-tap skipping off.
+              skipSeconds: gestureConfig.doubleTapSkipEnabled
+                  ? gestureConfig.doubleTapSkipSeconds
+                  : 0,
+              isAudio: isAudio,
+              subtitlesEnabled: _subtitlesEnabled,
+              subtitleFontSize: _subtitleFontSize,
+              subtitleVerticalPosition: _subtitleVerticalPosition,
+              onSubtitleVerticalPositionChanged: (pos) {
+                _sessionController.setSubtitleVerticalPosition(pos);
+              },
+              playbackSpeed: _playbackSpeed,
+              rotationQuarterTurns: _rotations[fileName] ?? 0,
+              adjustments: _adjustmentsFor(fileName),
+              videoAspectRatioMode: _videoAspectRatioMode,
+              // Only the video that is showing says where it is: the PiP
+              // transition animates from that rectangle.
+              onVideoRectChanged:
+                  !isAudio && fileName == _playlistController.currentFile
+                  ? (rect, devicePixelRatio) => PictureInPictureCoordinator
+                        .instance
+                        .setSourceRect(
+                          this,
+                          rect,
+                          devicePixelRatio: devicePixelRatio,
+                        )
+                  : null,
+              videoFrameProbe:
+                  !isAudio && fileName == _playlistController.currentFile
+                  ? _videoProbe
+                  : null,
+              isMuted: _isMuted,
+              onMuteChanged: (muted) {
+                if (_isMuted != muted) {
+                  _sessionController.setIsMuted(muted);
+                  _playbackManager.activeController?.setVolume(muted ? 0 : 100);
+                  ref.read(appSettingsServiceProvider).loadSettings().then((
+                    appSettings,
+                  ) {
+                    ref
+                        .read(appSettingsServiceProvider)
+                        .saveSettings(appSettings.copyWith(videoMuted: muted));
+                  });
+                }
+              },
+              edgeSwipeBrightnessEnabled:
+                  gestureConfig.edgeSwipeBrightnessEnabled,
+              edgeSwipeVolumeEnabled: gestureConfig.edgeSwipeVolumeEnabled,
+              edgeSwipeHudEnabled: gestureConfig.edgeSwipeHudEnabled,
+              edgeSwipeWidthFraction: gestureConfig.edgeSwipeWidthFraction,
+              pinchZoomOutEnabled: gestureConfig.pinchZoomOutEnabled,
+              minVideoZoomScale: gestureConfig.minVideoZoomScale,
+              holdToSpeedMultiplier: gestureConfig.holdToSpeedMultiplier,
+              swipeToSeekEnabled:
+                  !_playlistController.isPlaylistMode ||
+                  gestureConfig.swipeToSeekEnabled,
+              seekSensitivity: gestureConfig.seekSensitivity,
+              volumeGestureSensitivity: gestureConfig.volumeGestureSensitivity,
+              brightnessGestureSensitivity:
+                  gestureConfig.brightnessGestureSensitivity,
+              volumeBoostEnabled: gestureConfig.volumeBoostEnabled,
+              volumeBoostGainMb: gestureConfig.volumeBoostGainMb,
+              videoDecoderMode: gestureConfig.videoDecoderMode,
+              audioDecoderMode: gestureConfig.audioDecoderMode,
+              progressNotifier: _videoProgressNotifier,
+              onSubtitlesAvailableChanged: (val) {
+                _playbackManager.updateSubtitleStatus(fileName, val);
+                if (fileName == _playlistController.currentFile) {
+                  setState(() {});
+                }
+              },
+              onSizeKnown: (w, h) {
+                if (_scrollMode.isContinuous) {
+                  _scheduleGeometryRebuild();
+                }
+              },
+              onZoomChanged: onItemZoomChanged,
+              onError: () => _handleMediaError(fileName),
+            ),
+      ),
+      builder: (context, progress, media) {
+        final backgroundAlpha = (1.0 - progress).clamp(0.0, 1.0).toDouble();
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: ValueListenableBuilder<double>(
+                valueListenable: _openReveal,
+                builder: (context, reveal, _) => ColoredBox(
+                  color: Colors.black.withValues(
+                    alpha: backgroundAlpha * reveal,
+                  ),
+                ),
+              ),
+            ),
+            // While the floating window flies out of the video, this copy of
+            // it must not be drawn as well: it would hang about where the
+            // video was, fading, as the window leaves. And when the viewer was
+            // opened from the floating window, the item on screen grows out of
+            // it (see _runExpandFlight).
+            ValueListenableBuilder<_FloatingClose>(
+              valueListenable: _floatingClose,
+              child: fileName == _playlistController.currentFile
+                  ? _expandFlightLayer(media!)
+                  : media,
+              builder: (context, closing, child) => Opacity(
+                opacity: closing == _FloatingClose.flying ? 0.0 : 1.0,
+                child: child,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Only the currently active item should have its Hero enabled.
+    // ListenableBuilder ensures HeroMode updates immediately on swipe
+    // without rebuilding the heavy media widgets.
+    //
+    // Also off for a close that hands the video to the floating player: the
+    // Hero would fly the poster back to the file manager's thumbnail, when the
+    // video is going to the floating window instead.
+    final heroGatedWidget = ListenableBuilder(
+      listenable: Listenable.merge(<Listenable>[
+        _playlistController,
+        _floatingClose,
+      ]),
+      builder: (context, child) {
+        final isCurrent = _playlistController.currentIndex == index;
+        final closingToFloatingPlayer =
+            _floatingClose.value != _FloatingClose.none;
+        return HeroMode(
+          enabled: isCurrent && !closingToFloatingPlayer,
+          child: child!,
+        );
+      },
+      child: itemWidget,
+    );
+
+    if (_scrollMode.isContinuous) {
+      return heroGatedWidget;
+    }
+    return PlaylistTransitionTransformer(
+      pageController: _pageController,
+      index: index,
+      effect: _transitionEffect,
+      scrollDirection: _scrollMode.axis,
+      child: heroGatedWidget,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(mediaViewerSessionProvider(_sessionKey));
+    ref.watch(fileBrowserPinsBookmarksProvider(widget.container.volId));
+    final toolbarSettings = ref.watch(fileManagerToolbarSettingsProvider(null));
+    final mediaViewerConfig = _effectiveToolbarConfig(
+      toolbarSettings.config.mediaViewerToolbarConfig,
+    );
+    ref.listen<FileManagerToolbarSettingsState>(
+      fileManagerToolbarSettingsProvider(null),
+      (previous, next) {
+        if (previous?.config.mediaViewerToolbarConfig.swipeToSeekEnabled !=
+            next.config.mediaViewerToolbarConfig.swipeToSeekEnabled) {
+          _updateSwipePhysics();
+        }
+        if (previous?.config.mediaViewerToolbarConfig.pictureInPictureEnabled !=
+            next.config.mediaViewerToolbarConfig.pictureInPictureEnabled) {
+          _syncPictureInPicture();
+        }
+        if (previous?.config.showMediaCarousel !=
+            next.config.showMediaCarousel) {
+          _sessionController.setEnableCarousel(next.config.showMediaCarousel);
+          if (!next.config.showMediaCarousel) {
+            _sessionController.setCarouselVisible(false);
+          }
+        }
+      },
+    );
+    ref.listen<MediaViewerSessionState>(
+      mediaViewerSessionProvider(_sessionKey),
+      (previous, next) {
+        if (previous?.scrollMode != next.scrollMode) {
+          _updateSwipePhysics();
+        }
+      },
+    );
+    final isContainerLocked = ref.watch(
+      mediaViewerLockProvider(widget.container.volId),
+    );
+    if (isContainerLocked) {
+      _dismissRouteAfterContainerLock();
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: SizedBox.expand(),
+      );
+    }
+    final cs = Theme.of(context).colorScheme;
+    if (_playlistController.isEmpty) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(cs.primary),
+          ),
+        ),
+      );
+    }
+
+    return PopScope(
+      // Always intercepted: the only things that reach this callback with
+      // didPop == false are the person's own back presses (maybePop), which
+      // is how a deliberate close is told apart from one the app forces with
+      // pop / popUntil / removeRoute (app lock, locked container, ...).
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        // A back press is as likely a misstap as any other touch: it only
+        // points at the lock button.
+        if (_controlsLocked) {
+          _lockNudge.value++;
+          return;
+        }
+        if (_isEditingLayout) {
+          setState(() => _isEditingLayout = false);
+          _updateSwipePhysics();
+          _menuClosed();
+          _startHideTimer();
+          return;
+        }
+        unawaited(_closeFromBackPress());
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: AppSystemUI.transparentDark,
+        // The black behind the viewer fades out while a swipe-to-dismiss drag
+        // pulls the image away, showing the screen underneath.
+        child: ListenableBuilder(
+          listenable: Listenable.merge(<Listenable>[
+            _swipeDismissProgress,
+            _openReveal,
+          ]),
+          builder: (context, scaffold) {
+            final fades = ModalRoute.of(context)?.opaque == false;
+            final shown = (1.0 - _swipeDismissProgress.value) *
+                _openReveal.value;
+            return ColoredBox(
+              color: fades
+                  ? Colors.black.withValues(alpha: shown.clamp(0.0, 1.0))
+                  : Colors.black,
+              child: scaffold,
+            );
+          },
+          child: Scaffold(
+        backgroundColor: Colors.transparent,
+        extendBody: true, // Draws content under bottom navigation bar
+        extendBodyBehindAppBar: true,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final newWidth = constraints.maxWidth;
+            final newHeight = constraints.maxHeight;
+            final bool dimsChanged =
+                (_viewportWidth > 0 && _viewportHeight > 0) &&
+                (newWidth != _viewportWidth || newHeight != _viewportHeight);
+
+            if (dimsChanged) {
+              _viewportWidth = newWidth;
+              _viewportHeight = newHeight;
+              if (_scrollMode.isContinuous) {
+                final viewportIndex = _playlistController.currentIndex;
+                if (_listScrollController.hasClients &&
+                    _listScrollController.positions.length == 1) {
+                  final correctionToken = ++_viewportCorrectionToken;
+                  _isProgrammaticScrolling = true;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted ||
+                        correctionToken != _viewportCorrectionToken) {
+                      return;
+                    }
+                    if (_listScrollController.hasClients &&
+                        _listScrollController.positions.length == 1) {
+                      _listScrollController.jumpTo(
+                        _geometry.offsetForIndex(
+                          viewportIndex,
+                          _viewportWidth,
+                          _viewportHeight,
+                        ),
+                      );
+                    }
+                    _isProgrammaticScrolling = false;
+                  });
+                }
+              } else {
+                if (_pageController.hasClients &&
+                    _pageController.positions.length == 1) {
+                  _pageController.jumpToPage(_playlistController.currentIndex);
+                }
+              }
+            } else {
+              final isFirstLayout =
+                  _viewportWidth == 0.0 && _viewportHeight == 0.0;
+              _viewportWidth = newWidth;
+              _viewportHeight = newHeight;
+              if (isFirstLayout &&
+                  _scrollMode.isContinuous &&
+                  _playlistController.currentIndex > 0) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _scrollToCurrentIndex(animate: false);
+                });
+              }
+            }
+
+            // Preserve the scrollable when system bars or orientation change
+            // the viewport size. Remounting it here resets its offset to zero.
+            final builderKey = ValueKey(
+              '${_playlistController.isPlaylistMode}_'
+              '${_playlistController.selectedFolder}_'
+              '${_playlistController.isShuffled}_'
+              '${_scrollMode}',
+            );
+
+            // Builds the actual scrollable (PageView or continuous ListView)
+            // for a given physics value. Constructing it fresh here — inside
+            // the ValueListenableBuilder below — is what makes swipe-locking
+            // actually take effect: a widget built once and reused with a
+            // stale `physics:` snapshot never reflects a later change to
+            // the notifier, since ScrollPhysics is a constructor parameter,
+            // not something PageView/ListView re-reads on its own.
+            Widget buildMainScrollView(ScrollPhysics physics) {
+              if (_scrollMode.isContinuous) {
+                final listWidget = ListView.builder(
+                  key: builderKey,
+                  controller: _listScrollController,
+                  scrollDirection: Axis.vertical,
+                  physics: physics,
+                  itemExtentBuilder: (index, _) => _getItemExtent(
+                    index,
+                    constraints.maxWidth,
+                    constraints.maxHeight,
+                  ),
+                  padding: _geometry.continuousListPadding(
+                    constraints.maxWidth,
+                    constraints.maxHeight,
+                  ),
+                  itemCount: _playlistController.playlist.length,
+                  itemBuilder: (context, index) {
+                    final itemHeight = _getItemExtent(
+                      index,
+                      constraints.maxWidth,
+                      constraints.maxHeight,
+                    );
+                    return SizedBox(
+                      height: itemHeight,
+                      width: constraints.maxWidth,
+                      child: _buildMediaItem(index),
+                    );
+                  },
+                );
+
+                // Only registered while the list is transformed, so a plain
+                // tap at 1x isn't held back waiting to rule out a double tap.
+                final zoomed = !_continuousTransformationController.value
+                    .isIdentity();
+                final listCanScroll = physics is! NeverScrollableScrollPhysics;
+
+                final effectiveMinScale = mediaViewerConfig.pinchZoomOutEnabled
+                    ? mediaViewerConfig.minVideoZoomScale.clamp(
+                        MediaViewerConstants.minVideoZoomFloor,
+                        1.0,
+                      )
+                    : 1.0;
+
+                final continuousView = InteractiveViewer(
+                  transformationController: _continuousTransformationController,
+                  minScale: effectiveMinScale,
+                  maxScale: MediaViewerConstants.maxImageZoom,
+                  interactionEndFrictionCoefficient: 0.0005,
+                  boundaryMargin: mediaViewerConfig.pinchZoomOutEnabled
+                      ? const EdgeInsets.all(double.infinity)
+                      : EdgeInsets.zero,
+                  clipBehavior: Clip.none,
+                  // Only allow 1-finger panning when zoomed in; keep centered when zoomed out
+                  panEnabled: _continuousScale > 1.01,
+                  // Free 360° panning in all directions
+                  panAxis: PanAxis.free,
+                  onInteractionStart: (details) {
+                    if (details.pointerCount >= 2) {
+                      _continuousZoomAnimationController?.stop();
+                      _onZoomInteractionChanged(false);
+                    }
+                  },
+                  onInteractionUpdate: (details) {
+                    final s = _getMatrixScale(
+                      _continuousTransformationController.value,
+                    );
+                    if (s != _continuousScale) {
+                      _continuousScale = s;
+                    }
+                  },
+                  onInteractionEnd: (details) {
+                    final s = _getMatrixScale(
+                      _continuousTransformationController.value,
+                    );
+                    final clampedS = s.clamp(
+                      effectiveMinScale,
+                      MediaViewerConstants.maxImageZoom,
+                    );
+                    final vw = constraints.maxWidth;
+                    final vh = constraints.maxHeight;
+
+                    if (clampedS < 1.0 && vw > 0 && vh > 0) {
+                      // Keep continuous view centered horizontally and vertically when zoomed out
+                      final dx = vw * (1.0 - clampedS) / 2.0;
+                      final dy = vh * (1.0 - clampedS) / 2.0;
+                      _isClampingContinuous = true;
+                      _continuousTransformationController.value =
+                          Matrix4.identity()
+                            ..setTranslationRaw(dx, dy, 0.0)
+                            ..scale(clampedS, clampedS, clampedS);
+                      _isClampingContinuous = false;
+                    }
+
+                    _continuousScale = _getMatrixScale(
+                      _continuousTransformationController.value,
+                    );
+                    _onZoomInteractionChanged(true);
+                    if (mounted) setState(() {});
+                  },
+                  child: listWidget,
+                );
+
+                return GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onDoubleTapDown: (details) =>
+                      _continuousDoubleTapDetails = details,
+                  onDoubleTap: () =>
+                      _handleContinuousDoubleTap(_continuousDoubleTapDetails),
+                  child: continuousView,
+                );
+              }
+
+              return PageView.builder(
+                key: builderKey,
+                controller: _pageController,
+                scrollDirection: _scrollMode.axis,
+                physics: physics,
+                itemCount: _playlistController.playlist.length,
+                onPageChanged: (index) {
+                  if (_playlistController.currentIndex != index) {
+                    _playlistController.updateIndex(index);
+                    unawaited(_activateCurrentMedia());
+                  }
+                  _scheduleSurroundingPrefetch();
+                },
+                itemBuilder: (context, index) {
+                  return _buildMediaItem(index);
+                },
+              );
+            }
+
+            Widget fadeDuringDismiss(Widget child) => ListenableBuilder(
+              listenable: Listenable.merge(<Listenable>[
+                _swipeDismissProgress,
+                _openReveal,
+              ]),
+              child: child,
+              builder: (context, child) {
+                // Fades out with a swipe, and in as the viewer opens out of
+                // the floating window.
+                final visible =
+                    ((1.0 - _swipeDismissProgress.value) * _openReveal.value)
+                        .clamp(0.0, 1.0)
+                        .toDouble();
+                return IgnorePointer(
+                  ignoring: visible <= 0.01,
+                  child: Opacity(opacity: visible, child: child),
+                );
+              },
+            );
+
+            final swipeDismissAxis = _swipeDismissAxis;
+            return MediaSwipeDismissLayer(
+              enabled:
+                  mediaViewerConfig.swipeToDismissEnabled &&
+                  !_isEditingLayout &&
+                  !_controlsLocked,
+              axis: swipeDismissAxis,
+              bothDirections: true,
+              canStart: _canStartSwipeDismiss,
+              onDismiss: _closeViewerFromSwipe,
+              progress: _swipeDismissProgress,
+              transformChild: false,
+              child: Stack(
+              children: [
+                Listener(
+                  behavior: HitTestBehavior.translucent,
+                  onPointerDown: _handleTouchPointerDown,
+                  onPointerMove: _handleTouchPointerMove,
+                  onPointerUp: _handleTouchPointerUp,
+                  onPointerCancel: _handleTouchPointerUp,
+                  child: ValueListenableBuilder<ScrollPhysics>(
+                    valueListenable: _swipePhysicsNotifier,
+                    builder: (context, physics, child) {
+                      return NotificationListener<ScrollNotification>(
+                        onNotification: (ScrollNotification notification) {
+                          if (notification.depth == 0) {
+                            if (_isProgrammaticScrolling) {
+                              return false;
+                            }
+                            if (notification is ScrollStartNotification &&
+                                notification.dragDetails != null) {
+                              _onScrollStart();
+                            } else if (notification
+                                is ScrollUpdateNotification) {
+                              if (_scrollMode.isContinuous &&
+                                  _viewportHeight > 0 &&
+                                  _listScrollController.hasClients) {
+                                final offset = _listScrollController.offset;
+                                final shift = _continuousVisibleCenterShift();
+                                double customHeight(int i) => _getItemExtent(
+                                  i,
+                                  _viewportWidth,
+                                  _viewportHeight,
+                                );
+                                final newIndex = _geometry.indexForOffset(
+                                  offset + shift,
+                                  _viewportWidth,
+                                  _viewportHeight,
+                                  customHeight,
+                                );
+
+                                if (_playlistController.currentIndex !=
+                                    newIndex) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    if (mounted &&
+                                        !_isProgrammaticScrolling &&
+                                        _playlistController.currentIndex !=
+                                            newIndex) {
+                                      _playlistController.updateIndex(newIndex);
+                                      unawaited(_activateCurrentMedia());
+                                    }
+                                  });
+                                }
+                              }
+                            } else if (notification is ScrollEndNotification) {
+                              _onScrollEnd();
+                            }
+                          }
+                          return false;
+                        },
+                        child: PlaylistSwipeScope(
+                          drag: _playlistSwipeDrag,
+                          axis: _scrollMode.axis,
+                          enabled: !_scrollMode.isContinuous,
+                          child: buildMainScrollView(physics),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+               // Fullscreen scrub preview: above the media, below the
+                // chrome, so the seekbar stays visible while dragging.
+                // Not built at all in mini-box mode or during layout editing.
+                if (!_isEditingLayout &&
+                    mediaViewerConfig.scrubPreviewStyle ==
+                        ScrubPreviewStyle.fullscreen)
+                  Positioned.fill(
+                    child: fadeDuringDismiss(
+                      VideoScrubFullscreenLayer(
+                        previewHost: _scrubPreviewHost,
+                        progress: _videoProgressNotifier,
+                        rotationQuarterTurns:
+                            _rotations[_playlistController.currentFile] ?? 0,
+                        adjustments: _adjustmentsFor(
+                          _playlistController.currentFile,
+                        ),
+                      ),
+                    ),
+                  ),
+                // A-B repeat feedback. Mid-screen and pointer-transparent so
+                // it can never cover or block the button that triggered it.
+                if (!_isEditingLayout)
+                  Positioned.fill(
+                    child: fadeDuringDismiss(
+                      AbLoopToast(data: _abLoopToast),
+                    ),
+                  ),
+
+                if (_isEditingLayout)
+                  Positioned.fill(
+                    child: MediaViewerInPlaceLayoutEditor(
+                      toolbarConfig: mediaViewerConfig,
+                      containerUri: widget.container.isLocalStorage
+                          ? null
+                          : widget.container.uri,
+                      isImage: MediaViewerConstants.isImage(
+                        _playlistController.currentFile,
+                      ),
+                      isAudio: MediaViewerConstants.isAudio(
+                        _playlistController.currentFile,
+                      ),
+                      isPlaylistMode: _playlistController.isPlaylistMode,
+                      onConfigChanged: (updated) {
+                        unawaited(
+                          ref
+                              .read(
+                                fileManagerToolbarSettingsProvider(null).notifier,
+                              )
+                              .updateMediaViewerConfig(updated),
+                        );
+                      },
+                      onDone: () {
+                        setState(() => _isEditingLayout = false);
+                        _updateSwipePhysics();
+                        _menuClosed();
+                        _startHideTimer();
+                      },
+                      onOpenSettings: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SkinAreaScope(
+                              area: SkinArea.settings,
+                              child: const MediaViewerToolbarSettingsScreen(),
+                            ),
+                          ),
+                        );
+                      },
+                      onResetToDefaults: () async {
+                        final controller = ref.read(
+                          fileManagerToolbarSettingsProvider(null).notifier,
+                        );
+                        await controller.resetMediaViewerConfigToDefaults();
+                        if (mounted) {
+                          showAppSnackBar(
+                            context,
+                            message: context.l10n.mediaControlsResetSuccess,
+                            tone: AppBannerTone.success,
+                          );
+                        }
+                      },
+                    ),
+                  )
+                else ...[
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    // Slide by the bar's own height rather than a fixed offset:
+                    // its height is status-bar/cutout inset + content, so it
+                    // grows with display size and font scale, and a hard-coded
+                    // value left part of it visible when hidden.
+                    child: fadeDuringDismiss(
+                      RepaintBoundary(
+                      child: AnimatedSlide(
+                        duration: MediaViewerConstants.animationDuration,
+                        curve: Curves.easeOutCubic,
+                        offset: _showUI ? Offset.zero : const Offset(0, -1),
+                        child: ListenableBuilder(
+                          listenable: _playlistController,
+                          builder: (context, _) => MediaViewerTopBar(
+                            playlistController: _playlistController,
+                            currentFileName: _playlistController.currentFile,
+                            totalCount: _playlistController.playlist.length,
+                            toolbarConfig: mediaViewerConfig,
+                            currentTransitionEffect: _transitionEffect,
+                            onTransitionEffectChanged: (newEffect) async {
+                              _sessionController.setTransitionEffect(newEffect);
+                              final toolbarService = ref.read(
+                                fileManagerToolbarServiceProvider,
+                              );
+                              final config = await toolbarService.load();
+                              await toolbarService.save(
+                                config.copyWith(
+                                  playlistTransitionEffect: newEffect,
+                                ),
+                              );
+                            },
+                            currentScrollMode: _scrollMode,
+                            onScrollModeChanged: (newMode) async {
+                              _sessionController.setScrollMode(newMode);
+                              final appSettingsService = ref.read(
+                                appSettingsServiceProvider,
+                              );
+                              final appSettings = await appSettingsService
+                                  .loadSettings();
+                              await appSettingsService.saveSettings(
+                                appSettings.copyWith(
+                                  playlistScrollMode: newMode,
+                                ),
+                              );
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted)
+                                  _scrollToCurrentIndex(animate: false);
+                              });
+                            },
+                            isMuted: _isMuted,
+                            onExecuteAction: _executeMediaAction,
+                            onCustomizeControls: _openCustomizeControls,
+                            isBookmark: _isCurrentFileBookmark,
+                            onPlaylistChanged: _onPlaylistChanged,
+                            onMenuOpened: _menuOpened,
+                            onMenuClosed: _menuClosed,
+                            isImage: MediaViewerConstants.isImage(
+                              _playlistController.currentFile,
+                            ),
+                            isAudio: MediaViewerConstants.isAudio(
+                              _playlistController.currentFile,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: fadeDuringDismiss(
+                      RepaintBoundary(
+                      child: AnimatedSlide(
+                        duration: MediaViewerConstants.animationDuration,
+                        curve: Curves.easeOutCubic,
+                        offset: _showUI ? Offset.zero : const Offset(0, 1),
+                        child: ListenableBuilder(
+                          listenable: _playlistController,
+                          builder: (context, _) {
+                            final isImg = MediaViewerConstants.isImage(
+                              _playlistController.currentFile,
+                            );
+                            final showCarousel =
+                                _enableCarousel && _isCarouselVisible && _showUI;
+
+                            return Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [
+                                    Colors.black.withValues(alpha: 0.85),
+                                    Colors.black.withValues(alpha: 0.35),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Docked filmstrip carousel expands/collapses smoothly above controls
+                                  AnimatedSwitcher(
+                                    duration:
+                                        MediaViewerConstants.animationDuration,
+                                    reverseDuration:
+                                        MediaViewerConstants.animationDuration,
+                                    switchInCurve: Curves.easeOutCubic,
+                                    switchOutCurve: Curves.easeInCubic,
+                                    transitionBuilder: (child, animation) {
+                                      final slide = animation.drive(
+                                        Tween<Offset>(
+                                          begin: const Offset(0, 0.12),
+                                          end: Offset.zero,
+                                        ),
+                                      );
+                                      return SizeTransition(
+                                        sizeFactor: animation,
+                                        axisAlignment: 1.0,
+                                        child: FadeTransition(
+                                          opacity: animation,
+                                          child: SlideTransition(
+                                            position: slide,
+                                            child: child,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: showCarousel
+                                        ? PlaylistCarouselOverlay(
+                                            key: const ValueKey(
+                                              'playlist-carousel-visible',
+                                            ),
+                                            container: widget.container,
+                                            playlist:
+                                                _playlistController.playlist,
+                                            currentIndex:
+                                                _playlistController.currentIndex,
+                                            thumbnailQuality:
+                                                widget.thumbnailQuality,
+                                            thumbnailCacheMode:
+                                                widget.thumbnailCacheMode,
+                                            onSelect: _selectFromCarousel,
+                                            onClose: _toggleCarousel,
+                                          )
+                                        : const SizedBox.shrink(
+                                            key: ValueKey(
+                                              'playlist-carousel-hidden',
+                                            ),
+                                          ),
+                                  ),
+                                  MediaViewerBottomControls(
+                                    playlistController: _playlistController,
+                                    playbackManager: _playbackManager,
+                                    videoProgressNotifier:
+                                        _videoProgressNotifier,
+                                    abLoopNotifier: _abLoopNotifier,
+                                    scrubPreviewHost: _scrubPreviewHost,
+                                    toolbarConfig: mediaViewerConfig,
+                                    isImage: isImg,
+                                    isAudio: MediaViewerConstants.isAudio(
+                                      _playlistController.currentFile,
+                                    ),
+                                    showUI: _showUI,
+                                    isPlaylistMode:
+                                        _playlistController.isPlaylistMode,
+                                    autoAdvance: _autoAdvance,
+                                    slideshowDelaySeconds:
+                                        _slideshowDelaySeconds,
+                                    isMuted: _isMuted,
+                                    videoPlaybackMode: _videoPlaybackMode,
+                                    screenOrientationIcon:
+                                        _screenOrientationIcon(),
+                                    onExecuteAction: _executeMediaAction,
+                                    onStartHideTimer: _startHideTimer,
+                                    onShowUIChanged: _setUIVisibility,
+                                    isCarouselVisible: _isCarouselVisible,
+                                    onMenuOpened: _menuOpened,
+                                    onMenuClosed: _menuClosed,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      ),
+                    ),
+                  ),
+                ],
+                // Topmost, so it also covers the top and bottom bars.
+                if (_controlsLocked)
+                  Positioned.fill(
+                    child: MediaViewerLockOverlay(
+                      nudge: _lockNudge,
+                      onUnlock: () => _setControlsLocked(false),
+                    ),
+                  ),
+              ],
+            ),
+            );
+          },
+        ),
+      ),
+      ),
+    ),
+  );
+  }
+}

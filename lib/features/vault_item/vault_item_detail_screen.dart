@@ -1,0 +1,395 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/models/vault_item.dart';
+import 'package:vaultexplorer/core/utils/file_type_utils.dart';
+import 'package:vaultexplorer/core/theme/app_theme.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/core/utils/sensitive_clipboard.dart';
+import 'package:vaultexplorer/features/vault_item/vault_item_detail_controller.dart';
+import 'package:vaultexplorer/features/vault_item/vault_item_edit_screen.dart';
+
+class VaultItemDetailScreen extends ConsumerWidget {
+  final MountedContainer container;
+  final VaultItem item;
+  final String filePath;
+  const VaultItemDetailScreen({
+    super.key,
+    required this.container,
+    required this.item,
+    required this.filePath,
+  });
+
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref,
+    VaultItemDetailState state,
+  ) async {
+    final confirm = await showAppConfirmDialog(
+      context,
+      title: context.l10n.deleteItemTitle,
+      message: context.l10n.deleteItemMessage(state.item.title),
+      confirmLabel: context.l10n.delete,
+      isDestructive: true,
+    );
+    if (!confirm) return;
+    await ref
+        .read(vaultItemDetailProvider(container.volId, filePath, item).notifier)
+        .delete(container);
+    if (context.mounted) Navigator.pop(context, true);
+  }
+
+  Future<void> _edit(
+    BuildContext context,
+    WidgetRef ref,
+    VaultItemDetailState state,
+  ) async {
+    final resultPath = await Navigator.push<String?>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VaultItemEditScreen(
+          container: container,
+          type: state.item.type,
+          existing: state.item,
+          filePath: state.filePath,
+          currentDirPath: '',
+        ),
+      ),
+    );
+    if (resultPath != null) {
+      await ref
+          .read(
+            vaultItemDetailProvider(container.volId, filePath, item).notifier,
+          )
+          .reloadAfterEdit(container, resultPath);
+    }
+  }
+
+  Future<void> _copy(
+    BuildContext context,
+    WidgetRef ref,
+    String label,
+    String value,
+  ) async {
+    await ref.read(sensitiveClipboardProvider).copy(value);
+    if (!context.mounted) return;
+    showAppSnackBar(
+      context,
+      message: context.l10n.labelCopiedToClipboard(label),
+      tone: AppBannerTone.success,
+    );
+  }
+
+  String _formatDate(BuildContext context, DateTime dt) {
+    return DateFormat('MMM d, y  HH:mm', context.l10n.localeName).format(dt);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(
+      vaultItemDetailProvider(container.volId, filePath, item),
+    );
+    if (state.isContainerLocked) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: SizedBox.expand(),
+      );
+    }
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final currentItem = state.item;
+    final currentType = (currentItem.fields['totp_type'] ?? 'totp').trim().toLowerCase();
+    final fields = currentItem
+        .vaultFields(context.l10n)
+        .where((f) {
+          if (f.value.isEmpty) return false;
+          if (currentItem.type == VaultItemType.authenticator) {
+            if (f.key == 'hotp_counter' && currentType != 'hotp') return false;
+            if (f.key == 'totp_period' && currentType == 'hotp') return false;
+            if (currentType == 'steam' &&
+                (f.key == 'totp_algorithm' ||
+                    f.key == 'totp_digits' ||
+                    f.key == 'totp_period' ||
+                    f.key == 'hotp_counter')) {
+              return false;
+            }
+          }
+          return true;
+        })
+        .toList();
+    return PopScope(
+      canPop: true,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(currentItem.title),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit_rounded),
+              onPressed: () => _edit(context, ref, state),
+              tooltip: context.l10n.edit,
+            ),
+            PopupMenuButton<String>(
+              onSelected: (v) {
+                if (v == 'delete') _delete(context, ref, state);
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.delete_outline_rounded,
+                        color: cs.error,
+                        size: AppIconSize.standard,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        context.l10n.delete,
+                        style: TextStyle(color: cs.error),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        body: ListView(
+          padding: AppSpacing.pagePadding,
+          children: [
+            _HeaderCard(item: currentItem),
+            const SizedBox(height: 20),
+            if (fields.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(
+                    context.l10n.noFieldsFilledIn,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            else ...[
+              SectionLabel(context.l10n.sectionLabelDetails),
+              AppCard.rows(
+                dividerIndent: 16,
+                children: fields
+                    .map(
+                      (f) => _FieldRow(
+                        field: f,
+                        revealed: state.revealed[f.key] ?? false,
+                        onReveal: () => ref
+                            .read(
+                              vaultItemDetailProvider(
+                                container.volId,
+                                filePath,
+                                item,
+                              ).notifier,
+                            )
+                            .toggleRevealed(f.key),
+                        onCopy: () => _copy(context, ref, f.label, f.value),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+            const SizedBox(height: 20),
+            SectionLabel(context.l10n.sectionLabelInfo),
+            AppCard.rows(
+              dividerIndent: 16,
+              children: [
+                _MetaRow(
+                  label: context.l10n.metaLabelType,
+                  value: currentItem.type.label(context.l10n),
+                ),
+                _MetaRow(
+                  label: context.l10n.metaLabelCreated,
+                  value: _formatDate(context, currentItem.createdAt),
+                ),
+                _MetaRow(
+                  label: context.l10n.metaLabelModified,
+                  value: _formatDate(context, currentItem.updatedAt),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Header card ───────────────────────────────────────────────────────────────
+class _HeaderCard extends StatelessWidget {
+  final VaultItem item;
+  const _HeaderCard({required this.item});
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final icon = vaultIconForExt(item.type.name) ?? Icons.lock_rounded;
+    final color = vaultColorForExt(item.type.name) ?? cs.primary;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+              child: Icon(icon, size: 26, color: color),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Text(
+                          item.type.label(context.l10n),
+                          style: textTheme.labelSmall?.copyWith(
+                            color: color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      if (item.bookmark) ...[
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.star_rounded,
+                          size: AppIconSize.inline,
+                          color: context.semanticColors.bookmark,
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FieldRow extends StatelessWidget {
+  final VaultField field;
+  final bool revealed;
+  final VoidCallback onReveal;
+  final VoidCallback onCopy;
+  const _FieldRow({
+    required this.field,
+    required this.revealed,
+    required this.onReveal,
+    required this.onCopy,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isSecret = field.type == FieldType.secret;
+    final displayValue = isSecret && !revealed
+        ? '•' * (field.value.length.clamp(6, 16))
+        : field.displayValue;
+    return InkWell(
+      onLongPress: onCopy,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    field.label,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    displayValue,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontFamily: isSecret && !revealed ? 'monospace' : null,
+                      letterSpacing: isSecret && !revealed ? 2 : null,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isSecret)
+                  PasswordVisibilityToggle(
+                    obscured: !revealed,
+                    onToggle: onReveal,
+                  ),
+                IconButton(
+                  icon: Icon(
+                    Icons.copy_rounded,
+                    size: AppIconSize.small,
+                    color: cs.onSurfaceVariant,
+                  ),
+                  onPressed: onCopy,
+                  visualDensity: VisualDensity.compact,
+                  tooltip: context.l10n.copyFieldTooltip(field.label),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MetaRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _MetaRow({required this.label, required this.value});
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Text(label, style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+          const Spacer(),
+          Text(value, style: textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+}

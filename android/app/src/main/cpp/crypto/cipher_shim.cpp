@@ -1,0 +1,610 @@
+#include "cipher_shim.h"
+#include <openssl/aes.h>
+#include "mbedtls/md.h"
+#include "mbedtls/pkcs5.h"
+#include "mbedtls/platform_util.h"
+#include "Serpent.h"
+#include "Twofish.h"
+#include "Camellia.h"
+#include "kuznyechik.h"
+#include "Whirlpool.h"
+#include "Streebog.h"
+#include "blake2s.h"
+#include "argon2.h"
+#include <cstring>
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <future>
+#include <mutex>
+#include <thread>
+#include <vector>
+
+bool blockCipherSetKey(BlockCipherContext& ctx, CipherId id,
+                        const unsigned char* key, size_t keyLen) {
+    ctx.id = id;
+    if (id == CipherId::kAes) {
+        static_assert(sizeof(AesCtxPair) <= sizeof(ctx.scheduleStorage), "scheduleStorage too small for AesCtxPair");
+        AesCtxPair* pair = reinterpret_cast<AesCtxPair*>(ctx.scheduleStorage);
+        const int keyBits = (keyLen == 16) ? 128 : 256;
+        pair->rounds = (keyBits == 128) ? 10 : 14;
+
+#if defined(HAVE_ARM64_AES_INTRINSICS)
+        AES_KEY enc_tmp;
+        if (AES_set_encrypt_key(key, keyBits, &enc_tmp) != 0) return false;
+        const int nr = pair->rounds;
+        for (int i = 0; i <= nr; i++) {
+            uint8x16_t k = vld1q_u8(reinterpret_cast<const uint8_t*>(&enc_tmp.rd_key[i * 4]));
+            pair->arm_enc_rk[i] = k;
+            if (i > 0 && i < nr) {
+                pair->arm_dec_rk[nr - i] = vaesimcq_u8(k);
+            } else {
+                pair->arm_dec_rk[nr - i] = k;
+            }
+        }
+        return true;
+#else
+        if (AES_set_encrypt_key(key, keyBits, &pair->enc) != 0) return false;
+        if (AES_set_decrypt_key(key, keyBits, &pair->dec) != 0) return false;
+        return true;
+#endif
+    } else if (id == CipherId::kSerpent) {
+        serpent_set_key(key, ctx.scheduleStorage);
+        return true;
+    } else if (id == CipherId::kTwofish) {
+        TwofishInstance* inst = reinterpret_cast<TwofishInstance*>(ctx.scheduleStorage);
+        twofish_set_key(inst, reinterpret_cast<const u4byte*>(key));
+        return true;
+    } else if (id == CipherId::kCamellia) {
+        camellia_set_key(key, ctx.scheduleStorage);
+        return true;
+    } else if (id == CipherId::kKuznyechik) {
+        kuznyechik_set_key(key, reinterpret_cast<kuznyechik_kds*>(ctx.scheduleStorage));
+        return true;
+    }
+    return false;
+}
+
+void blockCipherEncryptBlock(const BlockCipherContext& ctx,
+                              const unsigned char in[kBlockSizeBytes],
+                              unsigned char out[kBlockSizeBytes]) {
+    if (ctx.id == CipherId::kAes) {
+        const AesCtxPair* pair = reinterpret_cast<const AesCtxPair*>(ctx.scheduleStorage);
+#if defined(HAVE_ARM64_AES_INTRINSICS)
+        uint8x16_t b = vld1q_u8(in);
+        const int nr = pair->rounds;
+        for (int i = 0; i < nr - 1; i++) {
+            b = vaesmcq_u8(vaeseq_u8(b, pair->arm_enc_rk[i]));
+        }
+        b = vaeseq_u8(b, pair->arm_enc_rk[nr - 1]);
+        b = veorq_u8(b, pair->arm_enc_rk[nr]);
+        vst1q_u8(out, b);
+#else
+        AES_encrypt(in, out, &pair->enc);
+#endif
+    } else if (ctx.id == CipherId::kSerpent) {
+        unsigned char* ks = const_cast<unsigned char*>(ctx.scheduleStorage);
+        serpent_encrypt(in, out, ks);
+    } else if (ctx.id == CipherId::kTwofish) {
+        TwofishInstance* inst = const_cast<TwofishInstance*>(reinterpret_cast<const TwofishInstance*>(ctx.scheduleStorage));
+        u4byte blockIn[4];
+        u4byte blockOut[4];
+        std::memcpy(blockIn, in, 16);
+        twofish_encrypt(inst, blockIn, blockOut);
+        std::memcpy(out, blockOut, 16);
+    } else if (ctx.id == CipherId::kCamellia) {
+        unsigned char* ks = const_cast<unsigned char*>(ctx.scheduleStorage);
+        camellia_encrypt(in, out, ks);
+    } else if (ctx.id == CipherId::kKuznyechik) {
+        auto* kds = const_cast<kuznyechik_kds*>(reinterpret_cast<const kuznyechik_kds*>(ctx.scheduleStorage));
+        kuznyechik_encrypt_block(out, in, kds);
+    }
+}
+
+void blockCipherDecryptBlock(const BlockCipherContext& ctx,
+                              const unsigned char in[kBlockSizeBytes],
+                              unsigned char out[kBlockSizeBytes]) {
+    if (ctx.id == CipherId::kAes) {
+        const AesCtxPair* pair = reinterpret_cast<const AesCtxPair*>(ctx.scheduleStorage);
+#if defined(HAVE_ARM64_AES_INTRINSICS)
+        uint8x16_t b = vld1q_u8(in);
+        const int nr = pair->rounds;
+        for (int i = 0; i < nr - 1; i++) {
+            b = vaesimcq_u8(vaesdq_u8(b, pair->arm_dec_rk[i]));
+        }
+        b = vaesdq_u8(b, pair->arm_dec_rk[nr - 1]);
+        b = veorq_u8(b, pair->arm_dec_rk[nr]);
+        vst1q_u8(out, b);
+#else
+        AES_decrypt(in, out, &pair->dec);
+#endif
+    } else if (ctx.id == CipherId::kSerpent) {
+        unsigned char* ks = const_cast<unsigned char*>(ctx.scheduleStorage);
+        serpent_decrypt(in, out, ks);
+    } else if (ctx.id == CipherId::kTwofish) {
+        TwofishInstance* inst = const_cast<TwofishInstance*>(reinterpret_cast<const TwofishInstance*>(ctx.scheduleStorage));
+        u4byte blockIn[4];
+        u4byte blockOut[4];
+        std::memcpy(blockIn, in, 16);
+        twofish_decrypt(inst, blockIn, blockOut);
+        std::memcpy(out, blockOut, 16);
+    } else if (ctx.id == CipherId::kCamellia) {
+        unsigned char* ks = const_cast<unsigned char*>(ctx.scheduleStorage);
+        camellia_decrypt(in, out, ks);
+    } else if (ctx.id == CipherId::kKuznyechik) {
+        auto* kds = const_cast<kuznyechik_kds*>(reinterpret_cast<const kuznyechik_kds*>(ctx.scheduleStorage));
+        kuznyechik_decrypt_block(out, in, kds);
+    }
+}
+
+// ── Custom HMAC & PBKDF2 Implementation for Whirlpool, Streebog, Blake2s ──
+
+union HashCtx {
+    WHIRLPOOL_CTX whirlpool;
+    STREEBOG_CTX streebog;
+    blake2s_state blake2s;
+};
+
+static void hashInit(HashId hash, HashCtx* ctx) {
+    if (hash == HashId::kWhirlpool) {
+        WHIRLPOOL_init(&ctx->whirlpool);
+    } else if (hash == HashId::kStreebog) {
+        STREEBOG_init(&ctx->streebog);
+    } else if (hash == HashId::kBlake2s256) {
+        blake2s_init(&ctx->blake2s);
+    }
+}
+
+static void hashUpdate(HashId hash, HashCtx* ctx, const unsigned char* data, size_t len) {
+    if (hash == HashId::kWhirlpool) {
+        WHIRLPOOL_add(data, len, &ctx->whirlpool);
+    } else if (hash == HashId::kStreebog) {
+        STREEBOG_add(&ctx->streebog, data, len);
+    } else if (hash == HashId::kBlake2s256) {
+        blake2s_update(&ctx->blake2s, data, len);
+    }
+}
+
+static void hashFinal(HashId hash, HashCtx* ctx, unsigned char* out) {
+    if (hash == HashId::kWhirlpool) {
+        WHIRLPOOL_finalize(&ctx->whirlpool, out);
+    } else if (hash == HashId::kStreebog) {
+        STREEBOG_finalize(&ctx->streebog, out);
+    } else if (hash == HashId::kBlake2s256) {
+        blake2s_final(&ctx->blake2s, out);
+    }
+}
+
+static size_t hashDigestSize(HashId hash) {
+    if (hash == HashId::kWhirlpool) return 64;
+    if (hash == HashId::kStreebog) return 64;
+    if (hash == HashId::kBlake2s256) return 32;
+    return 0;
+}
+
+struct HmacPrecomputed {
+    HashCtx innerCtx;
+    HashCtx outerCtx; 
+};
+
+static void hmacPrecompute(HashId hash, const unsigned char* key, size_t keyLen,
+                            HmacPrecomputed& pre) {
+    size_t blockSize = 64;
+
+    unsigned char k_ipad[64];
+    unsigned char k_opad[64];
+    std::memset(k_ipad, 0x36, 64);
+    std::memset(k_opad, 0x5C, 64);
+
+    unsigned char preparedKey[64] = {0};
+    if (keyLen > blockSize) {
+        HashCtx ctx;
+        hashInit(hash, &ctx);
+        hashUpdate(hash, &ctx, key, keyLen);
+        hashFinal(hash, &ctx, preparedKey);
+    } else {
+        std::memcpy(preparedKey, key, keyLen);
+    }
+
+    for (size_t i = 0; i < blockSize; i++) {
+        k_ipad[i] ^= preparedKey[i];
+        k_opad[i] ^= preparedKey[i];
+    }
+
+    hashInit(hash, &pre.innerCtx);
+    hashUpdate(hash, &pre.innerCtx, k_ipad, blockSize);
+
+    hashInit(hash, &pre.outerCtx);
+    hashUpdate(hash, &pre.outerCtx, k_opad, blockSize);
+}
+
+static void hashHmacFast(HashId hash, const HmacPrecomputed& pre,
+                          const unsigned char* data, size_t dataLen, unsigned char* out) {
+    size_t digestSize = hashDigestSize(hash);
+
+    HashCtx innerCtx = pre.innerCtx; 
+    hashUpdate(hash, &innerCtx, data, dataLen);
+    unsigned char innerDigest[64];
+    hashFinal(hash, &innerCtx, innerDigest);
+
+    HashCtx outerCtx = pre.outerCtx; 
+    hashUpdate(hash, &outerCtx, innerDigest, digestSize);
+    hashFinal(hash, &outerCtx, out);
+}
+
+static void hashHmac(HashId hash, const unsigned char* key, size_t keyLen,
+                     const unsigned char* data, size_t dataLen, unsigned char* out) {
+    HmacPrecomputed pre;
+    hmacPrecompute(hash, key, keyLen, pre);
+    hashHmacFast(hash, pre, data, dataLen, out);
+}
+
+static bool pbkdf2SingleBlockCustom(HashId hash, const HmacPrecomputed& pre,
+                                     const unsigned char* salt, size_t saltLen,
+                                     unsigned int block, unsigned int iterations,
+                                     size_t digestSize,
+                                     unsigned char* outBlock, size_t copyLen,
+                                     const std::function<bool()>& cancelCheck,
+                                     std::atomic<bool>* localFailed) {
+    unsigned char saltWithIndex[256];
+    std::memcpy(saltWithIndex, salt, saltLen);
+    saltWithIndex[saltLen]     = (block >> 24) & 0xFF;
+    saltWithIndex[saltLen + 1] = (block >> 16) & 0xFF;
+    saltWithIndex[saltLen + 2] = (block >> 8)  & 0xFF;
+    saltWithIndex[saltLen + 3] = block         & 0xFF;
+
+    unsigned char U[64];
+    unsigned char T[64];
+    hashHmacFast(hash, pre, saltWithIndex, saltLen + 4, U);
+    std::memcpy(T, U, digestSize);
+
+    for (unsigned int iter = 1; iter < iterations; iter++) {
+        if ((iter & 0x3FF) == 0) {
+            if ((cancelCheck && cancelCheck()) ||
+                localFailed->load(std::memory_order_relaxed)) {
+                return false; 
+            }
+        }
+        hashHmacFast(hash, pre, U, digestSize, U);
+        for (size_t i = 0; i < digestSize; i++) T[i] ^= U[i];
+    }
+    std::memcpy(outBlock, T, copyLen);
+    return true;
+}
+
+static bool pbkdf2HmacCustom(HashId hash,
+                            const unsigned char* password, size_t passwordLen,
+                            const unsigned char* salt, size_t saltLen,
+                            unsigned int iterations,
+                            unsigned char* out, size_t outLen,
+                            std::function<bool()> cancelCheck = nullptr) {
+    size_t digestSize = hashDigestSize(hash);
+    if (digestSize == 0) return false;
+    if (saltLen + 4 > 256) return false;
+
+    HmacPrecomputed pre;
+    hmacPrecompute(hash, password, passwordLen, pre);
+
+    unsigned int blockCount = (outLen + digestSize - 1) / digestSize;
+    std::atomic<bool> localFailed{false};
+
+    auto runBlock = [&](unsigned int block) -> bool {
+        size_t outOffset = static_cast<size_t>(block - 1) * digestSize;
+        size_t copyLen = std::min(digestSize, outLen - outOffset);
+        return pbkdf2SingleBlockCustom(hash, pre, salt, saltLen, block, iterations,
+                                       digestSize, out + outOffset, copyLen,
+                                       cancelCheck, &localFailed);
+    };
+
+    if (blockCount == 1) {
+        if (!runBlock(1)) return false;
+    } else {
+        std::vector<std::future<bool>> futures;
+        futures.reserve(blockCount - 1);
+        for (unsigned int block = 2; block <= blockCount; block++) {
+            futures.push_back(std::async(std::launch::async, [&, block]() -> bool {
+                bool ok = runBlock(block);
+                if (!ok) localFailed.store(true, std::memory_order_relaxed);
+                return ok;
+            }));
+        }
+
+        bool ok = runBlock(1);
+        if (!ok) localFailed.store(true, std::memory_order_relaxed);
+
+        for (auto& f : futures) {
+            ok = f.get() && ok;
+        }
+        if (!ok) return false;
+        return true;
+    }
+
+    return true;
+}
+
+// ── Cancellable PBKDF2-HMAC-SHA256/512 (mirrors pbkdf2SingleBlockCustom's
+//    block/iteration structure above, but driven by mbedTLS's own HMAC
+//    primitives instead of the custom Whirlpool/Streebog/Blake2s ones) ──
+//
+// mbedtls_pkcs5_pbkdf2_hmac() used to be called directly here for these two
+// hashes, running every iteration inside one opaque library call with no
+// way to observe cancelCheck -- unlike every other hash, which already went
+// through pbkdf2HmacCustom's chunked, periodically-cancellable loop. Since
+// SHA-512/SHA-256 are tried first (see deriveAndValidateHeader's tier1) and
+// PIM directly multiplies the iteration count, a cancelled unlock attempt
+// on a high-PIM VeraCrypt volume kept grinding through this call in the
+// background: requestUnlockCancellation() flipped the flag, but nothing
+// ever looked at it until the (possibly minutes-long) mbedTLS call finished
+// on its own -- during which it also held a ThreadPool worker thread, so a
+// subsequent retry's own tier1 workers could stall behind it. This
+// reimplements the same RFC 8018 loop by hand via mbedtls_md_hmac_starts/
+// reset/update/finish, checking cancelCheck every 1024 iterations just
+// like pbkdf2SingleBlockCustom, so it can actually stop. Verified
+// byte-for-byte identical output against mbedtls_pkcs5_pbkdf2_hmac across
+// both hashes, single- and multi-block outLens, and several iteration
+// counts (incl. an exact 1024-multiple boundary) via a host-side test.
+static bool pbkdf2SingleBlockMbedtls(mbedtls_md_type_t mdType,
+                                      const unsigned char* password, size_t passwordLen,
+                                      const unsigned char* salt, size_t saltLen,
+                                      unsigned int block, unsigned int iterations,
+                                      size_t digestSize,
+                                      unsigned char* outBlock, size_t copyLen,
+                                      const std::function<bool()>& cancelCheck,
+                                      std::atomic<bool>* localFailed) {
+    if (saltLen + 4 > 256) return false;
+    unsigned char saltWithIndex[256];
+    std::memcpy(saltWithIndex, salt, saltLen);
+    saltWithIndex[saltLen]     = (block >> 24) & 0xFF;
+    saltWithIndex[saltLen + 1] = (block >> 16) & 0xFF;
+    saltWithIndex[saltLen + 2] = (block >> 8)  & 0xFF;
+    saltWithIndex[saltLen + 3] = block         & 0xFF;
+
+    const mbedtls_md_info_t* mdInfo = mbedtls_md_info_from_type(mdType);
+    if (!mdInfo) return false;
+
+    mbedtls_md_context_t ctx;
+    mbedtls_md_init(&ctx);
+    if (mbedtls_md_setup(&ctx, mdInfo, 1) != 0) {
+        mbedtls_md_free(&ctx);
+        return false;
+    }
+    if (mbedtls_md_hmac_starts(&ctx, password, passwordLen) != 0) {
+        mbedtls_md_free(&ctx);
+        return false;
+    }
+
+    unsigned char U[64];
+    unsigned char T[64];
+
+    bool ok = mbedtls_md_hmac_update(&ctx, saltWithIndex, saltLen + 4) == 0 &&
+              mbedtls_md_hmac_finish(&ctx, U) == 0;
+    if (!ok) { mbedtls_md_free(&ctx); return false; }
+    std::memcpy(T, U, digestSize);
+
+    for (unsigned int iter = 1; iter < iterations && ok; iter++) {
+        if ((iter & 0x3FF) == 0) {
+            if ((cancelCheck && cancelCheck()) ||
+                localFailed->load(std::memory_order_relaxed)) {
+                ok = false;
+                break;
+            }
+        }
+        ok = mbedtls_md_hmac_reset(&ctx) == 0 &&
+             mbedtls_md_hmac_update(&ctx, U, digestSize) == 0 &&
+             mbedtls_md_hmac_finish(&ctx, U) == 0;
+        if (!ok) break;
+        for (size_t i = 0; i < digestSize; i++) T[i] ^= U[i];
+    }
+
+    mbedtls_md_free(&ctx);
+    if (!ok) return false;
+    std::memcpy(outBlock, T, copyLen);
+    return true;
+}
+
+static bool pbkdf2HmacMbedtlsCancellable(mbedtls_md_type_t mdType, size_t digestSize,
+                                          const unsigned char* password, size_t passwordLen,
+                                          const unsigned char* salt, size_t saltLen,
+                                          unsigned int iterations,
+                                          unsigned char* out, size_t outLen,
+                                          const std::function<bool()>& cancelCheck) {
+    if (digestSize == 0 || saltLen + 4 > 256) return false;
+
+    unsigned int blockCount = static_cast<unsigned int>((outLen + digestSize - 1) / digestSize);
+    std::atomic<bool> localFailed{false};
+
+    auto runBlock = [&](unsigned int block) -> bool {
+        size_t outOffset = static_cast<size_t>(block - 1) * digestSize;
+        size_t copyLen = std::min(digestSize, outLen - outOffset);
+        return pbkdf2SingleBlockMbedtls(mdType, password, passwordLen, salt, saltLen,
+                                         block, iterations, digestSize,
+                                         out + outOffset, copyLen, cancelCheck, &localFailed);
+    };
+
+    if (blockCount == 1) {
+        return runBlock(1);
+    }
+
+    std::vector<std::future<bool>> futures;
+    futures.reserve(blockCount - 1);
+    for (unsigned int block = 2; block <= blockCount; block++) {
+        futures.push_back(std::async(std::launch::async, [&, block]() -> bool {
+            bool ok = runBlock(block);
+            if (!ok) localFailed.store(true, std::memory_order_relaxed);
+            return ok;
+        }));
+    }
+
+    bool ok = runBlock(1);
+    if (!ok) localFailed.store(true, std::memory_order_relaxed);
+
+    for (auto& f : futures) {
+        ok = f.get() && ok;
+    }
+    return ok;
+}
+
+bool pbkdf2Hmac(HashId hash,
+                 const unsigned char* password, size_t passwordLen,
+                 const unsigned char* salt, size_t saltLen,
+                 unsigned int iterations,
+                 unsigned char* out, size_t outLen,
+                 std::function<bool()> cancelCheck) {
+    if (hash == HashId::kSha512 || hash == HashId::kSha256) {
+        mbedtls_md_type_t mdType = (hash == HashId::kSha512) ? MBEDTLS_MD_SHA512 : MBEDTLS_MD_SHA256;
+        size_t digestSize = (hash == HashId::kSha512) ? 64 : 32;
+        return pbkdf2HmacMbedtlsCancellable(mdType, digestSize, password, passwordLen,
+                                             salt, saltLen, iterations, out, outLen, cancelCheck);
+    }
+
+    return pbkdf2HmacCustom(hash, password, passwordLen, salt, saltLen, iterations, out, outLen, cancelCheck);
+}
+
+size_t genericHashOneShot(HashId hash,
+                           const unsigned char* data1, size_t len1,
+                           const unsigned char* data2, size_t len2,
+                           unsigned char* out) {
+    if (hash != HashId::kWhirlpool && hash != HashId::kStreebog && hash != HashId::kBlake2s256) {
+        return 0;
+    }
+    HashCtx ctx;
+    hashInit(hash, &ctx);
+    if (data1 && len1) hashUpdate(hash, &ctx, data1, len1);
+    if (data2 && len2) hashUpdate(hash, &ctx, data2, len2);
+    hashFinal(hash, &ctx, out);
+    return hashDigestSize(hash);
+}
+
+// ── Cancellable Argon2 ─────────────────────────────────────────────────────
+//
+// VeraCrypt's bundled Argon2 (the copy argon2id_hash_raw/argon2i_hash_raw
+// come from) already knows how to abort: every fill_segment_*() variant
+// looks at *context->pAbortKeyDerivation every 64 blocks and, if it is
+// non-zero, bails out with ARGON2_OPERATION_CANCELLED (which argon2_ctx()
+// turns into "free/wipe the block memory, return the error"). These
+// wrappers used to pass nullptr for that pointer, so nothing could ever
+// trip it: on a high-PIM VeraCrypt volume the Argon2id step (tier 3 in
+// deriveAndValidateHeader -- 1 GiB and, at PIM 2000, 1982 passes) ran to
+// completion after "cancel" was tapped, holding derivationMutexes[volId]
+// the whole time, so the retry just sat behind it on "Decrypting...".
+//
+// The flag is a plain `long volatile*`, not a callback, while every
+// caller's cancel condition is a callback (found / isUnlockCancelled(volId)
+// / externalAbort, ...). A small watcher thread bridges the two: it wakes
+// every kArgon2CancelPollInterval, and the moment cancelCheck() is true it
+// raises the flag. It sleeps on a condition variable, so it costs nothing
+// while Argon2 runs and exits immediately when Argon2 finishes on its own.
+//
+// Worst-case latency from cancelCheck() turning true to Argon2 stopping is
+// therefore one poll interval plus at most 64 blocks of work, plus the time
+// argon2_ctx() spends wiping/freeing its block memory on the way out.
+static constexpr std::chrono::milliseconds kArgon2CancelPollInterval{20};
+
+enum class Argon2Variant { kI, kId };
+
+static int runArgon2(Argon2Variant variant,
+                     const unsigned char* password, size_t passwordLen,
+                     const unsigned char* salt, size_t saltLen,
+                     uint32_t memoryKiB, uint32_t timeCost, uint32_t parallelism,
+                     unsigned char* out, size_t outLen,
+                     long volatile* abortFlag) {
+    return variant == Argon2Variant::kId
+        ? argon2id_hash_raw(timeCost, memoryKiB, parallelism,
+                            password, passwordLen, salt, saltLen,
+                            out, outLen, abortFlag)
+        : argon2i_hash_raw(timeCost, memoryKiB, parallelism,
+                           password, passwordLen, salt, saltLen,
+                           out, outLen, abortFlag);
+}
+
+static bool argon2DeriveKeyCancellable(Argon2Variant variant,
+                                       const unsigned char* password, size_t passwordLen,
+                                       const unsigned char* salt, size_t saltLen,
+                                       uint32_t memoryKiB, uint32_t timeCost, uint32_t parallelism,
+                                       unsigned char* out, size_t outLen,
+                                       const std::function<bool()>& cancelCheck) {
+    if (!password || !salt || !out || parallelism == 0) return false;
+
+    if (!cancelCheck) {
+        return runArgon2(variant, password, passwordLen, salt, saltLen,
+                         memoryKiB, timeCost, parallelism, out, outLen,
+                         nullptr) == ARGON2_OK;
+    }
+
+    // Already cancelled: skip the (up to 1 GiB) allocation entirely.
+    if (cancelCheck()) return false;
+
+    long volatile abortFlag = 0;
+    std::mutex m;
+    std::condition_variable cv;
+    bool argon2Done = false;
+
+    std::thread watcher;
+    try {
+        watcher = std::thread([&]() {
+            for (;;) {
+                {
+                    std::unique_lock<std::mutex> lock(m);
+                    if (cv.wait_for(lock, kArgon2CancelPollInterval,
+                                    [&]() { return argon2Done; })) {
+                        return; // Argon2 finished by itself
+                    }
+                }
+                if (cancelCheck()) {
+                    __atomic_store_n(&abortFlag, 1L, __ATOMIC_RELEASE);
+                    return;
+                }
+            }
+        });
+    } catch (...) {
+        // No thread available (resource exhaustion). Failing the unlock over
+        // that would look like a wrong password; fall back to the old
+        // uninterruptible behavior instead.
+        return runArgon2(variant, password, passwordLen, salt, saltLen,
+                         memoryKiB, timeCost, parallelism, out, outLen,
+                         nullptr) == ARGON2_OK;
+    }
+
+    const int rc = runArgon2(variant, password, passwordLen, salt, saltLen,
+                             memoryKiB, timeCost, parallelism, out, outLen,
+                             &abortFlag);
+
+    {
+        std::lock_guard<std::mutex> lock(m);
+        argon2Done = true;
+    }
+    cv.notify_all();
+    watcher.join();
+
+    // With parallelism > 1, upstream's fill_memory_blocks_mt() discards each
+    // lane thread's fill_segment() result, so an aborted run can still come
+    // back as ARGON2_OK with a digest computed over half-filled memory.
+    // Treat "abort was raised" as failure regardless of rc, and never hand
+    // that digest to the caller.
+    if (__atomic_load_n(&abortFlag, __ATOMIC_ACQUIRE) != 0) {
+        mbedtls_platform_zeroize(out, outLen);
+        return false;
+    }
+    return rc == ARGON2_OK;
+}
+
+bool argon2idDeriveKey(const unsigned char* password, size_t passwordLen,
+                       const unsigned char* salt, size_t saltLen,
+                       uint32_t memoryKiB, uint32_t timeCost, uint32_t parallelism,
+                       unsigned char* out, size_t outLen,
+                       std::function<bool()> cancelCheck) {
+    return argon2DeriveKeyCancellable(Argon2Variant::kId, password, passwordLen,
+                                      salt, saltLen, memoryKiB, timeCost, parallelism,
+                                      out, outLen, cancelCheck);
+}
+
+bool argon2iDeriveKey(const unsigned char* password, size_t passwordLen,
+                      const unsigned char* salt, size_t saltLen,
+                      uint32_t memoryKiB, uint32_t timeCost, uint32_t parallelism,
+                      unsigned char* out, size_t outLen,
+                      std::function<bool()> cancelCheck) {
+    return argon2DeriveKeyCancellable(Argon2Variant::kI, password, passwordLen,
+                                      salt, saltLen, memoryKiB, timeCost, parallelism,
+                                      out, outLen, cancelCheck);
+}

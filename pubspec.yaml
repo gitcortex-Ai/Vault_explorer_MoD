@@ -1,0 +1,63 @@
+name: vaultexplorer
+description: "Encrypted container explorer: VeraCrypt, LUKS, BitLocker, and more."
+publish_to: 'none'
+version: 1.38.0+57
+environment:
+  sdk: ^3.12.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.3
+  path_provider: ^2.1.6
+  local_auth: ^3.0.2
+  path: ^1.9.1
+  flutter_staggered_grid_view: ^0.7.0
+  dynamic_color: ^2.1.0
+  flutter_riverpod: ^3.4.2
+  riverpod_annotation: ^4.0.6
+  material_ui: ^1.1.0
+  meta: ^1.19.0
+  kpasslib: ^1.1.2
+  csv: ^8.0.0
+  re_editor:
+    path: packages/re_editor
+  re_highlight: ^0.0.3
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  # Tests only: reference HMAC for test/helpers/reference_hmac_crypto.dart. The
+  # app computes HMAC natively (VaultCryptoApi.hmac), not through this package.
+  crypto: ^3.0.7
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  test: ^1.31.0
+  fake_async: ^1.3.1
+  build_runner: ^2.16.0
+  riverpod_generator: ^4.0.8
+  riverpod_lint: ^3.1.8
+  path_provider_platform_interface: ^2.1.3
+  plugin_platform_interface: ^2.1.8
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/images/app_icon.png
+    - assets/data/eff_large_wordlist.txt
+  shaders:
+    - shaders/viewer_adjust.frag
+  fonts:
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+        - asset: assets/fonts/JetBrainsMono-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/JetBrainsMono-Italic.ttf
+          style: italic
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/images/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/app_icon.png"
+  adaptive_icon_monochrome: "assets/images/app_icon_monochrome.png"

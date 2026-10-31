@@ -1,0 +1,297 @@
+abstract final class ChannelMethods {
+  static const pickContainer = 'pickContainer';
+  static const pickKeyfiles = 'pickKeyfiles';
+  static const pickCryptoFiles = 'pickCryptoFiles';
+  static const pickArchiveFile = 'pickArchiveFile';
+  static const pickExtractFolder = 'pickExtractFolder';
+  static const createContainer = 'createContainer';
+  static const unlockContainer = 'unlockContainer';
+  static const detectsAsPlainDiskImage = 'detectsAsPlainDiskImage';
+  static const probeContainerFormat = 'probeContainerFormat';
+  static const lockContainer = 'lockContainer';
+  static const syncBackgroundService = 'syncBackgroundService';
+  static const scheduleContainerAutoClose = 'scheduleContainerAutoClose';
+  static const scheduleVaultSync = 'scheduleVaultSync';
+  static const canScheduleExactAlarms = 'canScheduleExactAlarms';
+  static const requestExactAlarmAccess = 'requestExactAlarmAccess';
+  static const isHeadlessSyncActive = 'isHeadlessSyncActive';
+  static const resolveRawStoragePath = 'resolveRawStoragePath';
+  static const startBackgroundRecording = 'startBackgroundRecording';
+  static const stopBackgroundRecording = 'stopBackgroundRecording';
+  static const updateBackgroundServiceProgress =
+      'updateBackgroundServiceProgress';
+  static const setNotificationLocale = 'setNotificationLocale';
+  static const updateContainerSettings = 'updateContainerSettings';
+  static const cancelUnlock = 'cancelUnlock';
+  static const changeContainerPassword = 'changeContainerPassword';
+  static const changeLuksContainerPassword = 'changeLuksContainerPassword';
+  static const getAvifInfo = 'getAvifInfo';
+  static const decodeAvifFrame = 'decodeAvifFrame';
+  static const decodeAvif = 'decodeAvif';
+  static const mountContainerFolder = 'mountContainerFolder';
+  static const unmountContainerFolder = 'unmountContainerFolder';
+  static const getMountedContainerFolders = 'getMountedContainerFolders';
+  static const hasAllFilesAccess = 'hasAllFilesAccess';
+  static const requestAllFilesAccess = 'requestAllFilesAccess';
+  static const hasOverlayPermission = 'hasOverlayPermission';
+  static const requestOverlayPermission = 'requestOverlayPermission';
+  static const hasUnrestrictedBattery = 'hasUnrestrictedBattery';
+  static const openBatterySettings = 'openBatterySettings';
+  static const requestNotificationPermission = 'requestNotificationPermission';
+  static const getAutomationPermissionStatus = 'getAutomationPermissionStatus';
+  static const requestAutomationPermission = 'requestAutomationPermission';
+  static const openAppSettings = 'openAppSettings';
+  static const pickCryptomatorVault = 'pickCryptomatorVault';
+  static const unlockCryptomatorVault = 'unlockCryptomatorVault';
+  static const createCryptomatorVault = 'createCryptomatorVault';
+  static const changeCryptomatorVaultPassword =
+      'changeCryptomatorVaultPassword';
+  static const pickGocryptfsVault = 'pickGocryptfsVault';
+  static const unlockGocryptfsVault = 'unlockGocryptfsVault';
+  static const createGocryptfsVault = 'createGocryptfsVault';
+  static const changeGocryptfsVaultPassword = 'changeGocryptfsVaultPassword';
+  static const isGocryptfsVault = 'isGocryptfsVault';
+  static const pickCryfsVault = 'pickCryfsVault';
+  static const unlockCryfsVault = 'unlockCryfsVault';
+  static const createCryfsVault = 'createCryfsVault';
+  static const changeCryfsVaultPassword = 'changeCryfsVaultPassword';
+  static const isCryfsVault = 'isCryfsVault';
+  static const decryptFile = 'decryptFile';
+  static const exportFileToStorage = 'exportFileToStorage';
+  static const exportFilesToFolder = 'exportFilesToFolder';
+  static const importFile = 'importFile';
+  static const importFolder = 'importFolder';
+  static const pickImportFiles = 'pickImportFiles';
+  static const pickImportFolder = 'pickImportFolder';
+  static const cancelPickedImport = 'cancelPickedImport';
+  static const exportAppSettingsFile = 'exportAppSettingsFile';
+  static const importAppSettingsFile = 'importAppSettingsFile';
+  static const cancelImport = 'cancelImport';
+  static const cancelExport = 'cancelExport';
+  static const deleteImportSources = 'deleteImportSources';
+  static const clearImportSources = 'clearImportSources';
+  static const getFileSize = 'getFileSize';
+  static const getFolderSize = 'getFolderSize';
+  static const readFileChunk = 'readFileChunk';
+  static const writeFileChunk = 'writeFileChunk';
+
+  /// Commits a buffered [writeFileChunk] sequence for whichever
+  /// container-backed engine is mounted (Cryptomator, gocryptfs, or
+  /// CryFS). Safe to call unconditionally after any writeFileChunk()
+  /// sequence -- a documented no-op for VeraCrypt/LUKS/BitLocker.
+  static const finishWrite = 'finishWrite';
+  static const beginBatchWrite = 'beginBatchWrite';
+  static const endBatchWrite = 'endBatchWrite';
+  static const beginBatchDelete = 'beginBatchDelete';
+  static const endBatchDelete = 'endBatchDelete';
+  static const writeBackFile = 'writeBackFile';
+  static const getSpaceInfo = 'getSpaceInfo';
+  static const getVaultInfo = 'getVaultInfo';
+  static const getMediaFileSize = 'getMediaFileSize';
+  static const readMediaFileChunk = 'readMediaFileChunk';
+  static const splitContainer = 'splitContainer';
+  static const joinContainer = 'joinContainer';
+  static const cancelSplitJoin = 'cancelSplitJoin';
+  static const videoEditProbe = 'videoEditProbe';
+  static const videoEditExport = 'videoEditExport';
+  static const cancelVideoEdit = 'cancelVideoEdit';
+  static const audioEditProbe = 'audioEditProbe';
+  static const audioEditWaveform = 'audioEditWaveform';
+  static const audioEditExport = 'audioEditExport';
+  static const cancelAudioEdit = 'cancelAudioEdit';
+  static const unlockSplitContainer = 'unlockSplitContainer';
+  static const encryptSingleFile = 'encryptSingleFile';
+  static const decryptSingleFile = 'decryptSingleFile';
+  static const computeExternalFileHash = 'computeExternalFileHash';
+  static const cancelHashCompute = 'cancelHashCompute';
+  static const readExternalFileBytes = 'readExternalFileBytes';
+  static const writeExternalFileBytes = 'writeExternalFileBytes';
+  static const hashBytesSha256 = 'hashBytesSha256';
+  static const hashBytesMd5 = 'hashBytesMd5';
+  static const beginHashSession = 'beginHashSession';
+  static const updateHashSession = 'updateHashSession';
+  static const finishHashSession = 'finishHashSession';
+  static const discardHashSession = 'discardHashSession';
+  static const listDirectory = 'listDirectory';
+  static const createDirectory = 'createDirectory';
+  static const renameFile = 'renameFile';
+  static const copyFile = 'copyFile';
+  static const cancelCopy = 'cancelCopy';
+  static const clearCopyState = 'clearCopyState';
+  static const deleteFile = 'deleteFile';
+  static const setLastModifiedTime = 'setLastModifiedTime';
+  static const openWithApp = 'openWithApp';
+  static const installApk = 'installApk';
+  static const shareFile = 'shareFile';
+  static const openLocalFileWithApp = 'openLocalFileWithApp';
+  static const getLocalFileUri = 'getLocalFileUri';
+  static const shareLocalFile = 'shareLocalFile';
+  static const getVideoThumbnail = 'getVideoThumbnail';
+  static const getImageThumbnail = 'getImageThumbnail';
+  static const getImageThumbnailWithSize = 'getImageThumbnailWithSize';
+  static const getVideoThumbnailWithSize = 'getVideoThumbnailWithSize';
+  static const getApkIcon = 'getApkIcon';
+  static const encodeImage = 'encodeImage';
+  static const setPlaybackActive = 'setPlaybackActive';
+  static const hashPassword = 'hashPassword';
+  static const hashPasswordSha256 = 'hashPasswordSha256';
+  static const deriveDerivedKey = 'deriveDerivedKey';
+  static const storeDerivedKey = 'storeDerivedKey';
+  static const loadDerivedKey = 'loadDerivedKey';
+  static const clearDerivedKey = 'clearDerivedKey';
+  static const setDerivedKeyExpiry = 'setDerivedKeyExpiry';
+  static const getDerivedKeyExpiry = 'getDerivedKeyExpiry';
+  static const purgeExpiredDerivedKeys = 'purgeExpiredDerivedKeys';
+  static const biometricKeyCreate = 'biometricKeyCreate';
+  static const biometricKeyStatus = 'biometricKeyStatus';
+  static const biometricKeyDelete = 'biometricKeyDelete';
+  static const aesGcmEncrypt = 'aesGcmEncrypt';
+  static const aesGcmDecrypt = 'aesGcmDecrypt';
+  static const aesCbcDecrypt = 'aesCbcDecrypt';
+  static const pbkdf2 = 'pbkdf2';
+  static const hmac = 'hmac';
+  static const scrypt = 'scrypt';
+  static const argon2id = 'argon2id';
+  static const xchacha20Poly1305Open = 'xchacha20Poly1305Open';
+  static const readSecure = 'readSecure';
+  static const writeSecure = 'writeSecure';
+  static const deleteSecure = 'deleteSecure';
+  static const deleteAllSecure = 'deleteAllSecure';
+  static const readAllSecure = 'readAllSecure';
+  static const containsKeySecure = 'containsKeySecure';
+  static const getAutomationToken = 'getAutomationToken';
+  static const regenerateAutomationToken = 'regenerateAutomationToken';
+  static const getAutomationVaultConfig = 'getAutomationVaultConfig';
+  static const setAutomationTier = 'setAutomationTier';
+  static const setAutomationPassword = 'setAutomationPassword';
+  static const getAutomationKeyfiles = 'getAutomationKeyfiles';
+  static const setAutomationKeyfiles = 'setAutomationKeyfiles';
+  static const getAutomationPim = 'getAutomationPim';
+  static const setAutomationPim = 'setAutomationPim';
+  static const setAutomationCaptureEnabled = 'setAutomationCaptureEnabled';
+  static const getActiveContainerSessions = 'getActiveContainerSessions';
+  static const setSecureScreen = 'setSecureScreen';
+  static const setRecentsSnapshotBlocked = 'setRecentsSnapshotBlocked';
+  static const notifyResumedFramePainted = 'notifyResumedFramePainted';
+  static const setSensitiveClipboardText = 'setSensitiveClipboardText';
+  static const clearSensitiveClipboardText = 'clearSensitiveClipboardText';
+  static const setKeepScreenOn = 'setKeepScreenOn';
+  static const setDebugLogging = 'setDebugLogging';
+  static const launchUrl = 'launchUrl';
+  static const getAppVersion = 'getAppVersion';
+  static const getAndroidSdkInt = 'getAndroidSdkInt';
+  static const listUsbDevices = 'listUsbDevices';
+  static const requestUsbPermission = 'requestUsbPermission';
+  static const unlockUsbContainer = 'unlockUsbContainer';
+  static const createUsbContainer = 'createUsbContainer';
+  static const getUsbDeviceCapacity = 'getUsbDeviceCapacity';
+  static const documentExists = 'documentExists';
+  static const warmContainer = 'warmContainer';
+  static const onTrimMemory = 'onTrimMemory';
+  static const getDeviceCapabilityProfile = 'getDeviceCapabilityProfile';
+
+  // Native PDF viewer (android.graphics.pdf.PdfRenderer).
+  static const openPdf = 'openPdf';
+  static const getPdfPageSize = 'getPdfPageSize';
+  static const renderPdfPage = 'renderPdfPage';
+  static const closePdf = 'closePdf';
+
+  // Hybrid PDF viewer -- Jetpack androidx.pdf.PdfViewerFragment, falling
+  // back to the openPdf/renderPdfPage path above.
+  static const isJetpackPdfViewerSupported = 'isJetpackPdfViewerSupported';
+  static const registerJetpackPdfSession = 'registerJetpackPdfSession';
+  static const revokeJetpackPdfSession = 'revokeJetpackPdfSession';
+  static const printPdf = 'printPdf';
+
+  // Check & Repair tool.
+  static const diagnoseUnmountedContainerFile =
+      'diagnoseUnmountedContainerFile';
+  static const diagnoseMountedVolumeFilesystem =
+      'diagnoseMountedVolumeFilesystem';
+  static const restoreBackupHeaderUnmounted = 'restoreBackupHeaderUnmounted';
+  static const runMountedVolumeFilesystemCheck =
+      'runMountedVolumeFilesystemCheck';
+  static const pickFolderVaultForRepair = 'pickFolderVaultForRepair';
+  static const checkFolderVault = 'checkFolderVault';
+  static const repairFolderVault = 'repairFolderVault';
+
+  // Archive engine (libarchive)
+  static const archiveScanVault = 'archiveScanVault';
+  static const archiveExtractVaultEntry = 'archiveExtractVaultEntry';
+  static const archiveExtractVaultAll = 'archiveExtractVaultAll';
+  static const archiveScanLocal = 'archiveScanLocal';
+  static const archiveExtractLocalEntry = 'archiveExtractLocalEntry';
+  static const archiveStageBrowseEntry = 'archiveStageBrowseEntry';
+  static const archiveDiscardBrowseFile = 'archiveDiscardBrowseFile';
+  static const archiveCreate = 'archiveCreate';
+
+  // Header Backup tool.
+  static const exportContainerHeader = 'exportContainerHeader';
+  static const restoreContainerHeaderRegion = 'restoreContainerHeaderRegion';
+  static const resolveFolderVaultConfigFile = 'resolveFolderVaultConfigFile';
+  static const restoreFolderVaultConfig = 'restoreFolderVaultConfig';
+
+  // Composite Multi-File Backing Store (Experimental)
+  static const profileCarriers = 'profileCarriers';
+  static const createCompositeContainer = 'createCompositeContainer';
+  static const unlockCompositeContainer = 'unlockCompositeContainer';
+  // Android Share Sheet integration (see ShareIntentHandlers.kt,
+  // lib/features/share_import/).
+  static const setShareTargetEnabled = 'setShareTargetEnabled';
+  static const isShareTargetEnabled = 'isShareTargetEnabled';
+  static const setUsbAttachPromptEnabled = 'setUsbAttachPromptEnabled';
+  static const isUsbAttachPromptEnabled = 'isUsbAttachPromptEnabled';
+  static const checkPendingShareRequest = 'checkPendingShareRequest';
+  static const cancelPendingShareRequest = 'cancelPendingShareRequest';
+  static const returnToSharingApp = 'returnToSharingApp';
+  static const prepareShareImport = 'prepareShareImport';
+
+  // Quick Capture: Quick Settings tile / pinned shortcut integration
+  // (see QuickCaptureSettingsHandlers.kt, QuickCaptureBridge.kt,
+  // lib/core/api/quick_capture_api.dart). Names match MainActivity.kt's
+  // own ChannelMethods object exactly.
+  static const checkPendingQuickCaptureRequest =
+      'checkPendingQuickCaptureRequest';
+  static const getQuickCaptureSettings = 'getQuickCaptureSettings';
+  static const setQuickCaptureTileEnabled = 'setQuickCaptureTileEnabled';
+  static const requestPinQuickCaptureShortcut =
+      'requestPinQuickCaptureShortcut';
+
+  // Panic, PanicKit & Emergency Tile integration (see PanicSettingsHandlers.kt,
+  // lib/core/api/vault_panic_api.dart). Names match MainActivity.kt's own
+  // ChannelMethods object exactly -- this side and the native side are two
+  // independent copies of the same wire contract, not a shared constant.
+  static const getPanicSettings = 'getPanicSettings';
+  static const setPanicTier = 'setPanicTier';
+  static const setQuickTileEnabled = 'setQuickTileEnabled';
+  static const getPanicKitStatus = 'getPanicKitStatus';
+  static const setPanicKitEnabled = 'setPanicKitEnabled';
+  static const setPanicKitPairingEnforcement = 'setPanicKitPairingEnforcement';
+  static const unpairPanicKit = 'unpairPanicKit';
+  static const triggerPanic = 'triggerPanic';
+  static const getPanicBootTriggerSettings = 'getPanicBootTriggerSettings';
+  static const setPanicBootTriggerTier = 'setPanicBootTriggerTier';
+  static const setPanicBootTriggerArmed = 'setPanicBootTriggerArmed';
+
+  // Document Providers & SAF Storage
+  static const String safListDirectory = 'safListDirectory';
+  static const String safCanListDirectory = 'safCanListDirectory';
+  static const String safCheckTreeAccess = 'safCheckTreeAccess';
+  static const String safGetFileSize = 'safGetFileSize';
+  static const String safReadFileChunk = 'safReadFileChunk';
+  static const String safWriteFileChunk = 'safWriteFileChunk';
+  static const String safCreateFile = 'safCreateFile';
+  static const String safCreateDirectory = 'safCreateDirectory';
+  static const String safRenameFile = 'safRenameFile';
+  static const String safDeleteFile = 'safDeleteFile';
+  static const String safGetSpaceInfo = 'safGetSpaceInfo';
+  static const String safGetThumbnail = 'safGetThumbnail';
+  static const String safOpenWithApp = 'safOpenWithApp';
+  static const String safShareFiles = 'safShareFiles';
+  static const String safGetDocumentUri = 'safGetDocumentUri';
+  static const String safCopyFile = 'safCopyFile';
+  static const String safGetRealPath = 'safGetRealPath';
+  static const String getStorageVolumes = 'getStorageVolumes';
+  static const String getMirrorPushActivity = 'getMirrorPushActivity';
+  static const String exportLogFile = 'exportLogFile';
+}

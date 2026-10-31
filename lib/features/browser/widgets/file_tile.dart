@@ -1,0 +1,658 @@
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/api/vault_file_io_api.dart';
+import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
+import 'package:vaultexplorer/core/theme/app_theme.dart';
+import 'package:vaultexplorer/core/theme/file_manager_skin_scope.dart';
+import 'package:vaultexplorer/core/utils/file_display_name.dart';
+import 'package:vaultexplorer/core/utils/file_type_utils.dart';
+import 'package:vaultexplorer/core/utils/raw_entry.dart';
+import 'package:vaultexplorer/core/widgets/thumbnail/async_thumbnail.dart';
+import 'package:vaultexplorer/data/models/archive_context.dart';
+import 'package:vaultexplorer/data/models/file_manager_toolbar_config.dart';
+import 'package:vaultexplorer/data/models/long_file_name_display_mode.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/models/thumbnail_cache_mode.dart';
+import 'package:vaultexplorer/data/models/thumbnail_quality.dart';
+import 'package:vaultexplorer/data/services/thumbnail_cache_service.dart';
+import 'package:vaultexplorer/data/services/video_thumbnail_fetcher.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_viewer_constants.dart';
+import 'package:vaultexplorer/features/browser/widgets/apk_icon_support.dart';
+import 'package:vaultexplorer/features/browser/widgets/archive_thumbnail_support.dart';
+import 'package:vaultexplorer/features/browser/widgets/thumbnail_raw_fallback.dart';
+import 'package:vaultexplorer/features/browser/widgets/tile_selection_style.dart';
+
+class FileTile extends StatelessWidget {
+  final RawEntry entry;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final String? searchQuery;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+  final ValueChanged<RawEntry>? onLongMenu;
+
+  /// Tapping the leading icon/thumbnail toggles this entry's selection
+  /// instead of opening it. See `FileRowShell.onIconTap`.
+  final VoidCallback? onIconTap;
+  final bool isCompact;
+
+  /// Two-row layout -- see `FileListView.isDetailed`.
+  final bool isDetailed;
+  final bool showItemActionsMenu;
+
+  /// Whether [entry]'s name is shown with its extension. Off hides it, except
+  /// while a search is typed so a match inside the extension stays visible.
+  final bool showFileExtensions;
+  final double zoomLevel;
+  final List<FileDetailColumn> detailColumns;
+  final LongFileNameDisplayMode longFileNameMode;
+  final MountedContainer? container;
+  final String currentDirPath;
+  final ThumbnailCacheMode thumbnailCacheMode;
+  final ThumbnailQuality thumbnailQuality;
+  final bool showThumbnail;
+  final bool isPinned;
+  final bool isBookmark;
+
+  /// Set when [entry] is being listed from inside an open archive (see
+  /// `file_browser_screen.dart`'s `_archiveContext`) rather than the real
+  /// container filesystem. When present, image thumbnails are sourced via
+  /// on-demand archive extraction instead of the native container
+  /// thumbnail API -- see `archive_thumbnail_support.dart`.
+  final ArchiveContext? archiveContext;
+
+  /// The container-relative path of the archive's own root, i.e. the
+  /// [currentDirPath] value at the point the archive was opened. Required
+  /// alongside [archiveContext] to resolve [entry]'s path back to a path
+  /// relative to the archive root.
+  final String? archiveRootPath;
+
+  const FileTile({
+    super.key,
+    required this.entry,
+    required this.isSelectionMode,
+    required this.isSelected,
+    this.searchQuery,
+    required this.onTap,
+    required this.onLongPress,
+    this.onLongMenu,
+    this.onIconTap,
+    this.isCompact = false,
+    this.isDetailed = false,
+    this.showItemActionsMenu = true,
+    this.showFileExtensions = true,
+    this.zoomLevel = 1.0,
+    this.detailColumns = const [FileDetailColumn.date, FileDetailColumn.size],
+    this.longFileNameMode = LongFileNameDisplayMode.ellipsizeEnd,
+    this.container,
+    this.currentDirPath = '',
+    this.thumbnailCacheMode = ThumbnailCacheMode.appCache,
+    this.thumbnailQuality = ThumbnailQuality.defaultQuality,
+    this.showThumbnail = true,
+    this.isPinned = false,
+    this.isBookmark = false,
+    this.archiveContext,
+    this.archiveRootPath,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    String displayName = entry.name;
+    final ext = displayName.split('.').last;
+    final vaultIcon = vaultIconForExt(ext);
+    if (vaultIcon != null) {
+      final parts = displayName.split('.');
+      if (parts.length > 1) {
+        parts.removeLast();
+        displayName = parts.join('.');
+      }
+    }
+    // Folders have no extension: "backup.2024" is a whole name.
+    if (!showFileExtensions &&
+        !entry.isDir &&
+        (searchQuery == null || searchQuery!.isEmpty)) {
+      displayName = stripFileExtension(entry.name);
+    }
+    // Icon and color come from the active skin. With the classic skin this
+    // is exactly `vaultIcon ?? iconForFile(name)` / `vaultColor ??
+    // colorForFile(name)`, as before skins existed.
+    final skin = FileManagerSkinScope.of(context);
+    final displayIcon = skin.fileIcon(entry.name);
+    final iconColor = skin.fileIconColor(cs, entry.name);
+    Widget? trailingWidget;
+    if (!isSelectionMode && showItemActionsMenu && !entry.isPlaceholder) {
+      trailingWidget = SizedBox(
+        width: 32,
+        height: 32,
+        child: IconButton(
+          padding: EdgeInsets.zero,
+          iconSize: 20,
+          color: cs.onSurfaceVariant,
+          icon: const Icon(Icons.more_vert_rounded),
+          onPressed: onLongMenu == null ? null : () => onLongMenu!(entry),
+        ),
+      );
+    }
+    Widget? customLeading;
+    // See `FileRowShell.customLeadingIsIcon`: true only for an APK's own
+    // launcher icon, which is shown as-is rather than filled into (and
+    // clipped by) the row's tinted squircle the way a photo/video frame is.
+    bool customLeadingIsIcon = false;
+    final fullPath = currentDirPath.isEmpty
+        ? entry.name
+        : '$currentDirPath/${entry.name}';
+    final isImg = MediaViewerConstants.isImage(entry.name);
+    final isVid = MediaViewerConstants.isVideo(entry.name);
+    final isApk = isApkFile(entry.name);
+    if (showThumbnail &&
+        container != null &&
+        vaultIcon == null &&
+        !entry.isPlaceholder) {
+      if (isImg) {
+        customLeading = Hero(
+          tag: 'media_hero_${container!.volId}_$fullPath',
+          child: Material(
+            type: MaterialType.transparency,
+            child: _ListImageThumb(
+              container: container!,
+              filePath: fullPath,
+              cacheMode: thumbnailCacheMode,
+              quality: thumbnailQuality,
+              fallbackIcon: displayIcon,
+              fallbackColor: iconColor,
+              zoomLevel: zoomLevel,
+              archiveContext: archiveContext,
+              archiveRootPath: archiveRootPath,
+            ),
+          ),
+        );
+      } else if (isVid) {
+        customLeading = Hero(
+          tag: 'media_hero_${container!.volId}_$fullPath',
+          child: Material(
+            type: MaterialType.transparency,
+            child: _ListVideoThumb(
+              container: container!,
+              filePath: fullPath,
+              cacheMode: thumbnailCacheMode,
+              quality: thumbnailQuality,
+              fallbackIcon: displayIcon,
+              fallbackColor: iconColor,
+              zoomLevel: zoomLevel,
+              archiveContext: archiveContext,
+              archiveRootPath: archiveRootPath,
+            ),
+          ),
+        );
+      } else if (isApk && archiveContext == null) {
+        // Same restriction as video above, and for the same underlying
+        // reason: an APK nested inside an already-open archive has no
+        // real container/local path for fetchApkIconForThumbnail to open
+        // -- see that function's doc comment.
+        customLeadingIsIcon = true;
+        customLeading = Material(
+          type: MaterialType.transparency,
+          child: _ListApkIconThumb(
+            container: container!,
+            filePath: fullPath,
+            cacheMode: thumbnailCacheMode,
+            quality: thumbnailQuality,
+            fallbackIcon: displayIcon,
+            fallbackColor: iconColor,
+            zoomLevel: zoomLevel,
+          ),
+        );
+      }
+    }
+
+    Widget? badge;
+    if ((isPinned || isBookmark) && !isSelected) {
+      badge = Container(
+        padding: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHigh.withValues(alpha: 0.85),
+          shape: BoxShape.circle,
+        ),
+        child: Row(
+          mainAxisSize: dynamicSize(mainAxis: true),
+          children: [
+            if (isPinned)
+              Icon(
+                Icons.push_pin_rounded,
+                size: 10 * zoomLevel,
+                color: cs.onPrimaryContainer,
+              ),
+            if (isBookmark)
+              Icon(
+                Icons.star_rounded,
+                size: 10 * zoomLevel,
+                color: context.semanticColors.bookmark,
+              ),
+          ],
+        ),
+      );
+    }
+
+    return FileRowShell(
+      icon: displayIcon,
+      iconColor: iconColor,
+      unselectedIconBackground: cs.surfaceContainerHighest,
+      displayName: displayName,
+      searchQuery: searchQuery,
+      entry: entry,
+      detailColumns: detailColumns,
+      longFileNameMode: longFileNameMode,
+      trailing: trailingWidget,
+      hasTrailingSlot: showItemActionsMenu && !entry.isPlaceholder,
+      isSelectionMode: isSelectionMode,
+      isSelected: isSelected,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      onIconTap: onIconTap,
+      isCompact: isCompact,
+      isDetailed: isDetailed,
+      zoomLevel: zoomLevel,
+      customLeading: customLeading,
+      customLeadingIsIcon: customLeadingIsIcon,
+      iconBadge: badge,
+    );
+  }
+
+  MainAxisSize dynamicSize({required bool mainAxis}) =>
+      mainAxis ? MainAxisSize.min : MainAxisSize.max;
+}
+
+class _ListImageThumb extends ConsumerWidget {
+  final MountedContainer container;
+  final String filePath;
+  final ThumbnailCacheMode cacheMode;
+  final ThumbnailQuality quality;
+  final IconData fallbackIcon;
+  final Color fallbackColor;
+  final double zoomLevel;
+  final ArchiveContext? archiveContext;
+  final String? archiveRootPath;
+  const _ListImageThumb({
+    required this.container,
+    required this.filePath,
+    required this.cacheMode,
+    required this.quality,
+    required this.fallbackIcon,
+    required this.fallbackColor,
+    this.zoomLevel = 1.0,
+    this.archiveContext,
+    this.archiveRootPath,
+  });
+
+  static Future<Uint8List> _fetch(
+    ThumbnailCacheService thumbnailCache,
+    VaultFileIoApi fileIoApi,
+    MountedContainer container,
+    String path,
+    ThumbnailCacheMode mode,
+    ThumbnailQuality quality,
+    ArchiveContext? archiveContext,
+    String? archiveRootPath,
+  ) async {
+    if (archiveContext != null && archiveRootPath != null) {
+      // Sourced by extracting the entry rather than the native container
+      // thumbnail API -- see archive_thumbnail_support.dart. Cached
+      // in-memory only for the life of this browsing session: the archive
+      // session is ephemeral, and unlike a real container path there's no
+      // stable on-disk/in-container cache slot to persist these under.
+      final bytes = await fetchArchiveEntryForThumbnail(
+        archiveContext: archiveContext,
+        archiveRootPath: archiveRootPath,
+        fullPath: path,
+        fileIoApi: fileIoApi,
+        targetSize: quality.scaledSize(180),
+        quality: quality.jpegQuality,
+      );
+      thumbnailCache.cacheInMemory(container, path, bytes, quality);
+      return bytes;
+    }
+    if (mode != ThumbnailCacheMode.disabled) {
+      final cached = await thumbnailCache.fetch(
+        container: container,
+        filePath: path,
+        mode: mode,
+        quality: quality,
+      );
+      if (cached != null && cached.isNotEmpty) return cached;
+    }
+    Uint8List? thumbBytes = await fileIoApi.getImageThumbnailOrThrow(
+      container,
+      path,
+      targetSize: quality.scaledSize(180),
+      quality: quality.jpegQuality,
+    );
+    if (thumbBytes == null || thumbBytes.isEmpty) {
+      final raw = await readRawThumbnailFallback(fileIoApi, container, path);
+      if (raw.length < 200 * 1024) {
+        thumbnailCache.cacheInMemory(container, path, raw, quality);
+      }
+      return raw;
+    }
+    thumbnailCache.cacheInMemory(container, path, thumbBytes, quality);
+    if (mode != ThumbnailCacheMode.disabled) {
+      unawaited(
+        thumbnailCache.store(
+          container: container,
+          filePath: path,
+          data: thumbBytes,
+          mode: mode,
+          quality: quality,
+        ),
+      );
+    }
+    return thumbBytes;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final thumbnailCache = ref.read(thumbnailCacheServiceProvider);
+    final fileIoApi = ref.read(vaultFileIoApiProvider);
+    return AsyncThumbnail(
+      key: ValueKey('list_img:$filePath'),
+      container: container,
+      filePath: filePath,
+      quality: quality,
+      cache: ThumbnailConcurrency.inFlightThumbnails,
+      limiter: ThumbnailConcurrency.imageLimiter,
+      fetchFn: (c, p) => _fetch(
+        thumbnailCache,
+        fileIoApi,
+        c,
+        p,
+        cacheMode,
+        quality,
+        archiveContext,
+        archiveRootPath,
+      ),
+      debounce: const Duration(milliseconds: 100),
+      syncLookup: () => thumbnailCache.peekMemory(container, filePath, quality),
+      cacheHeight: quality.scaledSize(180),
+      imageBuilder: (context, bytes, cacheHeight) => Image.memory(
+        bytes,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        cacheHeight: cacheHeight,
+        errorBuilder: (_, _, _) => _fallbackWidget(),
+      ),
+      loadingBuilder: (context) => Container(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Center(
+          child: SizedBox(
+            width: 14 * zoomLevel,
+            height: 14 * zoomLevel,
+            child: CircularProgressIndicator(
+              strokeWidth: 1.5,
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+      ),
+      errorBuilder: (context) => _fallbackWidget(),
+    );
+  }
+
+  Widget _fallbackWidget() {
+    return Center(
+      child: Icon(
+        fallbackIcon,
+        size: AppIconSize.action * zoomLevel,
+        color: fallbackColor,
+      ),
+    );
+  }
+}
+
+class _ListVideoThumb extends ConsumerWidget {
+  final MountedContainer container;
+  final String filePath;
+  final ThumbnailCacheMode cacheMode;
+  final ThumbnailQuality quality;
+  final IconData fallbackIcon;
+  final Color fallbackColor;
+  final double zoomLevel;
+  final ArchiveContext? archiveContext;
+  final String? archiveRootPath;
+  const _ListVideoThumb({
+    required this.container,
+    required this.filePath,
+    required this.cacheMode,
+    required this.quality,
+    required this.fallbackIcon,
+    required this.fallbackColor,
+    this.zoomLevel = 1.0,
+    this.archiveContext,
+    this.archiveRootPath,
+  });
+
+  static Future<Uint8List> _fetch(
+    ThumbnailCacheService thumbnailCache,
+    VaultFileIoApi fileIoApi,
+    MountedContainer container,
+    String path,
+    ThumbnailCacheMode mode,
+    ThumbnailQuality quality,
+    ArchiveContext? archiveContext,
+    String? archiveRootPath,
+  ) => VideoThumbnailFetcher.fetch(
+    thumbnailCache,
+    fileIoApi,
+    container,
+    path,
+    mode: mode,
+    quality: quality,
+    targetSize: quality.scaledSize(180),
+    archiveContext: archiveContext,
+    archiveRootPath: archiveRootPath,
+  );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final thumbnailCache = ref.read(thumbnailCacheServiceProvider);
+    final fileIoApi = ref.read(vaultFileIoApiProvider);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        AsyncThumbnail(
+          key: ValueKey('list_vid:$filePath'),
+          container: container,
+          filePath: filePath,
+          quality: quality,
+          cache: ThumbnailConcurrency.inFlightThumbnails,
+          limiter: ThumbnailConcurrency.videoLimiter,
+          fetchFn: (c, p) => _fetch(
+            thumbnailCache,
+            fileIoApi,
+            c,
+            p,
+            cacheMode,
+            quality,
+            archiveContext,
+            archiveRootPath,
+          ),
+          debounce: const Duration(milliseconds: 150),
+          syncLookup: () =>
+              thumbnailCache.peekMemory(container, filePath, quality),
+          cacheHeight: quality.scaledSize(180),
+          imageBuilder: (context, bytes, cacheHeight) => Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            cacheHeight: cacheHeight,
+            errorBuilder: (_, _, _) => _fallbackWidget(),
+          ),
+          loadingBuilder: (context) => Container(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            child: Center(
+              child: SizedBox(
+                width: 14 * zoomLevel,
+                height: 14 * zoomLevel,
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.5,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+          ),
+          errorBuilder: (context) => _fallbackWidget(),
+        ),
+        Positioned(
+          right: 2,
+          bottom: 2,
+          child: Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.6),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.play_arrow_rounded,
+              color: Colors.white,
+              size: (12 * zoomLevel).clamp(10.0, 20.0),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _fallbackWidget() {
+    return Center(
+      child: Icon(
+        fallbackIcon,
+        size: AppIconSize.action * zoomLevel,
+        color: fallbackColor,
+      ),
+    );
+  }
+}
+
+class _ListApkIconThumb extends ConsumerWidget {
+  final MountedContainer container;
+  final String filePath;
+  final ThumbnailCacheMode cacheMode;
+  final ThumbnailQuality quality;
+  final IconData fallbackIcon;
+  final Color fallbackColor;
+  final double zoomLevel;
+  const _ListApkIconThumb({
+    required this.container,
+    required this.filePath,
+    required this.cacheMode,
+    required this.quality,
+    required this.fallbackIcon,
+    required this.fallbackColor,
+    this.zoomLevel = 1.0,
+  });
+
+  /// Persisted through the same three-tier [ThumbnailCacheService] real
+  /// image thumbnails use, keyed by [filePath] like any other file --
+  /// unlike an archive-entry thumbnail, an APK sitting in the vault is a
+  /// stable path, so it's worth caching past the current browsing
+  /// session rather than only in memory. A cache hit skips re-parsing
+  /// the manifest/resource table entirely.
+  static Future<Uint8List> _fetch(
+    ThumbnailCacheService thumbnailCache,
+    VaultFileIoApi fileIoApi,
+    MountedContainer container,
+    String path,
+    ThumbnailCacheMode mode,
+    ThumbnailQuality quality,
+  ) async {
+    if (mode != ThumbnailCacheMode.disabled) {
+      final cached = await thumbnailCache.fetch(
+        container: container,
+        filePath: path,
+        mode: mode,
+        quality: quality,
+      );
+      if (cached != null && cached.isNotEmpty) return cached;
+    }
+    final bytes = await fetchApkIconForThumbnail(
+      container: container,
+      filePath: path,
+      fileIoApi: fileIoApi,
+    );
+    thumbnailCache.cacheInMemory(container, path, bytes, quality);
+    if (mode != ThumbnailCacheMode.disabled) {
+      unawaited(
+        thumbnailCache.store(
+          container: container,
+          filePath: path,
+          data: bytes,
+          mode: mode,
+          quality: quality,
+        ),
+      );
+    }
+    return bytes;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final thumbnailCache = ref.read(thumbnailCacheServiceProvider);
+    final fileIoApi = ref.read(vaultFileIoApiProvider);
+    return AsyncThumbnail(
+      key: ValueKey('list_apk:$filePath'),
+      container: container,
+      filePath: filePath,
+      quality: quality,
+      cache: ThumbnailConcurrency.inFlightThumbnails,
+      limiter: ThumbnailConcurrency.imageLimiter,
+      fetchFn: (c, p) => _fetch(thumbnailCache, fileIoApi, c, p, cacheMode, quality),
+      debounce: const Duration(milliseconds: 100),
+      syncLookup: () => thumbnailCache.peekMemory(container, filePath, quality),
+      cacheHeight: quality.scaledSize(180),
+      // An app icon is meant to be seen whole, unlike a photo -- contain
+      // rather than image/video's cover, so it's never cropped. The row
+      // draws no tinted square behind it either (see
+      // `FileRowShell.customLeadingIsIcon`), so the loading and fallback
+      // states below are deliberately background-free as well: an icon
+      // that briefly sits on a filled square and then doesn't would read
+      // as the layout shifting under the user.
+      imageBuilder: (context, bytes, cacheHeight) => Image.memory(
+        bytes,
+        fit: BoxFit.contain,
+        cacheHeight: cacheHeight,
+        errorBuilder: (_, _, _) => _fallbackWidget(),
+      ),
+      loadingBuilder: (context) => Center(
+        child: SizedBox(
+          width: 14 * zoomLevel,
+          height: 14 * zoomLevel,
+          child: CircularProgressIndicator(
+            strokeWidth: 1.5,
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.6),
+          ),
+        ),
+      ),
+      errorBuilder: (context) => _fallbackWidget(),
+    );
+  }
+
+  Widget _fallbackWidget() {
+    return Center(
+      child: Icon(
+        fallbackIcon,
+        size: AppIconSize.action * zoomLevel,
+        color: fallbackColor,
+      ),
+    );
+  }
+}

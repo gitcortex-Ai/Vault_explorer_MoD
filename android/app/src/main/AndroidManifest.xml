@@ -1,0 +1,390 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-sdk tools:overrideLibrary="androidx.pdf, androidx.pdf.core, androidx.pdf.viewer, androidx.pdf.viewer.fragment, androidx.pdf.document.service" />
+
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
+
+  <application
+        android:label="@string/app_name"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="false"
+        android:allowBackup="false"
+        android:requestLegacyExternalStorage="true"
+        android:enableOnBackInvokedCallback="true">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:supportsPictureInPicture="true"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.APP_SETTINGS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!-- The picture-in-picture window: nothing but the player's video
+             surface. A separate activity so the app itself stays usable behind
+             the window instead of being shrunk into it. -->
+        <activity
+            android:name=".pip.PictureInPictureActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:supportsPictureInPicture="true"
+            android:resizeableActivity="true"
+            android:theme="@android:style/Theme.Black.NoTitleBar"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|screenLayout|density|uiMode" />
+        <activity-alias
+            android:name=".UsbAttachAlias"
+            android:targetActivity=".MainActivity"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
+        </activity-alias>
+        <activity-alias
+            android:name=".VaultLauncherAlias"
+            android:targetActivity=".MainActivity"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter
+                android:label="@string/app_name"
+                android:icon="@mipmap/ic_launcher"
+                android:roundIcon="@mipmap/ic_launcher">
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".ZipExplorerAlias"
+            android:targetActivity=".MainActivity"
+            android:label="@string/decoy_app_name"
+            android:icon="@mipmap/ic_launcher_zip"
+            android:roundIcon="@mipmap/ic_launcher_zip"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter
+                android:label="@string/decoy_app_name"
+                android:icon="@mipmap/ic_launcher_zip"
+                android:roundIcon="@mipmap/ic_launcher_zip">
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <!-- Dedicated isolated share task window -->
+        <activity
+            android:name=".VaultShareActivity"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:exported="true"
+            android:taskAffinity="com.aeidolon.vaultexplorer.share"
+            android:launchMode="singleTask"
+            android:documentLaunchMode="always"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+        </activity>
+
+        <activity
+            android:name=".VaultQuickCaptureActivity"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:exported="true"
+            android:enableOnBackInvokedCallback="false"
+            android:taskAffinity="com.aeidolon.vaultexplorer.quickcapture"
+            android:launchMode="singleTask"
+            android:documentLaunchMode="always"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+        </activity>
+
+        <activity-alias
+            android:name=".ShareTargetAlias"
+            android:targetActivity=".VaultShareActivity"
+            android:label="@string/app_name"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".ShareTargetDecoyAlias"
+            android:targetActivity=".VaultShareActivity"
+            android:label="@string/decoy_app_name"
+            android:icon="@mipmap/ic_launcher_zip"
+            android:roundIcon="@mipmap/ic_launcher_zip"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity-alias>
+        <provider
+            android:name="com.aeidolon.vaultexplorer.container.ContainerDocumentsProvider"
+            android:authorities="com.aeidolon.vaultexplorer.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+        <provider
+            android:name="com.aeidolon.vaultexplorer.container.ContainerShareProvider"
+            android:authorities="com.aeidolon.vaultexplorer.shareprovider"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+        <provider
+            android:name="com.aeidolon.vaultexplorer.pdf.VaultPdfContentProvider"
+            android:authorities="${applicationId}.pdfprovider"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+        <provider
+            android:name="com.aeidolon.vaultexplorer.streaming.VaultStreamProvider"
+            android:authorities="com.aeidolon.vaultexplorer.stream"
+            android:exported="true"
+            android:grantUriPermissions="true" />
+        <provider
+            android:name="com.aeidolon.vaultexplorer.share.StorageFolderShareProvider"
+            android:authorities="${applicationId}.foldershare"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.localfiles"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/local_file_paths" />
+        </provider>
+        <service
+            android:name="com.aeidolon.vaultexplorer.service.VaultKeepAliveService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps unlocked encrypted vaults mounted and available to other apps while the app is in the background" />
+        </service>
+        <receiver
+            android:name="com.aeidolon.vaultexplorer.service.ContainerAutoCloseAlarmReceiver"
+            android:exported="false" />
+        <service
+            android:name="com.aeidolon.vaultexplorer.service.VaultMediaPlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge"
+            android:exported="false" />
+        <service
+            android:name=".automation.ScheduledVaultSyncService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="dataSync" />
+        <receiver
+            android:name=".automation.ScheduledVaultSyncAlarmReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".automation.ScheduledVaultSyncRescheduleReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name="com.aeidolon.vaultexplorer.service.VaultCameraRecordingService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="camera|microphone" />
+        <service
+            android:name="com.aeidolon.vaultexplorer.service.VaultAutomationRecordingService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="camera|microphone" />
+        <receiver
+            android:name=".automation.VaultAutomationReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.aeidolon.vaultexplorer.action.UNLOCK_VAULT" />
+                <action android:name="com.aeidolon.vaultexplorer.action.SYNC_VAULT" />
+                <action android:name="com.aeidolon.vaultexplorer.action.LOCK_VAULT" />
+                <action android:name="com.aeidolon.vaultexplorer.action.IMPORT_FILE" />
+                <action android:name="com.aeidolon.vaultexplorer.action.EXPORT_FILE" />
+                <action android:name="com.aeidolon.vaultexplorer.action.IMPORT_FOLDER" />
+                <action android:name="com.aeidolon.vaultexplorer.action.EXPORT_FOLDER" />
+                <action android:name="com.aeidolon.vaultexplorer.action.TAKE_PHOTO" />
+                <action android:name="com.aeidolon.vaultexplorer.action.START_RECORDING" />
+                <action android:name="com.aeidolon.vaultexplorer.action.STOP_RECORDING" />
+                <action android:name="com.aeidolon.vaultexplorer.action.START_AUDIO_RECORDING" />
+                <action android:name="com.aeidolon.vaultexplorer.action.STOP_AUDIO_RECORDING" />
+                <action android:name="com.aeidolon.vaultexplorer.action.WIPE_FILE" />
+                <action android:name="com.aeidolon.vaultexplorer.action.EMERGENCY_LOCK" />
+                <action android:name="com.aeidolon.vaultexplorer.action.EMERGENCY_PURGE" />
+            </intent-filter>
+        </receiver>
+        <activity
+            android:name=".automation.VaultAutomationCaptureActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TransparentCapture"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity="com.aeidolon.vaultexplorer.automation.capture">
+            <intent-filter>
+                <action android:name="com.aeidolon.vaultexplorer.action.TAKE_PHOTO" />
+                <action android:name="com.aeidolon.vaultexplorer.action.START_RECORDING" />
+                <action android:name="com.aeidolon.vaultexplorer.action.START_AUDIO_RECORDING" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".panic.PanicKitConnectActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.CONNECT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.DISCONNECT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".panic.PanicKitTriggerActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.TRIGGER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <receiver
+            android:name=".panic.PanicKitTriggerReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="info.guardianproject.panic.action.TRIGGER" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".panic.PanicBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".panic.PanicTileService"
+            android:label="@string/panic_tile_label"
+            android:icon="@drawable/ic_tile_panic"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+        </service>
+        <service
+            android:name=".quickcapture.CaptureTileService"
+            android:label="@string/quick_capture_tile_label"
+            android:icon="@drawable/ic_tile_quick_capture"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+        </service>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="info.guardianproject.panic.action.TRIGGER" />
+        </intent>
+        <package android:name="info.guardianproject.ripple" />
+        <package android:name="dev.msfjarvis.wasted" />
+    </queries>
+</manifest>

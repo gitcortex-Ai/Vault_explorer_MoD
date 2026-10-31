@@ -1,0 +1,301 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:vaultexplorer/core/services/playback_throttle_controller.dart';
+import 'package:vaultexplorer/core/services/thumbnail_retry_signal.dart';
+import 'package:vaultexplorer/core/utils/lru_cache.dart';
+import 'package:vaultexplorer/core/utils/image_preview_exception.dart';
+import 'package:vaultexplorer/core/utils/retry.dart';
+import 'package:vaultexplorer/core/widgets/thumbnail/thumbnail_concurrency.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/models/thumbnail_quality.dart';
+
+part 'async_thumbnail_controller.g.dart';
+
+typedef ThumbnailFetchFn = Future<Uint8List> Function(MountedContainer, String);
+typedef ThumbnailSyncLookup = Uint8List? Function();
+
+class AsyncThumbnailState {
+  final Uint8List? bytes;
+  final bool isLoading;
+  final bool hasError;
+
+  const AsyncThumbnailState({this.bytes, this.isLoading = true, this.hasError = false});
+
+  AsyncThumbnailState _copy({Uint8List? bytes, bool? isLoading, bool? hasError}) {
+    return AsyncThumbnailState(
+      bytes: bytes ?? this.bytes,
+      isLoading: isLoading ?? this.isLoading,
+      hasError: hasError ?? this.hasError,
+    );
+  }
+}
+
+/// Family-scoped replacement for `_AsyncThumbnailState`'s manual
+/// load/cancel/retry/debounce logic. Family key is (volId, mountedAt,
+/// filePath, quality) -- identity-only, deliberately excluding [fetchFn]/
+/// [syncLookup]/[cache]/[limiter], which can't be family arguments (fresh
+/// closure identity on every parent rebuild would make Riverpod treat
+/// every rebuild as a new family instance). Those are instead handed to
+/// [ensureLoaded] imperatively by the widget's `initState`/
+/// `didUpdateWidget` -- guarded by [_started] so only the first call per
+/// provider instance actually does anything, mirroring the old
+/// `initState`-runs-once contract this replaces.
+///
+/// Every call site keys the widget itself by content
+/// (`ValueKey('img:$filePath')` etc., never by list position), so a
+/// filePath change in practice always means Flutter tears down the old
+/// Element and mounts a fresh one -- a new family instance, not this same
+/// instance being redirected. The old `_loadingPath`/`targetPath`
+/// staleness comparisons this replaces are therefore collapsed to a
+/// single [ref.mounted] check throughout: there is no "this instance now
+/// wants a different path" case to distinguish anymore, since a
+/// different path is a different family instance entirely.
+@riverpod
+class AsyncThumbnailLoader extends _$AsyncThumbnailLoader {
+  MountedContainer? _container;
+  ThumbnailFetchFn? _fetchFn;
+  ThumbnailSyncLookup? _syncLookup;
+  LruCache<String, Future<Uint8List>>? _cache;
+  PriorityTaskQueue? _limiter;
+  Duration _debounce = const Duration(milliseconds: 100);
+  TaskPriority _priority = TaskPriority.visible;
+  bool _started = false;
+  Completer<void>? _limiterCompleter;
+
+  /// Guards the cancellation-retry path in [_load] against looping
+  /// forever. A dequeued/cancelled request is worth retrying (see there),
+  /// but nothing previously capped how many times: a tile whose fetch
+  /// kept coming back cancelled re-entered [_load] every 150ms
+  /// indefinitely, and since each pass leaves [state] in its loading form,
+  /// the user just sees a spinner that never resolves to either an image
+  /// or the file-type fallback. Past this many attempts the error state
+  /// wins, which at least shows the correct fallback icon and lets a
+  /// later rebuild (scroll away and back, pull-to-refresh) start clean.
+  static const _maxCancellationRetries = 5;
+  int _cancellationRetries = 0;
+
+  /// Hard ceiling on how long a single tile will sit on its spinner.
+  ///
+  /// Neither half of a thumbnail fetch is cancellable once it's running:
+  /// a `MethodChannel` call can't be interrupted, and the queue slot it's
+  /// waiting for is only freed by whoever holds it. So if either one
+  /// never comes back, [state] stays in its loading form forever and the
+  /// tile spins for as long as the screen is alive -- there is no failure
+  /// for the widget to fall back from, only the absence of a result.
+  ///
+  /// Timing out here is deliberately a display decision, not a
+  /// cancellation: the underlying fetch is left running, and if it does
+  /// eventually finish it still populates the cache for next time. All
+  /// that changes is that this tile stops pretending something is about
+  /// to happen and shows its plain file-type icon instead. Generous
+  /// enough to cover a long queue on a slow device -- the queue admits
+  /// two at a time, so a folder full of large files legitimately makes
+  /// the last tile wait a while -- and [ThumbnailRetrySignal] gives a
+  /// timed-out tile another go the next time the app is foregrounded.
+  static const _watchdogTimeout = Duration(seconds: 45);
+
+  @override
+  AsyncThumbnailState build(int volId, DateTime mountedAt, String filePath, ThumbnailQuality quality) {
+    PlaybackThrottleController.isPlaybackActive.addListener(_onPlaybackActiveChanged);
+    ThumbnailRetrySignal.generation.addListener(_onRetrySignal);
+    ref.onDispose(() {
+      PlaybackThrottleController.isPlaybackActive.removeListener(_onPlaybackActiveChanged);
+      ThumbnailRetrySignal.generation.removeListener(_onRetrySignal);
+      _cancel();
+    });
+    return const AsyncThumbnailState();
+  }
+
+  void ensureLoaded({
+    required MountedContainer container,
+    required ThumbnailFetchFn fetchFn,
+    required LruCache<String, Future<Uint8List>> cache,
+    required PriorityTaskQueue limiter,
+    ThumbnailSyncLookup? syncLookup,
+    Duration debounce = const Duration(milliseconds: 100),
+    TaskPriority priority = TaskPriority.visible,
+  }) {
+    if (_started) return;
+    _started = true;
+    _container = container;
+    _fetchFn = fetchFn;
+    _syncLookup = syncLookup;
+    _cache = cache;
+    _limiter = limiter;
+    _debounce = debounce;
+    _priority = priority;
+
+    // This is called from `initState`/`didUpdateWidget`, which run while
+    // the widget tree is still building -- writing `state` synchronously
+    // from here (either branch below) trips Riverpod's
+    // "modifying a provider during a widget life-cycle" assertion.
+    // Deferring to a microtask (Riverpod's own suggested fix) lets the
+    // current build finish first; `_load()`'s own first line does the
+    // same kind of synchronous write, so it needs to start inside this
+    // deferred callback too, not just be scheduled from it.
+    scheduleMicrotask(() {
+      if (!ref.mounted) return;
+      final syncBytes = syncLookup?.call();
+      if (syncBytes != null) {
+        state = AsyncThumbnailState(bytes: syncBytes, isLoading: false);
+      } else {
+        _load();
+      }
+    });
+  }
+
+  /// The app came back to the foreground (see [ThumbnailRetrySignal]).
+  ///
+  /// Anything already showing an image is left strictly alone -- this is
+  /// a recovery path for tiles that ended up with neither bytes nor an
+  /// error, not a refresh. Those are restarted from scratch: the shared
+  /// in-flight entry is dropped first, since the whole reason to be here
+  /// is that whatever it points at may never complete, and a second
+  /// attempt that awaits the same dead future would be no attempt at all.
+  void _onRetrySignal() {
+    if (!ref.mounted) return;
+    if (state.bytes != null && state.bytes!.isNotEmpty) return;
+    _restart();
+  }
+
+  /// Key of this tile's entry in the shared in-flight map. Auto-sized
+  /// requests include their size so a sharper re-request (after a zoom
+  /// change) never joins an older, smaller fetch of the same file and ends
+  /// up showing its bytes. Fixed-size requests keep the original key, which
+  /// is also what the viewer prefetch uses to coalesce with tiles.
+  String _inFlightKey(MountedContainer container) {
+    final base =
+        '${container.volId}:${container.mountedAt.millisecondsSinceEpoch}:$filePath';
+    return quality.auto ? '$base|${quality.size}' : base;
+  }
+
+  void _restart() {
+    if (!_started) return;
+    final container = _container;
+    if (container == null) return;
+    _cancel();
+    final cacheKey = _inFlightKey(container);
+    _cache?.remove(cacheKey);
+    _cancellationRetries = 0;
+    state = const AsyncThumbnailState();
+    _load();
+  }
+
+  void _onPlaybackActiveChanged() {
+    if (PlaybackThrottleController.isPlaybackActive.value) return;
+    if (!ref.mounted) return;
+    if (state.bytes != null && state.bytes!.isNotEmpty && !state.hasError) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!ref.mounted) return;
+      final container = _container;
+      if (container == null) return;
+      final cache = _cache;
+      final cacheKey = _inFlightKey(container);
+      cache?.remove(cacheKey);
+      state = const AsyncThumbnailState();
+      _load();
+    });
+  }
+
+  void _cancel() {
+    if (_limiterCompleter != null) {
+      _limiter?.cancel(_limiterCompleter!);
+      _limiterCompleter = null;
+    }
+  }
+
+  Future<void> _load() async {
+    final container = _container;
+    final fetchFn = _fetchFn;
+    final cache = _cache;
+    final limiter = _limiter;
+    if (container == null || fetchFn == null || cache == null || limiter == null) return;
+
+    final cacheKey = _inFlightKey(container);
+    var future = cache[cacheKey];
+
+    if (future == null) {
+      if (ref.mounted) state = state._copy(isLoading: true, hasError: false);
+
+      await Future.delayed(_debounce);
+      if (!ref.mounted) return;
+
+      final syncBytes = _syncLookup?.call();
+      if (syncBytes != null) {
+        state = AsyncThumbnailState(bytes: syncBytes, isLoading: false);
+        return;
+      }
+
+      future = cache[cacheKey];
+      if (future == null) {
+        future = _fetchWithQueue(container, filePath, fetchFn, limiter, _priority);
+        cache[cacheKey] = future;
+        final storedFuture = future;
+        unawaited(
+          storedFuture.then((_) => null, onError: (_) => null).whenComplete(() {
+            if (cache[cacheKey] == storedFuture) cache.remove(cacheKey);
+          }),
+        );
+      }
+    }
+
+    try {
+      final data = await future.timeout(_watchdogTimeout);
+      if (!ref.mounted) return;
+      _cancellationRetries = 0;
+      state = AsyncThumbnailState(bytes: data, isLoading: false);
+    } catch (e) {
+      if (!ref.mounted) return;
+      final errStr = e.toString();
+      final isCancellation = errStr.contains('Cancelled') || errStr.contains('cancelled');
+      if (isCancellation && _cancellationRetries < _maxCancellationRetries) {
+        // Dequeued/cancelled due to rapid scrolling, not a missing or
+        // corrupt file. Retry after a brief delay if this instance is
+        // still live -- bounded by [_maxCancellationRetries], see there.
+        _cancellationRetries++;
+        Future.delayed(const Duration(milliseconds: 150), () {
+          if (ref.mounted) _load();
+        });
+      } else {
+        state = state._copy(isLoading: false, hasError: true);
+      }
+    }
+  }
+
+  Future<Uint8List> _fetchWithQueue(
+    MountedContainer container,
+    String targetPath,
+    ThumbnailFetchFn fetchFn,
+    PriorityTaskQueue limiter,
+    TaskPriority priority,
+  ) async {
+    final completer = Completer<void>();
+    _limiterCompleter = completer;
+    bool acquired = false;
+
+    try {
+      await limiter.acquire(completer, priority: priority);
+      acquired = true;
+
+      if (!ref.mounted) {
+        throw Exception('Cancelled before processing');
+      }
+
+      return await retryWithBackoff<Uint8List>((attempt) {
+        if (!ref.mounted) {
+          throw Exception('Cancelled before retry attempt $attempt');
+        }
+        return fetchFn(container, targetPath);
+      },
+          // A deliberate "too large / not enough memory" refusal will just be
+          // refused again; don't re-run the native attempt three times.
+          retryIf: (e) => e is! ImagePreviewUnavailableException);
+    } finally {
+      if (_limiterCompleter == completer) _limiterCompleter = null;
+      if (acquired) limiter.release(completer);
+    }
+  }
+}

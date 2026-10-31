@@ -1,0 +1,90 @@
+import 'package:material_ui/material_ui.dart';
+import '../filesystem/file_size.dart';
+
+/// Formats a byte count into a human-readable string (e.g. "4.2 MB", "1 GB").
+/// Shared across ContainerCard, FileBrowserScreen's _StatsBar, and any other
+/// widget that previously carried its own copy of this logic.
+///
+/// Implemented in terms of [formatByteCount] (`core/filesystem/file_size.dart`)
+/// so there is exactly one formatting table shared with [FileSize.formatted]
+/// — behavior here is unchanged from before that refactor.
+String formatBytes(int bytes) => formatByteCount(bytes);
+
+/// Formats a duration into a concise human-readable string (e.g. "45s", "2m 15s", "1h 5m").
+String formatDuration(Duration d) {
+  if (d.isNegative || d.inSeconds <= 0) return '0s';
+  final hours = d.inHours;
+  final minutes = d.inMinutes.remainder(60);
+  final seconds = d.inSeconds.remainder(60);
+
+  if (hours > 0) {
+    return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
+  }
+  if (minutes > 0) {
+    return seconds > 0 ? '${minutes}m ${seconds}s' : '${minutes}m';
+  }
+  return '${seconds}s';
+}
+
+/// Formats a playback position/length the way a media player's clock reads:
+/// "03:07", or "01:02:03" once it passes an hour. A negative duration keeps
+/// its sign ("-00:05"). When [showMilliseconds] is true, appends millisecond
+/// precision (`"03:07.250"`).
+String formatClockDuration(Duration d, {bool showMilliseconds = false}) {
+  final Duration abs = d.isNegative ? -d : d;
+  final String minutes = abs.inMinutes.remainder(60).toString().padLeft(2, '0');
+  final String seconds = abs.inSeconds.remainder(60).toString().padLeft(2, '0');
+  final String sign = d.isNegative ? '-' : '';
+  final String millis = showMilliseconds
+      ? '.${(abs.inMilliseconds % 1000).toString().padLeft(3, '0')}'
+      : '';
+  if (abs.inHours > 0) {
+    final String hours = abs.inHours.toString().padLeft(2, '0');
+    return '$sign$hours:$minutes:$seconds$millis';
+  }
+  return '$sign$minutes:$seconds$millis';
+}
+
+// ── Entry date formatting ────────────────────────────────────────────────────
+
+const _months = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/// Formats a FAT/exFAT entry's modified-time (Unix seconds; 0 = unknown per
+/// [RawEntry.modifiedSecs]'s own doc comment) into a short display string for
+/// list rows: "14:32" for today, "Jan 5" for this year, "Jan 5, 2024"
+/// otherwise. Returns "—" when unknown.
+///
+/// When [context] is provided, uses [MaterialLocalizations] to format dates
+/// and times according to the user's active locale and 12/24-hour preference.
+String formatEntryDate(int secs, [BuildContext? context]) {
+  if (secs <= 0) return '—';
+  final dt = DateTime.fromMillisecondsSinceEpoch(secs * 1000);
+  final now = DateTime.now();
+
+  final isToday =
+      dt.year == now.year && dt.month == now.month && dt.day == now.day;
+
+  if (context != null) {
+    final localizations = MaterialLocalizations.of(context);
+    if (isToday) {
+      return localizations.formatTimeOfDay(TimeOfDay.fromDateTime(dt));
+    }
+    return dt.year == now.year
+        ? localizations.formatShortMonthDay(dt)
+        : localizations.formatShortDate(dt);
+  }
+
+  if (isToday) {
+    final hr = dt.hour.toString().padLeft(2, '0');
+    final min = dt.minute.toString().padLeft(2, '0');
+    return '$hr:$min';
+  }
+
+  final monthAbbr = _months[dt.month - 1];
+  return dt.year == now.year
+      ? '$monthAbbr ${dt.day}'
+      : '$monthAbbr ${dt.day}, ${dt.year}';
+}

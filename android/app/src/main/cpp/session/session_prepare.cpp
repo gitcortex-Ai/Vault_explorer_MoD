@@ -1,0 +1,1765 @@
+#include "crypto/thread_pool.h"
+#include "session_prepare.h"
+
+#include <algorithm>
+#include <atomic>
+#include <cstring>
+#include <fcntl.h>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <vector>
+
+#include <android/log.h>
+
+#include "container_format.h"
+#include "bitlocker_backend.h"
+#include "vhdx_image.h"
+#include "vhd_image.h"
+#include "container_header.h"
+#include "container_utils.h"
+#include "crypto/cascade.h"
+#include "crypto/cipher_shim.h"
+#include "crypto/keyfile_mixing.h"
+#include "crypto/luks_header.h"
+#include "crypto/vc_header_layout.h"
+#include "crypto/xts_tweak.h"
+#include "jni_callbacks.h"
+#include "volume_state.h"
+#include "block_io.h"
+
+#undef min
+#undef max
+
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "VaultExplorer_C++", __VA_ARGS__)
+
+static constexpr int MAX_VOLUMES = FF_VOLUMES;
+
+// Parses an MBR (and, if present, GPT) partition table from any
+// sector-addressable block source via the readSectors callback. Shared by
+// prepareUsbSession (backed by usbReadSectors) and prepareSession's
+// file-backed partition scan below (backed by pread on the container's fd)
+// so a "container file" can also be a whole-disk image -- e.g. a
+// fixed-format VHD exported from Windows with BitLocker already enabled --
+// with the encrypted volume living inside a partition rather than starting
+// at byte 0 of the file, the same way a raw USB disk already works. Also
+// reused by container_repair.cpp's format-detection scan (not just the
+// unlock path) -- see session_prepare.h.
+//
+// Always appends a trailing {0, 0} sentinel so callers that also want to
+// try "the whole device/file as one unpartitioned volume" (VeraCrypt/raw
+// LUKS/raw BitLocker containers) can loop over the result uniformly.
+std::vector<PartitionCandidate> scanPartitionTable(
+    const std::function<bool(uint64_t startSector, uint32_t count, unsigned char* out)>& readSectors) {
+    std::vector<PartitionCandidate> partitions;
+
+    unsigned char sector0[512];
+    if (readSectors(0, 1, sector0)) {
+        if (sector0[510] == 0x55 && sector0[511] == 0xAA) {
+            bool isGpt = false;
+
+            for (int i = 0; i < 4; i++) {
+                const unsigned char* entry = &sector0[446 + i * 16];
+                uint8_t type = entry[4];
+                if (type == 0xEE) {
+                    isGpt = true;
+                    break;
+                }
+                uint32_t startLba = readUint32LE(&entry[8]);
+                uint32_t numSectors = readUint32LE(&entry[12]);
+                if (startLba > 0 && numSectors > 0) {
+                    partitions.push_back({startLba, numSectors});
+                }
+            }
+
+            if (isGpt) {
+                std::unique_ptr<unsigned char[]> gptBuf(new unsigned char[33 * 512]);
+                if (readSectors(1, 33, gptBuf.get())) {
+                    const unsigned char* sector1 = gptBuf.get();
+                    const unsigned char* gptEntries = gptBuf.get() + 512;
+
+                    if (memcmp(sector1, "EFI PART", 8) == 0) {
+                        uint32_t numEntries = readUint32LE(&sector1[80]);
+                        uint32_t entrySize = readUint32LE(&sector1[84]);
+
+                        // gptBuf is exactly 33*512 bytes (header sector + 32
+                        // sectors of entry array); only 33*512-512 = 16384
+                        // bytes past `gptEntries` are actually allocated.
+                        // entrySize/numEntries come straight from an
+                        // on-disk (possibly corrupt or maliciously crafted)
+                        // GPT header, so the two bounds must be checked
+                        // together -- numEntries<=128 alone doesn't stop an
+                        // oversized entrySize (e.g. 256) from indexing past
+                        // the buffer.
+                        constexpr uint64_t kGptEntriesBufBytes = 33ull * 512 - 512;
+                        const bool entriesFit =
+                            entrySize >= 128 &&
+                            static_cast<uint64_t>(numEntries) * static_cast<uint64_t>(entrySize)
+                                <= kGptEntriesBufBytes;
+
+                        if (entriesFit) {
+                            for (uint32_t i = 0; i < numEntries; i++) {
+                                const unsigned char* entry = gptEntries + (i * entrySize);
+
+                                bool unused = true;
+                                for (int g = 0; g < 16; g++) {
+                                    if (entry[g] != 0) { unused = false; break; }
+                                }
+                                if (unused) continue;
+
+                                uint64_t startLba = readUint64LE(&entry[32]);
+                                uint64_t endLba = readUint64LE(&entry[40]);
+                                if (startLba > 0 && endLba >= startLba) {
+                                    partitions.push_back({startLba, endLba - startLba + 1});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    partitions.push_back({0, 0});
+    return partitions;
+}
+
+// Fixed-format VHD files (a common export shape for a whole-disk BitLocker
+// image -- e.g. via `Convert-VHD -VHDType Fixed`, or many disk-backup
+// tools) are just the raw disk bytes followed by a 512-byte "footer" sector
+// whose first 8 bytes are the "conectix" cookie. Excluding it keeps the
+// partition-table scan from treating those trailing 512 bytes as part of
+// the disk, and stops partition bounds-checking from rejecting a last
+// partition that legitimately runs right up to the pre-footer end of the
+// disk.
+//
+// NOTE: only fixed-format (or plain raw/.img) whole-disk files are
+// supported here, where sector N of the file really is sector N of the
+// disk. Dynamic/differencing VHDs (sparse, block-allocation-table-indexed
+// images) use a completely different on-disk layout and are not handled by
+// this scan -- see the probeVhdDiskKind()/VhdImage block in prepareSession,
+// which intercepts those before this function is ever called.
+// Reused by container_repair.cpp's format-detection scan too -- see
+// session_prepare.h.
+uint64_t usableFileBytesExcludingVhdFooter(int fd, uint64_t fileSize) {
+    if (fileSize < 512) return fileSize;
+    unsigned char footer[512];
+    if (pread(fd, footer, sizeof(footer), static_cast<off_t>(fileSize - 512)) != 512) return fileSize;
+    static const unsigned char kVhdCookie[8] = { 'c', 'o', 'n', 'e', 'c', 't', 'i', 'x' };
+    if (std::memcmp(footer, kVhdCookie, sizeof(kVhdCookie)) == 0) {
+        return fileSize - 512;
+    }
+    return fileSize;
+}
+
+static std::atomic<bool> cancelRequested[MAX_VOLUMES];
+
+static bool _cancelInit = [](){
+    for (int i = 0; i < MAX_VOLUMES; i++)
+        cancelRequested[i].store(false);
+    return true;
+}();
+
+bool isUnlockCancelled(int volId) {
+    return volId >= 0 && volId < MAX_VOLUMES &&
+           cancelRequested[volId].load(std::memory_order_acquire);
+}
+
+void clearUnlockCancellation(int volId) {
+    if (volId >= 0 && volId < MAX_VOLUMES)
+        cancelRequested[volId].store(false, std::memory_order_release);
+}
+
+void requestUnlockCancellation(int volId) {
+    if (volId >= 0 && volId < MAX_VOLUMES)
+        cancelRequested[volId].store(true, std::memory_order_release);
+}
+
+static bool tryDecryptHeader(
+    const unsigned char encH[VC_HEADER_BODY_SIZE],
+    CascadeId cipherId,
+    const unsigned char* derivedKeyMaterial,
+    unsigned char decH[VC_HEADER_BODY_SIZE],
+    ParsedHeaderFields* outFields = nullptr
+) {
+    CascadeContext tempCtx;
+    CascadeSpec spec = cascadeSpecFor(cipherId);
+    if (!cascadeSetKeys(tempCtx, cipherId, derivedKeyMaterial, spec.layerCount * 64)) {
+        return false;
+    }
+
+    std::memcpy(decH, encH, VC_HEADER_BODY_SIZE);
+
+    for (int i = 0; i < spec.layerCount; i++) {
+        const XtsLayerKey& layer = tempCtx.layers[i];
+        unsigned char T[16] = {0};
+        blockCipherEncryptBlock(layer.tweakKey, T, T);
+        for (int block = 0; block < 28; block++) {
+            unsigned char* blockPtr = decH + block * 16;
+            unsigned char tmp[16];
+            for (int j = 0; j < 16; j++) tmp[j] = blockPtr[j] ^ T[j];
+            blockCipherDecryptBlock(layer.dataKeyDec, tmp, tmp);
+            for (int j = 0; j < 16; j++) blockPtr[j] = tmp[j] ^ T[j];
+
+            if (block == 0 && i == spec.layerCount - 1 &&
+                (blockPtr[0] != 'V' || blockPtr[1] != 'E' || blockPtr[2] != 'R' || blockPtr[3] != 'A')) {
+                return false;
+            }
+
+            xtsMultiplyTweak(T);
+        }
+    }
+
+    if (decH[0] != 'V' || decH[1] != 'E' || decH[2] != 'R' || decH[3] != 'A') {
+        return false;
+    }
+
+    const uint32_t computedHdrCrc = container_crc32(decH, VC_HDR_CRC_COVERAGE_LEN);
+    const uint32_t storedHdrCrc   = readHeaderBE32(decH, VC_HDR_OFF_HEADER_CRC);
+    if (computedHdrCrc != storedHdrCrc) {
+        return false;
+    }
+
+    const uint32_t computedKeyCrc = container_crc32(&decH[VC_KEY_OFFSET_MASTER], VC_HDR_KEY_CRC_COVERAGE_LEN);
+    const uint32_t storedKeyCrc = readHeaderBE32(decH, VC_HDR_OFF_KEY_CRC);
+    if (computedKeyCrc != storedKeyCrc) {
+        return false;
+    }
+
+    if (outFields) {
+        outFields->volumeSize          = readHeaderBE64(decH, VC_HDR_OFF_VOLUME_SIZE);
+        outFields->hiddenVolumeSize    = readHeaderBE64(decH, VC_HDR_OFF_HIDDEN_VOL_SIZE);
+        outFields->encryptedAreaStart  = readHeaderBE64(decH, VC_HDR_OFF_KEY_SCOPE_START);
+        outFields->encryptedAreaLength = readHeaderBE64(decH, VC_HDR_OFF_KEY_SCOPE_SIZE);
+        outFields->sectorSize          = readHeaderBE32(decH, VC_HDR_OFF_SECTOR_SIZE);
+
+        if (cipherId == CascadeId::kAes) {
+            constexpr size_t kBenchBytes = 64 * 1024 * 1024;
+            constexpr size_t kSectors = kBenchBytes / 512;
+            std::vector<unsigned char> plain(512, 0), cipher(512);
+            auto start = std::chrono::steady_clock::now();
+            for (size_t i = 0; i < kSectors; i++) {
+                cascadeEncryptSector(tempCtx, i, plain.data(), cipher.data());
+            }
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - start).count();
+            double mbPerSec = (kBenchBytes / (1024.0 * 1024.0)) / (ms > 0 ? (ms / 1000.0) : 0.001);
+            __android_log_print(ANDROID_LOG_INFO, "VaultExplorer_Bench",
+                "BORINGSSL_AES_XTS_BENCH bytes=%zu ms=%lld throughputMBs=%.1f",
+                kBenchBytes, (long long)ms, mbPerSec);
+        }
+    }
+
+    return true;
+}
+
+bool deriveHeaderKey(HashId hash,
+                     const unsigned char* password, size_t passwordLen,
+                     const unsigned char* salt, int clampedPim,
+                     unsigned char* out, size_t outLen,
+                     std::function<bool()> cancelCheck) {
+    if (hash == HashId::kArgon2id) {
+        if (outLen != 192) return false;
+        uint32_t memoryKiB = 0;
+        uint32_t timeCost = 0;
+        uint32_t parallelism = 0;
+        argon2ParamsForPim(clampedPim, memoryKiB, timeCost, parallelism);
+        return argon2idDeriveKey(password, passwordLen, salt, VC_SALT_SIZE,
+                                 memoryKiB, timeCost, parallelism, out, outLen,
+                                 cancelCheck);
+    }
+    return pbkdf2Hmac(hash, password, passwordLen, salt, VC_SALT_SIZE,
+                       iterationsForHash(hash, clampedPim), out, outLen, cancelCheck);
+}
+
+std::mutex derivationMutexes[MAX_VOLUMES];
+
+bool deriveAndValidateHeader(
+    const unsigned char headerSector[VC_FULL_HEADER_SIZE],
+    const unsigned char* password, size_t passwordLen, int pim,
+    int cipherIdParam, int hashIdParam,
+    unsigned char outKeyMaterial[192],
+    unsigned char outDecryptedHeader[VC_HEADER_BODY_SIZE], 
+    CascadeId& outMatchedCipher,
+    HashId& outMatchedHash,
+    ParsedHeaderFields& outFields,
+    int volId,
+    std::atomic<bool>* externalAbort,
+    int slotId
+) {
+    const unsigned char* salt = headerSector;
+    const unsigned char* encH = headerSector + VC_SALT_SIZE;
+    const int safePim = clampPim(pim);
+
+    // ── 1. Cipher search order (AES is tested FIRST) ──────────────────────────
+    std::vector<CascadeId> ciphersToTry;
+    if (cipherIdParam != 255) {
+        ciphersToTry.push_back(static_cast<CascadeId>(cipherIdParam));
+    } else {
+        ciphersToTry = {
+            CascadeId::kAes,                  // 1st: AES-256 (512-bit XTS key)
+            CascadeId::kSerpent,
+            CascadeId::kTwofish,
+            CascadeId::kAesTwofish,
+            CascadeId::kSerpentAes,
+            CascadeId::kTwofishSerpent,
+            CascadeId::kAesTwofishSerpent,
+            CascadeId::kSerpentTwofishAes,
+            CascadeId::kCamellia,
+            CascadeId::kKuznyechik,
+            CascadeId::kCamelliaKuznyechik,
+            CascadeId::kCamelliaSerpent,
+            CascadeId::kKuznyechikAes,
+            CascadeId::kKuznyechikSerpentCamellia,
+            CascadeId::kKuznyechikTwofish,
+        };
+    }
+
+    // ── 2. Categorize hashes into tiers ──────────────────────────────────────
+    std::vector<HashId> tier1Hashes; // Tier 1: Most Common (SHA-512, SHA-256)
+    std::vector<HashId> tier2Hashes; // Tier 2: Secondary (Whirlpool, Streebog, BLAKE2s)
+    std::vector<HashId> tier3Hashes; // Tier 3: Argon2id
+
+    if (hashIdParam != 255) {
+        tier1Hashes.push_back(static_cast<HashId>(hashIdParam));
+    } else {
+        tier1Hashes = { HashId::kSha512, HashId::kSha256 };
+        tier2Hashes = { HashId::kWhirlpool, HashId::kStreebog, HashId::kBlake2s256 };
+        tier3Hashes = { HashId::kArgon2id };
+    }
+
+    const int totalHashSteps = static_cast<int>(
+        tier1Hashes.size() + tier2Hashes.size() + tier3Hashes.size()
+    );
+
+    if (isUnlockCancelled(volId)) return false;
+
+    std::atomic<bool> found{false};
+    std::atomic<int> combinationsAttempted{0};
+    std::mutex resultMutex;
+    unsigned char resultKeyMaterial[192] = {0};
+    CascadeId resultCipher{};
+    HashId resultHash{};
+    ParsedHeaderFields resultFields;
+
+    int maxLayersToTry = 1;
+    for (CascadeId c : ciphersToTry) {
+        maxLayersToTry = std::max(maxLayersToTry, cascadeSpecFor(c).layerCount);
+    }
+    const size_t neededKeyBytes = static_cast<size_t>(maxLayersToTry) * 64;
+
+    auto worker = [&](HashId h) {
+        auto cancelCheck = [&found, volId, externalAbort]() -> bool {
+            return found.load(std::memory_order_relaxed) || 
+                   isUnlockCancelled(volId) || 
+                   (externalAbort != nullptr && externalAbort->load(std::memory_order_relaxed));
+        };
+
+        if (cancelCheck()) return;
+
+        unsigned char derivedKeyMaterial[192] = {0};
+
+        reportUnlockProgress(volId, combinationsAttempted.load(), totalHashSteps,
+                             static_cast<int>(h), 255, 0, slotId);
+
+        const size_t outputBytes = h == HashId::kArgon2id ? 192 : neededKeyBytes;
+        if (!deriveHeaderKey(h, password, passwordLen, salt, safePim,
+                             derivedKeyMaterial, outputBytes, cancelCheck)) {
+            combinationsAttempted.fetch_add(1);
+            return;
+        }
+
+        if (cancelCheck()) {
+            mbedtls_platform_zeroize(derivedKeyMaterial, sizeof(derivedKeyMaterial));
+            return;
+        }
+
+        unsigned char decH[VC_HEADER_BODY_SIZE];
+        for (CascadeId c : ciphersToTry) {
+            if (cancelCheck()) break;
+            
+            reportUnlockProgress(volId, combinationsAttempted.load(), totalHashSteps,
+                                 static_cast<int>(h), static_cast<int>(c), 0, slotId);
+                                 
+            ParsedHeaderFields candidateFields;
+            if (tryDecryptHeader(encH, c, derivedKeyMaterial, decH, &candidateFields)) {
+                bool expected = false;
+                if (found.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
+                    std::lock_guard<std::mutex> lock(resultMutex);
+                    std::memcpy(resultKeyMaterial, derivedKeyMaterial, 192); 
+                    std::memcpy(outDecryptedHeader, decH, VC_HEADER_BODY_SIZE);
+                    resultCipher = c;
+                    resultHash = h;
+                    resultFields = candidateFields;
+                    if (externalAbort) externalAbort->store(true, std::memory_order_release);
+                }
+                mbedtls_platform_zeroize(decH, sizeof(decH));
+                mbedtls_platform_zeroize(derivedKeyMaterial, sizeof(derivedKeyMaterial));
+                combinationsAttempted.fetch_add(1);
+                return;
+            }
+        }
+        mbedtls_platform_zeroize(derivedKeyMaterial, sizeof(derivedKeyMaterial));
+        combinationsAttempted.fetch_add(1);
+    };
+
+    auto runBatch = [&](const std::vector<HashId>& batch) {
+        if (batch.empty() || found.load(std::memory_order_acquire) ||
+            isUnlockCancelled(volId) || (externalAbort && externalAbort->load())) {
+            return;
+        }
+        std::vector<std::future<void>> futures;
+        futures.reserve(batch.size());
+        for (HashId h : batch) {
+            futures.push_back(ThreadPool::getInstance().enqueue(worker, h));
+        }
+        for (auto& f : futures) f.get();
+    };
+
+    // ── Execute in order of popularity ────────────────────────────────────────
+    runBatch(tier1Hashes); // 1st: SHA-512 & SHA-256 with AES
+    runBatch(tier2Hashes); // 2nd: Whirlpool, Streebog, BLAKE2s
+    runBatch(tier3Hashes); // 3rd: Argon2id
+
+    if (!found.load(std::memory_order_acquire)) {
+        if (isUnlockCancelled(volId)) {
+            LOGI("deriveAndValidateHeader: cancelled (vol=%d)", volId);
+        } else {
+            LOGI("deriveAndValidateHeader: failed (cipher=%d hash=%d)",
+                 cipherIdParam, hashIdParam);
+        }
+        return false;
+    }
+
+    std::memcpy(outKeyMaterial, resultKeyMaterial, sizeof(resultKeyMaterial));
+    outMatchedCipher = resultCipher;
+    outMatchedHash = resultHash;
+    outFields = resultFields;
+    mbedtls_platform_zeroize(resultKeyMaterial, sizeof(resultKeyMaterial));
+    LOGI("deriveAndValidateHeader: success (cipher=%d hash=%d hidden=%d)",
+         static_cast<int>(resultCipher), static_cast<int>(resultHash),
+         resultFields.isHiddenVolume() ? 1 : 0);
+    return true;
+}
+
+static bool prepareLuksSession(int fd, const unsigned char* password, size_t passwordLen, int volId,
+                                const unsigned char* preservedKey, size_t preservedKeyLen,
+                                const int* keyfileFds, int keyfileCount,
+                                bool readOnly) {
+    if (volId < 0 || volId >= MAX_VOLUMES) { if (fd >= 0) close(fd); closeUnusedKeyfileFds(keyfileFds, keyfileCount); return false; }
+    if (fd < 0) { closeUnusedKeyfileFds(keyfileFds, keyfileCount); return false; }
+
+    VolumeState& v = volumes[volId];
+
+    std::vector<unsigned char> keyfileBuf;
+    const unsigned char* effectivePassword = password;
+    size_t effectivePasswordLen = passwordLen;
+
+    if (keyfileCount > 0 && keyfileFds != nullptr && keyfileFds[0] >= 0) {
+        constexpr size_t kMaxKeyfileBytes = 1024 * 1024;
+        keyfileBuf.resize(kMaxKeyfileBytes);
+        ssize_t total = 0, n;
+        while (total < static_cast<ssize_t>(kMaxKeyfileBytes) &&
+               (n = read(keyfileFds[0], keyfileBuf.data() + total, kMaxKeyfileBytes - total)) > 0) {
+            total += n;
+        }
+        keyfileBuf.resize(total > 0 ? total : 0);
+        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+        if (keyfileBuf.empty()) {
+            LOGI("prepareLuksSession(vol=%d): keyfile unreadable or empty", volId);
+            close(fd);
+            return false;
+        }
+        effectivePassword = keyfileBuf.data();
+        effectivePasswordLen = keyfileBuf.size();
+    } else {
+        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+    }
+
+    uint64_t fileSize = 0;
+    struct stat st;
+    if (fstat(fd, &st) == 0) fileSize = static_cast<uint64_t>(st.st_size);
+
+    LuksVolumeInfo luksInfo;
+
+    auto cancelCheck = [volId](int) -> bool {
+        return isUnlockCancelled(volId);
+    };
+    auto progressCb = [volId](int step, int total, int hashId, int cipherId) {
+        int format = (cipherId == 1) ? 2 : 1; 
+        reportUnlockProgress(volId, step, total, hashId, 255, format, 0);
+    };
+
+    const bool usingPreservedKey = (preservedKey != nullptr && preservedKeyLen > 0);
+    if (!luksRecoverMasterKey(fd,
+                              usingPreservedKey ? nullptr : effectivePassword,
+                              usingPreservedKey ? 0 : effectivePasswordLen,
+                              luksInfo, volId, cancelCheck, progressCb,
+                              usingPreservedKey ? preservedKey : nullptr,
+                              usingPreservedKey ? preservedKeyLen : 0)) {
+        close(fd);
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        return false;
+    }
+
+    if (luksInfo.cipherMode.rfind("xts-plain64", 0) != 0) {
+        LOGI("prepareLuksSession(vol=%d): unsupported cipher mode '%s'", volId, luksInfo.cipherMode.c_str());
+        mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        close(fd);
+        return false;
+    }
+
+    CascadeId dataCipher;
+    if (luksInfo.cipherName == "aes") dataCipher = CascadeId::kAes;
+    else if (luksInfo.cipherName == "serpent") dataCipher = CascadeId::kSerpent;
+    else if (luksInfo.cipherName == "twofish") dataCipher = CascadeId::kTwofish;
+    else if (luksInfo.cipherName == "camellia") dataCipher = CascadeId::kCamellia;
+    else if (luksInfo.cipherName == "kuznyechik") dataCipher = CascadeId::kKuznyechik;
+    else {
+        LOGI("prepareLuksSession(vol=%d): unsupported cipher '%s'", volId, luksInfo.cipherName.c_str());
+        mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        close(fd);
+        return false;
+    }
+    int mappedHash = 0; // kSha512, display-only for LUKS
+CascadeContext luksCascade;
+    CascadeSpec spec = cascadeSpecFor(dataCipher);
+    if (spec.layerCount != 1 || luksInfo.masterKey.size() != static_cast<size_t>(spec.layerCount) * 64) {
+        LOGI("prepareLuksSession(vol=%d): unsupported key size for %s (got %zu bytes)",
+             volId, luksInfo.cipherName.c_str(), luksInfo.masterKey.size());
+        mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        close(fd);
+        return false;
+    }
+
+    if (!cascadeSetKeys(luksCascade, dataCipher, luksInfo.masterKey.data(), luksInfo.masterKey.size())) {
+        mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        close(fd);
+        return false;
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(v.mutex);
+        v.fd = fd;
+        v.dataOffset = luksInfo.dataOffsetBytes;
+        v.dataAreaLengthBytes = fileSize - luksInfo.dataOffsetBytes;
+        v.isHiddenVolume = false;
+        v.fileSize = fileSize;
+        v.matchedCipherId = static_cast<int>(dataCipher);
+        v.matchedHashId = mappedHash;
+        v.luksSectorSize = (luksInfo.dataSectorSize >= 512) ? luksInfo.dataSectorSize : 512;
+        v.luksGenericCascade = luksCascade;
+        v.readOnly = readOnly;
+        
+        const uint64_t segmentStartSector = luksInfo.dataOffsetBytes / 512;
+        const uint64_t sectorsPerUnit = v.luksSectorSize / 512;
+        v.partitionStartSector = segmentStartSector - (luksInfo.ivTweak * sectorsPerUnit);
+        
+        v.containerFormat = luksInfo.version == 1
+            ? ContainerFormat::kLuks1 : ContainerFormat::kLuks2;
+        v.dataCtxInitialized = true;
+
+        if (v.preservedDerivedKey) {
+            mbedtls_platform_zeroize(v.preservedDerivedKey, v.preservedDerivedKeyLen);
+            delete[] v.preservedDerivedKey;
+        }
+        v.preservedDerivedKey = new unsigned char[luksInfo.masterKey.size()];
+        memcpy(v.preservedDerivedKey, luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        v.preservedDerivedKeyLen = luksInfo.masterKey.size();
+    }
+
+    mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+    if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+
+    LOGI("prepareLuksSession(vol=%d): LUKS%d unlocked, cipher=%s, dataOffset=%llu, keyBytes=%u, "
+         "sectorSize=%u, ivTweak=%llu, partitionStartSector=%llu, cachedKey=%d",
+         volId, luksInfo.version, luksInfo.cipherName.c_str(),
+         (unsigned long long)luksInfo.dataOffsetBytes, luksInfo.keyBytes,
+         v.luksSectorSize, (unsigned long long)luksInfo.ivTweak,
+         (unsigned long long)v.partitionStartSector, usingPreservedKey ? 1 : 0);
+    return true;
+}
+
+// ── Plain (unencrypted) VHD/VHDX mounting ───────────────────────────────
+//
+// A VHD/VHDX whose virtual disk (or one of its partitions) turns out to
+// carry a directly-recognizable filesystem, rather than a VeraCrypt/LUKS/
+// BitLocker header, needs no password at all: there's no encryption layer
+// to derive a key for. findsPlainFilesystemAt() is the signature check
+// prepareSession's VHDX/VHD/flat dispatch blocks fall back to once their
+// own BitLocker check at the same candidate location has already come back
+// negative; the three preparePlain*Session functions below then set up
+// VolumeState exactly like their prepare*BitLockerSession*/prepareLuksSession
+// counterparts, minus any credential handling, with ContainerFormat::kPlain
+// telling disk_read/disk_write (virtual_block_device.cpp), ntfsPread/
+// ntfsPwrite (ntfs_backend.cpp), and the ext2 io_manager (ext_backend.cpp,
+// itself layered on disk_read/disk_write) to pass bytes straight through
+// instead of running them through a cascade.
+//
+// Deliberately scoped to VHD/VHDX only (never plumbed into the generic
+// VeraCrypt header-slot matching path below): a VeraCrypt/LUKS volume's
+// data area is high-entropy ciphertext by construction, so it could never
+// coincidentally satisfy this signature check, but there's no reason to
+// go looking there anyway -- raw containers created by this app's own
+// "New Container" flow are never plain, so treating an unrecognized raw
+// file as "must need a password" (its existing behavior) rather than
+// "might be plain" avoids ever surfacing a confusing, out-of-scope UI
+// state for a format this feature was never meant to touch.
+//
+// Boot-sector formats (FAT12/16/32, exFAT, NTFS) share the 0x55AA
+// signature at bytes 510-511 plus an 8-byte ASCII filesystem-name field at
+// a format-specific offset (3 for exFAT/NTFS's OEM ID field, 54 for
+// FAT12/16's FS Type field, 82 for FAT32's -- see Microsoft's FAT and
+// exFAT specifications). ext2/3/4's superblock always starts at byte 1024
+// of the volume regardless of block size, with its magic number 8 bytes
+// before the end of this 1034-byte probe window (offset 56 into the
+// superblock) -- see ext2fs's <ext2fs/ext2_fs.h> EXT2_MAGIC_NUMBER.
+static bool looksLikePlainFilesystem(const unsigned char* buf, size_t len) {
+    if (len < 1024 + 58) return false;
+
+    if (buf[510] == 0x55 && buf[511] == 0xAA) {
+        static const unsigned char kExfat[] = { 'E','X','F','A','T',' ',' ',' ' };
+        static const unsigned char kNtfs[]  = { 'N','T','F','S',' ',' ',' ',' ' };
+        static const unsigned char kFat12[] = { 'F','A','T','1','2',' ',' ',' ' };
+        static const unsigned char kFat16[] = { 'F','A','T','1','6',' ',' ',' ' };
+        static const unsigned char kFat32[] = { 'F','A','T','3','2',' ',' ',' ' };
+        if (std::memcmp(buf + 3, kExfat, 8) == 0) return true;
+        if (std::memcmp(buf + 3, kNtfs, 8) == 0) return true;
+        if (std::memcmp(buf + 54, kFat12, 8) == 0) return true;
+        if (std::memcmp(buf + 54, kFat16, 8) == 0) return true;
+        if (std::memcmp(buf + 82, kFat32, 8) == 0) return true;
+    }
+
+    if (buf[1024 + 56] == 0x53 && buf[1024 + 57] == 0xEF) return true;
+
+    return false;
+}
+
+// Reads a 1034-byte probe window starting at [byteOffset] via [readAt] (a
+// pread-shaped callback over whichever address space the caller's volume
+// lives in -- raw file bytes for a fixed VHD, BAT-translated virtual-disk
+// bytes for a dynamic VHD/VHDX) and checks it with looksLikePlainFilesystem.
+// A short/failed read (e.g. the probe window runs past the end of the
+// volume) is treated as "not a match" rather than an error -- exactly like
+// vhdxDetectBitlockerAt/vhdDetectBitlockerAt/bitlockerDetectFile do for the
+// equivalent BitLocker signature check.
+static bool findsPlainFilesystemAt(
+        const std::function<bool(uint64_t byteOffset, unsigned char* out, size_t len)>& readAt,
+        uint64_t byteOffset) {
+    unsigned char buf[1024 + 58];
+    if (!readAt(byteOffset, buf, sizeof(buf))) return false;
+    return looksLikePlainFilesystem(buf, sizeof(buf));
+}
+
+static bool preparePlainSessionFlat(int fd, int volId, bool readOnly, uint64_t partitionStartByte,
+                                     uint64_t partitionSizeBytes, uint64_t fileSize) {
+    VolumeState& v = volumes[volId];
+    std::unique_lock<std::shared_mutex> lock(v.mutex);
+    v.fd = fd;
+    v.dataOffset = partitionStartByte;
+    v.dataAreaLengthBytes = partitionSizeBytes;
+    v.isHiddenVolume = false;
+    v.fileSize = fileSize;
+    v.isUsbSource = false;
+    v.readOnly = readOnly;
+    v.partitionStartSector = partitionStartByte / 512;
+    v.matchedCipherId = -1;
+    v.matchedHashId = -1;
+    v.containerFormat = ContainerFormat::kPlain;
+    v.plainBacking = VolumeState::PlainBacking::kFlatFile;
+    v.plainImage = nullptr;
+    v.dataCtxInitialized = true;
+    LOGI("preparePlainSessionFlat(vol=%d): mounted plain filesystem in fixed VHD, "
+         "partitionStartByte=%llu, size=%llu, readOnly=%d",
+         volId, (unsigned long long)partitionStartByte, (unsigned long long)partitionSizeBytes,
+         readOnly ? 1 : 0);
+    return true;
+}
+
+static bool preparePlainSessionVhdx(int fd, int volId, bool readOnly, uint64_t partitionStartByte,
+                                     uint64_t partitionSizeBytes) {
+    auto* img = new VhdxImage();
+    if (!img->open(fd, /*requestReadWrite=*/!readOnly)) {
+        LOGI("preparePlainSessionVhdx(vol=%d): VhdxImage::open failed: %s", volId, img->lastError());
+        delete img;
+        close(fd);
+        return false;
+    }
+    const bool actualReadOnly = readOnly || img->isReadOnly();
+
+    uint64_t fileSize = 0;
+    struct stat st;
+    if (fstat(fd, &st) == 0) fileSize = static_cast<uint64_t>(st.st_size);
+
+    VolumeState& v = volumes[volId];
+    std::unique_lock<std::shared_mutex> lock(v.mutex);
+    v.fd = fd;
+    v.dataOffset = partitionStartByte;
+    v.dataAreaLengthBytes = partitionSizeBytes;
+    v.isHiddenVolume = false;
+    v.fileSize = fileSize;
+    v.isUsbSource = false;
+    v.readOnly = actualReadOnly;
+    v.partitionStartSector = partitionStartByte / 512;
+    v.matchedCipherId = -1;
+    v.matchedHashId = -1;
+    v.containerFormat = ContainerFormat::kPlain;
+    v.plainBacking = VolumeState::PlainBacking::kVhdx;
+    v.plainImage = static_cast<void*>(img);
+    v.dataCtxInitialized = true;
+    LOGI("preparePlainSessionVhdx(vol=%d): mounted plain filesystem inside VHDX, "
+         "partitionStartByte=%llu, size=%llu, readOnly=%d",
+         volId, (unsigned long long)partitionStartByte, (unsigned long long)partitionSizeBytes,
+         actualReadOnly ? 1 : 0);
+    return true;
+}
+
+static bool preparePlainSessionVhd(int fd, int volId, bool readOnly, uint64_t fileSize,
+                                    uint64_t partitionStartByte, uint64_t partitionSizeBytes) {
+    auto* img = new VhdImage();
+    if (!img->open(fd, fileSize, /*requestReadWrite=*/!readOnly)) {
+        LOGI("preparePlainSessionVhd(vol=%d): VhdImage::open failed: %s", volId, img->lastError());
+        delete img;
+        close(fd);
+        return false;
+    }
+
+    VolumeState& v = volumes[volId];
+    std::unique_lock<std::shared_mutex> lock(v.mutex);
+    v.fd = fd;
+    v.dataOffset = partitionStartByte;
+    v.dataAreaLengthBytes = partitionSizeBytes;
+    v.isHiddenVolume = false;
+    v.fileSize = fileSize;
+    v.isUsbSource = false;
+    v.readOnly = readOnly;
+    v.partitionStartSector = partitionStartByte / 512;
+    v.matchedCipherId = -1;
+    v.matchedHashId = -1;
+    v.containerFormat = ContainerFormat::kPlain;
+    v.plainBacking = VolumeState::PlainBacking::kVhd;
+    v.plainImage = static_cast<void*>(img);
+    v.dataCtxInitialized = true;
+    LOGI("preparePlainSessionVhd(vol=%d): mounted plain filesystem inside VHD, "
+         "partitionStartByte=%llu, size=%llu, readOnly=%d",
+         volId, (unsigned long long)partitionStartByte, (unsigned long long)partitionSizeBytes,
+         readOnly ? 1 : 0);
+    return true;
+}
+
+// Cheap, read-only pre-check: does [fd] contain a VHD/VHDX whole-disk image
+// with a recognized plain (unencrypted) filesystem directly on it -- no
+// VeraCrypt/LUKS/BitLocker layer at all? This is exactly the condition
+// prepareSession's VHDX/VHD/flat dispatch blocks fall back to plain
+// mounting for, reimplemented standalone (and read-only/side-effect-free)
+// so the unlock UI can call it the moment a file is picked -- before ever
+// prompting for a password -- to decide whether the password field should
+// be required at all. Never mutates any VolumeState and never takes
+// volumes[]'s mutex, so it's safe to call even while other volumes are
+// mid-unlock; it does NOT take ownership of [fd] (unlike prepareSession),
+// so callers must close it themselves once done.
+//
+// Returns false (i.e. "assume a password is needed") for anything this
+// isn't confident about: LUKS- or BitLocker-protected files, non-VHD/VHDX
+// raw containers (VeraCrypt-shaped or otherwise), differencing VHDs, and
+// any file this can't even open -- matching prepareSession's own
+// conservative fallback to VeraCrypt header-slot matching in all of those
+// cases.
+const char* probeContainerFormat(int fd) {
+    if (fd < 0) return "unknown";
+
+    uint64_t fileSize = 0;
+    struct stat st;
+    if (fstat(fd, &st) != 0) return "unknown";
+    fileSize = static_cast<uint64_t>(st.st_size);
+
+ unsigned char magicBuf[8];
+    if (pread(fd, magicBuf, 8, 0) == 8 && isLuksContainer(magicBuf, 6)) {
+        uint16_t version = (static_cast<uint16_t>(magicBuf[6]) << 8) | magicBuf[7];
+        return (version == 2) ? "luks2" : "luks1";
+    }
+    unsigned char secMagic[8];
+    if (pread(fd, secMagic, 8, 0x4000) == 8 &&
+        (isLuksContainer(secMagic, 6) || std::memcmp(secMagic, "SKUL\xba\xbe", 6) == 0)) {
+        return "luks2";
+    }
+
+    if (bitlockerDetectFile(fd)) {
+        return "bitlocker";
+    }
+
+    if (isVhdxContainer(fd)) {
+        VhdxImage probeImg;
+        if (probeImg.open(fd, /*requestReadWrite=*/false)) {
+            auto vhdxReadSectors = [&probeImg](uint64_t startSector, uint32_t count, unsigned char* out) -> bool {
+                return probeImg.pread(startSector * 512ULL, out, static_cast<size_t>(count) * 512ULL);
+            };
+            auto vhdxReadAt = [&probeImg](uint64_t byteOffset, unsigned char* out, size_t len) -> bool {
+                return probeImg.pread(byteOffset, out, len);
+            };
+            auto vhdxDetectBitlockerAt = [&probeImg](uint64_t byteOffset) -> bool {
+                unsigned char header[11];
+                if (!probeImg.pread(byteOffset, header, sizeof(header))) return false;
+                static const unsigned char kFve[] = { '-','F','V','E','-','F','S','-' };
+                static const unsigned char kBtg[] = { 'M','S','W','I','N','4','.','1' };
+                return std::memcmp(header + 3, kFve, 8) == 0 || std::memcmp(header + 3, kBtg, 8) == 0;
+            };
+
+            if (vhdxDetectBitlockerAt(0)) return "bitlocker";
+            if (findsPlainFilesystemAt(vhdxReadAt, 0)) return "plain";
+
+            for (const auto& part : scanPartitionTable(vhdxReadSectors)) {
+                if (part.sectorCount == 0) continue;
+                const uint64_t partStartByte = part.startSector * 512ULL;
+                const uint64_t partSizeBytes = part.sectorCount * 512ULL;
+                if (partStartByte + partSizeBytes > probeImg.virtualDiskSize()) continue;
+                if (vhdxDetectBitlockerAt(partStartByte)) return "bitlocker";
+                if (findsPlainFilesystemAt(vhdxReadAt, partStartByte)) return "plain";
+            }
+        }
+        return "unknown";
+    }
+
+    const VhdDiskKind vhdKind = probeVhdDiskKind(fd, fileSize);
+    if (vhdKind == VhdDiskKind::kDifferencing) return "unknown";
+
+    if (vhdKind == VhdDiskKind::kDynamic) {
+        VhdImage probeImg;
+        if (probeImg.open(fd, fileSize, /*requestReadWrite=*/false)) {
+            auto vhdReadSectors = [&probeImg](uint64_t startSector, uint32_t count, unsigned char* out) -> bool {
+                return probeImg.pread(startSector * 512ULL, out, static_cast<size_t>(count) * 512ULL);
+            };
+            auto vhdReadAt = [&probeImg](uint64_t byteOffset, unsigned char* out, size_t len) -> bool {
+                return probeImg.pread(byteOffset, out, len);
+            };
+            auto vhdDetectBitlockerAt = [&probeImg](uint64_t byteOffset) -> bool {
+                unsigned char header[11];
+                if (!probeImg.pread(byteOffset, header, sizeof(header))) return false;
+                static const unsigned char kFve[] = { '-','F','V','E','-','F','S','-' };
+                static const unsigned char kBtg[] = { 'M','S','W','I','N','4','.','1' };
+                return std::memcmp(header + 3, kFve, 8) == 0 || std::memcmp(header + 3, kBtg, 8) == 0;
+            };
+
+            if (vhdDetectBitlockerAt(0)) return "bitlocker";
+            if (findsPlainFilesystemAt(vhdReadAt, 0)) return "plain";
+
+            for (const auto& part : scanPartitionTable(vhdReadSectors)) {
+                if (part.sectorCount == 0) continue;
+                const uint64_t partStartByte = part.startSector * 512ULL;
+                const uint64_t partSizeBytes = part.sectorCount * 512ULL;
+                if (partStartByte + partSizeBytes > probeImg.virtualDiskSize()) continue;
+                if (vhdDetectBitlockerAt(partStartByte)) return "bitlocker";
+                if (findsPlainFilesystemAt(vhdReadAt, partStartByte)) return "plain";
+            }
+        }
+        return "unknown";
+    }
+
+    if (vhdKind == VhdDiskKind::kFixed) {
+        const uint64_t usableBytes = usableFileBytesExcludingVhdFooter(fd, fileSize);
+        auto fileReadSectors = [fd, usableBytes](uint64_t startSector, uint32_t count, unsigned char* out) -> bool {
+            const uint64_t byteOffset = startSector * 512ULL;
+            const uint64_t byteLen = static_cast<uint64_t>(count) * 512ULL;
+            if (byteOffset + byteLen > usableBytes) return false;
+            return pread(fd, out, byteLen, static_cast<off_t>(byteOffset)) == static_cast<ssize_t>(byteLen);
+        };
+        auto fileReadAt = [fd, usableBytes](uint64_t byteOffset, unsigned char* out, size_t len) -> bool {
+            if (byteOffset + len > usableBytes) return false;
+            return pread(fd, out, len, static_cast<off_t>(byteOffset)) == static_cast<ssize_t>(len);
+        };
+
+        if (findsPlainFilesystemAt(fileReadAt, 0)) return "plain";
+
+        for (const auto& part : scanPartitionTable(fileReadSectors)) {
+            if (part.sectorCount == 0) continue;
+            const uint64_t partStartByte = part.startSector * 512ULL;
+            const uint64_t partSizeBytes = part.sectorCount * 512ULL;
+            if (partStartByte + partSizeBytes > usableBytes) continue;
+
+            unsigned char partMagic[8];
+            if (pread(fd, partMagic, 8, static_cast<off_t>(partStartByte)) == 8 && isLuksContainer(partMagic, 6)) {
+                uint16_t version = (static_cast<uint16_t>(partMagic[6]) << 8) | partMagic[7];
+                return (version == 2) ? "luks2" : "luks1";
+            }
+            if (bitlockerDetectFile(fd, partStartByte)) return "bitlocker";
+            if (findsPlainFilesystemAt(fileReadAt, partStartByte)) return "plain";
+        }
+    }
+
+    return "veracrypt";
+}
+
+bool detectsAsPlainDiskImage(int fd) {
+    return std::strcmp(probeContainerFormat(fd), "plain") == 0;
+}
+
+bool prepareSession(int fd, const unsigned char* password, size_t passwordLen, int pim, int volId, bool forceDerive, int cipherId, int hashId, const unsigned char* preservedKey, size_t preservedKeyLen, const int* keyfileFds, int keyfileCount, bool readOnly) {
+    if (volId < 0 || volId >= MAX_VOLUMES) { if (fd >= 0) close(fd); closeUnusedKeyfileFds(keyfileFds, keyfileCount); return false; }
+    VolumeState& v = volumes[volId];
+
+    if (!forceDerive) {
+        std::unique_lock<std::shared_mutex> lock(v.mutex);
+        if (v.dataCtxInitialized && v.fd >= 0) { if (fd >= 0) close(fd); closeUnusedKeyfileFds(keyfileFds, keyfileCount); return true; }
+    }
+    if (fd < 0) { closeUnusedKeyfileFds(keyfileFds, keyfileCount); return false; }
+
+    std::lock_guard<std::mutex> derivationLock(derivationMutexes[volId]);
+    
+    uint64_t fileSize = 0;
+    struct stat st;
+    if (fstat(fd, &st) == 0) fileSize = static_cast<uint64_t>(st.st_size);
+
+    {
+        unsigned char magicBuf[6];
+        if (pread(fd, magicBuf, 6, 0) == 6 && isLuksContainer(magicBuf, 6)) {
+            return prepareLuksSession(fd, password, passwordLen, volId,
+                                       preservedKey, preservedKeyLen,
+                                       keyfileFds, keyfileCount, readOnly);
+        }
+    }
+
+    // BitLocker check comes after the cheap LUKS magic-byte check (a LUKS
+    // container can never also be a BitLocker one, so order between the two
+    // doesn't matter for correctness) but before anything VeraCrypt-specific,
+    // for the same reason isLuksContainer is checked first: it's a hard
+    // format signal, not a key-derivation attempt, so there's no point
+    // falling into PBKDF2 trials first. Unlike the 6-byte LUKS magic check,
+    // this needs the real fd (see bitlockerDetectFile's doc comment for why
+    // a plain OEM-ID peek isn't reliable for Windows 8+ volumes).
+    //
+    // BitLocker has no keyfile/PIM/cipher/hash concept (see
+    // prepareBitLockerSession's signature), so any keyfiles the caller
+    // passed are simply unused here -- close them the same way the LUKS
+    // branch above does when it isn't the one consuming them.
+    if (bitlockerDetectFile(fd)) {
+        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+        return prepareBitLockerSession(fd, password, passwordLen, volId, readOnly);
+    }
+
+    // VHDX whole-disk images (Hyper-V's successor to VHD -- the default
+    // export shape since Windows 8/Server 2012, and typically *dynamic*
+    // rather than fixed, unlike most VHD exports). Unlike a fixed-format
+    // VHD, "byte N of the file" is never "byte N of the disk" for VHDX --
+    // every byte is indirected through a Block Allocation Table (see
+    // vhdx_image.h) -- so this can't share the raw-pread partition scan
+    // below. Detected via VhdxImage::detect() (8-byte "vhdxfile" signature
+    // at byte 0) before falling through to that raw-file scan, since a
+    // VHDX's own byte 0 is its own header, not an MBR/GPT the raw scan
+    // could otherwise misinterpret.
+    //
+    // We open the VhdxImage once here (read-only, just for the partition
+    // scan + signature probe) and let it go if this isn't a BitLocker-
+    // holding VHDX; prepareBitLockerSessionVhdx() below does its own
+    // fresh VhdxImage::open() with the real readOnly the caller asked for.
+    // That's a second parse of the header/BAT, but it keeps this dispatch
+    // block symmetric with the raw-VHD case above (which also just peeks
+    // via pread without keeping any state alive across the two steps) and
+    // avoids plumbing a VhdxImage instance through prepareBitLockerSession's
+    // ownership contract for the common case where the file isn't even a
+    // BitLocker-holding VHDX.
+    if (isVhdxContainer(fd)) {
+        VhdxImage probeImg;
+        if (probeImg.open(fd, /*requestReadWrite=*/false)) {
+            auto vhdxReadSectors = [&probeImg](uint64_t startSector, uint32_t count, unsigned char* out) -> bool {
+                return probeImg.pread(startSector * 512ULL, out, static_cast<size_t>(count) * 512ULL);
+            };
+            // Byte-offset (rather than sector-indexed) variant of the same
+            // read, for findsPlainFilesystemAt below, which needs to probe
+            // an arbitrary byte range rather than whole 512-byte sectors.
+            auto vhdxReadAt = [&probeImg](uint64_t byteOffset, unsigned char* out, size_t len) -> bool {
+                return probeImg.pread(byteOffset, out, len);
+            };
+
+            auto vhdxDetectBitlockerAt = [&probeImg](uint64_t byteOffset) -> bool {
+                // Mirrors bitlockerDetectFile's signature check (kFveSig/
+                // kBtgSig at offset 3, 11 bytes total) but reads through
+                // the VHDX's BAT translation instead of a flat pread.
+                unsigned char header[11];
+                if (!probeImg.pread(byteOffset, header, sizeof(header))) return false;
+                static const unsigned char kFve[] = { '-','F','V','E','-','F','S','-' };
+                static const unsigned char kBtg[] = { 'M','S','W','I','N','4','.','1' };
+                return std::memcmp(header + 3, kFve, 8) == 0 || std::memcmp(header + 3, kBtg, 8) == 0;
+            };
+
+            // Whole-VHDX-as-one-volume case (no partition table -- rare but
+            // possible if BitLocker encrypted the raw disk with no
+            // partitions on top, mirroring bitlockerDetectFile(fd) above).
+            if (vhdxDetectBitlockerAt(0)) {
+                closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                return prepareBitLockerSessionVhdx(fd, password, passwordLen, volId, readOnly,
+                                                    0, probeImg.virtualDiskSize());
+            }
+            // Same offset, but for "no encryption layer at all" rather than
+            // BitLocker -- see findsPlainFilesystemAt's doc comment just
+            // above prepareSession for why this can't false-positive on a
+            // VeraCrypt/LUKS container.
+            if (findsPlainFilesystemAt(vhdxReadAt, 0)) {
+                closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                return preparePlainSessionVhdx(fd, volId, readOnly, 0, probeImg.virtualDiskSize());
+            }
+
+            std::vector<PartitionCandidate> vhdxPartitions = scanPartitionTable(vhdxReadSectors);
+            for (const auto& part : vhdxPartitions) {
+                if (part.sectorCount == 0) continue; // {0,0} sentinel
+                const uint64_t partStartByte = part.startSector * 512ULL;
+                const uint64_t partSizeBytes = part.sectorCount * 512ULL;
+                if (partStartByte + partSizeBytes > probeImg.virtualDiskSize()) continue;
+                if (!vhdxDetectBitlockerAt(partStartByte)) {
+                    if (findsPlainFilesystemAt(vhdxReadAt, partStartByte)) {
+                        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                        return preparePlainSessionVhdx(fd, volId, readOnly, partStartByte, partSizeBytes);
+                    }
+                    continue;
+                }
+
+                closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                return prepareBitLockerSessionVhdx(fd, password, passwordLen, volId, readOnly,
+                                                    partStartByte, partSizeBytes);
+            }
+        } else {
+            LOGI("prepareSession(vol=%d): VHDX signature matched but open failed: %s",
+                 volId, probeImg.lastError());
+        }
+        // A VHDX file that isn't BitLocker-protected (or that we can't open
+        // -- e.g. differencing/log-pending) falls through to here. VeraCrypt
+        // and LUKS containers are never VHDX-shaped in practice, so unlike
+        // the raw-VHD case below there's no further fallback worth
+        // attempting -- but we still let it fall through to the generic
+        // VeraCrypt header-slot matching rather than failing outright, in
+        // case this is actually just a coincidental "vhdxfile"-prefixed
+        // raw/VeraCrypt container (astronomically unlikely, but free to
+        // allow given the code path already exists below).
+    }
+
+    // Legacy (pre-Hyper-V) VHD whole-disk images, *dynamic* (a.k.a.
+    // "expandable") sub-type. Mirrors the VHDX block above -- and
+    // vhd_image.h, which mirrors vhdx_image.h -- for the same underlying
+    // reason: a dynamic VHD's "byte N of the file" is never "byte N of the
+    // disk" (every byte is indirected through a Block Allocation Table),
+    // so it can't share usableFileBytesExcludingVhdFooter's flat-pread
+    // scan below, which only ever claimed to support the FIXED-format
+    // case (see that function's own doc comment).
+    //
+    // probeVhdDiskKind() is a cheap footer-only peek (no BAT/bitmap
+    // parsing) telling us, before doing anything else, which of the three
+    // legacy-VHD shapes (if any) this file is:
+    //   kFixed        -- byte-for-byte flat; fall through unchanged to the
+    //                     existing scan below, same as today.
+    //   kDynamic      -- BAT-indexed; handle here via VhdImage.
+    //   kDifferencing -- BAT-indexed AND needs a parent disk; out of scope,
+    //                     same stance as VHDX's differencing rejection.
+    //                     VhdImage::open() itself refuses these with a
+    //                     clear lastError() -- we still route it in here
+    //                     rather than the flat scan below, because a
+    //                     differencing VHD's sparse layout would otherwise
+    //                     be silently misread as flat bytes there.
+    // Either way, kDynamic/kDifferencing must NOT fall into the flat scan
+    // below -- handledAsExpandableVhd gates that.
+    bool handledAsExpandableVhd = false;
+    const VhdDiskKind vhdKind = probeVhdDiskKind(fd, fileSize);
+    if (vhdKind == VhdDiskKind::kDynamic || vhdKind == VhdDiskKind::kDifferencing) {
+        handledAsExpandableVhd = true;
+        VhdImage probeImg;
+        if (probeImg.open(fd, fileSize, /*requestReadWrite=*/false)) {
+            auto vhdReadSectors = [&probeImg](uint64_t startSector, uint32_t count, unsigned char* out) -> bool {
+                return probeImg.pread(startSector * 512ULL, out, static_cast<size_t>(count) * 512ULL);
+            };
+            // Byte-offset variant, for findsPlainFilesystemAt below -- see
+            // vhdxReadAt's comment in the VHDX block above.
+            auto vhdReadAt = [&probeImg](uint64_t byteOffset, unsigned char* out, size_t len) -> bool {
+                return probeImg.pread(byteOffset, out, len);
+            };
+
+            auto vhdDetectBitlockerAt = [&probeImg](uint64_t byteOffset) -> bool {
+                // Mirrors bitlockerDetectFile's signature check (kFveSig/
+                // kBtgSig at offset 3, 11 bytes total) but reads through
+                // the VHD's BAT translation instead of a flat pread.
+                unsigned char header[11];
+                if (!probeImg.pread(byteOffset, header, sizeof(header))) return false;
+                static const unsigned char kFve[] = { '-','F','V','E','-','F','S','-' };
+                static const unsigned char kBtg[] = { 'M','S','W','I','N','4','.','1' };
+                return std::memcmp(header + 3, kFve, 8) == 0 || std::memcmp(header + 3, kBtg, 8) == 0;
+            };
+
+            // Whole-VHD-as-one-volume case (no partition table -- rare but
+            // possible), mirroring bitlockerDetectFile(fd) above.
+            if (vhdDetectBitlockerAt(0)) {
+                closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                return prepareBitLockerSessionVhd(fd, password, passwordLen, volId, readOnly,
+                                                   0, probeImg.virtualDiskSize());
+            }
+            // Same offset, for "no encryption layer at all" -- see
+            // findsPlainFilesystemAt's doc comment above prepareSession.
+            if (findsPlainFilesystemAt(vhdReadAt, 0)) {
+                closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                return preparePlainSessionVhd(fd, volId, readOnly, fileSize, 0, probeImg.virtualDiskSize());
+            }
+
+            std::vector<PartitionCandidate> vhdPartitions = scanPartitionTable(vhdReadSectors);
+            for (const auto& part : vhdPartitions) {
+                if (part.sectorCount == 0) continue; // {0,0} sentinel
+                const uint64_t partStartByte = part.startSector * 512ULL;
+                const uint64_t partSizeBytes = part.sectorCount * 512ULL;
+                if (partStartByte + partSizeBytes > probeImg.virtualDiskSize()) continue;
+                if (!vhdDetectBitlockerAt(partStartByte)) {
+                    if (findsPlainFilesystemAt(vhdReadAt, partStartByte)) {
+                        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                        return preparePlainSessionVhd(fd, volId, readOnly, fileSize, partStartByte, partSizeBytes);
+                    }
+                    continue;
+                }
+
+                closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                return prepareBitLockerSessionVhd(fd, password, passwordLen, volId, readOnly,
+                                                   partStartByte, partSizeBytes);
+            }
+        } else {
+            LOGI("prepareSession(vol=%d): dynamic/differencing VHD signature matched but open failed: %s",
+                 volId, probeImg.lastError());
+        }
+        // Not BitLocker (or a differencing VHD we can't open): same stance
+        // as the VHDX block above -- VeraCrypt/LUKS are never
+        // dynamic-VHD-shaped in practice, so let it continue on to the
+        // generic VeraCrypt header-slot matching below, just skipping the
+        // (inapplicable) flat scan that follows.
+    }
+
+    // Whole-disk container files -- most commonly a fixed-format VHD
+    // exported from Windows with BitLocker already turned on -- don't have
+    // the FVE signature at byte 0 of the file: byte 0 is the disk's own
+    // MBR/GPT, and the BitLocker volume lives inside one of its partitions
+    // instead, exactly like a raw USB disk (see prepareUsbSession's
+    // matching scan below). Parse that partition table and retry the
+    // signature probe at each partition's byte offset before falling
+    // through to VeraCrypt's header-slot matching.
+    //
+    // Skipped entirely for a dynamic/differencing VHD (handledAsExpandableVhd)
+    // -- see the block above for why this flat, byte-N-of-file-is-byte-N-of-
+    // disk scan would silently misread one of those.
+    if (!handledAsExpandableVhd) {
+        const uint64_t usableBytes = usableFileBytesExcludingVhdFooter(fd, fileSize);
+        // usableFileBytesExcludingVhdFooter trims off the 512-byte VHD
+        // footer only when one is actually present, so "it trimmed
+        // something" is exactly "this is a fixed-format VHD" -- gating the
+        // plain-filesystem fallback below on that (rather than on any raw/
+        // non-VHD container reaching this same flat scan) keeps this
+        // change scoped to "unencrypted VHD/VHDX", matching BitLocker's own
+        // VHD-specific detection just above and leaving raw/VeraCrypt-style
+        // containers (.hc, .tc, arbitrary extension-less files) exactly as
+        // unable to skip the password prompt as they always have been.
+        const bool isFixedVhd = (usableBytes != fileSize);
+        auto fileReadSectors = [fd, usableBytes](uint64_t startSector, uint32_t count, unsigned char* out) -> bool {
+            const uint64_t byteOffset = startSector * 512ULL;
+            const uint64_t byteLen = static_cast<uint64_t>(count) * 512ULL;
+            if (byteOffset + byteLen > usableBytes) return false;
+            return pread(fd, out, byteLen, static_cast<off_t>(byteOffset)) == static_cast<ssize_t>(byteLen);
+        };
+        auto fileReadAt = [fd, usableBytes](uint64_t byteOffset, unsigned char* out, size_t len) -> bool {
+            if (byteOffset + len > usableBytes) return false;
+            return pread(fd, out, len, static_cast<off_t>(byteOffset)) == static_cast<ssize_t>(len);
+        };
+
+        // Whole-fixed-VHD-as-one-volume case (no partition table -- e.g. the
+        // disk was formatted directly with no MBR/GPT on top, "superfloppy"
+        // style). Mirrors the BitLocker whole-file check at the very top of
+        // this function, which a fixed VHD with no encryption at all would
+        // never have matched.
+        if (isFixedVhd && findsPlainFilesystemAt(fileReadAt, 0)) {
+            closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+            return preparePlainSessionFlat(fd, volId, readOnly, 0, usableBytes, fileSize);
+        }
+
+        std::vector<PartitionCandidate> filePartitions = scanPartitionTable(fileReadSectors);
+        for (const auto& part : filePartitions) {
+            if (part.sectorCount == 0) continue; // {0,0} sentinel -- whole-file case already tried above
+            const uint64_t partStartByte = part.startSector * 512ULL;
+            const uint64_t partSizeBytes = part.sectorCount * 512ULL;
+            if (partStartByte + partSizeBytes > usableBytes) continue;
+            if (!bitlockerDetectFile(fd, partStartByte)) {
+                if (isFixedVhd && findsPlainFilesystemAt(fileReadAt, partStartByte)) {
+                    closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+                    return preparePlainSessionFlat(fd, volId, readOnly, partStartByte, partSizeBytes, fileSize);
+                }
+                continue;
+            }
+
+            closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+            return prepareBitLockerSession(fd, password, passwordLen, volId, readOnly,
+                                            partStartByte, partSizeBytes);
+        }
+    }
+
+    struct HeaderSlot { uint64_t fileOffset; };
+    static constexpr HeaderSlot kHeaderSlots[] = { { 0 }, { VC_HIDDEN_HEADER_OFFSET } };
+
+    unsigned char dKey[192];           // PBKDF2 result (Key to Header)
+    unsigned char decH[VC_HEADER_BODY_SIZE]; // Decrypted Header Body
+    CascadeId matchedCipher{};
+    HashId matchedHash{};
+    ParsedHeaderFields fields;
+    bool matched = false;
+
+    unsigned char mixedPassword[MAX_PASSWORD_LEN] = {0};
+    ScopeZeroize mixedPasswordGuard(mixedPassword, sizeof(mixedPassword));
+    size_t mixedPasswordLen = 0;
+    const bool usingPreservedKey = (preservedKey != nullptr && preservedKeyLen > 0);
+    if (!usingPreservedKey) {
+        mixedPasswordLen = std::min(passwordLen, sizeof(mixedPassword));
+        memcpy(mixedPassword, password, mixedPasswordLen);
+        if (keyfileCount > 0 && !applyKeyfilesToPassword(keyfileFds, keyfileCount, mixedPassword, &mixedPasswordLen)) {
+            LOGI("prepareSession(vol=%d): keyfile mixing failed (unreadable/empty keyfile)", volId);
+            close(fd);
+            return false;
+        }
+    } else {
+        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+    }
+
+    if (usingPreservedKey) {
+        for (const auto& slot : kHeaderSlots) {
+            unsigned char headerSector[VC_FULL_HEADER_SIZE];
+            if (pread(fd, headerSector, VC_FULL_HEADER_SIZE, static_cast<off_t>(slot.fileOffset)) != VC_FULL_HEADER_SIZE) continue;
+
+            CascadeId candidateCipher = (cipherId != 255) ? static_cast<CascadeId>(cipherId) : CascadeId::kAes;
+            unsigned char candidateKey[192];
+            memset(candidateKey, 0, 192);
+            memcpy(candidateKey, preservedKey, std::min(preservedKeyLen, (size_t)192));
+
+            if (tryDecryptHeader(headerSector + VC_SALT_SIZE, candidateCipher, candidateKey, decH, &fields)) {
+                memcpy(dKey, candidateKey, 192);
+                matchedCipher = candidateCipher;
+                matchedHash = (hashId != 255) ? static_cast<HashId>(hashId) : HashId::kSha512;
+                matched = true;
+                break;
+            }
+        }
+    } else {
+        struct SlotReadResult { bool ok = false; unsigned char sector[VC_FULL_HEADER_SIZE]; };
+        SlotReadResult reads[2];
+        for (size_t i = 0; i < 2; i++) {
+            reads[i].ok = pread(fd, reads[i].sector, VC_FULL_HEADER_SIZE,
+                                 static_cast<off_t>(kHeaderSlots[i].fileOffset)) == VC_FULL_HEADER_SIZE;
+        }
+
+        struct SlotResult {
+            bool matched = false;
+            unsigned char dKey[192];
+            unsigned char decH[VC_HEADER_BODY_SIZE];
+            CascadeId matchedCipher{};
+            HashId matchedHash{};
+            ParsedHeaderFields fields;
+        };
+
+        // Sequential, standard-volume-first: deriveAndValidateHeader already fans the
+        // hash/cipher combinations for a single slot out across the shared ThreadPool.
+        // Running slot 0 (standard) and slot 1 (hidden) concurrently on separate threads
+        // made both calls submit to that same pool at once, so worker threads were handed
+        // out in whatever order the scheduler happened to pick -- the hidden-volume header
+        // could (and often did) get validated before the standard one. Trying the slots one
+        // at a time, standard first, matches VeraCrypt's own mount order and avoids splitting
+        // the pool's threads across two simultaneous derivations.
+        for (size_t i = 0; i < 2 && !matched; i++) {
+            if (!reads[i].ok) continue;
+            SlotResult result;
+            result.matched = deriveAndValidateHeader(
+                reads[i].sector, mixedPassword, mixedPasswordLen, pim, cipherId, hashId,
+                result.dKey, result.decH, result.matchedCipher,
+                result.matchedHash, result.fields, volId, nullptr, i);
+            if (result.matched) {
+                memcpy(dKey, result.dKey, 192);
+                memcpy(decH, result.decH, VC_HEADER_BODY_SIZE);
+                matchedCipher = result.matchedCipher;
+                matchedHash = result.matchedHash;
+                fields = result.fields;
+                matched = true;
+            }
+        }
+    }
+
+    if (!matched) { close(fd); return false; }
+
+
+    CascadeContext candidateCascade;
+    CascadeSpec spec = cascadeSpecFor(matchedCipher);
+    const unsigned char* masterKeyPtr = &decH[VC_KEY_OFFSET_MASTER]; 
+
+
+    if (!cascadeSetKeys(candidateCascade, matchedCipher, masterKeyPtr, spec.layerCount * 64)) {
+        close(fd); return false;
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(v.mutex);
+        if (v.preservedDerivedKey) {
+            mbedtls_platform_zeroize(v.preservedDerivedKey, v.preservedDerivedKeyLen);
+            delete[] v.preservedDerivedKey;
+        }
+        v.preservedDerivedKey = new unsigned char[192];
+        memcpy(v.preservedDerivedKey, dKey, 192); 
+        v.preservedDerivedKeyLen = 192;
+
+        v.cascade = candidateCascade;
+        v.dataCtxInitialized = true;
+        v.fd = fd;
+        v.dataOffset = fields.encryptedAreaStart;
+        v.dataAreaLengthBytes = fields.encryptedAreaLength;
+        v.isHiddenVolume = fields.isHiddenVolume();
+        v.fileSize = fileSize;
+        v.matchedCipherId = (int)matchedCipher;
+        v.matchedHashId = (int)matchedHash;
+        v.partitionStartSector = 0; 
+        v.readOnly = readOnly;
+    }
+    return true;
+}
+
+bool enableHiddenVolumeProtection(
+    int volId,
+    const unsigned char* hiddenPassword, size_t hiddenPasswordLen,
+    int hiddenPim, int hiddenCipherId, int hiddenHashId,
+    const int* hiddenKeyfileFds, int hiddenKeyfileCount) {
+    if (volId < 0 || volId >= MAX_VOLUMES) {
+        closeUnusedKeyfileFds(hiddenKeyfileFds, hiddenKeyfileCount);
+        return false;
+    }
+    VolumeState& v = volumes[volId];
+
+    unsigned char mixedPassword[MAX_PASSWORD_LEN] = {0};
+    ScopeZeroize mixedPasswordGuard(mixedPassword, sizeof(mixedPassword));
+    size_t mixedPasswordLen = std::min(hiddenPasswordLen, sizeof(mixedPassword));
+    memcpy(mixedPassword, hiddenPassword, mixedPasswordLen);
+    if (hiddenKeyfileCount > 0 &&
+        !applyKeyfilesToPassword(hiddenKeyfileFds, hiddenKeyfileCount, mixedPassword, &mixedPasswordLen)) {
+        LOGI("enableHiddenVolumeProtection(vol=%d): hidden keyfile mixing failed", volId);
+        return false;
+    }
+    if (mixedPasswordLen == 0) {
+        LOGI("enableHiddenVolumeProtection(vol=%d): empty hidden password", volId);
+        return false;
+    }
+
+    uint64_t dataOffset, dataAreaLengthBytes;
+    {
+        std::shared_lock<std::shared_mutex> lock(v.mutex);
+        // Protection only makes sense when the volume actually mounted by
+        // the caller's (outer) password is the *outer* volume -- if that
+        // password happened to match the embedded hidden volume directly
+        // (the ordinary "type the hidden password to mount the hidden
+        // volume transparently" path, see kHeaderSlots above), there's no
+        // separate outer data area left to protect.
+        if (!v.dataCtxInitialized || v.isHiddenVolume) {
+            LOGI("enableHiddenVolumeProtection(vol=%d): no outer session to protect", volId);
+            return false;
+        }
+        dataOffset = v.dataOffset;
+        dataAreaLengthBytes = v.dataAreaLengthBytes;
+    }
+
+    // v.dataOffset is always container/device-absolute (see prepareSession
+    // and prepareUsbSession above) and, for a properly formed outer
+    // header, always equals VC_DATA_AREA_OFFSET past the container's own
+    // byte 0 -- so this recovers that byte 0 in the same absolute
+    // coordinate space physicalWrite() operates in, for either transport.
+    const uint64_t containerBase = dataOffset - VC_DATA_AREA_OFFSET;
+    const uint64_t hiddenHeaderOffset = containerBase + TC_HIDDEN_VOLUME_HEADER_OFFSET;
+
+    unsigned char headerSector[VC_FULL_HEADER_SIZE];
+    if (!physicalRead(volId, hiddenHeaderOffset, headerSector, VC_FULL_HEADER_SIZE)) {
+        LOGI("enableHiddenVolumeProtection(vol=%d): could not read hidden header", volId);
+        return false;
+    }
+
+    unsigned char dKey[192];
+    unsigned char decH[VC_HEADER_BODY_SIZE];
+    CascadeId matchedCipher{};
+    HashId matchedHash{};
+    ParsedHeaderFields fields;
+
+    const bool matched = deriveAndValidateHeader(
+        headerSector, mixedPassword, mixedPasswordLen, hiddenPim, hiddenCipherId, hiddenHashId,
+        dKey, decH, matchedCipher, matchedHash, fields, volId, nullptr, /*slotId=*/1);
+    mbedtls_platform_zeroize(dKey, sizeof(dKey));
+
+    if (!matched) {
+        LOGI("enableHiddenVolumeProtection(vol=%d): hidden password/keyfiles did not match", volId);
+        return false;
+    }
+    // Mirrors createContainerWithHidden's own validity check (see
+    // container_create.cpp): a hidden volume can occupy at most everything
+    // past the outer volume's reserved header area.
+    if (!fields.isHiddenVolume() || fields.hiddenVolumeSize == 0 ||
+        fields.hiddenVolumeSize >= dataAreaLengthBytes + VC_DATA_AREA_OFFSET) {
+        LOGI("enableHiddenVolumeProtection(vol=%d): decrypted header is not a valid hidden volume", volId);
+        return false;
+    }
+
+    // See container_create.cpp's createContainerWithHidden: the hidden
+    // volume's data area always occupies the last hiddenVolumeSize bytes
+    // of the outer container, and the outer container's own total size is
+    // dataOffset + dataAreaLengthBytes + VC_DATA_AREA_OFFSET (the trailing
+    // header-group-sized area reserved, but never used for data, by every
+    // outer volume this app creates).
+    const uint64_t outerContainerEnd = dataOffset + dataAreaLengthBytes + VC_DATA_AREA_OFFSET;
+
+    {
+        std::unique_lock<std::shared_mutex> lock(v.mutex);
+        v.hiddenVolumeProtectionEnabled = true;
+        v.hiddenProtectedStart = outerContainerEnd - fields.hiddenVolumeSize;
+        v.hiddenProtectedEnd = outerContainerEnd;
+        v.hiddenVolumeProtectionTriggered = false;
+    }
+    LOGI("enableHiddenVolumeProtection(vol=%d): armed -- outerEnd=%llu hiddenSize=%llu "
+         "protected=[%llu,%llu) outerDataOffset=%llu outerDataAreaLen=%llu writableBytes=%llu",
+         volId,
+         (unsigned long long)outerContainerEnd, (unsigned long long)fields.hiddenVolumeSize,
+         (unsigned long long)(outerContainerEnd - fields.hiddenVolumeSize),
+         (unsigned long long)outerContainerEnd,
+         (unsigned long long)dataOffset, (unsigned long long)dataAreaLengthBytes,
+         (unsigned long long)((outerContainerEnd - fields.hiddenVolumeSize) > dataOffset
+                                   ? (outerContainerEnd - fields.hiddenVolumeSize) - dataOffset
+                                   : 0));
+    return true;
+}
+
+static bool usbReadBytes(int volId, uint64_t byteOffset, void* outData, size_t len) {
+    if (len == 0) return true;
+    const uint64_t startSector = byteOffset / 512;
+    const uint64_t endSector = (byteOffset + len + 511) / 512;
+    const uint32_t sectorCount = static_cast<uint32_t>(endSector - startSector);
+    std::vector<unsigned char> buf(static_cast<size_t>(sectorCount) * 512);
+    if (!usbReadSectors(volId, startSector, sectorCount, buf.data())) return false;
+    const size_t innerOffset = static_cast<size_t>(byteOffset - startSector * 512);
+    std::memcpy(outData, buf.data() + innerOffset, len);
+    return true;
+}
+
+
+static bool prepareUsbLuksSession(uint64_t partitionStartSector, uint64_t partitionSizeBytes,
+                                   const unsigned char* password, size_t passwordLen, int volId,
+                                   const unsigned char* preservedKey, size_t preservedKeyLen,
+                                   const int* keyfileFds, int keyfileCount,
+                                   bool readOnly) {
+    VolumeState& v = volumes[volId];
+
+    std::vector<unsigned char> keyfileBuf;
+    const unsigned char* effectivePassword = password;
+    size_t effectivePasswordLen = passwordLen;
+
+    if (keyfileCount > 0 && keyfileFds != nullptr && keyfileFds[0] >= 0) {
+        constexpr size_t kMaxKeyfileBytes = 1024 * 1024;
+        keyfileBuf.resize(kMaxKeyfileBytes);
+        ssize_t total = 0, n;
+        while (total < static_cast<ssize_t>(kMaxKeyfileBytes) &&
+               (n = read(keyfileFds[0], keyfileBuf.data() + total, kMaxKeyfileBytes - total)) > 0) {
+            total += n;
+        }
+        keyfileBuf.resize(total > 0 ? total : 0);
+        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+        if (keyfileBuf.empty()) {
+            LOGI("prepareUsbLuksSession(vol=%d): keyfile unreadable or empty", volId);
+            return false;
+        }
+        effectivePassword = keyfileBuf.data();
+        effectivePasswordLen = keyfileBuf.size();
+    } else {
+        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+    }
+
+    const uint64_t baseOffset = partitionStartSector * 512;
+    auto readMutex = std::make_shared<std::mutex>();
+    LuksByteReader reader = [volId, baseOffset, readMutex](uint64_t offset, void* outData, size_t len) -> bool {
+        std::lock_guard<std::mutex> lock(*readMutex);
+        return usbReadBytes(volId, baseOffset + offset, outData, len);
+    };
+
+    LuksVolumeInfo luksInfo;
+    auto cancelCheck = [volId](int) -> bool { return isUnlockCancelled(volId); };
+    auto progressCb = [volId](int step, int total, int hashId, int cipherId) {
+        int format = (cipherId == 1) ? 2 : 1;
+        reportUnlockProgress(volId, step, total, hashId, 255, format, 0);
+    };
+
+    const bool usingPreservedKey = (preservedKey != nullptr && preservedKeyLen > 0);
+    if (!luksRecoverMasterKey(reader,
+                              usingPreservedKey ? nullptr : effectivePassword,
+                              usingPreservedKey ? 0 : effectivePasswordLen,
+                              luksInfo, volId, cancelCheck, progressCb,
+                              usingPreservedKey ? preservedKey : nullptr,
+                              usingPreservedKey ? preservedKeyLen : 0)) {
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        return false;
+    }
+
+    if (luksInfo.cipherMode.rfind("xts-plain64", 0) != 0) {
+        LOGI("prepareUsbLuksSession(vol=%d): unsupported cipher mode '%s'", volId, luksInfo.cipherMode.c_str());
+        mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        return false;
+    }
+
+    CascadeId dataCipher;
+    if (luksInfo.cipherName == "aes") dataCipher = CascadeId::kAes;
+    else if (luksInfo.cipherName == "serpent") dataCipher = CascadeId::kSerpent;
+    else if (luksInfo.cipherName == "twofish") dataCipher = CascadeId::kTwofish;
+    else if (luksInfo.cipherName == "camellia") dataCipher = CascadeId::kCamellia;
+    else if (luksInfo.cipherName == "kuznyechik") dataCipher = CascadeId::kKuznyechik;
+    else {
+        LOGI("prepareUsbLuksSession(vol=%d): unsupported cipher '%s'", volId, luksInfo.cipherName.c_str());
+        mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        return false;
+    }
+    int mappedHash = 0; // kSha512, display-only for LUKS
+
+    CascadeContext luksCascade;
+    CascadeSpec spec = cascadeSpecFor(dataCipher);
+    if (spec.layerCount != 1 || luksInfo.masterKey.size() != static_cast<size_t>(spec.layerCount) * 64) {
+        LOGI("prepareUsbLuksSession(vol=%d): unsupported key size for %s (got %zu bytes)",
+             volId, luksInfo.cipherName.c_str(), luksInfo.masterKey.size());
+        mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        return false;
+    }
+
+    if (!cascadeSetKeys(luksCascade, dataCipher, luksInfo.masterKey.data(), luksInfo.masterKey.size())) {
+        mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+        return false;
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(v.mutex);
+        v.isUsbSource = true;
+        v.fd = -1;
+        v.dataOffset = baseOffset + luksInfo.dataOffsetBytes;
+        v.dataAreaLengthBytes = partitionSizeBytes - luksInfo.dataOffsetBytes;
+        v.isHiddenVolume = false;
+        v.matchedCipherId = static_cast<int>(dataCipher);
+        v.matchedHashId = mappedHash;
+        v.luksSectorSize = (luksInfo.dataSectorSize >= 512) ? luksInfo.dataSectorSize : 512;
+        v.luksGenericCascade = luksCascade;
+        v.readOnly = readOnly;
+
+        const uint64_t segmentStartSector = (baseOffset + luksInfo.dataOffsetBytes) / 512;
+        const uint64_t sectorsPerUnit = v.luksSectorSize / 512;
+        v.partitionStartSector = segmentStartSector - (luksInfo.ivTweak * sectorsPerUnit);
+
+        v.containerFormat = luksInfo.version == 1 ? ContainerFormat::kLuks1 : ContainerFormat::kLuks2;
+        v.dataCtxInitialized = true;
+
+        if (v.preservedDerivedKey) {
+            mbedtls_platform_zeroize(v.preservedDerivedKey, v.preservedDerivedKeyLen);
+            delete[] v.preservedDerivedKey;
+        }
+        v.preservedDerivedKey = new unsigned char[luksInfo.masterKey.size()];
+        memcpy(v.preservedDerivedKey, luksInfo.masterKey.data(), luksInfo.masterKey.size());
+        v.preservedDerivedKeyLen = luksInfo.masterKey.size();
+    }
+
+    mbedtls_platform_zeroize(luksInfo.masterKey.data(), luksInfo.masterKey.size());
+    if (!keyfileBuf.empty()) mbedtls_platform_zeroize(keyfileBuf.data(), keyfileBuf.size());
+
+    LOGI("prepareUsbLuksSession(vol=%d): LUKS%d unlocked, cipher=%s, dataOffset=%llu, partitionSize=%llu",
+         volId, luksInfo.version, luksInfo.cipherName.c_str(),
+         (unsigned long long)luksInfo.dataOffsetBytes, (unsigned long long)partitionSizeBytes);
+    return true;
+}
+
+bool prepareUsbSession(const unsigned char* password, size_t passwordLen, int pim, int volId, int cipherId, int hashId, const unsigned char* preservedKey, size_t preservedKeyLen, int64_t partitionOffsetHint, const int* keyfileFds, int keyfileCount, bool readOnly) {
+    if (volId < 0 || volId >= MAX_VOLUMES) { closeUnusedKeyfileFds(keyfileFds, keyfileCount); return false; }
+    VolumeState& v = volumes[volId];
+    std::lock_guard<std::mutex> derivationLock(derivationMutexes[volId]);
+    {
+        std::shared_lock<std::shared_mutex> lock(v.mutex);
+        if (v.dataCtxInitialized && v.isUsbSource) {
+            LOGI("prepareUsbSession(vol=%d): session prepared by another thread", volId);
+            closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+            return true;
+        }
+    }
+
+    std::vector<PartitionCandidate> partitions = scanPartitionTable(
+        [volId](uint64_t startSector, uint32_t count, unsigned char* out) -> bool {
+            return usbReadSectors(volId, startSector, count, out);
+        });
+
+    if (partitionOffsetHint >= 0) {
+        const uint64_t hint = static_cast<uint64_t>(partitionOffsetHint);
+        auto hintIt = std::find_if(partitions.begin(), partitions.end(),
+            [hint](const PartitionCandidate& p) { return p.startSector == hint; });
+        if (hintIt != partitions.end()) {
+            std::iter_swap(partitions.begin(), hintIt);
+        } else {
+            partitions.insert(partitions.begin(), {hint, 0});
+        }
+    }
+
+    bool keyfilesConsumedByLuks = false;
+    for (const auto& part : partitions) {
+        if (part.sectorCount == 0) {
+            continue;
+        }
+        unsigned char firstSector[512];
+        if (!usbReadSectors(volId, part.startSector, 1, firstSector)) continue;
+        if (!isLuksContainer(firstSector, 6)) continue;
+
+        const int* attemptKeyfileFds = keyfilesConsumedByLuks ? nullptr : keyfileFds;
+        const int attemptKeyfileCount = keyfilesConsumedByLuks ? 0 : keyfileCount;
+        keyfilesConsumedByLuks = true; 
+
+        const uint64_t partitionSizeBytes = part.sectorCount * 512ULL;
+        if (prepareUsbLuksSession(part.startSector, partitionSizeBytes,
+                                  password, passwordLen, volId,
+                                  preservedKey, preservedKeyLen,
+                                  attemptKeyfileFds, attemptKeyfileCount,readOnly)) {
+            return true;
+        }
+    }
+
+    // Same per-partition scan for BitLocker, run after the LUKS scan for the
+    // same reason as the file-based path in prepareSession above (hard
+    // format signal, not worth trying VeraCrypt's PBKDF2 first). No keyfile
+    // bookkeeping needed here -- BitLocker never consumes keyfileFds, so
+    // unlike the loop above there's no "did an earlier iteration already
+    // consume it" state to track.
+    for (const auto& part : partitions) {
+        if (part.sectorCount == 0) {
+            continue;
+        }
+        if (!bitlockerDetectUsb(volId, part.startSector)) continue;
+
+        const uint64_t partitionSizeBytes = part.sectorCount * 512ULL;
+        if (prepareUsbBitLockerSession(part.startSector, partitionSizeBytes,
+                                       password, passwordLen, volId, readOnly)) {
+            closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+            return true;
+        }
+    }
+
+    unsigned char mixedPassword[MAX_PASSWORD_LEN] = {0};
+    ScopeZeroize mixedPasswordGuard(mixedPassword, sizeof(mixedPassword));
+    size_t mixedPasswordLen = 0;
+    const bool usingPreservedKey = (preservedKey != nullptr && preservedKeyLen > 0);
+    if (!usingPreservedKey) {
+        mixedPasswordLen = std::min(passwordLen, sizeof(mixedPassword));
+        memcpy(mixedPassword, password, mixedPasswordLen);
+        if (!keyfilesConsumedByLuks && keyfileCount > 0 &&
+            !applyKeyfilesToPassword(keyfileFds, keyfileCount, mixedPassword, &mixedPasswordLen)) {
+            LOGI("prepareUsbSession(vol=%d): keyfile mixing failed (unreadable/empty keyfile)", volId);
+            return false;
+        }
+    } else if (!keyfilesConsumedByLuks) {
+        closeUnusedKeyfileFds(keyfileFds, keyfileCount);
+    }
+
+    struct HeaderSlot { uint64_t sectorOffset; };
+    static constexpr HeaderSlot kHeaderSlots[] = {
+        { 0 },
+        { VC_HIDDEN_HEADER_OFFSET / 512 },
+    };
+
+    bool fsFound = false;
+    uint64_t foundDataOffset = 0;
+    uint64_t foundDataLength = 0;
+    bool foundIsHidden = false;
+    CascadeContext candidateCascade;
+    uint64_t matchedPartitionStart = 0;
+    CascadeId matchedCipherFound{};
+    HashId matchedHashFound{};
+    std::vector<unsigned char> derivedKeyBytes;
+
+    for (const auto& part : partitions) {
+        for (const auto& slot : kHeaderSlots) {
+            const uint64_t headerSector = part.startSector + slot.sectorOffset;
+
+            unsigned char dKey[192]{};
+            unsigned char decH[VC_HEADER_BODY_SIZE];
+            CascadeId matchedCipher{};
+            HashId matchedHash{};
+            ParsedHeaderFields fields;
+            bool derivedSuccessfully = false;
+
+            if (usingPreservedKey) {
+                unsigned char headerBuf[VC_FULL_HEADER_SIZE];
+                if (!usbReadSectors(volId, headerSector, 1, headerBuf)) continue;
+
+                CascadeId candidateCipher = (cipherId != 255) ? static_cast<CascadeId>(cipherId) : CascadeId::kAes;
+                const size_t bytesToCopy = std::min(preservedKeyLen, (size_t)192);
+                memcpy(dKey, preservedKey, bytesToCopy);
+
+                if (tryDecryptHeader(headerBuf + VC_SALT_SIZE, candidateCipher, dKey, decH, &fields)) {
+                    matchedCipher = candidateCipher;
+                    matchedHash = (hashId != 255) ? static_cast<HashId>(hashId) : HashId::kSha512;
+                    derivedSuccessfully = true;
+                }
+            } else {
+                unsigned char headerBuf[VC_FULL_HEADER_SIZE];
+                if (!usbReadSectors(volId, headerSector, 1, headerBuf)) continue;
+
+                derivedSuccessfully = deriveAndValidateHeader(headerBuf, mixedPassword, mixedPasswordLen, pim, cipherId, hashId,
+                                         dKey, decH, matchedCipher, matchedHash, fields, volId, nullptr, slot.sectorOffset > 0 ? 1 : 0);
+            }
+
+            if (!derivedSuccessfully) {
+                mbedtls_platform_zeroize(dKey, sizeof(dKey));
+                continue;
+            }
+
+            CascadeSpec spec = cascadeSpecFor(matchedCipher);
+            const unsigned char* masterKeyPtr = &decH[VC_KEY_OFFSET_MASTER];
+
+            if (!cascadeSetKeys(candidateCascade, matchedCipher, masterKeyPtr, spec.layerCount * 64)) {
+                mbedtls_platform_zeroize(dKey, sizeof(dKey));
+                continue;
+            }
+
+            fsFound = true;
+            foundDataOffset = part.startSector * 512 + fields.encryptedAreaStart;
+            foundDataLength = fields.encryptedAreaLength;
+            foundIsHidden   = fields.isHiddenVolume();
+            matchedPartitionStart = part.startSector;
+            matchedCipherFound = matchedCipher;
+            matchedHashFound = matchedHash;
+            derivedKeyBytes.assign(dKey, dKey + sizeof(dKey));
+            mbedtls_platform_zeroize(dKey, sizeof(dKey));
+            break;
+        }
+        if (fsFound) break;
+    }
+
+    if (!fsFound) {
+        return false;
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(v.mutex);
+        if (preservedKey == nullptr || preservedKeyLen == 0) {
+            if (v.preservedDerivedKey != nullptr) {
+                mbedtls_platform_zeroize(v.preservedDerivedKey, v.preservedDerivedKeyLen);
+                delete[] v.preservedDerivedKey;
+            }
+            v.preservedDerivedKey = new unsigned char[derivedKeyBytes.size()];
+            std::memcpy(v.preservedDerivedKey, derivedKeyBytes.data(), derivedKeyBytes.size());
+            v.preservedDerivedKeyLen = derivedKeyBytes.size();
+        }
+        v.cascade = candidateCascade;
+        v.isUsbSource          = true;
+        v.dataCtxInitialized   = true;
+        v.fd                   = -1;
+        v.dataOffset           = foundDataOffset;
+        v.dataAreaLengthBytes  = foundDataLength;
+        v.isHiddenVolume       = foundIsHidden;
+        v.partitionStartSector = matchedPartitionStart;
+        v.matchedCipherId      = static_cast<int>(matchedCipherFound);
+        v.matchedHashId        = static_cast<int>(matchedHashFound);
+        v.readOnly             = readOnly;
+    }
+    return true;
+}

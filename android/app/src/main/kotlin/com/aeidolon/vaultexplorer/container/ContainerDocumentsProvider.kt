@@ -1,0 +1,785 @@
+package com.aeidolon.vaultexplorer.container
+
+import android.content.Context
+import android.content.res.AssetFileDescriptor
+import android.database.Cursor
+import android.database.MatrixCursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Point
+import android.net.Uri
+import android.os.Build
+import android.os.CancellationSignal
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.ParcelFileDescriptor
+import android.os.storage.StorageManager
+import android.provider.DocumentsContract
+import android.provider.DocumentsProvider
+import java.io.File
+import java.io.FileNotFoundException
+import kotlin.concurrent.withLock
+import com.aeidolon.vaultexplorer.bridge.UsbBlockBridge
+import com.aeidolon.vaultexplorer.DirEntryWire
+import com.aeidolon.vaultexplorer.DocumentId
+import com.aeidolon.vaultexplorer.MimeTypeHelper
+import com.aeidolon.vaultexplorer.SecureFileWipe
+import com.aeidolon.vaultexplorer.UriNameResolver
+import com.aeidolon.vaultexplorer.VeLog
+
+class ContainerDocumentsProvider : DocumentsProvider() {
+
+    companion object {
+        /** Not private: `ThumbnailHandlers.handleGetApkIcon` builds a
+         *  document URI for this provider directly (to get a real
+         *  `ParcelFileDescriptor` for vault content -- see that method's
+         *  doc comment for why), so it needs this authority string too. */
+        const val AUTHORITY = "com.aeidolon.vaultexplorer.documents"
+        private const val TAG = "ContainerDocsProvider"
+
+        /** The in-container thumbnail disk cache directory (see
+         *  `ThumbnailCacheService.inContainerDir` on the Dart side — the
+         *  two must stay in sync, the same way channel method name
+         *  strings already are across that boundary). It lives at the
+         *  container root and is pure implementation bookkeeping, not
+         *  user content, so it's hidden from both the app's own file
+         *  browser and anything browsing this SAF root — see
+         *  [isReservedCachePath]. */
+        private const val THUMBNAIL_CACHE_DIR_NAME = ".thumbcache"
+    }
+
+    /** True for [fatPath] that names the in-container thumbnail cache
+     *  directory itself, or anything inside it — internal bookkeeping
+     *  rather than user content, so it's hidden from every SAF-facing
+     *  entry point (listings, direct document queries, opens, and
+     *  thumbnail requests), the same way it's hidden from the app's own
+     *  file browser. Matched against the *full* path, so a user's own
+     *  folder that happens to be named ".thumbcache" somewhere other
+     *  than the container root is unaffected — only the reserved
+     *  root-level directory and its contents are hidden. */
+    internal fun isReservedCachePath(fatPath: String): Boolean =
+        fatPath == THUMBNAIL_CACHE_DIR_NAME || fatPath.startsWith("$THUMBNAIL_CACHE_DIR_NAME/")
+
+    private val defaultRootProjection = arrayOf(
+        DocumentsContract.Root.COLUMN_ROOT_ID,
+        DocumentsContract.Root.COLUMN_MIME_TYPES,
+        DocumentsContract.Root.COLUMN_FLAGS,
+        DocumentsContract.Root.COLUMN_ICON,
+        DocumentsContract.Root.COLUMN_TITLE,
+        DocumentsContract.Root.COLUMN_SUMMARY,
+        DocumentsContract.Root.COLUMN_DOCUMENT_ID,
+        DocumentsContract.Root.COLUMN_AVAILABLE_BYTES,
+        DocumentsContract.Root.COLUMN_CAPACITY_BYTES
+    )
+
+    private val defaultDocumentProjection = arrayOf(
+        DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+        DocumentsContract.Document.COLUMN_MIME_TYPE,
+        DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+        DocumentsContract.Document.COLUMN_LAST_MODIFIED,
+        DocumentsContract.Document.COLUMN_FLAGS,
+        DocumentsContract.Document.COLUMN_SIZE
+    )
+
+    override fun onCreate(): Boolean {
+        VeLog.d(TAG) { "onCreate initialized" }
+        return true
+    }
+
+    // ── Roots ──────────────────────────────────────────────────────────────
+
+    override fun queryRoots(projection: Array<out String>?): Cursor {
+        VeLog.d(TAG) { "queryRoots called (projection=${projection?.contentToString()})" }
+        val resolvedProjection = projection ?: defaultRootProjection
+        val cursor = MatrixCursor(resolvedProjection)
+        cursor.setNotificationUri(context?.contentResolver, DocumentsContract.buildRootsUri(AUTHORITY))
+
+        for ((volId, session) in ContainerSessionRegistry.activeSessions.filter { it.value.documentProvider }) {
+            var flags = DocumentsContract.Root.FLAG_LOCAL_ONLY or
+                    DocumentsContract.Root.FLAG_SUPPORTS_EJECT
+            if (!session.readOnly) {
+                flags = flags or DocumentsContract.Root.FLAG_SUPPORTS_CREATE          
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                flags = flags or DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD
+            }
+
+            val rootTitle = session.displayName
+                ?: UriNameResolver.resolve(context?.contentResolver, Uri.parse(session.uri))
+            val (totalBytes, freeBytes) = ContainerFileSystem.getSpacePair(volId)
+            val rootSummary = if (totalBytes > 0)
+                "Volume — ${android.text.format.Formatter.formatFileSize(context, freeBytes)} free"
+            else "Volume"
+
+            val capacityBytes = if (totalBytes > 0) totalBytes else -1L
+            val availableBytes = if (freeBytes > 0) freeBytes else -1L
+
+            val row = cursor.newRow()
+            for (col in resolvedProjection) {
+                when (col) {
+                    DocumentsContract.Root.COLUMN_ROOT_ID -> row.add(session.stableId)
+                    DocumentsContract.Root.COLUMN_MIME_TYPES -> row.add("*/*")
+                    DocumentsContract.Root.COLUMN_DOCUMENT_ID -> row.add(DocumentId(volId, "dir", "").toString())
+                    DocumentsContract.Root.COLUMN_TITLE -> row.add(rootTitle)
+                    DocumentsContract.Root.COLUMN_SUMMARY -> row.add(rootSummary)
+                    DocumentsContract.Root.COLUMN_FLAGS -> row.add(flags)
+                    DocumentsContract.Root.COLUMN_ICON -> row.add(android.R.drawable.ic_lock_idle_charging)
+                    DocumentsContract.Root.COLUMN_AVAILABLE_BYTES -> row.add(availableBytes)
+                    DocumentsContract.Root.COLUMN_CAPACITY_BYTES -> row.add(capacityBytes)
+                    else -> row.add(null)
+                }
+            }
+        }
+
+        // Folder-level roots: one extra SAF root per exposed subfolder
+        for ((volId, session) in ContainerSessionRegistry.activeSessions) {
+            for (mount in session.subFolderMounts.values) {
+                var flags = DocumentsContract.Root.FLAG_LOCAL_ONLY or
+                        DocumentsContract.Root.FLAG_SUPPORTS_EJECT or
+                        DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD
+                if (!session.readOnly) {
+                    flags = flags or DocumentsContract.Root.FLAG_SUPPORTS_CREATE
+                }
+                val containerTitle = session.displayName
+                    ?: UriNameResolver.resolve(context?.contentResolver, Uri.parse(session.uri))
+
+                val row = cursor.newRow()
+                for (col in resolvedProjection) {
+                    when (col) {
+                        DocumentsContract.Root.COLUMN_ROOT_ID -> row.add("subfolder:${session.stableId}:${mount.fatPath}")
+                        DocumentsContract.Root.COLUMN_MIME_TYPES -> row.add("*/*")
+                        DocumentsContract.Root.COLUMN_DOCUMENT_ID -> row.add(DocumentId(volId, "dir", mount.fatPath).toString())
+                        DocumentsContract.Root.COLUMN_TITLE -> row.add(mount.displayName)
+                        DocumentsContract.Root.COLUMN_SUMMARY -> row.add("Folder in $containerTitle")
+                        DocumentsContract.Root.COLUMN_FLAGS -> row.add(flags)
+                        DocumentsContract.Root.COLUMN_ICON -> row.add(android.R.drawable.ic_lock_idle_charging)
+                        else -> row.add(null)
+                    }
+                }
+            }
+        }
+
+        VeLog.d(TAG) { "queryRoots returning ${cursor.count} roots" }
+        return cursor
+    }
+
+    override fun isChildDocument(parentDocumentId: String?, documentId: String?): Boolean {
+        VeLog.d(TAG) { "isChildDocument(parent=$parentDocumentId, child=$documentId)" }
+        if (parentDocumentId == null || documentId == null) return false
+        val parent = try { DocumentId.parse(parentDocumentId, "parent") }
+                     catch (e: Exception) { return false }
+        val child  = try { DocumentId.parse(documentId, "child") }
+                     catch (e: Exception) { return false }
+        
+        if (parent.volId != child.volId) return false
+        if (parent.fatPath.isEmpty()) return true
+        if (parent.fatPath == child.fatPath) return true 
+        
+        val isChild = child.fatPath.startsWith("${parent.fatPath}/")
+        VeLog.d(TAG) { "isChildDocument result: $isChild" }
+        return isChild
+    }
+
+    internal fun documentIdChain(volId: Int, fatPath: String, leafType: String): List<String> {
+        if (fatPath.isEmpty()) return emptyList()
+        val segments = fatPath.split("/")
+        val ids = mutableListOf<String>()
+        var acc = ""
+        for ((index, seg) in segments.withIndex()) {
+            acc = if (acc.isEmpty()) seg else "$acc/$seg"
+            val type = if (index == segments.lastIndex) leafType else "dir"
+            ids.add(DocumentId(volId, type, acc).toString())
+        }
+        return ids
+    }
+
+    @Throws(FileNotFoundException::class)
+    override fun findDocumentPath(parentDocumentId: String?, childDocumentId: String?): DocumentsContract.Path {
+        VeLog.d(TAG) { "findDocumentPath(parent=$parentDocumentId, child=$childDocumentId)" }
+        val child = DocumentId.parse(childDocumentId, "document")
+        ContainerFileSystem.requireSession(child.volId)
+
+        val fullChain = documentIdChain(child.volId, child.fatPath, child.type)
+
+        if (parentDocumentId != null) {
+            val parent = try { DocumentId.parse(parentDocumentId, "parent") }
+                         catch (e: Exception) { throw FileNotFoundException("Invalid parent ID") }
+            if (!isChildDocument(parentDocumentId, childDocumentId)) {
+                throw FileNotFoundException("$childDocumentId is not a descendant of $parentDocumentId")
+            }
+            val parentDepth = if (parent.fatPath.isEmpty()) 0 else parent.fatPath.split("/").size
+            val trimmed = fullChain.drop(parentDepth)
+            val resultPath = DocumentsContract.Path(null, trimmed.ifEmpty { listOf(child.toString()) })
+            VeLog.d(TAG) { "findDocumentPath (relative) returning path=${resultPath.path}" }
+            return resultPath
+        }
+
+        val rootId = ContainerSessionRegistry.activeSessions[child.volId]?.stableId
+            ?: throw FileNotFoundException("Vault for document $childDocumentId is not mounted")
+        val resultPath = DocumentsContract.Path(rootId, fullChain.ifEmpty { listOf(child.toString()) })
+        VeLog.d(TAG) { "findDocumentPath returning rootId=$rootId, path=${resultPath.path}" }
+        return resultPath
+    }
+
+    override fun ejectRoot(rootId: String?) {
+        VeLog.d(TAG) { "ejectRoot called (rootId=$rootId)" }
+        if (rootId == null) return
+
+        if (rootId.startsWith("subfolder:")) {
+            val rest = rootId.removePrefix("subfolder:")
+            val stableIdOrLegacyVolId = rest.substringBefore(":")
+            val volId = ContainerSessionRegistry.getVolumeIdByStableId(stableIdOrLegacyVolId)
+                ?: stableIdOrLegacyVolId.toIntOrNull()
+                    ?.takeIf { it in 0 until ContainerSessionRegistry.MAX_VOLUMES }
+                ?: return
+            val fatPath = rest.substringAfter(":", "")
+            ContainerSessionRegistry.activeSessions[volId]?.subFolderMounts?.remove(fatPath)
+            context?.contentResolver?.notifyChange(
+                DocumentsContract.buildRootsUri(AUTHORITY), null
+            )
+            return
+        }
+
+        val volId = ContainerSessionRegistry.getVolumeIdByStableId(rootId)
+            ?: rootId.toIntOrNull()?.takeIf { it in 0 until ContainerSessionRegistry.MAX_VOLUMES }
+            ?: return
+        val session = ContainerSessionRegistry.activeSessions[volId]
+
+        ContainerSessionRegistry.locks[volId].writeLock().withLock {
+            ContainerEngine.lock(volId)
+        }
+        if (session?.isUsbSource == true) UsbBlockBridge.unregister(volId)
+        ContainerSessionRegistry.removeSession(volId)
+        context?.contentResolver?.notifyChange(
+            DocumentsContract.buildRootsUri(AUTHORITY), null
+        )
+    }
+
+    private fun addDocumentRow(
+        cursor: MatrixCursor,
+        projection: Array<out String>,
+        docId: String,
+        displayName: String,
+        mimeType: String,
+        size: Long,
+        isDir: Boolean,
+        isRoot: Boolean,
+        readOnly: Boolean,
+        lastModifiedMillis: Long?,
+    ) {
+        var flags = 0
+        if (!isRoot && !readOnly) {
+            flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_DELETE
+            flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_RENAME
+        }
+        if (isDir) {
+            if (!readOnly) flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
+        } else {
+            if (!readOnly) flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_WRITE
+            if (mimeType.startsWith("image/") || mimeType.startsWith("video/"))
+                flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
+        }
+
+        val row = cursor.newRow()
+        for (col in projection) {
+            when (col) {
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID -> row.add(docId)
+                DocumentsContract.Document.COLUMN_MIME_TYPE -> row.add(mimeType)
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME -> row.add(displayName)
+                DocumentsContract.Document.COLUMN_LAST_MODIFIED -> row.add(lastModifiedMillis)
+                DocumentsContract.Document.COLUMN_FLAGS -> row.add(flags)
+                DocumentsContract.Document.COLUMN_SIZE -> if (isDir) row.add(null) else row.add(size) 
+                "_id" -> row.add(docId.hashCode()) 
+                else -> row.add(null)
+            }
+        }
+    }
+
+    override fun queryDocument(documentId: String?, projection: Array<out String>?): Cursor {
+        VeLog.d(TAG) { "queryDocument called (documentId=$documentId)" }
+        val resolvedProjection = projection ?: defaultDocumentProjection
+        val cursor = MatrixCursor(resolvedProjection)
+        
+        if (documentId == null) return cursor
+        cursor.setNotificationUri(context?.contentResolver, DocumentsContract.buildDocumentUri(AUTHORITY, documentId))
+        
+        val doc = try { DocumentId.parse(documentId, "document") } catch (e: Exception) { 
+            VeLog.w(TAG, e) { "queryDocument failed parsing ID: $documentId" }
+            throw FileNotFoundException("Invalid ID")
+        }
+        val volId   = doc.volId
+        val fatPath = doc.fatPath
+        if (isReservedCachePath(fatPath)) {
+            throw FileNotFoundException("Document $fatPath not found")
+        }
+
+        ContainerFileSystem.requireSession(volId)
+        val readOnly = ContainerSessionRegistry.activeSessions[volId]?.readOnly == true
+        val isSubfolderRoot =
+            ContainerSessionRegistry.activeSessions[volId]?.subFolderMounts?.containsKey(fatPath) == true
+
+        var actualIsDir = doc.isDir
+        var actualSize = 0L
+        var actualMtimeMillis: Long? = null
+
+        if (fatPath.isNotEmpty()) {
+            val parentPath = if (fatPath.contains("/")) fatPath.substringBeforeLast("/") else ""
+            val fileName = fatPath.substringAfterLast("/")
+            
+            val siblings = ContainerFileSystem.listDirectory(volId, parentPath) 
+                ?: throw FileNotFoundException("Parent directory missing")
+                
+            var found = false
+            for (fileStr in siblings) {
+                if (fileStr.startsWith("System:")) continue
+                val parsed = DirEntryWire.parse(fileStr) ?: continue
+
+                if (parsed.name == fileName) {
+                    found = true
+                    actualIsDir = parsed.isDir
+                    actualSize = parsed.sizeBytes
+                    actualMtimeMillis = parsed.mtimeUnixSecs * 1000L
+                    break
+                }
+            }
+            
+            if (!found) {
+                throw FileNotFoundException("Document $fatPath not found")
+            }
+        } else {
+            actualIsDir = true
+        }
+
+        val displayName = if (fatPath.isEmpty()) "Root $volId" else fatPath.substringAfterLast("/")
+        val mimeType = doc.mimeTypeOverride ?: (
+            if (actualIsDir) {
+                DocumentsContract.Document.MIME_TYPE_DIR
+            } else {
+                MimeTypeHelper.getMimeType(displayName) ?: "application/octet-stream"
+            }
+        )
+
+        addDocumentRow(
+            cursor, resolvedProjection, doc.toString(), displayName,
+            mimeType, actualSize, actualIsDir, fatPath.isEmpty() || isSubfolderRoot, readOnly,
+            actualMtimeMillis
+        )
+        return cursor
+    }
+
+    override fun queryChildDocuments(
+        parentDocumentId: String?,
+        projection: Array<out String>?,
+        sortOrder: String?
+    ): Cursor {
+        VeLog.d(TAG) { "queryChildDocuments called (parentDocumentId=$parentDocumentId, sort=$sortOrder)" }
+        val resolvedProjection = projection ?: defaultDocumentProjection
+        val cursor = MatrixCursor(resolvedProjection)
+        
+        if (parentDocumentId == null) return cursor
+        cursor.setNotificationUri(context?.contentResolver, DocumentsContract.buildChildDocumentsUri(AUTHORITY, parentDocumentId))
+        
+        val parent = try { DocumentId.parse(parentDocumentId, "parent") } catch (e: Exception) { 
+            VeLog.w(TAG, e) { "queryChildDocuments failed parsing parent ID: $parentDocumentId" }
+            return cursor 
+        }
+        val volId         = parent.volId
+        val parentFatPath = parent.fatPath
+        ContainerFileSystem.requireSession(volId)
+        val readOnly = ContainerSessionRegistry.activeSessions[volId]?.readOnly == true
+
+        try {
+            val files = ContainerFileSystem.listDirectory(volId, parentFatPath)
+            
+            files?.forEach { file ->
+                if (file.startsWith("System:")) return@forEach
+                val parsed = DirEntryWire.parse(file) ?: return@forEach
+                val isDir     = parsed.isDir
+                val cleanName = parsed.name
+                val size      = parsed.sizeBytes
+                val mtimeMillis = parsed.mtimeUnixSecs * 1000L
+                val childFatPath = if (parentFatPath.isEmpty()) cleanName else "$parentFatPath/$cleanName"
+                if (isReservedCachePath(childFatPath)) return@forEach
+                val childType    = if (isDir) "dir" else "file"
+                
+                val childMime = if (isDir) DocumentsContract.Document.MIME_TYPE_DIR 
+                                else (MimeTypeHelper.getMimeType(cleanName) ?: "application/octet-stream")
+
+                addDocumentRow(
+                    cursor, resolvedProjection, DocumentId(volId, childType, childFatPath).toString(),
+                    cleanName, childMime, size, isDir, false, readOnly,
+                    mtimeMillis
+                )
+            }
+        } catch (e: FileNotFoundException) {
+            VeLog.w(TAG, e) { "queryChildDocuments FileNotFound for $parentFatPath" }
+            throw e
+        } catch (e: Exception) {
+            VeLog.e(TAG, e) { "queryChildDocuments unexpected error for $parentFatPath: ${e.message}" }
+        }
+        return cursor
+    }
+
+    @Throws(FileNotFoundException::class)
+    override fun createDocument(parentDocumentId: String?, mimeType: String?, displayName: String?): String {
+        VeLog.d(TAG) { "createDocument called (parent=$parentDocumentId, mime=$mimeType, name=$displayName)" }
+        val parent = DocumentId.parse(parentDocumentId, "parent")
+        val volId  = parent.volId
+        val parentFatPath = parent.fatPath
+        ContainerFileSystem.requireSession(volId)
+        if (ContainerSessionRegistry.activeSessions[volId]?.readOnly == true) {   
+            throw FileNotFoundException("Container is mounted read-only")
+        }
+        
+        val fileName  = displayName?.replace("/", "_") ?: throw FileNotFoundException("No file name provided")
+        val cleanPath = if (parentFatPath.isEmpty()) fileName else "$parentFatPath/$fileName"
+        val isDirectory = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
+
+        val success = try {
+            if (isDirectory) {
+                ContainerFileSystem.createDirectory(volId, cleanPath)
+            } else {
+                ContainerFileSystem.writeFileChunk(volId, cleanPath, 0L, ByteArray(0)) &&
+                    ContainerFileSystem.finishWrite(volId, cleanPath)
+            }
+        } catch (e: Exception) {
+            VeLog.e(TAG, e) { "createDocument native failure on $cleanPath" }
+            throw FileNotFoundException("File operations failed natively: ${e.message}")
+        }
+
+        if (!success) throw FileNotFoundException("Creation failed for $cleanPath")
+
+        context?.contentResolver?.notifyChange(DocumentsContract.buildChildDocumentsUri(AUTHORITY, parentDocumentId), null)
+        context?.contentResolver?.notifyChange(DocumentsContract.buildDocumentUri(AUTHORITY, parentDocumentId), null)
+        
+        val childType = if (isDirectory) "dir" else "file"
+        val newDocId = DocumentId(volId, childType, cleanPath).toString()
+        VeLog.d(TAG) { "createDocument succeeded: $newDocId" }
+        return newDocId
+    }
+
+    private fun deleteRecursive(volId: Int, path: String, isDir: Boolean): Boolean {
+        if (isDir) {
+            try {
+                val children = ContainerFileSystem.listDirectory(volId, path)
+                children?.forEach { child ->
+                    if (child.startsWith("System:")) return@forEach
+                    val parsed = DirEntryWire.parse(child) ?: return@forEach
+                    val childPath = if (path.isEmpty()) parsed.name else "$path/${parsed.name}"
+
+                    deleteRecursive(volId, childPath, parsed.isDir)
+                }
+            } catch (e: Exception) {
+                VeLog.w(TAG, e) { "deleteRecursive listing error on $path" }
+            }
+        }
+        return ContainerFileSystem.deleteFile(volId, path)
+    }
+
+    @Throws(FileNotFoundException::class)
+    override fun deleteDocument(documentId: String?) {
+        VeLog.d(TAG) { "deleteDocument called (docId=$documentId)" }
+        val doc     = DocumentId.parse(documentId, "document")
+        val volId   = doc.volId
+        val fatPath = doc.fatPath
+        ContainerFileSystem.requireSession(volId)
+
+        if (ContainerSessionRegistry.activeSessions[volId]?.readOnly == true) {                                        
+            throw FileNotFoundException("Container is mounted read-only")
+        }
+
+        val success = deleteRecursive(volId, fatPath, doc.isDir)
+        if (!success) throw FileNotFoundException("Delete failed for $fatPath")
+
+        val parentPath = if (fatPath.contains("/")) fatPath.substringBeforeLast("/") else ""
+        val parentDocId = DocumentId(volId, "dir", parentPath).toString()
+        
+        context?.contentResolver?.notifyChange(DocumentsContract.buildChildDocumentsUri(AUTHORITY, parentDocId), null)
+        context?.contentResolver?.notifyChange(DocumentsContract.buildDocumentUri(AUTHORITY, parentDocId), null)
+        VeLog.d(TAG) { "deleteDocument succeeded for $fatPath" }
+    }
+
+    @Throws(FileNotFoundException::class)
+    override fun renameDocument(documentId: String?, displayName: String?): String {
+        VeLog.d(TAG) { "renameDocument called (docId=$documentId, displayName=$displayName)" }
+        val doc = DocumentId.parse(documentId, "document")
+        val volId = doc.volId
+        ContainerFileSystem.requireSession(volId)
+
+        if (ContainerSessionRegistry.activeSessions[volId]?.readOnly == true) {                                        
+            throw FileNotFoundException("Container is mounted read-only")
+        }
+
+        val newName = displayName?.replace("/", "_") ?: throw FileNotFoundException("No name provided")
+
+        val oldFatPath = doc.fatPath
+        val parentPath = if (oldFatPath.contains("/")) oldFatPath.substringBeforeLast("/") else ""
+        val newFatPath = if (parentPath.isEmpty()) newName else "$parentPath/$newName"
+
+        val success = ContainerFileSystem.renameFile(doc.volId, oldFatPath, newFatPath)
+        if (!success) throw FileNotFoundException("Rename failed for $oldFatPath to $newFatPath")
+
+        val parentDocId = DocumentId(doc.volId, "dir", parentPath).toString()
+        context?.contentResolver?.notifyChange(DocumentsContract.buildChildDocumentsUri(AUTHORITY, parentDocId), null)
+        
+        val childType = if (doc.isDir) "dir" else "file"
+        val newDocId = DocumentId(doc.volId, childType, newFatPath).toString()
+        
+        context?.contentResolver?.notifyChange(DocumentsContract.buildDocumentUri(AUTHORITY, documentId), null)
+        context?.contentResolver?.notifyChange(DocumentsContract.buildDocumentUri(AUTHORITY, newDocId), null)
+        
+        VeLog.d(TAG) { "renameDocument succeeded: $newDocId" }
+        return newDocId
+    }
+
+    @Throws(FileNotFoundException::class)
+    override fun openDocument(
+        documentId: String?,
+        mode: String?,
+        signal: CancellationSignal?
+    ): ParcelFileDescriptor {
+        VeLog.d(TAG) { "openDocument called (docId=$documentId, mode=$mode)" }
+        val doc     = DocumentId.parse(documentId, "document")
+        val volId   = doc.volId
+        val session = ContainerFileSystem.requireSession(volId)
+        val fatPath = doc.fatPath
+        if (isReservedCachePath(fatPath)) {
+            throw FileNotFoundException("Document $fatPath not found")
+        }
+
+        val isWrite = mode?.contains("w") == true || mode?.contains("r+") == true
+        if (isWrite && session.readOnly) {                                        
+            throw FileNotFoundException("Container is mounted read-only")
+        }
+
+        val storageManager = context?.getSystemService(Context.STORAGE_SERVICE) as? StorageManager
+            ?: throw FileNotFoundException("Could not obtain StorageManager")
+
+        val ioLease = ContainerDocumentIoRegistry.acquireHandle(volId)
+            ?: throw FileNotFoundException("Container is being locked; retry after the lock completes")
+        val currentSession = try {
+            ContainerFileSystem.requireSession(volId)
+        } catch (e: Exception) {
+            ioLease.close()
+            throw FileNotFoundException("Container is no longer mounted")
+        }
+        if (isWrite && currentSession.readOnly) {
+            ioLease.close()
+            throw FileNotFoundException("Container is mounted read-only")
+        }
+
+        val handlerThread = HandlerThread(
+            "vc_proxy_${volId}_${System.nanoTime()}"
+        ).apply { start() }
+        val handler = Handler(handlerThread.looper)
+
+        return try {
+            val callback = ContainerProxyCallback(context, volId, currentSession, fatPath, isWrite, handlerThread, ioLease)
+            val parcelMode = ParcelFileDescriptor.parseMode(mode ?: "r")
+            storageManager.openProxyFileDescriptor(parcelMode, callback, handler)
+        } catch (e: Exception) {
+            VeLog.e(TAG, e) { "openProxyFileDescriptor failed for $fatPath: ${e.message}" }
+            ioLease.close()
+            handlerThread.quitSafely()
+            throw FileNotFoundException("Failed to open proxy file descriptor: ${e.message}")
+        }
+    }
+
+    @Throws(FileNotFoundException::class)
+    override fun openDocumentThumbnail(
+        documentId: String?,
+        sizeHint: Point?,
+        signal: CancellationSignal?
+    ): AssetFileDescriptor {
+        VeLog.d(TAG) { "openDocumentThumbnail called (docId=$documentId, sizeHint=$sizeHint)" }
+        val doc     = DocumentId.parse(documentId, "document")
+        val volId   = doc.volId
+        val fatPath = doc.fatPath
+        if (fatPath.isEmpty()) throw FileNotFoundException(
+            "Cannot generate thumbnail for volume root"
+        )
+        if (isReservedCachePath(fatPath)) {
+            throw FileNotFoundException("Document $fatPath not found")
+        }
+        ContainerFileSystem.requireSession(volId)
+        signal?.throwIfCanceled()
+
+        val displayName = fatPath.substringAfterLast("/")
+        val isVideo = (MimeTypeHelper.getMimeType(displayName) ?: "").startsWith("video/")
+        val executor = if (isVideo) VideoThumbnailCoordinator.safVideoExecutor
+                       else VideoThumbnailCoordinator.safImageExecutor
+
+        val pipe     = ParcelFileDescriptor.createPipe()
+        val readEnd  = pipe[0]
+        val writeEnd = pipe[1]
+
+        executor.execute {
+            try {
+                if (signal?.isCanceled == true) {
+                    runCatching { writeEnd.close() }
+                    return@execute
+                }
+
+                context?.let { ctx ->
+                    val cached = SafThumbnailCache.tryRead(ctx, volId, fatPath)
+                    if (cached != null) {
+                        try {
+                            ParcelFileDescriptor.AutoCloseOutputStream(writeEnd).use { out ->
+                                out.write(cached)
+                            }
+                        } catch (_: Exception) {
+                            runCatching { writeEnd.close() }
+                        }
+                        return@execute
+                    }
+                }
+
+                val bmp = decodeThumbnailSource(volId, fatPath, sizeHint)
+                if (bmp == null) {
+                    runCatching { writeEnd.close() }
+                    return@execute
+                }
+                try {
+                    ParcelFileDescriptor.AutoCloseOutputStream(writeEnd).use { out ->
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 85, out)
+                    }
+                } finally {
+                    bmp.recycle()
+                }
+            } catch (e: Exception) {
+                VeLog.w(TAG, e) { "openDocumentThumbnail pipeline error for $fatPath: ${e.message}" }
+                runCatching { writeEnd.close() }
+            }
+        }
+
+        return AssetFileDescriptor(readEnd, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
+    }
+
+    private val THUMBNAIL_MEMORY_THRESHOLD_BYTES = 32L * 1024 * 1024
+
+    private fun decodeThumbnailSource(volId: Int, fatPath: String, sizeHint: Point?): Bitmap? {
+        val reqW = sizeHint?.x ?: 256
+        val reqH = sizeHint?.y ?: 256
+
+        val displayName = fatPath.substringAfterLast("/")
+        val mimeType = MimeTypeHelper.getMimeType(displayName) ?: "application/octet-stream"
+
+        if (mimeType.startsWith("video/")) {
+            return decodeVideoThumbnailSource(volId, fatPath, reqW, reqH)
+        }
+
+        val size = ContainerFileSystem.getFileSize(volId, fatPath)
+        if (size in 1..THUMBNAIL_MEMORY_THRESHOLD_BYTES) {
+            val bytes = readWholeFileInMemory(volId, fatPath, size) ?: return null
+            val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+            if (opts.outWidth <= 0 || opts.outHeight <= 0) return null
+            opts.inSampleSize       = calculateInSampleSize(opts, reqW, reqH)
+            opts.inJustDecodeBounds = false
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+        }
+
+        val tempFile = File(context?.cacheDir, "thumb_${System.nanoTime()}")
+        try {
+            val ok = ContainerFileSystem.extractToFile(volId, fatPath, tempFile.absolutePath)
+            if (!ok || !tempFile.exists()) return null
+
+            val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(tempFile.absolutePath, opts)
+            if (opts.outWidth <= 0 || opts.outHeight <= 0) return null
+            opts.inSampleSize       = calculateInSampleSize(opts, reqW, reqH)
+            opts.inJustDecodeBounds = false
+            return BitmapFactory.decodeFile(tempFile.absolutePath, opts)
+        } finally {
+            SecureFileWipe.secureDeleteFile(tempFile)
+        }
+    }
+
+    private fun decodeVideoThumbnailSource(volId: Int, fatPath: String, reqW: Int, reqH: Int): Bitmap? {
+        val maxEdge = maxOf(reqW, reqH).coerceAtLeast(64)
+
+        if (VideoThumbnailCoordinator.isPlaybackActive) return null
+
+        VideoThumbnailCoordinator.videoDecoderLock.lock()
+        try {
+            if (VideoThumbnailCoordinator.isPlaybackActive) return null
+
+            var retriever: android.media.MediaMetadataRetriever? = null
+            try {
+                retriever = android.media.MediaMetadataRetriever()
+                // Bound to a val so it can be referenced from the retry
+                // lambda below without smart-cast ambiguity over the
+                // enclosing var.
+                val mmr = retriever
+                val session = ContainerSessionRegistry.activeSessions[volId] ?: return null
+                val dataSource = ContainerMediaDataSource(context ?: return null, session.uri, fatPath, volId)
+                mmr.setDataSource(dataSource)
+
+                val durationUs = mmr
+                    .extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    ?.toLongOrNull()
+                    ?.let { it * 1000L } ?: 0L
+                val initialTimeUs = VideoThumbnailCoordinator.getInitialThumbnailTimeUs(durationUs)
+
+                var frame = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    mmr.getScaledFrameAtTime(initialTimeUs, android.media.MediaMetadataRetriever.OPTION_PREVIOUS_SYNC, maxEdge, maxEdge)
+                } else {
+                    mmr.getFrameAtTime(initialTimeUs, android.media.MediaMetadataRetriever.OPTION_PREVIOUS_SYNC)
+                }
+
+                if (frame != null && VideoThumbnailCoordinator.isLikelyBlankFrame(frame)) {
+                    if (durationUs > 0L) {
+                        for (fraction in VideoThumbnailCoordinator.BLANK_FRAME_RETRY_FRACTIONS) {
+                            val candidateUs = (durationUs * fraction).toLong()
+                            if (candidateUs <= initialTimeUs) continue
+                            val candidate = runCatching {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                                    mmr.getScaledFrameAtTime(candidateUs, android.media.MediaMetadataRetriever.OPTION_PREVIOUS_SYNC, maxEdge, maxEdge)
+                                } else {
+                                    mmr.getFrameAtTime(candidateUs, android.media.MediaMetadataRetriever.OPTION_PREVIOUS_SYNC)
+                                }
+                            }.getOrNull() ?: continue
+                            if (!VideoThumbnailCoordinator.isLikelyBlankFrame(candidate)) {
+                                frame?.recycle()
+                                frame = candidate
+                                break
+                            }
+                            candidate.recycle()
+                        }
+                    }
+                }
+                return frame?.let { VideoThumbnailCoordinator.scaledToFit(it, maxEdge) }
+            } catch (e: Exception) {
+                if (VideoThumbnailCoordinator.isCodecResourceError(e)) {
+                    VeLog.w(TAG) { "SAF video thumbnail hit codec resource limit for $fatPath: ${e.message}" }
+                }
+                return null
+            } finally {
+                runCatching { retriever?.release() }
+            }
+        } finally {
+            VideoThumbnailCoordinator.videoDecoderLock.unlock()
+        }
+    }
+
+    private val THUMBNAIL_READ_CHUNK_BYTES = 4 * 1024 * 1024
+
+    private fun readWholeFileInMemory(volId: Int, fatPath: String, size: Long): ByteArray? {
+        val out = java.io.ByteArrayOutputStream(size.toInt())
+        var offset = 0L
+        while (offset < size) {
+            val len = minOf(THUMBNAIL_READ_CHUNK_BYTES.toLong(), size - offset).toInt()
+            val chunk = ContainerFileSystem.readFileChunk(volId, fatPath, offset, len) ?: return null
+            if (chunk.isEmpty()) return null
+            out.write(chunk)
+            offset += chunk.size
+        }
+        return out.toByteArray()
+    }
+
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int
+    ): Int = VideoThumbnailCoordinator.calculateInSampleSize(
+        options.outWidth, options.outHeight, reqWidth, reqHeight
+    )
+}

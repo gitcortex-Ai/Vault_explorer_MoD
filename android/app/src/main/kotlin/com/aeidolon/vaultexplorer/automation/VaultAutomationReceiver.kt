@@ -1,0 +1,1120 @@
+package com.aeidolon.vaultexplorer.automation
+
+import android.app.ActivityOptions
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.hardware.camera2.CameraManager
+import android.net.Uri
+import android.os.Build
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.ParcelFileDescriptor
+import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkManager
+import com.aeidolon.vaultexplorer.SecureFileWipe
+import com.aeidolon.vaultexplorer.UriNameResolver
+import com.aeidolon.vaultexplorer.bridge.VaultAutomationUnlockedBridge
+import com.aeidolon.vaultexplorer.camera.VaultHeadlessCameraSession
+import com.aeidolon.vaultexplorer.camera.VaultVideoQuality
+import com.aeidolon.vaultexplorer.camera.listCameraLenses
+import com.aeidolon.vaultexplorer.R
+import com.aeidolon.vaultexplorer.container.ContainerFileSystem
+import com.aeidolon.vaultexplorer.container.ContainerLifecycleCore
+import com.aeidolon.vaultexplorer.container.ContainerSessionRegistry
+import com.aeidolon.vaultexplorer.service.VaultAutomationRecordingService
+import com.aeidolon.vaultexplorer.service.VaultKeepAliveService
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.CountDownLatch
+import java.util.UUID
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import com.aeidolon.vaultexplorer.VeLog
+import com.aeidolon.vaultexplorer.panic.PanicManager
+import com.aeidolon.vaultexplorer.panic.PanicSettings
+import com.aeidolon.vaultexplorer.panic.PanicTier
+import com.aeidolon.vaultexplorer.util.NotificationLocale
+import kotlinx.coroutines.runBlocking
+
+/**
+ * Headless entry point for any automation app to unlock, lock, import into,
+ * export out of, and (with an extra opt-in) photograph/record into a vault
+ * without opening the app UI. Every action needs the per-install API token
+ * (AutomationSettings) AND the specific vault opted in to the tier that
+ * action needs (AutomationSettings.AutomationTier) -- both are checked
+ * before any vault state is touched, and a bad/missing token gets no reply
+ * at all (see handleAction) so a probing app can't even learn the feature
+ * is configured.
+ *
+ * UNLOCK_VAULT/LOCK_VAULT need only the LIFECYCLE tier. SYNC_VAULT and
+ * IMPORT_FILE/EXPORT_FILE/IMPORT_FOLDER/EXPORT_FOLDER need FULL, since they
+ * read or write files -- a materially bigger trust decision than lifecycle
+ * control alone, hence two separate opt-in switches rather than one.
+ * TAKE_PHOTO/START_RECORDING/STOP_RECORDING and
+ * START_AUDIO_RECORDING/STOP_AUDIO_RECORDING need FULL *and* the
+ * separate AutomationSettings.canCapture opt-in -- see that function's doc
+ * comment for why silent camera/mic capture gets its own switch on top of
+ * FULL rather than riding along with file import/export. Audio-only
+ * recording shares that one switch rather than adding a second: video
+ * recording already captures the microphone under it, so a separate mic
+ * switch would not be a narrower grant.
+ *
+ * No hidden-volume support and no keyfile support here, by design -- see
+ * ContainerLifecycleCore.unlockContainer's doc comment. UNLOCK_VAULT
+ * covers all four unlock paths -- standard block-device containers plus
+ * Cryptomator/gocryptfs/CryFS -- dispatched on AutomationSettings.getFormat
+ * for the given vault (see handleUnlock). USB-attached containers are not
+ * covered by any action here yet.
+ *
+ * IMPORT_FILE/EXPORT_FILE/IMPORT_FOLDER/EXPORT_FOLDER accept either a plain
+ * filesystem path (this app already holds MANAGE_EXTERNAL_STORAGE) or a
+ * `content://` SAF Uri -- see VaultAutomationFolderOps's doc comment for
+ * the real limitation on the latter: it only works for a Uri this app
+ * already holds a persisted grant for, since Android doesn't let a sending
+ * app confer that grant onto an arbitrary broadcast extra string the way
+ * it can for an Intent's own `data`.
+ *
+ * Every action replies on ACTION_AUTOMATION_RESULT with RESULT_CODE /
+ * RESULT_MESSAGE so an automation profile listening for that broadcast (an
+ * ordinary "Intent Received" event, not a special reply mechanism) can
+ * branch a task chain on success/failure instead of assuming success.
+ * RESULT_MESSAGE additionally carries EXTRA_DURATION_MS for a successful
+ * STOP_RECORDING / STOP_AUDIO_RECORDING.
+ */
+class VaultAutomationReceiver : BroadcastReceiver() {
+
+    companion object {
+        private const val TAG = "VaultExplorer_Automation"
+
+        const val ACTION_UNLOCK_VAULT = "com.aeidolon.vaultexplorer.action.UNLOCK_VAULT"
+        const val ACTION_SYNC_VAULT = "com.aeidolon.vaultexplorer.action.SYNC_VAULT"
+        const val ACTION_LOCK_VAULT = "com.aeidolon.vaultexplorer.action.LOCK_VAULT"
+        const val ACTION_IMPORT_FILE = "com.aeidolon.vaultexplorer.action.IMPORT_FILE"
+        const val ACTION_EXPORT_FILE = "com.aeidolon.vaultexplorer.action.EXPORT_FILE"
+        const val ACTION_IMPORT_FOLDER = "com.aeidolon.vaultexplorer.action.IMPORT_FOLDER"
+        const val ACTION_EXPORT_FOLDER = "com.aeidolon.vaultexplorer.action.EXPORT_FOLDER"
+        const val ACTION_TAKE_PHOTO = "com.aeidolon.vaultexplorer.action.TAKE_PHOTO"
+        const val ACTION_START_RECORDING = "com.aeidolon.vaultexplorer.action.START_RECORDING"
+        const val ACTION_STOP_RECORDING = "com.aeidolon.vaultexplorer.action.STOP_RECORDING"
+        const val ACTION_START_AUDIO_RECORDING = "com.aeidolon.vaultexplorer.action.START_AUDIO_RECORDING"
+        const val ACTION_STOP_AUDIO_RECORDING = "com.aeidolon.vaultexplorer.action.STOP_AUDIO_RECORDING"
+        const val ACTION_WIPE_FILE = "com.aeidolon.vaultexplorer.action.WIPE_FILE"
+        const val ACTION_EMERGENCY_LOCK = "com.aeidolon.vaultexplorer.action.EMERGENCY_LOCK"
+        const val ACTION_EMERGENCY_PURGE = "com.aeidolon.vaultexplorer.action.EMERGENCY_PURGE"
+        const val ACTION_AUTOMATION_RESULT = "com.aeidolon.vaultexplorer.action.AUTOMATION_RESULT"
+
+        const val EXTRA_API_TOKEN = "api_token"
+        const val EXTRA_TIER = "tier" // Optional Int: 1, 2, or 3
+        const val EXTRA_VAULT_URI = "vault_uri"
+        const val EXTRA_PASSWORD = "password"            // optional; falls back to the stored automation password
+        const val EXTRA_PIM = "pim"                      // optional VeraCrypt Personal Iteration Multiplier (Int, default 0)
+        const val EXTRA_KEYFILE_URIS = "keyfile_uris"    // optional keyfile paths/URIs (pipe-delimited string)
+        const val EXTRA_CIPHER_ID = "cipher_id"          // optional cipher algorithm ID hint (Int, 255 = auto)
+        const val EXTRA_HASH_ID = "hash_id"              // optional hash algorithm ID hint (Int, 255 = auto)
+        const val EXTRA_READ_ONLY = "read_only"
+        const val EXTRA_SOURCE_PATH = "source_path"       // IMPORT_FILE/IMPORT_FOLDER/WIPE_FILE: real path or content:// Uri
+        const val EXTRA_DEST_PATH = "dest_path"           // EXPORT_FILE/EXPORT_FOLDER: real path or content:// Uri to write to
+        const val EXTRA_VAULT_PATH = "vault_path"         // path *inside* the vault; optional for TAKE_PHOTO/START_RECORDING/START_AUDIO_RECORDING
+        const val EXTRA_DELETE_SOURCE = "delete_source"   // IMPORT_FILE/IMPORT_FOLDER: wipe/delete source after import
+        const val EXTRA_PATTERN = "pattern"               // glob wildcard pattern for batch import/export (e.g. *.xlsx, HOSPITAL_*)
+        const val EXTRA_EXCLUDE_PATTERN = "exclude_pattern" // optional glob to skip matching files, folders, and folder contents
+        const val EXTRA_RECURSIVE = "recursive"           // boolean, whether glob batch matches recursively (default true)
+        const val EXTRA_STREAM_MODE = "stream_mode"       // EXPORT_FILE: stream decrypted bytes via pipe without disk writes
+
+        // TAKE_PHOTO / START_RECORDING
+        const val EXTRA_CAMERA_FACING = "camera_facing"   // optional: "back" (default) | "front"
+        const val EXTRA_VIDEO_QUALITY = "video_quality"   // START_RECORDING only, optional: "hd" | "fhd" (default) | "uhd"
+        const val EXTRA_RECORD_AUDIO = "record_audio"     // START_RECORDING only, optional, default true
+        const val EXTRA_AUDIO_QUALITY = "audio_quality"   // START_AUDIO_RECORDING only, optional: "voice" | "standard" (default) | "high"
+        const val EXTRA_SEGMENT_MINUTES = "segment_minutes" // START_RECORDING / START_AUDIO_RECORDING, optional: > 0 cuts the recording into parts of about this many minutes, each saved into the vault as it closes (default 0 = one file)
+
+        /** Longest part length accepted for [EXTRA_SEGMENT_MINUTES]. */
+        private const val MAX_SEGMENT_MINUTES = 240
+
+        /**
+         * Reads a `segment_minutes` extra however the sender typed it: Tasker
+         * and MacroDroid often send numbers as text. Anything missing,
+         * unreadable or not positive means 0 (no segmenting); anything above
+         * the limit is capped.
+         */
+        internal fun parseSegmentMinutes(raw: Any?): Int {
+            val minutes = when (raw) {
+                is Number -> raw.toInt()
+                is String -> raw.trim().toIntOrNull() ?: 0
+                else -> 0
+            }
+            return minutes.coerceIn(0, MAX_SEGMENT_MINUTES)
+        }
+
+        /** `Recording saved (…ms)`, naming the part count when it was cut into parts. */
+        internal fun recordingSavedMessage(kind: String, durationMs: Long, parts: Int): String =
+            if (parts > 1) "$kind saved in $parts parts (${durationMs}ms)" else "$kind saved (${durationMs}ms)"
+
+        const val EXTRA_ORIGINAL_ACTION = "original_action"
+        const val RESULT_CODE = "result_code"       // see the full list in this class's own doc comment below
+        const val RESULT_MESSAGE = "result_message"
+        const val EXTRA_DURATION_MS = "duration_ms" // STOP_RECORDING only, present when RESULT_CODE is OK
+        const val EXTRA_STREAM_URI = "stream_uri"   // EXPORT_FILE with stream_mode=true
+        const val EXTRA_MATCHED_COUNT = "matched_count"
+        const val EXTRA_SUCCEEDED_COUNT = "succeeded_count"
+        const val EXTRA_FAILED_COUNT = "failed_count"
+        const val EXTRA_SKIPPED_COUNT = "skipped_count"
+
+        // START_AUDIO_RECORDING takes no camera/video extras: it needs
+        // api_token, vault_uri and, optionally, vault_path and audio_quality
+        // (voice = 32 kbps/22.05 kHz, standard = 64 kbps/44.1 kHz, high =
+        // 128 kbps/44.1 kHz; mono AAC, matching the in-app recorder's presets).
+        // An unknown audio_quality value falls back to "standard".
+
+        // Result codes across every action in this receiver:
+        //   OK | AUTH_FAIL | NOT_MOUNTED | FORBIDDEN | INVALID_ARGS | ERROR
+        //   PARTIAL           -- IMPORT_FOLDER/EXPORT_FOLDER: some files failed, see RESULT_MESSAGE
+        //   PERMISSION_DENIED -- TAKE_PHOTO/START_RECORDING: camera/mic permission not granted; automation
+        //                        can't request it, grant it once from the app's own camera screen first
+        //                        START_AUDIO_RECORDING: mic permission not granted (camera is not needed)
+        //   CAMERA_UNAVAILABLE-- TAKE_PHOTO/START_RECORDING: camera busy (e.g. the in-app camera screen has
+        //                        it open) or a hardware/driver error opening it
+        //   MIC_UNAVAILABLE   -- START_AUDIO_RECORDING: the microphone couldn't be opened (e.g. another app
+        //                        holds it, or a device policy blocks it); the message carries the detail
+        //   BUSY              -- START_RECORDING/START_AUDIO_RECORDING: an automation recording (video OR
+        //                        audio) is already in progress
+        //                        SYNC_VAULT: the open app is still syncing after the wait ended (it keeps going)
+        //   NOT_RECORDING     -- STOP_RECORDING/STOP_AUDIO_RECORDING: nothing is currently recording, it's for
+        //                        a different vault, or it's the other kind (STOP_RECORDING does not end an
+        //                        audio recording and vice versa -- the message says which STOP to send)
+
+        // Automation actions must run in the order automation fires them --
+        // unlock, then import, then lock is a common chain -- and this
+        // receiver has no Activity to hand work off to the way
+        // MainActivity's handlers use its ioExecutor, so it gets its own
+        // strictly-serial executor rather than a shared/parallel pool.
+        private val automationExecutor = Executors.newSingleThreadExecutor()
+        private val fuseThread = HandlerThread("automation-split-fuse").apply { start() }
+        private val fuseHandler = Handler(fuseThread.looper)
+
+        private const val PHOTO_TIMEOUT_MS = 12_000L
+        private const val START_RECORDING_TIMEOUT_MS = 15_000L
+        // Generous on purpose: this is how long the receiver waits before
+        // giving up and reporting ERROR, not a cap on the save itself -- a
+        // very long recording's finalize can still outlive it, in which case
+        // the service keeps writing in the background regardless and the
+        // file lands in the vault either way; only the result broadcast
+        // would be a false-negative ERROR/timeout in that case, not the data.
+        private const val STOP_RECORDING_TIMEOUT_MS = 60_000L
+
+        // How long SYNC_VAULT waits for the open app to finish before
+        // answering BUSY. Like the recording timeouts above, it bounds the
+        // wait, not the sync: a long sync keeps running in the app. The wait
+        // can't be unbounded because it occupies the strictly-serial
+        // automationExecutor, which would hold up a LOCK_VAULT queued behind.
+        private const val OPEN_APP_SYNC_WAIT_MS = 60_000L
+
+        internal fun pickCameraId(context: Context, facing: String): String? {
+            val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val lenses = listCameraLenses(cameraManager)
+            return lenses.firstOrNull { it.facing == facing }?.cameraId ?: lenses.firstOrNull()?.cameraId
+        }
+
+        internal fun generateCaptureName(volId: Int, isPhoto: Boolean): String =
+            uniqueCaptureName(volId, if (isPhoto) "IMG_" else "VID_", if (isPhoto) ".jpg" else ".mp4")
+
+        /** `AUD_<timestamp>.m4a`, matching the name the in-app audio recorder gives its takes. */
+        internal fun generateAudioCaptureName(volId: Int): String =
+            uniqueCaptureName(volId, "AUD_", ".m4a")
+
+        private fun uniqueCaptureName(volId: Int, prefix: String, ext: String): String {
+            val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val existingNames = (ContainerFileSystem.listDirectory(volId, "") ?: emptyArray())
+                .mapNotNull { VaultAutomationFolderOps.parseDirEntry(it)?.name }
+                .toSet()
+            var candidate = "$prefix$stamp$ext"
+            var counter = 1
+            while (candidate in existingNames) {
+                candidate = "$prefix${stamp}_$counter$ext"
+                counter++
+            }
+            return candidate
+        }
+
+        internal fun outcomeForCameraError(error: String?): Outcome = when {
+            error == null -> Outcome("ERROR", "Unknown camera error")
+            error == "permission_denied" -> Outcome(
+                "PERMISSION_DENIED",
+                "Camera/microphone permission not granted -- grant it once from the app's own camera screen first",
+            )
+            error.startsWith("camera_unavailable") || error == "camera disconnected" || error == "session configuration failed" ->
+                Outcome("CAMERA_UNAVAILABLE", error)
+            else -> Outcome("ERROR", error)
+        }
+
+        /**
+         * Audio counterpart of [outcomeForCameraError]. The strings come from
+         * [com.aeidolon.vaultexplorer.service.VaultAutomationRecordingService]'s
+         * audio start path and the capture activity's own permission check.
+         */
+        internal fun outcomeForAudioError(error: String?): Outcome = when {
+            error == null -> Outcome("ERROR", "Unknown audio recording error")
+            error == "permission_denied" -> Outcome(
+                "PERMISSION_DENIED",
+                "Microphone permission not granted -- grant it once from the app's own audio recorder first",
+            )
+            error.startsWith("mic_unavailable") -> Outcome("MIC_UNAVAILABLE", error)
+            else -> Outcome("ERROR", error)
+        }
+
+        internal fun sendResult(context: Context, action: String, outcome: Outcome) {
+            VeLog.i(TAG) { "$action -> ${outcome.code}: ${outcome.message}" }
+            val resultIntent = Intent(ACTION_AUTOMATION_RESULT).apply {
+                putExtra(EXTRA_ORIGINAL_ACTION, action)
+                putExtra(RESULT_CODE, outcome.code)
+                putExtra(RESULT_MESSAGE, outcome.message)
+                outcome.durationMs?.let { putExtra(EXTRA_DURATION_MS, it) }
+                outcome.streamUri?.let { uriStr ->
+                    putExtra(EXTRA_STREAM_URI, uriStr)
+                }
+                outcome.matchedCount?.let { putExtra(EXTRA_MATCHED_COUNT, it) }
+                outcome.succeededCount?.let { putExtra(EXTRA_SUCCEEDED_COUNT, it) }
+                outcome.failedCount?.let { putExtra(EXTRA_FAILED_COUNT, it) }
+                outcome.skippedCount?.let { putExtra(EXTRA_SKIPPED_COUNT, it) }
+                addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            }
+            context.sendBroadcast(resultIntent)
+        }
+
+        internal fun launchCaptureActivity(context: Context, action: String, intent: Intent): Boolean {
+            val captureIntent = Intent(context, VaultAutomationCaptureActivity::class.java).apply {
+                this.action = action
+                putExtras(intent)
+                putExtra(VaultAutomationCaptureActivity.EXTRA_TRAMPOLINE, true)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            }
+            return try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    val bOptions = ActivityOptions.makeBasic().apply {
+                        setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                        )
+                    }.toBundle()
+                    val pi = PendingIntent.getActivity(
+                        context,
+                        action.hashCode(),
+                        captureIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                        bOptions,
+                    )
+                    val sendOptions = ActivityOptions.makeBasic().apply {
+                        setPendingIntentBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                        )
+                    }.toBundle()
+                    pi.send(context, 0, null, null, null, null, sendOptions)
+                } else {
+                    context.startActivity(captureIntent)
+                }
+                true
+            } catch (e: Exception) {
+                VeLog.e(TAG, e) { "Failed to launch VaultAutomationCaptureActivity via PendingIntent" }
+                try {
+                    context.startActivity(captureIntent)
+                    true
+                } catch (e2: Exception) {
+                    VeLog.e(TAG, e2) { "Direct startActivity also failed" }
+                    false
+                }
+            }
+        }
+    }
+
+    // internal rather than private: outcomeForCameraError below needs to
+    // return at least as visible a type as itself once it's made internal
+    // for testing (visibility only, no logic touched on either).
+    internal data class Outcome(
+        val code: String,
+        val message: String,
+        val durationMs: Long? = null,
+        val streamUri: String? = null,
+        val matchedCount: Int? = null,
+        val succeededCount: Int? = null,
+        val failedCount: Int? = null,
+        val skippedCount: Int? = null,
+    )
+
+    override fun onReceive(context: Context, intent: Intent) {
+        val action = intent.action ?: return
+        val knownActions = setOf(
+            ACTION_UNLOCK_VAULT, ACTION_SYNC_VAULT, ACTION_LOCK_VAULT,
+            ACTION_IMPORT_FILE, ACTION_EXPORT_FILE,
+            ACTION_IMPORT_FOLDER, ACTION_EXPORT_FOLDER,
+            ACTION_TAKE_PHOTO, ACTION_START_RECORDING, ACTION_STOP_RECORDING,
+            ACTION_START_AUDIO_RECORDING, ACTION_STOP_AUDIO_RECORDING,
+            ACTION_WIPE_FILE,
+            ACTION_EMERGENCY_LOCK, ACTION_EMERGENCY_PURGE,
+        )
+        if (action !in knownActions) {
+            return
+        }
+        val appContext = context.applicationContext
+        val token = intent.getStringExtra(EXTRA_API_TOKEN)
+        val validToken = AutomationSettings.isTokenValid(appContext, token)
+        val progressTitle = if (validToken) {
+            progressTitleForAction(appContext, action)
+        } else null
+        if (progressTitle != null && !VaultKeepAliveService.isRunning) {
+            enqueueBackgroundAction(appContext, action, intent)
+            return
+        }
+        val progressId = progressTitle?.let { VaultAutomationProgress.begin(appContext, it) } ?: 0
+        val pending = goAsync()
+        automationExecutor.execute {
+            try {
+                handleAction(appContext, action, intent, progressId)
+            } catch (e: Exception) {
+                VeLog.e(TAG, e) { "Unhandled automation error for $action" }
+            } finally {
+                if (progressId > 0) VaultAutomationProgress.finish(progressId)
+                pending.finish()
+            }
+        }
+    }
+
+    internal fun progressTitleForAction(context: Context, action: String): String? {
+        val resources = NotificationLocale.wrap(context)
+        val titleId = when (action) {
+            ACTION_UNLOCK_VAULT -> R.string.automation_unlocking_notification_title
+            ACTION_SYNC_VAULT -> R.string.syncing_vault_notification
+            ACTION_IMPORT_FILE, ACTION_IMPORT_FOLDER -> R.string.automation_importing_notification_title
+            ACTION_EXPORT_FILE, ACTION_EXPORT_FOLDER -> R.string.automation_exporting_notification_title
+            else -> return null
+        }
+        return resources.getString(titleId)
+    }
+
+    private fun enqueueBackgroundAction(context: Context, action: String, intent: Intent) {
+        val payloadId = VaultAutomationActionPayload.persist(context, intent)
+        if (payloadId == null) {
+            sendResult(context, action, Outcome("ERROR", "Could not securely queue this automation action"))
+            return
+        }
+        try {
+            val request = OneTimeWorkRequestBuilder<VaultAutomationWorker>()
+                .setInputData(
+                    Data.Builder()
+                        .putString(VaultAutomationWorker.KEY_PAYLOAD_ID, payloadId)
+                        .putString(VaultAutomationWorker.KEY_ACTION, action)
+                        .build(),
+                )
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .addTag(VaultAutomationWorker.TAG)
+                .build()
+            WorkManager.getInstance(context).beginUniqueWork(
+                VaultAutomationWorker.UNIQUE_WORK_NAME,
+                ExistingWorkPolicy.APPEND_OR_REPLACE,
+                request,
+            ).enqueue()
+        } catch (e: Exception) {
+            VaultAutomationActionPayload.clear(context, payloadId)
+            VeLog.e(TAG, e) { "Could not queue foreground automation action $action" }
+            sendResult(context, action, Outcome("ERROR", "Could not queue this automation action"))
+        }
+    }
+
+    internal fun handleAction(context: Context, action: String, intent: Intent, progressId: Int) {
+        val token = intent.getStringExtra(EXTRA_API_TOKEN)
+        if (!AutomationSettings.isTokenValid(context, token)) {
+            VeLog.w(TAG) { "Rejected $action: invalid or missing token" }
+            return // No reply broadcast on a bad token -- don't confirm to an
+                   // unauthenticated caller that automation is even configured.
+        }
+        val vaultUri = intent.getStringExtra(EXTRA_VAULT_URI)
+        val outcome = if (vaultUri.isNullOrEmpty() &&
+            action != ACTION_WIPE_FILE &&
+            action != ACTION_EMERGENCY_LOCK &&
+            action != ACTION_EMERGENCY_PURGE
+        ) {
+            Outcome("INVALID_ARGS", "vault_uri is required")
+        } else when (action) {
+            ACTION_EMERGENCY_LOCK -> {
+                // Tier 1 Session Purge
+                val result = PanicManager.execute(context, PanicTier.SESSION_PURGE, source = "automation")
+                Outcome(if (result.success) "OK" else "ERROR", "Emergency lock executed: ${result.containersLocked} locked")
+            }
+            ACTION_EMERGENCY_PURGE -> {
+                val requestedTierInt = intent.getIntExtra(EXTRA_TIER, -1)
+                val tier = PanicTier.fromLevel(requestedTierInt) ?: PanicSettings.getConfiguredTier(context)
+                val result = PanicManager.execute(context, tier, source = "automation")
+                Outcome(if (result.success) "OK" else "ERROR", "Emergency purge tier ${tier.level} executed")
+            }
+            ACTION_UNLOCK_VAULT -> handleUnlock(context, vaultUri!!, intent)
+            ACTION_SYNC_VAULT -> handleSync(context, vaultUri!!, progressId)
+            ACTION_LOCK_VAULT -> handleLock(context, vaultUri!!)
+            ACTION_IMPORT_FILE -> handleImport(context, vaultUri!!, intent, progressId)
+            ACTION_EXPORT_FILE -> handleExport(context, vaultUri!!, intent, progressId)
+            ACTION_IMPORT_FOLDER -> handleImportFolder(context, vaultUri!!, intent, progressId)
+            ACTION_EXPORT_FOLDER -> handleExportFolder(context, vaultUri!!, intent, progressId)
+            ACTION_TAKE_PHOTO -> handleTakePhoto(context, vaultUri!!, intent)
+            ACTION_START_RECORDING -> handleStartRecording(context, vaultUri!!, intent)
+            ACTION_STOP_RECORDING -> handleStopRecording(context, vaultUri!!)
+            ACTION_START_AUDIO_RECORDING -> handleStartAudioRecording(context, vaultUri!!, intent)
+            ACTION_STOP_AUDIO_RECORDING -> handleStopAudioRecording(context, vaultUri!!)
+            else -> handleWipe(context, intent) // ACTION_WIPE_FILE; doesn't need vaultUri, see handleWipe
+        }
+        var automaticSyncOutcome: Outcome? = null
+        val unlockedSession = vaultUri?.let { uri ->
+            ContainerSessionRegistry.getVolumeIdByUri(uri)?.let { ContainerSessionRegistry.activeSessions[it] }
+        }
+        if (action == ACTION_UNLOCK_VAULT && outcome.code == "OK" &&
+            VaultAutomationUnlockedBridge.channel == null &&
+            unlockedSession?.readOnly == false &&
+            hasUnlockSyncRules(unlockedSession.volId)
+        ) {
+            val syncProgressId = VaultAutomationProgress.begin(
+                context,
+                progressTitleForAction(context, ACTION_SYNC_VAULT)
+                    ?: context.getString(R.string.syncing_vault_notification),
+            )
+            automaticSyncOutcome = try {
+                handleSync(context, vaultUri, syncProgressId)
+            } finally {
+                VaultAutomationProgress.finish(syncProgressId)
+            }
+        }
+
+        // Hold the unlock result until any headless sync it started has ended.
+        // Automation profiles that chain a lock after unlock therefore won't
+        // race the sync worker's writes.
+        sendResult(context, action, outcome)
+        automaticSyncOutcome?.let { sendResult(context, ACTION_SYNC_VAULT, it) }
+    }
+
+    /** Avoid starting a second Flutter engine when the vault has no sync rules. */
+    private fun hasUnlockSyncRules(volId: Int): Boolean {
+        return try {
+            val entries = ContainerFileSystem.listDirectory(volId, ".vaultexplorer") ?: return false
+            if (entries.none { VaultAutomationFolderOps.parseDirEntry(it)?.name == "sync_config.json" }) {
+                return false
+            }
+            val size = ContainerFileSystem.getFileSize(volId, ".vaultexplorer/sync_config.json")
+            if (size <= 0L || size > 1024 * 1024) return true
+            val bytes = ContainerFileSystem.readFileChunk(
+                volId,
+                ".vaultexplorer/sync_config.json",
+                0L,
+                size.toInt(),
+            ) ?: return true
+            val rules = org.json.JSONObject(String(bytes, Charsets.UTF_8)).optJSONArray("rules") ?: return true
+            (0 until rules.length()).any { index ->
+                val rule = rules.optJSONObject(index) ?: return@any false
+                rule.optBoolean("autoSyncOnUnlock", true) || rule.optBoolean("liveWatch", false)
+            }
+        } catch (e: Exception) {
+            VeLog.w(TAG, e) { "Could not inspect sync rules after automation unlock" }
+            true
+        }
+    }
+
+    private fun handleSync(context: Context, vaultUri: String, progressId: Int): Outcome {
+        // The FULL opt-in applies on every path, including the hand-off below.
+        if (!AutomationSettings.canImportExport(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "Background sync requires FULL automation opt-in")
+        }
+        // The app is open: its coordinator owns this vault's sync ledger and
+        // run queue, so hand the request to it rather than starting a second
+        // engine on the same vault. Null means nobody is listening (app
+        // closed, or its engine is gone): sync headlessly below.
+        VaultAutomationUnlockedBridge.requestSync(vaultUri, OPEN_APP_SYNC_WAIT_MS)?.let { reply ->
+            return Outcome(reply.code, reply.message)
+        }
+        val volId = ContainerSessionRegistry.getVolumeIdByUri(vaultUri)
+            ?: return Outcome("NOT_MOUNTED", "Unlock the vault before starting sync")
+        val session = ContainerSessionRegistry.activeSessions[volId]
+        if (session?.readOnly != false) {
+            return Outcome("FORBIDDEN", "Background sync requires a writable vault")
+        }
+        val displayName = session.displayName ?: runCatching {
+            UriNameResolver.resolve(context.contentResolver, Uri.parse(vaultUri))
+        }.getOrDefault("Vault")
+        val succeeded = try {
+            runBlocking {
+                ScheduledVaultSyncRunner(context.applicationContext, Data.Builder().build())
+                    .runAutoSyncOnUnlock(vaultUri, displayName, progressId)
+            }
+        } catch (e: Exception) {
+            VeLog.e(TAG, e) { "Unlock sync failed for $vaultUri" }
+            false
+        }
+        return if (succeeded) {
+            Outcome("OK", "Unlock sync completed")
+        } else {
+            Outcome("ERROR", "Unlock sync did not complete cleanly")
+        }
+    }
+
+    /**
+     * Returns true if the keep-alive service is running or was started, false
+     * if Android refused. A refusal does not fail the action -- its
+     * WorkManager foreground worker already protects the current operation --
+     * but the caller reports it in RESULT_MESSAGE (see [unlockedOutcome]),
+     * because without the keep-alive service the unlocked session can vanish
+     * whenever Android stops the process, and VeLog is off in a cold start so
+     * the log line below is usually silent.
+     */
+    private fun startKeepAlive(context: Context): Boolean {
+        if (VaultKeepAliveService.isRunning) return true
+        return try {
+            ContextCompat.startForegroundService(context, Intent(context, VaultKeepAliveService::class.java))
+            true
+        } catch (e: Exception) {
+            // A background automation broadcast is not an Android FGS-start
+            // exemption (the app's battery usage being Unrestricted is one).
+            VeLog.w(TAG, e) { "Keep-alive service was not allowed to start after automation unlock" }
+            false
+        }
+    }
+
+    private fun unlockedOutcome(context: Context, base: String, keepAliveStarted: Boolean): Outcome =
+        if (keepAliveStarted) {
+            Outcome("OK", base)
+        } else {
+            Outcome("OK", BackgroundStartAdvice.keepAliveNotStartedMessage(context, base))
+        }
+
+    /**
+     * Notifies VaultAutomationUnlockedBridge (and, through it, the dashboard
+     * if a Flutter engine is attached) that [volId] is unlocked, reading
+     * everything it needs back off the just-committed ContainerSession
+     * rather than threading result-specific fields through each of the
+     * three call sites below -- unlockContainer, unlockDirectoryVault, and
+     * the already-mounted short-circuit all commit a session before this
+     * can run, so it's a single source of truth for all three.
+     *
+     * displayName falls back to UriNameResolver -- the same resolver
+     * unlockContainer itself uses -- because ContainerSession.displayName
+     * is null whenever automation unlocks a non-split container with no
+     * override (there's no Dart-side picker here to already know the name
+     * the way the normal unlock flow does).
+     *
+     * containerFormat reads straight off ContainerSession.containerFormat,
+     * which ContainerLifecycleCore now sets at unlock time for every path
+     * (block-device via ContainerEngine.format, directory vaults via
+     * DirectoryVaultFormat.asContainerFormat) -- no need to re-derive it
+     * from AutomationSettings or re-query the native engine here.
+     */
+    private fun reportAutomationUnlock(context: Context, volId: Int) {
+        val session = ContainerSessionRegistry.activeSessions[volId] ?: return
+        val displayName = session.displayName ?: runCatching {
+            UriNameResolver.resolve(context.contentResolver, Uri.parse(session.uri))
+        }.getOrDefault(session.uri)
+        VaultAutomationUnlockedBridge.reportUnlocked(
+            volId = volId,
+            uri = session.uri,
+            displayName = displayName,
+            containerFormat = session.containerFormat?.wireName ?: "unknown",
+            readOnly = session.readOnly,
+            files = session.cachedFilesList,
+        )
+    }
+
+    internal fun unlockForScheduledSync(context: Context, vaultUri: String): String? {
+        if (!AutomationSettings.canImportExport(context, vaultUri)) {
+            return "FORBIDDEN: Background sync requires FULL automation opt-in"
+        }
+        if (AutomationSettings.getStoredPassword(context, vaultUri).isNullOrEmpty()) {
+            return "FORBIDDEN: No saved unlock password is available"
+        }
+        val outcome = handleUnlock(
+            context,
+            vaultUri,
+            Intent().putExtra(EXTRA_READ_ONLY, false),
+            startKeepAliveService = false,
+        )
+        return if (outcome.code == "OK") null else "${outcome.code}: ${outcome.message}"
+    }
+
+    private fun handleUnlock(
+        context: Context,
+        vaultUri: String,
+        intent: Intent,
+        startKeepAliveService: Boolean = true,
+    ): Outcome {
+        if (!AutomationSettings.canUnlockLock(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation")
+        }
+        val existingVolId = ContainerSessionRegistry.getVolumeIdByUri(vaultUri)
+        if (existingVolId != null) {
+            if (!startKeepAliveService) {
+                return Outcome("BUSY", "Vault became unlocked before scheduled sync started")
+            }
+            val keepAliveStarted = startKeepAlive(context)
+            reportAutomationUnlock(context, existingVolId)
+            return unlockedOutcome(context, "Already unlocked", keepAliveStarted)
+        }
+        val password = intent.getStringExtra(EXTRA_PASSWORD)
+            ?: AutomationSettings.getStoredPassword(context, vaultUri)
+        if (password.isNullOrEmpty()) {
+            return Outcome("INVALID_ARGS", "No password supplied and none stored for this vault")
+        }
+        val targetVolId = ContainerSessionRegistry.getFreeVolumeId()
+            ?: return Outcome("ERROR", "No free volume slots (${ContainerSessionRegistry.MAX_VOLUMES} already mounted)")
+        val readOnly = intent.getBooleanExtra(EXTRA_READ_ONLY, false)
+
+        // AutomationSettings.getFormat is set when a vault opts in to
+        // automation (null = standard block-device container); that's what
+        // picks the unlock path here, rather than inspecting the URI/file
+        // itself -- the app already knows each configured vault's format
+        // from when it was added, so re-detecting it at unlock time would
+        // just be a second, less trustworthy source of truth.
+        val directoryFormat = AutomationSettings.getFormat(context, vaultUri)
+        if (directoryFormat != null) {
+            val result = ContainerLifecycleCore.unlockDirectoryVault(
+                context = context,
+                format = directoryFormat,
+                uriString = vaultUri,
+                targetVolId = targetVolId,
+                password = password,
+                readOnly = readOnly,
+            )
+            return when (result) {
+                is ContainerLifecycleCore.DirectoryVaultOutcome.Success -> {
+                    val keepAliveStarted = !startKeepAliveService || startKeepAlive(context)
+                    reportAutomationUnlock(context, result.result.volId)
+                    unlockedOutcome(context, "Unlocked", keepAliveStarted)
+                }
+                is ContainerLifecycleCore.DirectoryVaultOutcome.AuthFailure -> Outcome("AUTH_FAIL", result.code.name)
+                is ContainerLifecycleCore.DirectoryVaultOutcome.InvalidVault -> Outcome("ERROR", result.reason)
+                is ContainerLifecycleCore.DirectoryVaultOutcome.Error ->
+                    Outcome("ERROR", result.exception.message ?: "Unknown error")
+            }
+        }
+
+        val pimIntent = intent.getIntExtra(EXTRA_PIM, 0)
+        val pim = if (pimIntent > 0) pimIntent else (AutomationSettings.getStoredPim(context, vaultUri) ?: 0)
+        val cipherId = intent.getIntExtra(EXTRA_CIPHER_ID, 255)
+        val hashId = intent.getIntExtra(EXTRA_HASH_ID, 255)
+        val keyfileFds = try {
+            resolveKeyfiles(context, intent, vaultUri)
+        } catch (e: Exception) {
+            return Outcome("ERROR", "Failed to open keyfiles: ${e.message}")
+        }
+
+        val result = ContainerLifecycleCore.unlockContainer(
+            context = context,
+            uriString = vaultUri,
+            targetVolId = targetVolId,
+            password = password,
+            pim = pim,
+            cipherId = cipherId,
+            hashId = hashId,
+            keyfileFds = keyfileFds,
+            readOnly = readOnly,
+            fuseHandler = fuseHandler,
+        )
+        return when (result) {
+            is ContainerLifecycleCore.UnlockCoreOutcome.Success -> {
+                val keepAliveStarted = !startKeepAliveService || startKeepAlive(context)
+                reportAutomationUnlock(context, result.result.volId)
+                unlockedOutcome(context, "Unlocked", keepAliveStarted)
+            }
+            is ContainerLifecycleCore.UnlockCoreOutcome.AuthFailure -> Outcome("AUTH_FAIL", result.code.name)
+            is ContainerLifecycleCore.UnlockCoreOutcome.Error ->
+                Outcome("ERROR", result.exception.message ?: "Unknown error")
+        }
+    }
+
+    private fun resolveKeyfiles(context: Context, intent: Intent, vaultUri: String): IntArray? {
+        val keyfilesSpec = intent.getStringExtra(EXTRA_KEYFILE_URIS)
+        val paths = if (!keyfilesSpec.isNullOrEmpty()) {
+            keyfilesSpec.split("|").map { it.trim() }.filter { it.isNotEmpty() }
+        } else {
+            AutomationSettings.getStoredKeyfiles(context, vaultUri)
+        } ?: return null
+
+        if (paths.isEmpty()) return null
+
+        val opened = mutableListOf<ParcelFileDescriptor>()
+        try {
+            for (path in paths) {
+                val pfd = (when {
+                    path.startsWith("content://") -> context.contentResolver.openFileDescriptor(Uri.parse(path), "r")
+                    path.startsWith("file://") -> {
+                        val f = File(Uri.parse(path).path ?: path.removePrefix("file://"))
+                        if (f.exists() && f.canRead()) ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY) else null
+                    }
+                    else -> {
+                        val f = File(path)
+                        if (f.exists() && f.canRead()) ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY) else null
+                    }
+                }) ?: throw Exception("Could not open keyfile: $path")
+                opened.add(pfd)
+            }
+            return IntArray(opened.size) { i -> opened[i].detachFd() }
+        } catch (e: Exception) {
+            for (pfd in opened) {
+                try { pfd.close() } catch (_: Exception) {}
+            }
+            throw e
+        }
+    }
+
+    private fun handleLock(context: Context, vaultUri: String): Outcome {
+        if (!AutomationSettings.canUnlockLock(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation")
+        }
+        val wasMounted = ContainerSessionRegistry.getVolumeIdByUri(vaultUri) != null
+        val locked = ContainerLifecycleCore.lockContainer(context, vaultUri)
+        if (!ContainerSessionRegistry.hasAnyActiveSessions()) {
+            context.stopService(Intent(context, VaultKeepAliveService::class.java))
+        }
+        return when {
+            locked -> Outcome("OK", "Locked")
+            !wasMounted -> Outcome("OK", "Already locked")
+            else -> Outcome("ERROR", "Lock failed")
+        }
+    }
+
+    private fun handleImport(context: Context, vaultUri: String, intent: Intent, progressId: Int): Outcome {
+        if (!AutomationSettings.canImportExport(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation file import/export")
+        }
+        val volId = ContainerSessionRegistry.getVolumeIdByUri(vaultUri)
+            ?: return Outcome("NOT_MOUNTED", "Vault is not currently unlocked")
+        val sourcePath = intent.getStringExtra(EXTRA_SOURCE_PATH)
+        val vaultPath = intent.getStringExtra(EXTRA_VAULT_PATH)
+        if (sourcePath.isNullOrEmpty() || vaultPath.isNullOrEmpty()) {
+            return Outcome("INVALID_ARGS", "source_path and vault_path are required")
+        }
+
+        val patternStr = intent.getStringExtra(EXTRA_PATTERN)
+        val excludePatternStr = intent.getStringExtra(EXTRA_EXCLUDE_PATTERN)
+        val isDirectorySource = !sourcePath.startsWith("content://") && File(sourcePath).isDirectory
+        val excludePattern = excludePatternStr?.takeIf { it.isNotBlank() }
+            ?.let { GlobMatcher.compile(it) }
+        if (!patternStr.isNullOrEmpty() || isDirectorySource || excludePattern != null) {
+            val glob = patternStr?.let { GlobMatcher.compile(it) }
+            val recursive = intent.getBooleanExtra(EXTRA_RECURSIVE, true)
+            val deleteSource = intent.getBooleanExtra(EXTRA_DELETE_SOURCE, false)
+            val summary = VaultAutomationFolderOps.importFolder(
+                context, volId, sourcePath, vaultPath, deleteSource, glob, recursive, excludePattern, progressId
+            ) ?: return Outcome("INVALID_ARGS", "source_path is not a readable folder")
+            return summaryOutcome(summary, "Imported")
+        }
+
+        // VaultAutomationFolderOps.importOneFile accepts source_path as either
+        // a raw filesystem path or a content:// Uri -- see its own and this
+        // class's doc comments for the SAF-permission caveat on the latter.
+        if (!VaultAutomationFolderOps.importOneFile(context, volId, sourcePath, vaultPath, progressId)) {
+            return Outcome("ERROR", "Import failed", failedCount = 1, matchedCount = 1)
+        }
+        if (intent.getBooleanExtra(EXTRA_DELETE_SOURCE, false)) {
+            val deleted = if (sourcePath.startsWith("content://")) {
+                try { DocumentFile.fromSingleUri(context, Uri.parse(sourcePath))?.delete() ?: false }
+                catch (e: Exception) { false }
+            } else {
+                SecureFileWipe.secureDeleteFile(File(sourcePath))
+            }
+            if (!deleted) {
+                return Outcome(
+                    "OK",
+                    "Imported, but deleting/wiping the source afterward failed",
+                    succeededCount = 1,
+                    matchedCount = 1,
+                )
+            }
+        }
+        return Outcome("OK", "Imported", succeededCount = 1, matchedCount = 1, failedCount = 0, skippedCount = 0)
+    }
+
+    private fun handleExport(context: Context, vaultUri: String, intent: Intent, progressId: Int): Outcome {
+        if (!AutomationSettings.canImportExport(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation file import/export")
+        }
+        val volId = ContainerSessionRegistry.getVolumeIdByUri(vaultUri)
+            ?: return Outcome("NOT_MOUNTED", "Vault is not currently unlocked")
+        val vaultPath = intent.getStringExtra(EXTRA_VAULT_PATH)
+        if (vaultPath.isNullOrEmpty()) {
+            return Outcome("INVALID_ARGS", "vault_path is required")
+        }
+
+        // Track C: Zero-Disk Decrypted Data Streaming via ParcelFileDescriptor pipe ContentProvider
+        if (intent.getBooleanExtra(EXTRA_STREAM_MODE, false)) {
+            val streamUri = com.aeidolon.vaultexplorer.streaming.VaultStreamProvider.registerStream(volId, vaultPath)
+                ?: return Outcome("ERROR", "Failed to initialize zero-disk stream session (file missing or max concurrent streams reached)")
+            return Outcome(
+                "OK",
+                "Stream initialized: $streamUri",
+                streamUri = streamUri.toString(),
+                matchedCount = 1,
+                succeededCount = 1,
+            )
+        }
+
+        val destPath = intent.getStringExtra(EXTRA_DEST_PATH)
+        if (destPath.isNullOrEmpty()) {
+            return Outcome("INVALID_ARGS", "dest_path is required (or set stream_mode=true)")
+        }
+
+        val patternStr = intent.getStringExtra(EXTRA_PATTERN)
+        val excludePatternStr = intent.getStringExtra(EXTRA_EXCLUDE_PATTERN)
+        val excludePattern = excludePatternStr?.takeIf { it.isNotBlank() }
+            ?.let { GlobMatcher.compile(it) }
+        if (!patternStr.isNullOrEmpty() || excludePattern != null) {
+            val glob = GlobMatcher.compile(patternStr)
+            val recursive = intent.getBooleanExtra(EXTRA_RECURSIVE, true)
+            val summary = VaultAutomationFolderOps.exportFolder(
+                context, volId, vaultPath, destPath, glob, recursive, excludePattern, progressId
+            ) ?: return Outcome("INVALID_ARGS", "dest_path is not a writable folder")
+            return summaryOutcome(summary, "Exported")
+        }
+
+        // dest_path is either a raw full file path, or (if it starts with
+        // content://) a SAF *tree* Uri to create the file inside -- see
+        // VaultAutomationFolderOps.exportOneFile's doc comment for why the
+        // two conventions differ here.
+        return if (VaultAutomationFolderOps.exportOneFile(context, volId, vaultPath, destPath, progressId)) {
+            Outcome("OK", "Exported", succeededCount = 1, matchedCount = 1, failedCount = 0, skippedCount = 0)
+        } else {
+            Outcome("ERROR", "Export failed", failedCount = 1, matchedCount = 1)
+        }
+    }
+
+    private fun handleImportFolder(context: Context, vaultUri: String, intent: Intent, progressId: Int): Outcome {
+        if (!AutomationSettings.canImportExport(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation file import/export")
+        }
+        val volId = ContainerSessionRegistry.getVolumeIdByUri(vaultUri)
+            ?: return Outcome("NOT_MOUNTED", "Vault is not currently unlocked")
+        val sourcePath = intent.getStringExtra(EXTRA_SOURCE_PATH)
+        val vaultDestDir = intent.getStringExtra(EXTRA_VAULT_PATH) ?: ""
+        if (sourcePath.isNullOrEmpty()) {
+            return Outcome("INVALID_ARGS", "source_path is required")
+        }
+        val deleteSource = intent.getBooleanExtra(EXTRA_DELETE_SOURCE, false)
+        val pattern = intent.getStringExtra(EXTRA_PATTERN)?.let { GlobMatcher.compile(it) }
+        val excludePattern = intent.getStringExtra(EXTRA_EXCLUDE_PATTERN)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { GlobMatcher.compile(it) }
+        val recursive = intent.getBooleanExtra(EXTRA_RECURSIVE, true)
+        val summary = VaultAutomationFolderOps.importFolder(
+            context, volId, sourcePath, vaultDestDir, deleteSource, pattern, recursive, excludePattern, progressId
+        ) ?: return Outcome("INVALID_ARGS", "source_path is not a readable folder (check the path/Uri and permissions)")
+        return summaryOutcome(summary, "Imported")
+    }
+
+    private fun handleExportFolder(context: Context, vaultUri: String, intent: Intent, progressId: Int): Outcome {
+        if (!AutomationSettings.canImportExport(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation file import/export")
+        }
+        val volId = ContainerSessionRegistry.getVolumeIdByUri(vaultUri)
+            ?: return Outcome("NOT_MOUNTED", "Vault is not currently unlocked")
+        val vaultSourceDir = intent.getStringExtra(EXTRA_VAULT_PATH) ?: ""
+        val destPath = intent.getStringExtra(EXTRA_DEST_PATH)
+        if (destPath.isNullOrEmpty()) {
+            return Outcome("INVALID_ARGS", "dest_path is required")
+        }
+        val pattern = intent.getStringExtra(EXTRA_PATTERN)?.let { GlobMatcher.compile(it) }
+        val excludePattern = intent.getStringExtra(EXTRA_EXCLUDE_PATTERN)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { GlobMatcher.compile(it) }
+        val recursive = intent.getBooleanExtra(EXTRA_RECURSIVE, true)
+        val summary = VaultAutomationFolderOps.exportFolder(
+            context, volId, vaultSourceDir, destPath, pattern, recursive, excludePattern, progressId
+        ) ?: return Outcome("INVALID_ARGS", "dest_path is not a writable folder (check the path/Uri and permissions)")
+        return summaryOutcome(summary, "Exported")
+    }
+
+    private fun summaryOutcome(summary: VaultAutomationFolderOps.OpSummary, verb: String): Outcome {
+        val truncatedNote = if (summary.truncated) " (source directory listing was truncated -- see docs)" else ""
+        val skippedNote = if (summary.filesSkipped > 0) " (${summary.filesSkipped} skipped)" else ""
+        val code = when {
+            summary.allFailed -> "ERROR"
+            summary.anyFailed -> "PARTIAL"
+            else -> "OK"
+        }
+        val message = when {
+            summary.allFailed -> "$verb 0 files -- all ${summary.filesFailed} failed$truncatedNote"
+            summary.anyFailed -> "$verb ${summary.filesOk} file(s), ${summary.filesFailed} failed$skippedNote$truncatedNote"
+            else -> "$verb ${summary.filesOk} file(s)$skippedNote$truncatedNote"
+        }
+        return Outcome(
+            code = code,
+            message = message,
+            matchedCount = summary.filesMatched,
+            succeededCount = summary.filesOk,
+            failedCount = summary.filesFailed,
+            skippedCount = summary.filesSkipped,
+        )
+    }
+
+    // ── Camera: photo / video ────────────────────────────────────────────
+
+    private fun handleTakePhoto(context: Context, vaultUri: String, intent: Intent): Outcome {
+        if (!AutomationSettings.canCapture(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation camera capture")
+        }
+        val volId = ContainerSessionRegistry.getVolumeIdByUri(vaultUri)
+            ?: return Outcome("NOT_MOUNTED", "Vault is not currently unlocked")
+
+        val latch = VaultAutomationActivityBridge.arm()
+        if (!launchCaptureActivity(context, ACTION_TAKE_PHOTO, intent)) {
+            return Outcome("ERROR", "Failed to launch capture activity (Background Activity Launch blocked by OS)")
+        }
+
+        val result = VaultAutomationActivityBridge.await(latch, PHOTO_TIMEOUT_MS)
+            ?: return Outcome(
+                "ERROR",
+                "Photo capture timed out (on Android 14+, grant 'Display over other apps' to VaultExplorer or target Activity directly in Tasker)",
+            )
+        return if (result.ok) {
+            Outcome("OK", "Photo saved to ${result.vaultPath ?: "vault"}")
+        } else {
+            outcomeForCameraError(result.message)
+        }
+    }
+
+    private fun handleStartRecording(context: Context, vaultUri: String, intent: Intent): Outcome {
+        if (!AutomationSettings.canCapture(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation camera capture")
+        }
+        val volId = ContainerSessionRegistry.getVolumeIdByUri(vaultUri)
+            ?: return Outcome("NOT_MOUNTED", "Vault is not currently unlocked")
+        if (VaultAutomationRecordingService.isRecording) {
+            return Outcome("BUSY", "An automation recording is already in progress")
+        }
+
+        val latch = VaultAutomationActivityBridge.arm()
+        if (!launchCaptureActivity(context, ACTION_START_RECORDING, intent)) {
+            return Outcome("ERROR", "Failed to launch capture activity (Background Activity Launch blocked by OS)")
+        }
+
+        val result = VaultAutomationActivityBridge.await(latch, START_RECORDING_TIMEOUT_MS)
+            ?: return Outcome(
+                "ERROR",
+                "Timed out waiting for recording to start (on Android 14+, grant 'Display over other apps' to VaultExplorer or target Activity directly in Tasker)",
+            )
+        return if (result.ok) {
+            Outcome("OK", "Recording started: ${result.vaultPath ?: "vault"}")
+        } else {
+            outcomeForCameraError(result.message)
+        }
+    }
+
+    private fun handleStopRecording(context: Context, vaultUri: String): Outcome {
+        if (!AutomationSettings.canCapture(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation camera capture")
+        }
+        if (!VaultAutomationRecordingService.isRecording) {
+            return Outcome("NOT_RECORDING", "No automation recording is in progress")
+        }
+        if (VaultAutomationRecordingService.currentVaultUri != vaultUri) {
+            return Outcome("NOT_RECORDING", "The in-progress automation recording is for a different vault")
+        }
+        if (VaultAutomationRecordingService.currentIsAudioOnly) {
+            return Outcome("NOT_RECORDING", "The in-progress recording is audio-only -- send STOP_AUDIO_RECORDING to stop it")
+        }
+        val latch = VaultAutomationCaptureBridge.arm()
+        context.startService(
+            Intent(context, VaultAutomationRecordingService::class.java)
+                .setAction(VaultAutomationRecordingService.ACTION_STOP)
+        )
+        val result = VaultAutomationCaptureBridge.await(latch, STOP_RECORDING_TIMEOUT_MS)
+            ?: return Outcome("ERROR", "Timed out waiting for the recording to finish saving (it may still complete in the background)")
+        return if (result.ok) {
+            Outcome("OK", recordingSavedMessage("Recording", result.durationMs, result.parts), durationMs = result.durationMs)
+        } else {
+            outcomeForCameraError(result.message)
+        }
+    }
+
+    // ── Audio-only recording ─────────────────────────────────────────────
+
+    private fun handleStartAudioRecording(context: Context, vaultUri: String, intent: Intent): Outcome {
+        if (!AutomationSettings.canCapture(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation camera capture")
+        }
+        if (ContainerSessionRegistry.getVolumeIdByUri(vaultUri) == null) {
+            return Outcome("NOT_MOUNTED", "Vault is not currently unlocked")
+        }
+        // Covers a video recording too: there is one recording slot, shared.
+        if (VaultAutomationRecordingService.isRecording) {
+            return Outcome("BUSY", "An automation recording is already in progress")
+        }
+
+        // Android 14+ only lets an app use the microphone from a foreground
+        // service it started while visible, so this goes through the same
+        // invisible capture Activity as the camera actions -- see
+        // VaultAutomationCaptureActivity.
+        val latch = VaultAutomationActivityBridge.arm()
+        if (!launchCaptureActivity(context, ACTION_START_AUDIO_RECORDING, intent)) {
+            return Outcome("ERROR", "Failed to launch capture activity (Background Activity Launch blocked by OS)")
+        }
+
+        val result = VaultAutomationActivityBridge.await(latch, START_RECORDING_TIMEOUT_MS)
+            ?: return Outcome(
+                "ERROR",
+                "Timed out waiting for audio recording to start (on Android 14+, grant 'Display over other apps' to VaultExplorer or target Activity directly in Tasker)",
+            )
+        return if (result.ok) {
+            Outcome("OK", "Audio recording started: ${result.vaultPath ?: "vault"}")
+        } else {
+            outcomeForAudioError(result.message)
+        }
+    }
+
+    private fun handleStopAudioRecording(context: Context, vaultUri: String): Outcome {
+        if (!AutomationSettings.canCapture(context, vaultUri)) {
+            return Outcome("FORBIDDEN", "This vault is not opted in to automation camera capture")
+        }
+        if (!VaultAutomationRecordingService.isRecording) {
+            return Outcome("NOT_RECORDING", "No automation recording is in progress")
+        }
+        if (VaultAutomationRecordingService.currentVaultUri != vaultUri) {
+            return Outcome("NOT_RECORDING", "The in-progress automation recording is for a different vault")
+        }
+        if (!VaultAutomationRecordingService.currentIsAudioOnly) {
+            return Outcome("NOT_RECORDING", "The in-progress recording is video -- send STOP_RECORDING to stop it")
+        }
+        val latch = VaultAutomationCaptureBridge.arm()
+        context.startService(
+            Intent(context, VaultAutomationRecordingService::class.java)
+                .setAction(VaultAutomationRecordingService.ACTION_STOP)
+        )
+        val result = VaultAutomationCaptureBridge.await(latch, STOP_RECORDING_TIMEOUT_MS)
+            ?: return Outcome("ERROR", "Timed out waiting for the audio recording to finish saving (it may still complete in the background)")
+        return if (result.ok) {
+            Outcome("OK", recordingSavedMessage("Audio recording", result.durationMs, result.parts), durationMs = result.durationMs)
+        } else {
+            // A finalize failure ("vault write failed", "no audio was captured")
+            // is not a mic problem, so it reports as a plain ERROR.
+            outcomeForAudioError(result.message)
+        }
+    }
+
+    internal fun outcomeForCameraError(error: String?): Outcome = Companion.outcomeForCameraError(error)
+
+    internal fun outcomeForAudioError(error: String?): Outcome = Companion.outcomeForAudioError(error)
+
+    /**
+     * Not vault-gated: this only ever touches a plaintext staging file
+     * outside any vault (typically the destination of a prior EXPORT_FILE,
+     * once Termux is done processing it), so it doesn't need FULL tier on
+     * a specific vault -- it still needed a valid token to get here at all
+     * (checked in handleAction before this is reached).
+     */
+    private fun handleWipe(context: Context, intent: Intent): Outcome {
+        val path = intent.getStringExtra(EXTRA_SOURCE_PATH)
+            ?: return Outcome("INVALID_ARGS", "source_path is required")
+        return if (SecureFileWipe.secureDeleteFile(File(path))) {
+            Outcome("OK", "Wiped")
+        } else {
+            Outcome("ERROR", "Wipe failed")
+        }
+    }
+}

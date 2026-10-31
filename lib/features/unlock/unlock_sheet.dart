@@ -1,0 +1,1386 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/api/vault_engine_types.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/theme/app_theme.dart';
+import 'package:vaultexplorer/core/utils/format_utils.dart';
+import 'package:vaultexplorer/core/utils/responsive.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/core/widgets/container_format_icon.dart';
+import 'package:vaultexplorer/data/models/container_format.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/services/container_repository.dart';
+import 'package:vaultexplorer/data/services/session_lock_controller.dart';
+import 'package:vaultexplorer/features/lock/widgets/pattern_lock_view.dart';
+import 'package:vaultexplorer/features/lock/widgets/pin_lock_view.dart';
+import 'package:vaultexplorer/features/unlock/unlock_controller.dart';
+
+enum _UnlockCredentialState { loading, missing, biometric, pattern, pin, password, none }
+
+class UnlockSheet extends ConsumerStatefulWidget {
+  final void Function(MountedContainer container, {ContainerRecord? record}) onMounted;
+  final Route<void> Function(MountedContainer container)? openBrowserRoute;
+  final String? initialUri;
+  final String? initialName;
+  final String? prefillPassword;
+  final bool documentProvider;
+  final List<String> autoMountFolders;
+  final List<String> mountedUris;
+  final List<KeyfileRef>? initialCompositeCarriers;
+
+  const UnlockSheet({
+    super.key,
+    required this.onMounted,
+    this.openBrowserRoute,
+    this.initialUri,
+    this.initialName,
+    this.prefillPassword,
+    this.documentProvider = false,
+    this.autoMountFolders = const [],
+    this.mountedUris = const [],
+    this.initialCompositeCarriers,
+  });
+
+  @override
+  ConsumerState<UnlockSheet> createState() => _UnlockSheetState();
+}
+
+class _UnlockSheetState extends ConsumerState<UnlockSheet> with WidgetsBindingObserver {
+  late final TextEditingController _passwordCtrl;
+  final _pimCtrl = TextEditingController();
+  final _hiddenPasswordCtrl = TextEditingController();
+  final _hiddenPimCtrl = TextEditingController();
+  final _carrierScrollCtrl = ScrollController();
+
+  bool _obscure = true;
+  bool _hiddenObscure = true;
+  bool _showAdvanced = false;
+
+  /// True until the password field has been fully cleared at least once
+  /// since it was prefilled with a saved credential. Tracking "ever
+  /// cleared" rather than "currently differs from the prefill" closes the
+  /// trivial bypass where someone types one extra character (the field
+  /// still contains — and would reveal — almost the entire real saved
+  /// password) and hits show. Once genuinely cleared and retyped from
+  /// scratch, normal show/hide and copy/select behavior resumes.
+  bool _prefillCleared = false;
+
+  UnlockParams get _params => UnlockParams(
+    initialUri: widget.initialUri,
+    initialName: widget.initialName,
+    prefillPassword: widget.prefillPassword,
+    documentProvider: widget.documentProvider,
+    autoMountFolders: widget.autoMountFolders,
+    mountedUris: widget.mountedUris,
+    initialCompositeCarriers: widget.initialCompositeCarriers,
+  );
+
+  Future<T> _suppressLock<T>(Future<T> Function() action) =>
+      ref.read(sessionLockControllerProvider).withLockSuppression(action);
+
+  bool get _passwordPrefilled => widget.prefillPassword != null && _passwordCtrl.text == widget.prefillPassword;
+
+  /// While true, the password field's real characters can't be revealed
+  /// via the show/hide toggle or copied via text selection — see
+  /// [_prefillCleared].
+  bool get _revealLocked => (widget.prefillPassword?.isNotEmpty ?? false) && !_prefillCleared;
+
+  /// Opened from the composite-create wizard's "already have one?" shortcut:
+  /// this screen is a dedicated composite unlock (carriers can be added or
+  /// removed, but it can't turn into a different kind of vault).
+  bool get _isCompositeShortcut => widget.initialCompositeCarriers != null;
+
+  bool _isKnownFormat(UnlockState state) =>
+      widget.initialUri != null ||
+      widget.initialCompositeCarriers != null ||
+      (state.selectedUri != null && state.containerFormat != 'container');
+
+  bool _isKnownVeraCrypt(UnlockState state) => _isKnownFormat(state) && (state.isVeraCrypt || state.isComposite);
+
+  bool _isKnownLuks(UnlockState state) => _isKnownFormat(state) && state.isLuks;
+
+  bool _hasDirectOptions(UnlockState state) => _isKnownVeraCrypt(state) || _isKnownLuks(state);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _passwordCtrl = TextEditingController(text: widget.prefillPassword ?? '');
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _passwordCtrl.dispose();
+    _pimCtrl.dispose();
+    _hiddenPasswordCtrl.dispose();
+    _hiddenPimCtrl.dispose();
+    _carrierScrollCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(unlockControllerProvider(_params).notifier).checkStoragePermission();
+    }
+  }
+
+  void _resetInputFields() {
+    _passwordCtrl.clear();
+    _pimCtrl.clear();
+    _hiddenPasswordCtrl.clear();
+    _hiddenPimCtrl.clear();
+    _prefillCleared = false;
+    setState(() {});
+  }
+
+  void _onUnlock() {
+    ref
+        .read(unlockControllerProvider(_params).notifier)
+        .unlock(
+          passwordText: _passwordCtrl.text,
+          pimText: _pimCtrl.text,
+          hiddenPasswordText: _hiddenPasswordCtrl.text,
+          hiddenPimText: _hiddenPimCtrl.text,
+          l10n: context.l10n,
+          passwordPrefilled: _passwordPrefilled,
+        );
+  }
+
+  _UnlockCredentialState _getCredentialState(UnlockState state) {
+    if (state.loadingAuth) return _UnlockCredentialState.loading;
+    if (state.containerMissing) return _UnlockCredentialState.missing;
+    if (state.unlockMethod == ContainerUnlockMethod.biometrics && !state.showPasswordFallback) {
+      return _UnlockCredentialState.biometric;
+    }
+    if (state.unlockMethod == ContainerUnlockMethod.pattern && !state.showPasswordFallback) {
+      return _UnlockCredentialState.pattern;
+    }
+    if (state.unlockMethod == ContainerUnlockMethod.pin && !state.showPasswordFallback) {
+      return _UnlockCredentialState.pin;
+    }
+    if (state.showPasswordFallback ||
+        widget.initialUri == null ||
+        state.unlockMethod == ContainerUnlockMethod.password ||
+        state.unlockMethod == ContainerUnlockMethod.rememberPassword) {
+      return _UnlockCredentialState.password;
+    }
+    return _UnlockCredentialState.none;
+  }
+
+  String _formatBadgeLabel(BuildContext context, UnlockState state) {
+    if (state.isComposite) {
+      return state.compositeCarrierCount > 1
+          ? context.l10n.compositeBadgeMultipleCarriers(state.compositeCarrierCount)
+          : (state.compositeCarrierCount == 1
+                ? context.l10n.compositeBadgeSingleCarrier
+                : context.l10n.compositeBadgeDefault);
+    }
+    if (state.isLuks) return context.l10n.formatContainerLabel('LUKS');
+    if (state.isCryptomator) return context.l10n.formatVaultLabel('Cryptomator');
+    if (state.isGocryptfs) return context.l10n.formatVaultLabel('Gocryptfs');
+    if (state.isCryfs) return context.l10n.formatVaultLabel('CryFS');
+    if (state.isBitlocker) return context.l10n.formatContainerLabel('BitLocker');
+    if (state.containerFormat == 'veracrypt') return context.l10n.formatContainerLabel('VeraCrypt');
+    return context.l10n.encryptedContainerLabel;
+  }
+
+  String _unlockProgressLabel(BuildContext context, UnlockState state) {
+    final p = state.progress;
+    if (p == null || p.total <= 0) return context.l10n.decryptingLabel;
+
+    if (state.isLuks) {
+      return p.total > 1
+          ? context.l10n.luksKeyslotProgress(p.attempted, p.total)
+          : context.l10n.luksKeyslotProgressUnknown;
+    }
+
+    if (state.isBitlocker) {
+      return p.total > 1
+          ? context.l10n.bitlockerCredentialProgress(p.attempted, p.total)
+          : context.l10n.bitlockerCredentialProgressUnknown;
+    }
+
+    final hashName = hashAlgorithmName(p.hashId);
+    final cipherName = p.cipherId != 255 ? cipherAlgorithmName(p.cipherId) : '';
+    final slotName = p.slot == 1 ? context.l10n.hiddenVolumeSlotName : context.l10n.standardVolumeSlotName;
+    final algo = cipherName.isNotEmpty ? '$hashName + $cipherName' : hashName;
+    return context.l10n.veracryptAlgoProgress(algo, slotName);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(unlockControllerProvider(_params).select((s) => s.mountedSuccess), (prev, next) {
+      if (next != null && mounted) {
+        HapticFeedback.lightImpact();
+        widget.onMounted(next.container, record: next.record);
+        if (widget.openBrowserRoute != null) {
+          Navigator.of(context).pushReplacement(widget.openBrowserRoute!(next.container));
+        } else {
+          Navigator.pop(context);
+        }
+      }
+    });
+    ref.listen(unlockControllerProvider(_params).select((s) => s.biometricAutoTriggerTick), (prev, next) {
+      if (mounted) {
+        _suppressLock(() async => ref.read(unlockControllerProvider(_params).notifier).tryBiometric(context.l10n));
+      }
+    });
+
+    final state = ref.watch(unlockControllerProvider(_params));
+    final cs = context.colors;
+    final textTheme = context.typography;
+    final wideLayout = context.screen.useWideLayout;
+    final credState = _getCredentialState(state);
+    final isBusy = state.loading || state.checkingContainer || (state.selectedUri != null && state.loadingAuth);
+
+    return PopScope(
+      canPop: !state.loading,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && state.loading) {
+          ref.read(unlockControllerProvider(_params).notifier).cancelUnlock();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.close_rounded),
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+            onPressed: state.loading ? null : () => Navigator.of(context).pop(),
+          ),
+          title: Text(
+            (widget.initialUri != null || widget.initialCompositeCarriers != null)
+                ? context.l10n.unlockContainerTitle
+                : context.l10n.mountContainerTitle,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          actions: widget.initialUri == null && widget.initialCompositeCarriers == null && wideLayout
+              ? [_buildVaultKindSegmentedButton(context, state), const SizedBox(width: 12)]
+              : null,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4),
+            child: isBusy
+                ? LinearProgressIndicator(color: cs.primary, backgroundColor: cs.primaryContainer)
+                : const SizedBox(height: 4),
+          ),
+        ),
+        body: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          child: SafeArea(
+            child: wideLayout
+                ? _buildWideLayout(context, state, credState, cs, textTheme)
+                : _buildPortraitLayout(context, state, credState, cs, textTheme),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWideLayout(
+    BuildContext context,
+    UnlockState state,
+    _UnlockCredentialState credState,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 5,
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildPickerCard(context, state, cs, textTheme),
+                  const SizedBox(height: 10),
+                  ..._buildCredentialSection(context, state, credState, cs, textTheme),
+                  ..._buildQuickUnlockOptionsSection(context, state, credState, cs, textTheme),
+                  ..._buildPrimaryActionSection(context, state, credState, cs, textTheme),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 28),
+          Expanded(flex: 6, child: _buildRightPane(context, state, credState, cs, textTheme)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPortraitLayout(
+    BuildContext context,
+    UnlockState state,
+    _UnlockCredentialState credState,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildPickerCard(context, state, cs, textTheme),
+          const SizedBox(height: 10),
+          ..._buildCredentialSection(context, state, credState, cs, textTheme),
+          ..._buildQuickUnlockOptionsSection(context, state, credState, cs, textTheme),
+          ..._buildPrimaryActionSection(context, state, credState, cs, textTheme),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVaultKindSplitRow(BuildContext context, UnlockState state) {
+    final cs = context.colors;
+    final textTheme = context.typography;
+    final isFolder = state.isFolderVault;
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ( Container File )
+          Expanded(
+            child: InkWell(
+              onTap: state.loading || state.checkingContainer
+                  ? null
+                  : () {
+                      _resetInputFields();
+                      ref.read(unlockControllerProvider(_params).notifier).setSelectedVaultKind('container');
+                    },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                color: !isFolder ? cs.primaryContainer.withValues(alpha: 0.7) : Colors.transparent,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.folder_zip_rounded,
+                      size: 18,
+                      color: !isFolder ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        context.l10n.vaultKindContainerFile,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.labelLarge?.copyWith(
+                          fontWeight: !isFolder ? FontWeight.bold : FontWeight.w500,
+                          color: !isFolder ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Middle separator "|"
+          VerticalDivider(width: 1, thickness: 1, color: cs.outlineVariant.withValues(alpha: 0.5)),
+
+          // ( Folder Vault )
+          Expanded(
+            child: InkWell(
+              onTap: state.loading || state.checkingContainer
+                  ? null
+                  : () {
+                      _resetInputFields();
+                      ref.read(unlockControllerProvider(_params).notifier).setSelectedVaultKind('directory_vault');
+                    },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                color: isFolder ? cs.primaryContainer.withValues(alpha: 0.7) : Colors.transparent,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.folder, size: 18, color: isFolder ? cs.onPrimaryContainer : cs.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        context.l10n.vaultKindFolderVault,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.labelLarge?.copyWith(
+                          fontWeight: isFolder ? FontWeight.bold : FontWeight.w500,
+                          color: isFolder ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVaultKindSegmentedButton(BuildContext context, UnlockState state, {OutlinedBorder? shape}) {
+    return SizedBox(
+      width: shape != null ? double.infinity : null,
+      child: SegmentedButton<String>(
+        showSelectedIcon: false,
+        style: SegmentedButton.styleFrom(
+          side: BorderSide.none,
+          shape: shape,
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+        segments: [
+          ButtonSegment(
+            value: 'container',
+            label: Text(
+              context.l10n.vaultKindContainerFile,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+            ),
+            icon: const Icon(Icons.folder_zip_rounded, size: 16),
+          ),
+          ButtonSegment(
+            value: 'directory_vault',
+            label: Text(
+              context.l10n.vaultKindFolderVault,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+            ),
+            icon: const Icon(Icons.folder_shared_rounded, size: 16),
+          ),
+        ],
+        selected: {state.isFolderVault ? 'directory_vault' : 'container'},
+        onSelectionChanged: state.loading || state.checkingContainer
+            ? null
+            : (sel) {
+                _resetInputFields();
+                ref.read(unlockControllerProvider(_params).notifier).setSelectedVaultKind(sel.first);
+              },
+      ),
+    );
+  }
+
+  Widget _buildPickerCard(BuildContext context, UnlockState state, ColorScheme cs, TextTheme textTheme) {
+    final hasSelection = state.selectedUri != null;
+    final isWide = context.screen.useWideLayout;
+    final showLoadingFeedback = hasSelection && (state.checkingContainer || state.loadingAuth);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (widget.initialUri == null && widget.initialCompositeCarriers == null && !isWide) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _buildVaultKindSegmentedButton(
+              context,
+              state,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+            ),
+          ),
+        ],
+        SectionCard(
+          children: [
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              leading: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: hasSelection ? cs.primaryContainer.withValues(alpha: 0.7) : cs.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: state.isComposite
+                    ? Icon(
+                        Icons.layers_rounded,
+                        color: hasSelection ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+                        size: 22,
+                      )
+                    : (state.isPlainDiskImage || state.containerFormat == 'plain'
+                          ? Icon(
+                              Icons.album_outlined,
+                              color: hasSelection ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+                              size: 22,
+                            )
+                          : ContainerFormatIcon(
+                              format: hasSelection
+                                  ? ContainerFormat.fromWire(state.containerFormat)
+                                  : ContainerFormat.directoryVault,
+                              color: hasSelection ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+                              size: 22,
+                            )),
+              ),
+              title: Text(
+                state.selectedName ??
+                    (state.isFolderVault ? context.l10n.tapToSelectVaultFolder : context.l10n.tapToSelectContainerFile),
+                style: textTheme.bodyMedium?.copyWith(fontWeight: hasSelection ? FontWeight.bold : FontWeight.normal),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: (hasSelection && widget.initialUri == null && widget.initialCompositeCarriers == null)
+                  ? IconButton(
+                      icon: const Icon(Icons.close_rounded, size: 20),
+                      tooltip: context.l10n.clearAllButton,
+                      onPressed: state.loading || state.checkingContainer
+                          ? null
+                          : () {
+                              _resetInputFields();
+                              ref.read(unlockControllerProvider(_params).notifier).clearSelection();
+                            },
+                    )
+                  : (widget.initialUri == null && widget.initialCompositeCarriers == null
+                        ? Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant)
+                        : null),
+              onTap:
+                  state.loading ||
+                      state.checkingContainer ||
+                      widget.initialUri != null ||
+                      widget.initialCompositeCarriers != null
+                  ? null
+                  : () => _suppressLock(
+                      () async => ref.read(unlockControllerProvider(_params).notifier).pickFile(context.l10n),
+                    ),
+            ),
+          ],
+        ),
+        if (showLoadingFeedback) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: cs.primaryContainer.withValues(alpha: 0.45),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+            child: Row(
+              children: [
+                SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2, color: cs.primary)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    context.l10n.loadingContainerFromStorage,
+                    style: textTheme.bodySmall?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (state.isComposite && state.compositeCarrierCount > 0 && widget.initialUri == null) ...[
+          if (state.compositeCarrierCount == 1) ...[
+            const SizedBox(height: 8),
+            InlineBanner(
+              context.l10n.compositeSingleCarrierWarningBanner,
+              tone: AppBannerTone.info,
+              icon: Icons.layers_rounded,
+            ),
+          ],
+          const SizedBox(height: 8),
+          _buildCompositeCarriersEditor(context, state, cs, textTheme),
+        ],
+        if (state.isFolderVault && !state.hasAllStorageAccess) ...[
+          const SizedBox(height: 8),
+          InlineBanner(
+            state.isCryfs ? context.l10n.cryfsStorageAccessWarning : context.l10n.folderVaultStorageAccessWarning,
+            tone: AppBannerTone.warning,
+            icon: Icons.speed_rounded,
+            trailing: TextButton(
+              onPressed: () => _suppressLock(
+                () async => ref.read(unlockControllerProvider(_params).notifier).requestStoragePermission(),
+              ),
+              child: Text(context.l10n.enableButtonLabel),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Carrier list shown once a composite carrier has been detected. Mirrors
+  /// the carriers step of the composite-create wizard: "Add" can be tapped
+  /// repeatedly (each pick may come from a different folder or storage
+  /// volume, and is merged into the selection), and each row can be removed.
+  Widget _buildCompositeCarriersEditor(BuildContext context, UnlockState state, ColorScheme cs, TextTheme textTheme) {
+    final notifier = ref.read(unlockControllerProvider(_params).notifier);
+    final carriers = state.compositeCarriers;
+    final l10n = context.l10n;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.compositeCarrierFilesCountHeader(carriers.length)),
+        SectionCard(
+          children: [
+            InkWell(
+              onTap: state.loading ? null : () => _suppressLock(() async => notifier.addCompositeCarriers()),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Icon(Icons.add_photo_alternate_rounded, color: cs.primary, size: 24),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.compositeAddCarrierFilesTitle,
+                            style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.compositeAddCarrierFilesSubtitle,
+                            style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    FilledButton.tonalIcon(
+                      onPressed: state.loading
+                          ? null
+                          : () => _suppressLock(() async => notifier.addCompositeCarriers()),
+                      style: FilledButton.styleFrom(
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                      ),
+                      icon: const Icon(Icons.folder_open_rounded, size: 18),
+                      label: Text(l10n.compositeBrowseButtonLabel),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 280),
+              child: Scrollbar(
+                controller: _carrierScrollCtrl,
+                thumbVisibility: carriers.length > 4,
+                interactive: true,
+                thickness: 4.5,
+                radius: const Radius.circular(8),
+                child: ListView.builder(
+                  controller: _carrierScrollCtrl,
+                  shrinkWrap: true,
+                  physics: const ClampingScrollPhysics(),
+                  itemCount: carriers.length,
+                  itemExtent: 54,
+                  padding: const EdgeInsets.only(right: 6),
+                  itemBuilder: (context, index) {
+                    final carrier = carriers[index];
+                    final budget = state.compositeCarrierProfiles[carrier.uri];
+                    final unrecognized = budget != null && budget.detectedFormat != 'composite_carrier';
+
+                    Widget leadingWidget;
+                    if (budget == null) {
+                      leadingWidget = SizedBox(
+                        width: 26,
+                        height: 26,
+                        child: Center(
+                          child: SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: cs.primary),
+                          ),
+                        ),
+                      );
+                    } else if (unrecognized) {
+                      leadingWidget = Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(color: cs.errorContainer, shape: BoxShape.circle),
+                        child: Icon(Icons.warning_amber_rounded, size: 16, color: cs.onErrorContainer),
+                      );
+                    } else {
+                      leadingWidget = Container(
+                        width: 26,
+                        height: 26,
+                        decoration: BoxDecoration(color: cs.surfaceContainerHighest, shape: BoxShape.circle),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${index + 1}',
+                          style: textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                      leading: leadingWidget,
+                      title: Text(
+                        carrier.displayName,
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: unrecognized ? cs.error : cs.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        budget == null
+                            ? l10n.compositeCarrierAnalyzingStatus
+                            : (unrecognized
+                                  ? '${budget.detectedFormat.toUpperCase()} • ${formatBytes(budget.fileSize)}'
+                                  : formatBytes(budget.fileSize)),
+                        style: textTheme.bodySmall?.copyWith(color: unrecognized ? cs.error : cs.onSurfaceVariant),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.close_rounded, size: 18),
+                        tooltip: l10n.clear,
+                        visualDensity: VisualDensity.compact,
+                        onPressed: state.loading
+                            ? null
+                            : () {
+                                if (carriers.length == 1) {
+                                  // Nothing left to unlock: go back to where the
+                                  // user came from rather than an empty form.
+                                  if (_isCompositeShortcut) {
+                                    Navigator.of(context).pop();
+                                    return;
+                                  }
+                                  _resetInputFields();
+                                }
+                                notifier.removeCompositeCarrier(carrier.uri);
+                              },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildCredentialSection(
+    BuildContext context,
+    UnlockState state,
+    _UnlockCredentialState credState,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    final isWide = context.screen.useWideLayout;
+
+    switch (credState) {
+      case _UnlockCredentialState.loading:
+        return [
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: CircularProgressIndicator(strokeWidth: 2.5),
+            ),
+          ),
+        ];
+
+      case _UnlockCredentialState.missing:
+        return [
+          SectionCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.find_in_page_outlined, color: cs.error, size: 22),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            state.isComposite
+                                ? context.l10n.compositeCarriersMissingTitle
+                                : context.l10n.containerMissingTitle,
+                            style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: cs.error),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.isComposite
+                          ? context.l10n.compositeCarriersMissingExplanation
+                          : context.l10n.containerMissingExplanation,
+                      style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => _suppressLock(
+                              () async =>
+                                  ref.read(unlockControllerProvider(_params).notifier).relocateContainer(context.l10n),
+                            ),
+                            child: Text(
+                              state.isComposite
+                                  ? context.l10n.compositeRelocateCarriersButton
+                                  : context.l10n.locateFileButtonLabel,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ];
+
+      case _UnlockCredentialState.biometric:
+        return [
+          SectionCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                child: Column(
+                  children: [
+                    if (!isWide) ...[
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: cs.primaryContainer.withValues(alpha: 0.4),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.fingerprint_rounded, size: 44, color: cs.primary),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    Text(
+                      context.l10n.biometricUnlockTitle,
+                      style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () =>
+                                ref.read(unlockControllerProvider(_params).notifier).setShowPasswordFallback(true),
+                            child: Text(context.l10n.usePasswordButtonLabel),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => _suppressLock(
+                              () async =>
+                                  ref.read(unlockControllerProvider(_params).notifier).tryBiometric(context.l10n),
+                            ),
+                            child: Text(context.l10n.authenticateButtonLabel),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ];
+
+      case _UnlockCredentialState.pattern:
+        return [
+          SectionCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    Text(
+                      context.l10n.drawUnlockPatternTitle,
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    if (!isWide) ...[
+                      const SizedBox(height: 14),
+                      PatternLockView(
+                        key: ValueKey(state.patternResetKey),
+                        onPatternComplete: (p) =>
+                            ref.read(unlockControllerProvider(_params).notifier).onPatternComplete(p, context.l10n),
+                        showError: state.patternError,
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: () =>
+                          ref.read(unlockControllerProvider(_params).notifier).setShowPasswordFallback(true),
+                      child: Text(context.l10n.usePasswordInsteadButtonLabel),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ];
+
+      case _UnlockCredentialState.pin:
+        return [
+          SectionCard(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    Text(
+                      context.l10n.enterUnlockPinTitle,
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    if (!isWide) ...[
+                      const SizedBox(height: 14),
+                      PinLockView(
+                        key: ValueKey(state.pinResetKey),
+                        onPinComplete: (p) =>
+                            ref.read(unlockControllerProvider(_params).notifier).onPinComplete(p, context.l10n),
+                        showError: state.pinError,
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    TextButton(
+                      onPressed: () =>
+                          ref.read(unlockControllerProvider(_params).notifier).setShowPasswordFallback(true),
+                      child: Text(context.l10n.usePasswordInsteadButtonLabel),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ];
+
+      case _UnlockCredentialState.password:
+        final isKnownVeraCrypt = _isKnownVeraCrypt(state);
+        final isKnownLuks = _isKnownLuks(state);
+        final hasDirectOptions = _hasDirectOptions(state);
+        final hasSelection = state.selectedUri != null;
+        final canConfigure = hasSelection && !state.loading && !state.checkingContainer;
+
+        final isPlain = state.isPlainDiskImage || state.containerFormat == 'plain';
+
+        return [
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: canConfigure ? 1.0 : 0.45,
+            child: SectionCard(
+              children: [
+                if (isPlain) ...[
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: InlineBanner(
+                      context.l10n.plainDiskImageNotice,
+                      tone: AppBannerTone.info,
+                      icon: Icons.album_outlined,
+                    ),
+                  ),
+                ] else ...[
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: TextField(
+                      controller: _passwordCtrl,
+                      enabled: canConfigure,
+                      // Stay obscured — and block text selection, so the real
+                      // characters can't be copied out either — while
+                      // _revealLocked: a saved credential shouldn't be
+                      // revealable in plain text just by editing around it.
+                      obscureText: _revealLocked ? true : _obscure,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      enableIMEPersonalizedLearning: false,
+                      enableInteractiveSelection: !_revealLocked && canConfigure,
+                      autofocus: widget.initialUri != null && widget.prefillPassword?.isEmpty != false,
+                      onChanged: (val) {
+                        if (val.isEmpty) _prefillCleared = true;
+                        setState(() {});
+                      },
+                      onSubmitted: (_) => _onUnlock(),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: cs.surfaceContainerHighest,
+                        labelText: context.l10n.passwordFieldLabel,
+                        hintText: state.isFolderVault
+                            ? context.l10n.passwordHintFolderVault
+                            : state.isBitlocker
+                            ? context.l10n.passwordHintBitlocker
+                            : state.isComposite
+                            ? context.l10n.compositePasswordHint
+                            : context.l10n.passwordHintContainer,
+                        prefixIcon: Icon(Icons.lock_outline_rounded, size: 20, color: cs.primary),
+                        suffixIcon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (_passwordPrefilled)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 4),
+                                child: Tooltip(
+                                  message: context.l10n.usingSavedPasswordTooltip,
+                                  child: Icon(Icons.bookmark_rounded, size: AppIconSize.standard, color: cs.primary),
+                                ),
+                              ),
+                            PasswordVisibilityToggle(
+                              obscured: _revealLocked ? true : _obscure,
+                              enabled: !_revealLocked && canConfigure,
+                              onToggle: () => setState(() => _obscure = !_obscure),
+                            ),
+                            const SizedBox(width: 4),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                if (isKnownVeraCrypt) ...[
+                  PimInputField(controller: _pimCtrl, enabled: canConfigure, onSubmitted: (_) => _onUnlock()),
+                ],
+                if (hasDirectOptions) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 1),
+                    child: KeyfilesPicker(
+                      keyfiles: state.keyfiles,
+                      picking: state.pickingKeyfiles,
+                      enabled: canConfigure,
+                      onPick: () => _suppressLock(
+                        () async => ref.read(unlockControllerProvider(_params).notifier).pickKeyfiles(),
+                      ),
+                      onRemove: (k) => ref.read(unlockControllerProvider(_params).notifier).removeKeyfile(k),
+                    ),
+                  ),
+                  if (isKnownLuks && state.keyfiles.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                      child: Text(
+                        context.l10n.luksKeyfileReplacesPasswordNote,
+                        style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
+                ],
+                if (state.selectedUri != null && !state.containerMissing && !context.screen.useWideLayout) ...[
+                  Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      enabled: canConfigure,
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+                      leading: Icon(Icons.tune_rounded, size: 20, color: cs.primary),
+                      title: Text(
+                        context.l10n.advancedOptionsTitle,
+                        style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      children: _buildAdvancedOptionsSection(context, state),
+                    ),
+                  ),
+                ],
+                if (widget.initialUri == null) ...[
+                  SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    value: state.remember,
+                    onChanged: canConfigure
+                        ? (val) {
+                            ref.read(unlockControllerProvider(_params).notifier).setRemember(val);
+                          }
+                        : null,
+                    title: Text(context.l10n.rememberContainerLabel),
+                    subtitle: Text(
+                      context.l10n.rememberContainerSubtitle,
+                      style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                    secondary: Icon(Icons.push_pin_outlined, color: cs.primary, size: 22),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ];
+
+      default:
+        return const [];
+    }
+  }
+
+  List<Widget> _buildQuickUnlockOptionsSection(
+    BuildContext context,
+    UnlockState state,
+    _UnlockCredentialState credState,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    if (credState == _UnlockCredentialState.password ||
+        credState == _UnlockCredentialState.loading ||
+        credState == _UnlockCredentialState.missing ||
+        credState == _UnlockCredentialState.none ||
+        state.selectedUri == null ||
+        state.checkingContainer) {
+      return const [];
+    }
+
+    return [const SizedBox(height: 10), SectionCard(children: _buildUnlockModeOptions(context, state, cs, textTheme))];
+  }
+
+  List<Widget> _buildUnlockModeOptions(BuildContext context, UnlockState state, ColorScheme cs, TextTheme textTheme) {
+    final canConfigure = !state.loading && !state.loadingAuth && !state.isAuthenticating && !state.checkingContainer;
+    final notifier = ref.read(unlockControllerProvider(_params).notifier);
+    final supportsHiddenVolumeProtection = state.isVeraCrypt && !state.isComposite;
+
+    return [
+      SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        value: state.readOnly,
+        onChanged: canConfigure ? notifier.setReadOnly : null,
+        title: Text(context.l10n.readOnlyModeLabel),
+        subtitle: Text(
+          context.l10n.readOnlyModeContainerSubtitle,
+          style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+        ),
+        secondary: Icon(Icons.visibility_outlined, color: cs.primary, size: 22),
+      ),
+      if (supportsHiddenVolumeProtection) ...[
+        SwitchListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          value: state.protectHiddenVolume && !state.readOnly,
+          onChanged: canConfigure && !state.readOnly ? notifier.setProtectHiddenVolume : null,
+          title: Text(context.l10n.protectHiddenVolumeToggleTitle),
+          subtitle: Text(
+            state.readOnly
+                ? context.l10n.readOnlyModeContainerSubtitle
+                : context.l10n.protectHiddenVolumeToggleSubtitle,
+            style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+          ),
+          secondary: Icon(Icons.shield_outlined, color: cs.primary, size: 22),
+        ),
+        if (state.protectHiddenVolume && !state.readOnly) ...[
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: TextField(
+              controller: _hiddenPasswordCtrl,
+              obscureText: _hiddenObscure,
+              autocorrect: false,
+              enableSuggestions: false,
+              enableIMEPersonalizedLearning: false,
+              enabled: canConfigure,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: cs.surfaceContainerHighest,
+                labelText: context.l10n.hiddenPasswordLabel,
+                prefixIcon: Icon(Icons.key_rounded, size: AppIconSize.standard, color: cs.primary),
+                suffixIcon: PasswordVisibilityToggle(
+                  obscured: _hiddenObscure,
+                  enabled: canConfigure,
+                  onToggle: () => setState(() => _hiddenObscure = !_hiddenObscure),
+                ),
+              ),
+            ),
+          ),
+          PimInputField(controller: _hiddenPimCtrl, enabled: canConfigure, onSubmitted: (_) => _onUnlock()),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1),
+            child: KeyfilesPicker(
+              keyfiles: state.hiddenKeyfiles,
+              picking: state.pickingHiddenKeyfiles,
+              enabled: canConfigure,
+              onPick: () => _suppressLock(() async => notifier.pickHiddenKeyfiles()),
+              onRemove: notifier.removeHiddenKeyfile,
+            ),
+          ),
+          AdvancedParamsPanel(
+            collapsible: false,
+            cipherId: state.hiddenCipherId,
+            hashId: state.hiddenHashId,
+            enabled: canConfigure,
+            onCipherChanged: notifier.setHiddenCipherId,
+            onHashChanged: notifier.setHiddenHashId,
+          ),
+        ],
+      ],
+    ];
+  }
+
+  List<Widget> _buildAdvancedOptionsSection(BuildContext context, UnlockState state) {
+    final hasDirectOptions = _hasDirectOptions(state);
+    final hasSelection = state.selectedUri != null;
+    final canConfigure = hasSelection && !state.loading;
+
+    return [
+      if (!hasDirectOptions) ...[
+        if (state.isVeraCrypt || state.isComposite) ...[
+          PimInputField(controller: _pimCtrl, enabled: canConfigure, onSubmitted: (_) => _onUnlock()),
+        ],
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1),
+          child: KeyfilesPicker(
+            keyfiles: state.keyfiles,
+            picking: state.pickingKeyfiles,
+            enabled: canConfigure,
+            onPick: () =>
+                _suppressLock(() async => ref.read(unlockControllerProvider(_params).notifier).pickKeyfiles()),
+            onRemove: (k) => ref.read(unlockControllerProvider(_params).notifier).removeKeyfile(k),
+          ),
+        ),
+      ],
+      if (state.isVeraCrypt || state.isComposite) ...[
+        AdvancedParamsPanel(
+          collapsible: false,
+          cipherId: state.cipherId,
+          hashId: state.hashId,
+          enabled: canConfigure,
+          onCipherChanged: (val) => ref.read(unlockControllerProvider(_params).notifier).setCipherId(val),
+          onHashChanged: (val) => ref.read(unlockControllerProvider(_params).notifier).setHashId(val),
+        ),
+      ],
+      ..._buildUnlockModeOptions(context, state, context.colors, context.typography),
+    ];
+  }
+
+  Widget _buildRightPane(
+    BuildContext context,
+    UnlockState state,
+    _UnlockCredentialState credState,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    switch (credState) {
+      case _UnlockCredentialState.loading:
+        return const SizedBox.shrink();
+
+      case _UnlockCredentialState.pattern:
+        return Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: PatternLockView(
+              key: ValueKey(state.patternResetKey),
+              onPatternComplete: (p) =>
+                  ref.read(unlockControllerProvider(_params).notifier).onPatternComplete(p, context.l10n),
+              showError: state.patternError,
+            ),
+          ),
+        );
+
+      case _UnlockCredentialState.pin:
+        return Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: PinLockView(
+              key: ValueKey(state.pinResetKey),
+              onPinComplete: (p) => ref.read(unlockControllerProvider(_params).notifier).onPinComplete(p, context.l10n),
+              showError: state.pinError,
+            ),
+          ),
+        );
+
+      case _UnlockCredentialState.biometric:
+        return Center(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(color: cs.primaryContainer.withValues(alpha: 0.4), shape: BoxShape.circle),
+            child: Icon(Icons.fingerprint_rounded, size: 56, color: cs.primary),
+          ),
+        );
+
+      case _UnlockCredentialState.password:
+      default:
+        if (state.selectedUri == null || state.containerMissing) {
+          return const SizedBox.shrink();
+        }
+        final hasSelection = state.selectedUri != null;
+        final canConfigure = hasSelection && !state.loading;
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: canConfigure ? 1.0 : 0.45,
+                child: SectionCard(children: _buildAdvancedOptionsSection(context, state)),
+              ),
+            ],
+          ),
+        );
+    }
+  }
+
+  List<Widget> _buildPrimaryActionSection(
+    BuildContext context,
+    UnlockState state,
+    _UnlockCredentialState credState,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    if (credState != _UnlockCredentialState.password) return const [];
+    final isButtonEnabled = state.selectedUri != null && !state.checkingContainer;
+
+    return [
+      if (state.error != null) ...[const SizedBox(height: 10), InlineErrorBanner(state.error!)],
+      const SizedBox(height: 10),
+      if (state.loading) ...[
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock_clock_rounded, size: 16, color: cs.primary),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  _unlockProgressLabel(context, state),
+                  style: textTheme.bodySmall?.copyWith(color: cs.primary, fontWeight: FontWeight.w600),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      FilledButton(
+        onPressed: state.loading || state.checkingContainer ? null : (isButtonEnabled ? _onUnlock : null),
+        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50), shape: const StadiumBorder()),
+        child: state.loading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+              )
+            : Text(
+                state.isPlainDiskImage || state.containerFormat == 'plain'
+                    ? context.l10n.mountContainerTitle
+                    : (state.isFolderVault ? context.l10n.unlockVaultButtonLabel : context.l10n.unlockContainerLabel),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+      ),
+      if (state.loading && state.activeVolId != null) ...[
+        const SizedBox(height: 4),
+        Center(
+          child: TextButton(
+            onPressed: () => ref.read(unlockControllerProvider(_params).notifier).cancelUnlock(),
+            child: Text(context.l10n.cancelUnlockButtonLabel),
+          ),
+        ),
+      ],
+    ];
+  }
+}

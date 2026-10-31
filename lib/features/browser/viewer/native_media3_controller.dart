@@ -1,0 +1,697 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:vaultexplorer/core/services/playback_throttle_controller.dart';
+import 'package:vaultexplorer/core/utils/retry.dart';
+import 'package:vaultexplorer/data/models/audio_equalizer_settings.dart';
+import 'package:vaultexplorer/data/models/media_decoder_mode.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_session_bridge.dart';
+import 'package:vaultexplorer/features/browser/viewer/native_video_controller.dart';
+
+@immutable
+class AudioTrackInfo {
+  final int groupIndex;
+  final int trackIndex;
+  final bool isSelected;
+  final String language;
+  final String label;
+  final String mimeType;
+  final String id;
+  final int? channelCount;
+  final int? sampleRate;
+  final int? bitrate;
+
+  const AudioTrackInfo({
+    required this.groupIndex,
+    required this.trackIndex,
+    required this.isSelected,
+    required this.language,
+    required this.label,
+    required this.mimeType,
+    required this.id,
+    this.channelCount,
+    this.sampleRate,
+    this.bitrate,
+  });
+
+  factory AudioTrackInfo.fromMap(Map<String, dynamic> map) {
+    return AudioTrackInfo(
+      groupIndex: map['groupIndex'] as int? ?? -1,
+      trackIndex: map['trackIndex'] as int? ?? -1,
+      isSelected: map['isSelected'] as bool? ?? false,
+      language: map['language'] as String? ?? '',
+      label: map['label'] as String? ?? '',
+      mimeType: map['mimeType'] as String? ?? '',
+      id: map['id'] as String? ?? '',
+      channelCount: map['channelCount'] as int?,
+      sampleRate: map['sampleRate'] as int?,
+      bitrate: map['bitrate'] as int?,
+    );
+  }
+}
+
+@immutable
+class SubtitleTrackInfo {
+  final int groupIndex;
+  final int trackIndex;
+  final bool isSelected;
+  final String language;
+  final String label;
+  final String mimeType;
+  final String id;
+
+  const SubtitleTrackInfo({
+    required this.groupIndex,
+    required this.trackIndex,
+    required this.isSelected,
+    required this.language,
+    required this.label,
+    required this.mimeType,
+    required this.id,
+  });
+
+  factory SubtitleTrackInfo.fromMap(Map<String, dynamic> map) {
+    return SubtitleTrackInfo(
+      groupIndex: map['groupIndex'] as int? ?? -1,
+      trackIndex: map['trackIndex'] as int? ?? -1,
+      isSelected: map['isSelected'] as bool? ?? false,
+      language: map['language'] as String? ?? '',
+      label: map['label'] as String? ?? '',
+      mimeType: map['mimeType'] as String? ?? '',
+      id: map['id'] as String? ?? '',
+    );
+  }
+}
+
+@immutable
+class MediaDiagnosticsInfo {
+  final String videoDecoderName;
+  final bool isVideoHardwareAccelerated;
+  final String audioDecoderName;
+  final bool isAudioHardwareAccelerated;
+  final double frameRate;
+  final String videoMimeType;
+  final String audioMimeType;
+  final int droppedFrames;
+  final int decoderInitTimeMs;
+  final int bufferedMs;
+  final String colorInfo;
+  final int volId;
+  final String filePath;
+
+  const MediaDiagnosticsInfo({
+    this.videoDecoderName = 'Initializing...',
+    this.isVideoHardwareAccelerated = true,
+    this.audioDecoderName = 'Initializing...',
+    this.isAudioHardwareAccelerated = false,
+    this.frameRate = 0.0,
+    this.videoMimeType = '',
+    this.audioMimeType = '',
+    this.droppedFrames = 0,
+    this.decoderInitTimeMs = 0,
+    this.bufferedMs = 0,
+    this.colorInfo = 'SDR',
+    this.volId = -1,
+    this.filePath = '',
+  });
+
+  factory MediaDiagnosticsInfo.fromMap(Map<String, dynamic> map) {
+    return MediaDiagnosticsInfo(
+      videoDecoderName: map['videoDecoderName'] as String? ?? 'Unknown',
+      isVideoHardwareAccelerated:
+          map['isVideoHardwareAccelerated'] as bool? ?? true,
+      audioDecoderName: map['audioDecoderName'] as String? ?? 'Unknown',
+      isAudioHardwareAccelerated:
+          map['isAudioHardwareAccelerated'] as bool? ?? false,
+      frameRate: (map['frameRate'] as num?)?.toDouble() ?? 0.0,
+      videoMimeType: map['videoMimeType'] as String? ?? '',
+      audioMimeType: map['audioMimeType'] as String? ?? '',
+      droppedFrames: (map['droppedFrames'] as num?)?.toInt() ?? 0,
+      decoderInitTimeMs: (map['decoderInitTimeMs'] as num?)?.toInt() ?? 0,
+      bufferedMs: (map['bufferedMs'] as num?)?.toInt() ?? 0,
+      colorInfo: map['colorInfo'] as String? ?? 'SDR',
+      volId: (map['volId'] as num?)?.toInt() ?? -1,
+      filePath: map['filePath'] as String? ?? '',
+    );
+  }
+}
+
+class NativeMedia3Controller extends ValueNotifier<NativeVideoValue> {
+  static const MethodChannel _cmdChannel = MethodChannel(
+    'com.aeidolon.vaultexplorer/player',
+  );
+  static const EventChannel _eventChannel = EventChannel(
+    'com.aeidolon.vaultexplorer/player_events',
+  );
+
+  final int volId;
+  final String filePath;
+  final bool autoPlay;
+
+  /// True when [filePath] is a real, already-plaintext absolute path on
+  /// device storage (the decoy's local file manager) rather than a path
+  /// inside a mounted, encrypted container -- see
+  /// NativePlayerManager.kt's buildMediaSource for how the native side
+  /// branches on this.
+  final bool isLocalStorage;
+
+  /// Opts this item into background playback with a media notification and
+  /// lock screen controls (vault items opened from the media viewer only --
+  /// see NativePlayerManager.initialize / VaultPlaybackSession). Off for every
+  /// other user of the native player, e.g. the video editor.
+  final bool mediaSession;
+  double _currentSpeed;
+  int _currentVolume = 100;
+  bool _audioOnly = false;
+
+  // What was last asked of the player: false until anything is, so a player
+  // that has not been started yet counts as one that is about to be.
+  bool _pauseRequested = false;
+  // play() asked for before the native player exists (see playWhenReady).
+  bool _playOnInit = false;
+  bool _initFinished = false;
+  MediaDecoderMode _videoDecoderMode;
+  MediaDecoderMode _audioDecoderMode;
+  bool _volumeBoostEnabled;
+  int _volumeBoostGainMb;
+  AudioEqualizerSettings _equalizer;
+
+  /// The last volume level (0-100) applied via [setVolume]. Read by the
+  /// edge-swipe volume gesture so a drag continues smoothly from wherever
+  /// the volume already is, rather than always restarting from 100.
+  int get currentVolume => _currentVolume;
+  StreamSubscription<dynamic>? _eventSubscription;
+  bool _disposed = false;
+  int? textureId;
+
+  final ValueNotifier<List<AudioTrackInfo>> audioTracksNotifier =
+      ValueNotifier<List<AudioTrackInfo>>([]);
+  final ValueNotifier<List<SubtitleTrackInfo>> subtitleTracksNotifier =
+      ValueNotifier<List<SubtitleTrackInfo>>([]);
+  final ValueNotifier<MediaDiagnosticsInfo> diagnosticsNotifier =
+      ValueNotifier<MediaDiagnosticsInfo>(const MediaDiagnosticsInfo());
+
+  List<AudioTrackInfo> get audioTracks => audioTracksNotifier.value;
+  List<SubtitleTrackInfo> get subtitleTracks => subtitleTracksNotifier.value;
+  MediaDiagnosticsInfo get diagnostics => diagnosticsNotifier.value;
+
+  final int initialPositionMs;
+
+  NativeMedia3Controller({
+    required this.volId,
+    required this.filePath,
+    this.autoPlay = false,
+    this.isLocalStorage = false,
+    double initialSpeed = 1.0,
+    MediaDecoderMode videoDecoderMode = MediaDecoderMode.auto,
+    MediaDecoderMode audioDecoderMode = MediaDecoderMode.auto,
+    bool volumeBoostEnabled = false,
+    int volumeBoostGainMb = 2000,
+    AudioEqualizerSettings? equalizer,
+    this.initialPositionMs = 0,
+    this.mediaSession = false,
+  }) : _currentSpeed = initialSpeed,
+       _videoDecoderMode = videoDecoderMode,
+       _audioDecoderMode = audioDecoderMode,
+       _volumeBoostEnabled = volumeBoostEnabled,
+       _volumeBoostGainMb = volumeBoostGainMb,
+       _equalizer = equalizer ?? AudioEqualizerSettings.defaults,
+       super(const NativeVideoValue());
+
+  Future<void> initialize() async {
+    if (_disposed) return;
+    _initFinished = false;
+    PlaybackThrottleController.setInitializing();
+    value = value.copyWith(
+      isInitialized: false,
+      hasRenderedFirstFrame: false,
+      isMirrorDownloading: false,
+      captionText: '',
+    );
+    await _eventSubscription?.cancel();
+    _eventSubscription = _eventChannel.receiveBroadcastStream().listen(
+      _handleNativeEvent,
+      onError: (err) {
+        if (_disposed) return;
+        value = value.copyWith(
+          hasError: true,
+          errorDescription: err.toString(),
+        );
+      },
+    );
+
+    try {
+      await retryWithBackoff<void>(
+        (attempt) async {
+          if (_disposed) throw StateError('disposed');
+          final result = await _cmdChannel.invokeMethod('initialize', {
+            'volId': volId,
+            'filePath': filePath,
+            'isLocalStorage': isLocalStorage,
+            'videoDecoderMode': _videoDecoderMode.name,
+            'audioDecoderMode': _audioDecoderMode.name,
+            'volumeBoostEnabled': _volumeBoostEnabled,
+            'volumeBoostGainMb': _volumeBoostGainMb,
+            // Only sent when it does something, so the native default
+            // ("off") also covers the editors that never set it.
+            if (_equalizer.enabled) 'equalizer': _equalizer.toChannelMap(),
+            if (initialPositionMs > 0) 'initialPositionMs': initialPositionMs,
+            if (mediaSession) 'mediaSession': true,
+          });
+          if (result is Map && result.containsKey('textureId')) {
+            textureId = (result['textureId'] as num?)?.toInt();
+          }
+        },
+        maxAttempts: 3,
+        initialDelay: const Duration(milliseconds: 500),
+        maxDelay: const Duration(seconds: 2),
+        retryIf: (_) => !_disposed,
+      );
+    } catch (e) {
+      PlaybackThrottleController.setInitialized();
+      if (_disposed) return;
+      value = NativeVideoValue(
+        hasError: true,
+        errorDescription: _describeInitError(e),
+      );
+      return;
+    }
+
+    PlaybackThrottleController.setInitialized();
+    if (_disposed) return;
+    if (_currentSpeed != 1.0) {
+      try {
+        await setPlaybackSpeed(_currentSpeed);
+      } catch (_) {
+        // Non-fatal: playback just continues at the native player's default
+        // 1.0x speed instead of the user's chosen speed; not worth
+        // surfacing as a playback error.
+      }
+    }
+    if (_currentVolume != 100) {
+      try {
+        await setVolume(_currentVolume);
+      } catch (_) {
+        // Non-fatal: same reasoning as speed above. Without this, a
+        // setVolume() call that arrived (and was dropped, see setVolume's
+        // comment) before the native player existed would leave a muted
+        // session playing at full volume once the player actually starts.
+      }
+    }
+    if (_audioOnly) {
+      try {
+        await setAudioOnly(true);
+      } catch (_) {
+        // Non-fatal: the video is decoded for a moment longer than asked.
+      }
+    }
+    // Decided and recorded in one go, so a playWhenReady() that comes in from
+    // here on plays at once instead of waiting for an initialize that is over.
+    final startNow = (autoPlay || _playOnInit) && !_disposed;
+    _initFinished = true;
+    if (startNow) {
+      await play();
+    }
+  }
+
+  void _handleNativeEvent(dynamic rawEvent) {
+    if (_disposed || rawEvent is! Map) return;
+    final eventMap = Map<String, dynamic>.from(rawEvent);
+    final type = eventMap['event'] as String?;
+
+    switch (type) {
+      case 'mirrorPullStatus':
+        final isDownloading = eventMap['isDownloading'] as bool? ?? false;
+        value = value.copyWith(isMirrorDownloading: isDownloading);
+        break;
+      case 'renderedFirstFrame':
+        value = value.copyWith(hasRenderedFirstFrame: true);
+        break;
+      case 'playbackState':
+        final state = eventMap['state'] as String?;
+        final isBuffering = state == 'buffering';
+        final isInitialized =
+            state == 'ready' || state == 'buffering' || value.isInitialized;
+        value = value.copyWith(
+          isInitialized: isInitialized,
+          isBuffering: isBuffering,
+        );
+        break;
+      case 'cues':
+        final text = eventMap['text'] as String? ?? '';
+        value = value.copyWith(captionText: text);
+        break;
+      case 'playingChanged':
+        final isPlaying = eventMap['isPlaying'] as bool? ?? false;
+        value = value.copyWith(isPlaying: isPlaying);
+        break;
+      case 'positionUpdate':
+        final posMs = (eventMap['positionMs'] as num?)?.toInt() ?? 0;
+        final durMs = (eventMap['durationMs'] as num?)?.toInt() ?? 0;
+        value = value.copyWith(
+          position: Duration(milliseconds: posMs),
+          duration: Duration(milliseconds: durMs),
+          // Force fallback true if it has progressed time but missed the event somehow
+          hasRenderedFirstFrame: value.hasRenderedFirstFrame || posMs > 0,
+        );
+        break;
+      case 'videoSize':
+        final w = (eventMap['width'] as num?)?.toDouble() ?? 0.0;
+        final h = (eventMap['height'] as num?)?.toDouble() ?? 0.0;
+        value = value.copyWith(size: Size(w, h));
+        break;
+      case 'tracksChanged':
+        _updateTracksFromMap(eventMap);
+        break;
+      case 'diagnosticsUpdate':
+        diagnosticsNotifier.value = MediaDiagnosticsInfo.fromMap(eventMap);
+        break;
+      case 'mediaSessionAction':
+        MediaSessionBridge.dispatch(eventMap['action'] as String?);
+        break;
+      case 'error':
+        final msg = eventMap['message'] as String? ?? 'Playback error';
+        value = value.copyWith(hasError: true, errorDescription: msg);
+        break;
+    }
+  }
+
+  Future<MediaDiagnosticsInfo> fetchDiagnostics() async {
+    if (_disposed) return diagnostics;
+    try {
+      final map = await _cmdChannel.invokeMethod('getDiagnostics');
+      if (map is Map) {
+        final info = MediaDiagnosticsInfo.fromMap(
+          Map<String, dynamic>.from(map),
+        );
+        diagnosticsNotifier.value = info;
+        return info;
+      }
+    } catch (_) {
+      // Diagnostics are informational only (a stats overlay); fall through
+      // to the last-known value below rather than surfacing this as an
+      // error.
+    }
+    return diagnostics;
+  }
+
+  void _updateTracksFromMap(Map<String, dynamic> eventMap) {
+    final rawAudio = eventMap['audioTracks'] as List?;
+    if (rawAudio != null) {
+      audioTracksNotifier.value = rawAudio
+          .whereType<Map>()
+          .map((m) => AudioTrackInfo.fromMap(Map<String, dynamic>.from(m)))
+          .toList();
+    }
+    final rawSubs = eventMap['subtitleTracks'] as List?;
+    if (rawSubs != null) {
+      subtitleTracksNotifier.value = rawSubs
+          .whereType<Map>()
+          .map((m) => SubtitleTrackInfo.fromMap(Map<String, dynamic>.from(m)))
+          .toList();
+    }
+  }
+
+  String _describeInitError(Object error) {
+    final msg = error.toString().toLowerCase();
+    final looksLikeDecoderContention =
+        msg.contains('codec') ||
+        msg.contains('decoder') ||
+        msg.contains('no_memory') ||
+        msg.contains('insufficientresources') ||
+        msg.contains('0x80001000');
+    return looksLikeDecoderContention
+        ? 'Video decoder unavailable — hardware codec contention'
+        : error.toString();
+  }
+
+  Future<void> play() async {
+    _pauseRequested = false;
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('play');
+    }
+  }
+
+  Future<void> pause() async {
+    _pauseRequested = true;
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('pause');
+    }
+  }
+
+  /// Whether the last thing asked of the player was to pause it. False for a
+  /// player nobody has started yet: the viewer opens it with auto-play off and
+  /// starts it once the saved position has been looked up, and a player in
+  /// that stretch is about to play, not paused.
+  bool get pauseRequested => _pauseRequested;
+
+  /// Plays as soon as the player can: at once if it is initialized, otherwise
+  /// right after it is. A [play] sent before the native player exists would be
+  /// dropped, which is why this exists: whoever takes over a player that was
+  /// still starting up uses it, because the code that would have started it
+  /// (the viewer's) is gone.
+  Future<void> playWhenReady() async {
+    if (_disposed) return;
+    if (_initFinished) {
+      await play();
+    } else {
+      _pauseRequested = false;
+      _playOnInit = true;
+    }
+  }
+
+  Future<void> seekTo(Duration position) async {
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('seekTo', {
+        'positionMs': position.inMilliseconds,
+      });
+    }
+  }
+
+  Future<void> setVolume(int vol) async {
+    // Recorded before the native call (and even if disposed/no-op below)
+    // so a fresh initialize() -- e.g. after this controller's ExoPlayer
+    // hasn't been created yet -- can reapply it once the player actually
+    // exists. Mirrors _currentSpeed's handling of the same race.
+    _currentVolume = vol;
+    if (!_disposed) {
+      final double normalized = (vol / 100.0).clamp(0.0, 1.0);
+      await _cmdChannel.invokeMethod('setVolume', {'volume': normalized});
+    }
+  }
+
+  /// Stops decoding (and drawing) the video while the sound carries on, or
+  /// starts again with `false`. Recorded before the native call, like
+  /// [setVolume], and applied again once the native player exists: the
+  /// platform forgets it whenever a player is released, so it never outlives
+  /// the item it was set on, and a call that arrives before the player does
+  /// still takes effect.
+  Future<void> setAudioOnly(bool enabled) async {
+    _audioOnly = enabled;
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('setAudioOnly', {'enabled': enabled});
+    }
+  }
+
+  Future<void> setVolumeBoost(bool enabled, int gainMb) async {
+    _volumeBoostEnabled = enabled;
+    _volumeBoostGainMb = gainMb.clamp(0, 2000).toInt();
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('setVolumeBoost', {
+        'enabled': _volumeBoostEnabled,
+        'gainMb': _volumeBoostGainMb,
+      });
+    }
+  }
+
+  /// Applies the equalizer live (takes effect within one audio buffer).
+  Future<void> setEqualizer(AudioEqualizerSettings settings) async {
+    _equalizer = settings;
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('setEqualizer', {
+        'settings': settings.toChannelMap(),
+      });
+    }
+  }
+
+  Future<void> setDecoderModes(
+    MediaDecoderMode videoMode,
+    MediaDecoderMode audioMode,
+  ) async {
+    _videoDecoderMode = videoMode;
+    _audioDecoderMode = audioMode;
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('setDecoderModes', {
+        'videoMode': videoMode.name,
+        'audioMode': audioMode.name,
+      });
+    }
+  }
+
+  Future<void> setPlaybackSpeed(double speed) async {
+    _currentSpeed = speed;
+    if (!_disposed) {
+      try {
+        await _cmdChannel.invokeMethod('setSpeed', {'speed': speed});
+      } catch (_) {
+        // Non-fatal: _currentSpeed above already reflects the user's
+        // choice for the next play()/re-init; a failed native call here
+        // just means the currently-playing instance doesn't pick it up
+        // immediately.
+      }
+    }
+  }
+
+  Future<void> setLooping(bool loop) async {
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('setLooping', {'loop': loop});
+    }
+  }
+
+  /// The player's exact position right now. [value]'s position only
+  /// refreshes every 200ms, which is too coarse for marking the ends of an
+  /// A-B loop. Null when it cannot be read (disposed, no player, or a failed
+  /// call); callers fall back to [value].
+  Future<Duration?> getExactPosition() async {
+    if (_disposed) return null;
+    try {
+      final ms = await _cmdChannel.invokeMethod<num>('getPosition');
+      if (ms == null || ms < 0) return null;
+      return Duration(milliseconds: ms.toInt());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Repeats the section [start]..[end] of this video until [clearAbLoop].
+  /// The jump back happens on the native playback thread at the exact end
+  /// position, so it does not drift with the position-event interval. While
+  /// it is set, seeks are kept between [start] and [end]. The
+  /// native side keeps [end] clear of the end of the video, and a loop is
+  /// dropped by it whenever a different item is loaded.
+  Future<void> setAbLoop(Duration start, Duration end) async {
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('setAbLoop', {
+        'startMs': start.inMilliseconds,
+        'endMs': end.inMilliseconds,
+      });
+    }
+  }
+
+  /// Marks A while B is still to be chosen: until [setAbLoop] or
+  /// [clearAbLoop], seeking before [start] lands on [start] instead.
+  Future<void> setAbLoopStart(Duration start) async {
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('setAbLoopStart', {
+        'startMs': start.inMilliseconds,
+      });
+    }
+  }
+
+  Future<void> clearAbLoop() async {
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('clearAbLoop');
+    }
+  }
+
+  Future<void> selectAudioTrack(int groupIndex, int trackIndex) async {
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('selectAudioTrack', {
+        'groupIndex': groupIndex,
+        'trackIndex': trackIndex,
+      });
+    }
+  }
+
+  Future<void> selectSubtitleTrack(int groupIndex, int trackIndex) async {
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('selectSubtitleTrack', {
+        'groupIndex': groupIndex,
+        'trackIndex': trackIndex,
+      });
+    }
+  }
+
+  Future<void> disableSubtitleTrack() async {
+    if (!_disposed) {
+      await _cmdChannel.invokeMethod('disableSubtitleTrack');
+    }
+  }
+
+  /// Opens a native scrub-preview decode session for this controller's
+  /// video, reused across every [getScrubPreviewFrame] call until
+  /// [endScrubPreview]. Returns false (and the caller should skip showing
+  /// preview UI entirely) when the native side has no software decoder
+  /// for this video's codec, or the video has no video track at all.
+  Future<bool> startScrubPreview() async {
+    if (_disposed) return false;
+    try {
+      final result = await _cmdChannel.invokeMethod('startScrubPreview');
+      if (result is Map) {
+        return result['available'] as bool? ?? false;
+      }
+      return false;
+    } catch (_) {
+      // Best-effort: a failed session open just means no scrub preview
+      // is shown for this drag, not a playback error.
+      return false;
+    }
+  }
+
+  /// Decodes the frame nearest [position] using the session opened by
+  /// [startScrubPreview]. Returns null if no session is open, the frame
+  /// couldn't be decoded, or a newer request superseded this one on the
+  /// native side -- either way the caller should just keep showing
+  /// whatever preview it already has rather than clear it.
+  Future<Uint8List?> getScrubPreviewFrame(
+    Duration position, {
+    int maxSize = 200,
+    int quality = 55,
+  }) async {
+    if (_disposed) return null;
+    try {
+      return await _cmdChannel.invokeMethod<Uint8List>('getScrubPreviewFrame', {
+        'positionMs': position.inMilliseconds,
+        'maxSize': maxSize,
+        'quality': quality,
+      });
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Closes the scrub-preview session opened by [startScrubPreview],
+  /// releasing its native decoder. Safe to call even if no session is
+  /// open (e.g. [startScrubPreview] returned false).
+  Future<void> endScrubPreview() async {
+    if (_disposed) return;
+    try {
+      await _cmdChannel.invokeMethod('endScrubPreview');
+    } catch (_) {
+      // Best-effort teardown, mirroring dispose()'s release() call below.
+    }
+  }
+
+  bool get isDisposed => _disposed;
+
+  @override
+  Future<void> dispose() async {
+    if (_disposed) return;
+    _disposed = true;
+    value = const NativeVideoValue(
+      isInitialized: false,
+      hasRenderedFirstFrame: false,
+    );
+    await _eventSubscription?.cancel();
+    _eventSubscription = null;
+    audioTracksNotifier.dispose();
+    subtitleTracksNotifier.dispose();
+    try {
+      await _cmdChannel.invokeMethod('release');
+    } catch (_) {
+      // Best-effort teardown: this controller is being disposed regardless;
+      // a failed native release call isn't actionable from here.
+    }
+    super.dispose();
+  }
+}

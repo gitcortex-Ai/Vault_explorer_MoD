@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vault Explorer</string>
+    <string name="decoy_app_name">Archive Explorer</string>
+    <string name="pdf_edit_unavailable">Editing isn\'t available for this document</string>
+    <string name="install_unknown_apps_required">Allow this app to install apps, then tap the APK again</string>
+    <string name="install_no_installer">No app on this device can install APK files</string>
+
+    <string name="vault_keep_alive_channel_description">Ongoing status notifications</string>
+    <string name="scheduled_sync_channel_name">Scheduled vault sync</string>
+    <string name="scheduled_sync_channel_description">Status while a scheduled vault sync is running</string>
+    <string name="syncing_vault_notification">Syncing vault...</string>
+    <string name="automation_unlocking_notification_title">Unlocking vault...</string>
+    <string name="automation_importing_notification_title">Importing to vault...</string>
+    <string name="automation_exporting_notification_title">Exporting from vault...</string>
+    <string name="automation_progress_channel_name">Vault automation</string>
+    <string name="automation_progress_channel_description">Progress of vault automation actions</string>
+    <string name="automation_progress_starting">Starting automation...</string>
+    <plurals name="vault_keep_alive_notification_text">
+        <item quantity="one">%d vault open</item>
+        <item quantity="other">%d vaults open</item>
+    </plurals>
+
+    <string name="panickit_notification_channel_name">App connections</string>
+    <string name="panickit_notification_channel_description">Shown when an external app is linked or unlinked</string>
+    <string name="panickit_paired_notification_title">Panic trigger connected</string>
+    <string name="panickit_paired_notification_text">%1$s can now trigger this app\'s panic response</string>
+    <string name="panickit_paired_notification_text_decoy">A connected app was added</string>
+    <string name="panickit_unpaired_notification_title">Panic trigger disconnected</string>
+    <string name="panickit_unpaired_notification_text">%1$s can no longer trigger this app\'s panic response</string>
+    <string name="panickit_unpaired_notification_text_decoy">A connected app was removed</string>
+    <string name="panickit_unknown_app">an app</string>
+
+    <string name="vault_keep_alive_lock_all_action">Lock all vaults</string>
+    <string name="vault_keep_alive_notification_text_decoy">Archive Explorer is running</string>
+    <string name="vault_keep_alive_close_action_decoy">Close</string>
+    <string name="mirror_push_notification_title">Saving vault changes</string>
+    <string name="mirror_push_notification_text">Uploading changes to storage</string>
+
+    <string name="camera_recording_channel_description">Ongoing recording status</string>
+    <string name="camera_recording_notification_title">Recording video</string>
+    <string name="audio_recording_notification_title">Recording audio</string>
+    <string name="camera_recording_notification_text">Saving to %1$s</string>
+    <string name="camera_recording_stop_action">Stop &amp; save</string>
+    <string name="camera_recording_notification_text_decoy">Archive Explorer is running</string>
+    <string name="camera_recording_stop_action_decoy">Close</string>
+
+    <string name="panic_tile_label">Panic Purge</string>
+    <string name="quick_capture_tile_label">Quick Capture</string>
+    <string name="quick_capture_shortcut_label">Quick Capture</string>
+    <string name="panic_tile_active_description">Emergency Purge Active</string>
+    <string name="vault_media_channel_description">Playback controls for media from unlocked vaults and local storage</string>
+    <string name="vault_media_notification_title">Playing from vault</string>
+    <string name="vault_media_notification_title_local">Playing media</string>
+    <string name="vault_media_action_play">Play</string>
+    <string name="vault_media_action_pause">Pause</string>
+    <string name="vault_media_action_previous">Previous</string>
+    <string name="vault_media_action_next">Next</string>
+    <string name="vault_media_action_stop">Stop</string>
+    <string name="vault_pip_action_audio_only">Audio only</string>
+</resources>

@@ -1,0 +1,13177 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Arabic (`ar`).
+class AppLocalizationsAr extends AppLocalizations {
+  AppLocalizationsAr([String locale = 'ar']) : super(locale);
+
+  @override
+  String get usbAttachPromptTitle => 'إظهار مطالبة اتصال USB';
+
+  @override
+  String get usbAttachPromptSubtitle =>
+      'عند التفعيل، يعرض Android تطبيق VaultExplorer عند توصيل محرك USB. أوقف هذا الخيار لإيقاف المطالبة؛ لا يزال بإمكانك فتح المحركات من «تركيب محرك USB».';
+
+  @override
+  String get usbAttachPromptUpdateErrorMessage => 'تعذر تحديث إعداد اتصال USB.';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String get search => 'بحث';
+
+  @override
+  String get goBack => 'رجوع';
+
+  @override
+  String xOfYCounter(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String get pdfViewerGoToPageTitle => 'الانتقال إلى صفحة';
+
+  @override
+  String pdfViewerPageNumberHint(int pageCount) {
+    return 'رقم الصفحة (1 - $pageCount)';
+  }
+
+  @override
+  String get pdfViewerPageLabel => 'الصفحة';
+
+  @override
+  String get pdfViewerGoButton => 'انتقال';
+
+  @override
+  String get pdfViewerSearchHint => 'البحث في المستند';
+
+  @override
+  String get pdfViewerNoMatches => 'لا توجد نتائج مطابقة';
+
+  @override
+  String get pdfViewerPreviousMatch => 'النتيجة السابقة';
+
+  @override
+  String get pdfViewerNextMatch => 'النتيجة التالية';
+
+  @override
+  String get pdfViewerCloseSearch => 'إغلاق البحث';
+
+  @override
+  String get pdfViewerPrintTooltip => 'طباعة المستند';
+
+  @override
+  String get pdfViewerLoadingDocument => 'جارٍ تحميل المستند…';
+
+  @override
+  String get pdfViewerCannotOpenTitle => 'تعذّر فتح ملف PDF';
+
+  @override
+  String get pdfViewerFailedToLoad => 'فشل تحميل ملف PDF';
+
+  @override
+  String get pdfViewerEditTooltip => 'تعديل';
+
+  @override
+  String get pdfViewerDoneEditingTooltip => 'إنهاء التعديل';
+
+  @override
+  String get pdfViewerSaveFailed => 'تعذّر حفظ التغييرات في ملف PDF هذا';
+
+  @override
+  String get pdfViewerEditUnavailable => 'التعديل غير متاح لهذا المستند';
+
+  @override
+  String get paste => 'لصق';
+
+  @override
+  String get clear => 'مسح';
+
+  @override
+  String get clipboardVerbMove => 'نقل';
+
+  @override
+  String get clipboardVerbCopy => 'نسخ';
+
+  @override
+  String clipboardTooltipInteractive(String verb, int count) {
+    return '$verb ($count) — اضغط للتفاصيل، اضغط مطولاً للصق';
+  }
+
+  @override
+  String clipboardTooltipViewOnly(String verb, int count) {
+    return '$verb ($count) — تفاصيل الحافظة';
+  }
+
+  @override
+  String clipboardSourceLabel(String source) {
+    return 'المصدر: $source';
+  }
+
+  @override
+  String get clipboardDefaultSourceName => 'الخزنة';
+
+  @override
+  String clipboardHeaderCount(String verb, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصرًا',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    return '$verb $_temp0';
+  }
+
+  @override
+  String clipboardMoreItems(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count عنصر إضافي',
+      many: '+$count عنصرًا إضافيًا',
+      few: '+$count عناصر إضافية',
+      two: '+عنصران إضافيان',
+      one: '+عنصر واحد إضافي',
+      zero: 'لا عناصر إضافية',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get advancedParametersTitle => 'المعاملات المتقدمة';
+
+  @override
+  String get pimFieldLabel => 'PIM (اتركه فارغًا لاستخدام القيمة الافتراضية)';
+
+  @override
+  String get encryptionAlgorithmLabel => 'خوارزمية التشفير';
+
+  @override
+  String get hashAlgorithmLabel => 'خوارزمية التجزئة';
+
+  @override
+  String get clipboardVerbMoving => 'جارٍ النقل';
+
+  @override
+  String get clipboardVerbCopying => 'جارٍ النسخ';
+
+  @override
+  String clipboardPillTitle(String verb, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصرًا',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    return '$verb $_temp0';
+  }
+
+  @override
+  String clipboardFromSourceSuffix(String source) {
+    return ' من \"$source\"';
+  }
+
+  @override
+  String get clipboardOpenContainerToPaste => 'افتح حاوية للصق';
+
+  @override
+  String get keyfilesOptionalLabel => 'ملفات المفاتيح (اختياري)';
+
+  @override
+  String get addFile => 'إضافة ملف';
+
+  @override
+  String get noKeyfilesAttached => 'لا توجد ملفات مفاتيح مرفقة';
+
+  @override
+  String get completed => 'مكتمل';
+
+  @override
+  String get dismiss => 'تجاهل';
+
+  @override
+  String byteProgressText(String transferred, String total, int pct) {
+    return '$transferred / $total ($pct%)';
+  }
+
+  @override
+  String countProgressText(int done, int total, int pct) {
+    return '$done / $total ($pct%)';
+  }
+
+  @override
+  String multiOpLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عملية نقل',
+      many: '$count عملية نقل',
+      few: '$count عمليات نقل',
+      two: 'عمليتا نقل',
+      one: 'عملية نقل واحدة',
+      zero: 'لا عمليات نقل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String multiOpSublabel(String summary) {
+    return '$summary · اضغط لعرض الكل';
+  }
+
+  @override
+  String get thumbnailSizeResolutionLabel => 'حجم الصورة المصغرة (الدقة)';
+
+  @override
+  String get jpegCompressionQualityLabel => 'جودة ضغط JPEG';
+
+  @override
+  String get done => 'تم';
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get couldNotPickKeyfiles => 'تعذّر اختيار ملفات المفاتيح';
+
+  @override
+  String get filesystemLabelEncryptedVault => 'هذه الخزنة المشفّرة';
+
+  @override
+  String get filesystemLabelThisContainer => 'هذه الحاوية';
+
+  @override
+  String get nounFile => 'ملف';
+
+  @override
+  String get nounFolder => 'مجلد';
+
+  @override
+  String get nounFileCapitalized => 'ملف';
+
+  @override
+  String get nounFolderCapitalized => 'مجلد';
+
+  @override
+  String get unitBytes => 'بايت';
+
+  @override
+  String get unitCharacters => 'حرفًا';
+
+  @override
+  String get validationEmptyName => 'لا يمكن أن يكون الاسم فارغًا.';
+
+  @override
+  String validationReservedNavName(String name, String noun) {
+    return '\"$name\" اسم تنقّل محجوز ولا يمكن استخدامه كاسم $noun.';
+  }
+
+  @override
+  String validationIllegalChar(String char, int position, String fsLabel) {
+    return 'الحرف \"$char\" في الموضع $position غير مسموح به في الاسم على $fsLabel.';
+  }
+
+  @override
+  String validationControlChar(int position, String code, String fsLabel) {
+    return 'يحتوي الموضع $position على حرف تحكم غير قابل للطباعة (الرمز $code)، وهو غير مسموح به على $fsLabel.';
+  }
+
+  @override
+  String validationReservedDeviceName(String name, String fsLabel) {
+    return '\"$name\" اسم جهاز محجوز على $fsLabel (يطابق CON أو PRN أو AUX أو NUL أو COM0–9 أو LPT0–9) ولا يمكن استخدامه، سواء بامتداد ملف أو بدونه.';
+  }
+
+  @override
+  String validationTrailingSpace(String noun, String fsLabel) {
+    return 'لا يمكن أن ينتهي اسم $noun بمسافة على $fsLabel';
+  }
+
+  @override
+  String validationTrailingDot(String noun, String fsLabel) {
+    return 'لا يمكن أن ينتهي اسم $noun بنقطة \".\" على $fsLabel';
+  }
+
+  @override
+  String validationNameTooLong(
+    int length,
+    String unit,
+    String fsLabel,
+    int maxLength,
+    String noun,
+  ) {
+    return 'طول هذا الاسم $length $unit؛ يسمح $fsLabel بحد أقصى $maxLength $unit لاسم $noun.';
+  }
+
+  @override
+  String validationPathTooLong(int length, String fsLabel, int maxLength) {
+    return 'طول المسار الكامل $length حرفًا؛ يسمح $fsLabel بحد أقصى $maxLength.';
+  }
+
+  @override
+  String conflictSameType(String noun, String name) {
+    return 'يوجد بالفعل $noun بالاسم \"$name\" هنا.';
+  }
+
+  @override
+  String conflictCrossType(
+    String existingNoun,
+    String name,
+    String candidateNoun,
+  ) {
+    return 'يوجد بالفعل $existingNoun بالاسم \"$name\" هنا — ولا يمكنه مشاركة الاسم مع $candidateNoun.';
+  }
+
+  @override
+  String get readOnlyContainerWarning => 'تم تحميل هذه الحاوية للقراءة فقط.';
+
+  @override
+  String get hiddenVolumeProtectionTriggeredWarning =>
+      'كانت الكتابة على وحدة التخزين الخارجية هذه ستُتلف الوحدة المخفية، لذا تم حظرها. تم تحويل هذه الحاوية إلى وضع القراءة فقط لبقية هذه الجلسة.';
+
+  @override
+  String get protectHiddenVolumeToggleTitle => 'حماية الوحدة المخفية';
+
+  @override
+  String get protectHiddenVolumeToggleSubtitle =>
+      'منع التلف الناتج عن الكتابة على الوحدة الخارجية';
+
+  @override
+  String get protectHiddenVolumeCredentialsRequired =>
+      'يلزم توفير كلمة مرور أو ملف مفتاح للوحدة المخفية لحمايتها';
+
+  @override
+  String deleteItemsTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'حذف $count عنصر؟',
+      many: 'حذف $count عنصرًا؟',
+      few: 'حذف $count عناصر؟',
+      two: 'حذف عنصرين؟',
+      one: 'حذف عنصر واحد؟',
+      zero: 'حذف لا عناصر؟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteFoldersWarning =>
+      'سيتم حذف هذه العناصر نهائيًا، بما في ذلك جميع محتويات أي مجلدات محددة.';
+
+  @override
+  String get deleteFilesWarning =>
+      'سيتم محو هذه العناصر نهائيًا من وحدة التخزين المشفرة الخاصة بك.';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get remove => 'إزالة';
+
+  @override
+  String get create => 'إنشاء';
+
+  @override
+  String get rename => 'إعادة تسمية';
+
+  @override
+  String renameMultipleTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'إعادة تسمية $count عنصر',
+      many: 'إعادة تسمية $count عنصرًا',
+      few: 'إعادة تسمية $count عناصر',
+      two: 'إعادة تسمية عنصرين',
+      one: 'إعادة تسمية عنصر واحد',
+      zero: 'إعادة تسمية لا عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newFolderTitle => 'مجلد جديد';
+
+  @override
+  String get newTextFileTitle => 'ملف نصي جديد';
+
+  @override
+  String get folderNameHint => 'اسم المجلد';
+
+  @override
+  String get filenameHint => 'اسم_الملف.txt';
+
+  @override
+  String get newNameHint => 'اسم جديد';
+
+  @override
+  String get baseNameHint => 'الاسم الأساسي';
+
+  @override
+  String couldntCreateItem(String name) {
+    return 'تعذّر إنشاء \"$name\" — تحقق من أن الحاوية لا تزال مثبَّتة';
+  }
+
+  @override
+  String couldntRenameSingle(String name) {
+    return 'تعذّر إعادة تسمية \"$name\" — قد يوجد بالفعل عنصر بهذا الاسم';
+  }
+
+  @override
+  String couldntRenameMultiWithReason(num count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تعذّرت إعادة تسمية $count عنصر: $reason',
+      many: 'تعذّرت إعادة تسمية $count عنصرًا: $reason',
+      few: 'تعذّرت إعادة تسمية $count عناصر: $reason',
+      two: 'تعذّرت إعادة تسمية عنصرين: $reason',
+      one: 'تعذّرت إعادة تسمية عنصر واحد: $reason',
+      zero: 'تعذّرت إعادة تسمية لا عناصر: $reason',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String couldntRenameMultiNoReason(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تعذّرت إعادة تسمية $count عنصر',
+      many: 'تعذّرت إعادة تسمية $count عنصرًا',
+      few: 'تعذّرت إعادة تسمية $count عناصر',
+      two: 'تعذّرت إعادة تسمية عنصرين',
+      one: 'تعذّرت إعادة تسمية عنصر واحد',
+      zero: 'تعذّرت إعادة تسمية لا عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hiddenVolumeErrorInvalidSize =>
+      'أدخل حجمًا مخفيًا صالحًا أكبر من 0';
+
+  @override
+  String get hiddenVolumeErrorTooLargeVsOuter =>
+      'يجب أن يكون حجم الوحدة المخفية أصغر من حجم الوحدة الخارجية';
+
+  @override
+  String get hiddenVolumeErrorTooLargeForContainer =>
+      'حجم الوحدة المخفية كبير جدًا بالنسبة لحجم هذه الحاوية';
+
+  @override
+  String get hiddenVolumeErrorCredentialsRequired =>
+      'يلزم توفير كلمة مرور مخفية أو ملف مفتاح عند إنشاء وحدة مخفية';
+
+  @override
+  String get hiddenVolumeErrorCredentialsMustDiffer =>
+      'لا يمكن أن تكون بيانات اعتماد الوحدة المخفية (كلمة المرور وPIM وملفات المفاتيح) مطابقة لبيانات اعتماد الوحدة الخارجية.';
+
+  @override
+  String get vaultItemTypePassword => 'كلمة مرور';
+
+  @override
+  String get vaultItemTypePaymentCard => 'بطاقة دفع';
+
+  @override
+  String get vaultItemTypeIdentity => 'هوية';
+
+  @override
+  String get vaultItemTypeSecureNote => 'ملاحظة آمنة';
+
+  @override
+  String get vaultItemTypeBankAccount => 'حساب مصرفي';
+
+  @override
+  String get vaultItemTypeSoftwareLicense => 'ترخيص برمجي';
+
+  @override
+  String get fieldUsernameEmail => 'اسم المستخدم / البريد الإلكتروني';
+
+  @override
+  String get fieldPassword => 'كلمة المرور';
+
+  @override
+  String get fieldWebsiteUrl => 'رابط الموقع';
+
+  @override
+  String get fieldTotpSecret => 'سر TOTP (التحقق بخطوتين)';
+
+  @override
+  String get fieldNotes => 'ملاحظات';
+
+  @override
+  String get fieldCardholderName => 'اسم حامل البطاقة';
+
+  @override
+  String get fieldCardNumber => 'رقم البطاقة';
+
+  @override
+  String get fieldExpiryMMYY => 'تاريخ الانتهاء (شهر/سنة)';
+
+  @override
+  String get fieldCvvCvc => 'CVV / CVC';
+
+  @override
+  String get fieldPin => 'PIN';
+
+  @override
+  String get fieldIssuingBank => 'البنك المُصدر';
+
+  @override
+  String get fieldFullName => 'الاسم الكامل';
+
+  @override
+  String get fieldDateOfBirth => 'تاريخ الميلاد';
+
+  @override
+  String get fieldNationality => 'الجنسية';
+
+  @override
+  String get fieldPassportNumber => 'رقم جواز السفر';
+
+  @override
+  String get fieldPassportExpiry => 'تاريخ انتهاء جواز السفر';
+
+  @override
+  String get fieldNationalIdSsn => 'الهوية الوطنية / الرقم القومي';
+
+  @override
+  String get fieldDriversLicense => 'رخصة القيادة';
+
+  @override
+  String get fieldAddress => 'العنوان';
+
+  @override
+  String get fieldPhone => 'الهاتف';
+
+  @override
+  String get fieldEmail => 'البريد الإلكتروني';
+
+  @override
+  String get fieldNote => 'ملاحظة';
+
+  @override
+  String get fieldBankName => 'اسم البنك';
+
+  @override
+  String get fieldAccountHolder => 'صاحب الحساب';
+
+  @override
+  String get fieldAccountNumber => 'رقم الحساب';
+
+  @override
+  String get fieldRoutingSortCode => 'رمز التوجيه المصرفي / رمز الفرع';
+
+  @override
+  String get fieldIban => 'IBAN';
+
+  @override
+  String get fieldSwiftBic => 'SWIFT / BIC';
+
+  @override
+  String get fieldAccountType => 'نوع الحساب';
+
+  @override
+  String get fieldProductName => 'اسم المنتج';
+
+  @override
+  String get fieldLicenseKey => 'مفتاح الترخيص';
+
+  @override
+  String get fieldRegisteredTo => 'مسجَّل باسم';
+
+  @override
+  String get fieldPurchaseDate => 'تاريخ الشراء';
+
+  @override
+  String get fieldExpiryRenewalDate => 'تاريخ الانتهاء / التجديد';
+
+  @override
+  String get fieldDownloadUrl => 'رابط التنزيل';
+
+  @override
+  String get fieldRegistrationEmail => 'بريد التسجيل الإلكتروني';
+
+  @override
+  String get titleRequired => 'العنوان مطلوب';
+
+  @override
+  String newTypeTitle(String typeLabel) {
+    return '$typeLabel جديد';
+  }
+
+  @override
+  String editItemTitle(String title) {
+    return 'تعديل $title';
+  }
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String typeNameHint(String typeLabel) {
+    return 'اسم $typeLabel';
+  }
+
+  @override
+  String get titleSectionLabel => 'العنوان';
+
+  @override
+  String get fieldsSectionLabel => 'الحقول';
+
+  @override
+  String get encryptedStorageHint =>
+      'يتم تخزين جميع الحقول بشكل مشفّر داخل الحاوية.';
+
+  @override
+  String copiedSuffix(String fieldLabel) {
+    return 'تم نسخ $fieldLabel';
+  }
+
+  @override
+  String get copy => 'نسخ';
+
+  @override
+  String get failedToSaveCheckMounted =>
+      'فشل الحفظ — تحقق من أن الحاوية لا تزال مثبَّتة';
+
+  @override
+  String get discardChangesTitle => 'تجاهل التغييرات؟';
+
+  @override
+  String get discardChangesMessage => 'ستفقد تغييراتك غير المحفوظة.';
+
+  @override
+  String get discard => 'تجاهل';
+
+  @override
+  String get keepEditing => 'متابعة التعديل';
+
+  @override
+  String get deleteItemTitle => 'حذف العنصر؟';
+
+  @override
+  String deleteItemMessage(String title) {
+    return 'سيتم حذف \"$title\" نهائيًا من الخزنة.';
+  }
+
+  @override
+  String get removeFromBookmarks => 'إزالة من المفضلة';
+
+  @override
+  String get addToBookmarks => 'إضافة إلى المفضلة';
+
+  @override
+  String get edit => 'تعديل';
+
+  @override
+  String labelCopiedToClipboard(String label) {
+    return 'تم نسخ $label إلى الحافظة';
+  }
+
+  @override
+  String get noFieldsFilledIn =>
+      'لا توجد حقول معبأة.\nاضغط على تعديل لإضافة التفاصيل.';
+
+  @override
+  String get sectionLabelDetails => 'التفاصيل';
+
+  @override
+  String get sectionLabelInfo => 'معلومات';
+
+  @override
+  String get metaLabelType => 'النوع';
+
+  @override
+  String get metaLabelCreated => 'تاريخ الإنشاء';
+
+  @override
+  String get metaLabelModified => 'تاريخ التعديل';
+
+  @override
+  String copyFieldTooltip(String fieldLabel) {
+    return 'نسخ $fieldLabel';
+  }
+
+  @override
+  String get readOnlyCantAddItemsTooltip => 'للقراءة فقط — لا يمكن إضافة عناصر';
+
+  @override
+  String get extractArchive => 'استخراج الأرشيف';
+
+  @override
+  String get verbArchive => 'أرشفة';
+
+  @override
+  String get verbExtract => 'استخراج';
+
+  @override
+  String get verbArchived => 'تمت الأرشفة';
+
+  @override
+  String get verbExtracted => 'تم الاستخراج';
+
+  @override
+  String get verbArchiving => 'جارٍ الأرشفة';
+
+  @override
+  String get verbExtracting => 'جارٍ الاستخراج';
+
+  @override
+  String get fileOpExtractingArchive => 'جارٍ استخراج الأرشيف…';
+
+  @override
+  String fileOpExtractingArchiveName(String name) {
+    return 'جارٍ استخراج $name…';
+  }
+
+  @override
+  String fileOpArchivingBytes(String bytes) {
+    return 'جارٍ الأرشفة… ($bytes)';
+  }
+
+  @override
+  String get newItemTooltip => 'عنصر جديد';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String get importFiles => 'استيراد ملفات';
+
+  @override
+  String get importFolder => 'استيراد مجلد';
+
+  @override
+  String get secureItem => 'عنصر آمن';
+
+  @override
+  String get appNameVaultExplorer => 'Vault Explorer';
+
+  @override
+  String get appNameZipExplorer => 'Archive Explorer';
+
+  @override
+  String get archiveExplorerPermissionTitle => 'يلزم الوصول إلى وحدة التخزين';
+
+  @override
+  String get archiveExplorerPermissionMessage =>
+      'اسمح بالوصول إلى ملفاتك لتصفح واستخراج أرشيفات .zip من مجلد التنزيلات.';
+
+  @override
+  String get archiveExplorerGrantAccess => 'منح الوصول';
+
+  @override
+  String get archiveExplorerEmptyTitle => 'لم يتم العثور على أرشيفات';
+
+  @override
+  String get archiveExplorerEmptyMessage =>
+      'ستظهر هنا ملفات zip التي تقوم بتنزيلها.';
+
+  @override
+  String get archiveExplorerRefreshTooltip => 'تحديث';
+
+  @override
+  String archiveExplorerEntryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصرًا',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get archiveExplorerExtractAll => 'استخراج الكل';
+
+  @override
+  String get archiveExplorerExtracting => 'جارٍ الاستخراج…';
+
+  @override
+  String archiveExplorerExtractSuccess(int count, String name) {
+    return 'تم استخراج $count ملف إلى Download/Extracted/$name';
+  }
+
+  @override
+  String get archiveExplorerExtractFailed => 'تعذّر استخراج ذلك الأرشيف.';
+
+  @override
+  String get archiveExplorerOpenFailed => 'تعذّر فتح ذلك الأرشيف.';
+
+  @override
+  String get archiveExplorerOpenArchive => 'فتح أرشيف…';
+
+  @override
+  String get archiveExplorerUnresolvedPath =>
+      'تعذّر الوصول إلى ذلك الملف مباشرةً. جرّب اختيار ملف من التنزيلات بدلاً من ذلك.';
+
+  @override
+  String get archiveExplorerExtractTo => 'استخراج إلى…';
+
+  @override
+  String get archiveExplorerPreview => 'معاينة';
+
+  @override
+  String get archiveExplorerChoosingDestination => 'جارٍ اختيار الوجهة…';
+
+  @override
+  String get archiveExplorerNoDestinationChosen => 'لم يتم اختيار وجهة.';
+
+  @override
+  String archiveExplorerExtractSuccessTo(int count, String path) {
+    return 'تم استخراج $count ملف إلى $path';
+  }
+
+  @override
+  String get archiveBrowserEmptyTitle => 'مجلد فارغ';
+
+  @override
+  String get archiveBrowserEmptyMessage => 'لا يحتوي هذا المجلد على أي ملفات.';
+
+  @override
+  String get archiveBrowserRoot => 'الأرشيف';
+
+  @override
+  String get archiveBrowserOpenFileFailed => 'تعذّر فتح ذلك الملف.';
+
+  @override
+  String get fileAssocInAppTextEditor => 'محرر النصوص المدمج';
+
+  @override
+  String get fileAssocInAppMediaViewer => 'عارض الوسائط المدمج';
+
+  @override
+  String fileAssocAppPrefix(String name) {
+    return 'التطبيق: $name';
+  }
+
+  @override
+  String get fileAssocExternalApp => 'تطبيق خارجي';
+
+  @override
+  String get appSettingsTitle => 'إعدادات التطبيق';
+
+  @override
+  String get sectionSecurityPrivacy => 'الأمان والخصوصية';
+
+  @override
+  String get sectionAppearanceInterface => 'المظهر والواجهة';
+
+  @override
+  String get sectionVaultFileHandling => 'الخزنة ومعالجة الملفات';
+
+  @override
+  String get masterPasswordTitle => 'كلمة المرور الرئيسية';
+
+  @override
+  String get masterPasswordActiveSubtitle =>
+      'مفعّلة — اضغط على المفتاح لإزالتها';
+
+  @override
+  String get masterPasswordInactiveSubtitle => 'طلب كلمة مرور لفتح التطبيق';
+
+  @override
+  String get newPasswordLabel => 'كلمة مرور جديدة';
+
+  @override
+  String get masterPasswordFieldLabel => 'كلمة المرور الرئيسية';
+
+  @override
+  String get confirmPasswordLabel => 'تأكيد كلمة المرور';
+
+  @override
+  String get update => 'تحديث';
+
+  @override
+  String get setPassword => 'تعيين كلمة المرور';
+
+  @override
+  String get biometricUnlockTitle => 'فتح القفل بالبصمة الحيوية';
+
+  @override
+  String get biometricUnlockSubtitle => 'أجرِ المصادقة لتحميل الحاوية بأمان';
+
+  @override
+  String get changeMasterPasswordTitle => 'تغيير كلمة المرور الرئيسية';
+
+  @override
+  String get changeMasterPasswordSubtitle =>
+      'تحديث بيانات اعتماد كلمة المرور الرئيسية';
+
+  @override
+  String get autoLockContainersTitle => 'القفل التلقائي للحاويات';
+
+  @override
+  String get autoLockContainersSubtitle =>
+      'قفل الخزنات المفتوحة تلقائيًا بعد فترة من عدم النشاط';
+
+  @override
+  String get autoLockTimeoutLabel => 'مهلة القفل التلقائي';
+
+  @override
+  String get immediately => 'فورًا';
+
+  @override
+  String nMinutes(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count دقيقة',
+      many: '$count دقيقة',
+      few: '$count دقائق',
+      two: 'دقيقتان',
+      one: 'دقيقة واحدة',
+      zero: '0 دقيقة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nHours(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ساعة',
+      many: '$count ساعة',
+      few: '$count ساعات',
+      two: 'ساعتان',
+      one: 'ساعة واحدة',
+      zero: '0 ساعة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get customDurationOption => 'مخصص…';
+
+  @override
+  String get customDurationDialogTitle => 'مدة مخصصة';
+
+  @override
+  String get blockScreenshotsTitle => 'حظر لقطات الشاشة';
+
+  @override
+  String get blockScreenshotsSubtitle =>
+      'منع لقطات الشاشة وإخفاء معاينة التطبيقات الأخيرة';
+
+  @override
+  String get keepVaultsRunningInBackgroundTitle =>
+      'إبقاء الخزنات نشطة في الخلفية';
+
+  @override
+  String get keepVaultsRunningInBackgroundSubtitle =>
+      'عرض إشعار وإبقاء الخزنات المفتوحة متاحة بعد مغادرة التطبيق. تبقى مفاتيح الخزنة في الذاكرة حتى يتم قفلها.';
+
+  @override
+  String get notificationPermissionDeniedMessage =>
+      'تم رفض إذن الإشعارات. ستبقى الخزنات مفتوحة، لكن لن يظهر الإشعار المستمر.';
+
+  @override
+  String get discreteModeTitle => 'وضع التمويه';
+
+  @override
+  String get discreteModeActiveSubtitle =>
+      'مفعّل — يظهر التطبيق حاليًا باسم \"Archive Explorer\"';
+
+  @override
+  String get discreteModeInactiveSubtitle =>
+      'تمويه هذا التطبيق كمتصفح أرشيف zip على الشاشة الرئيسية';
+
+  @override
+  String get enableDiscreteModeTitle => 'تفعيل وضع التمويه؟';
+
+  @override
+  String get disableDiscreteModeTitle => 'تعطيل وضع التمويه؟';
+
+  @override
+  String get enableDiscreteModeMessage =>
+      'سيتغير رمز التطبيق واسمه على شاشتك الرئيسية إلى \"Archive Explorer\". سيعمل كمتصفح ومستخرج لأرشيفات zip.\n\nللوصول إلى خزنتك، افتح Archive Explorer واضغط مطولاً على العنوان لمدة ثانيتين.';
+
+  @override
+  String get disableDiscreteModeMessage =>
+      'سيعود رمز التطبيق واسمه على شاشتك الرئيسية إلى \"Vault Explorer\".';
+
+  @override
+  String get enable => 'تفعيل';
+
+  @override
+  String get disable => 'تعطيل';
+
+  @override
+  String get discreteModeEnabledSnack =>
+      'تم تفعيل وضع التمويه. سيُغلق التطبيق — أعد فتحه من أيقونة المشغّل الجديدة.';
+
+  @override
+  String get discreteModeDisabledSnack =>
+      'تم تعطيل وضع التمويه. سيُغلق التطبيق — أعد فتحه من أيقونة المشغّل الجديدة.';
+
+  @override
+  String get failedToChangeDiscreteMode => 'فشل تغيير وضع التمويه';
+
+  @override
+  String get cacheDerivedKeysTitle => 'تخزين المفاتيح المشتقة مؤقتًا افتراضيًا';
+
+  @override
+  String get cacheDerivedKeysSubtitle =>
+      'تخزين مادة المفتاح المشتق في Keystore لتسريع عمليات فتح القفل';
+
+  @override
+  String get appThemeLabel => 'سمة التطبيق';
+
+  @override
+  String get systemDefault => 'افتراضي النظام';
+
+  @override
+  String get lightTheme => 'السمة الفاتحة';
+
+  @override
+  String get darkTheme => 'السمة الداكنة';
+
+  @override
+  String get useMaterialYouTitle => 'استخدام Material You';
+
+  @override
+  String get useMaterialYouSubtitle =>
+      'مطابقة ألوان التطبيق مع خلفيتك (Android 12 فأعلى)';
+
+  @override
+  String get pureBlackThemeTitle => 'أسود نقي (OLED)';
+
+  @override
+  String get pureBlackThemeSubtitle =>
+      'خلفيات سوداء نقية لتوفير البطارية وتقليل الوهج على شاشات OLED (يعمل فقط مع المظهر الداكن)';
+
+  @override
+  String get sortContainersByLabel => 'ترتيب الحاويات حسب';
+
+  @override
+  String get swapCardSwipeActionsTitle => 'تبديل إجراءات سحب البطاقات';
+
+  @override
+  String get swapCardSwipeActionsSubtitle =>
+      'إظهار تعديل على اليسار وإزالة على اليمين عند سحب البطاقات';
+
+  @override
+  String get swipeGestureHintTitle => 'تلميح إيماءة السحب';
+
+  @override
+  String get swipeGestureHintSubtitle =>
+      'إظهار حركة معاينة البطاقة عند أول حاوية';
+
+  @override
+  String get autoOpenOnUnlockTitle => 'الفتح التلقائي عند فتح القفل';
+
+  @override
+  String get autoOpenOnUnlockActiveSubtitle =>
+      'الفتح تلقائيًا بعد فتح قفل الخزنة';
+
+  @override
+  String get autoOpenOnUnlockInactiveSubtitle =>
+      'فتح قفل الخزنة فقط والبقاء في لوحة التحكم';
+
+  @override
+  String get enableJsHtmlTitle => 'تفعيل JavaScript في عارض HTML';
+
+  @override
+  String get jsEnabledSubtitle => 'تم تفعيل JavaScript لملفات HTML المحلية';
+
+  @override
+  String get jsDisabledSubtitle => 'تم تعطيل JavaScript لملفات HTML المحلية';
+
+  @override
+  String get fastStorageAccessTitle => 'الوصول السريع لوحدة التخزين';
+
+  @override
+  String get fastStorageAccessGrantedSubtitle =>
+      'تم منح الوصول إلى جميع الملفات (أقصى سرعة)';
+
+  @override
+  String get fastStorageAccessNotGrantedSubtitle =>
+      'امنح إذن الوصول إلى جميع الملفات في إعدادات النظام للحصول على أفضل سرعة';
+
+  @override
+  String get showStorageLocationsTitle =>
+      'إظهار مواقع التخزين في الشريط الجانبي';
+
+  @override
+  String get showStorageLocationsSubtitle =>
+      'يعرض التخزين المحلي والمواقع المضافة. يتطلب فتح التخزين المحلي إذن الوصول إلى جميع الملفات.';
+
+  @override
+  String get localStorageCardTitle => 'التخزين المحلي';
+
+  @override
+  String get localStorageCardSubtitle =>
+      'غير مشفّر — لعمليات النقل السريعة مع الخزائن';
+
+  @override
+  String get enableFastStorageAccessTitle =>
+      'تفعيل الوصول السريع لوحدة التخزين';
+
+  @override
+  String get enableFastStorageAccessMessage =>
+      'يتيح منح \"الوصول إلى جميع الملفات\" لتطبيق Vault Explorer إجراء عمليات ملفات POSIX مباشرة، مما يسرّع أداء خزنات المجلدات بمقدار يصل إلى 1000 ضعف.';
+
+  @override
+  String get disableStorageAccessTitle => 'تعطيل الوصول إلى وحدة التخزين';
+
+  @override
+  String get disableStorageAccessMessage =>
+      'يتطلب Android إيقاف تشغيل \"الوصول إلى جميع الملفات\" من داخل إعدادات النظام. هل تريد فتح الإعدادات لإيقاف تشغيله؟';
+
+  @override
+  String get enableStoragePermissionLegacyTitle =>
+      'السماح بالوصول إلى وحدة التخزين';
+
+  @override
+  String get enableStoragePermissionLegacyMessage =>
+      'يحتاج Vault Explorer إلى إذن التخزين لإجراء عمليات ملفات مباشرة، مما يسرّع أداء خزنات المجلدات. سيطلب منك Android الآن التأكيد.';
+
+  @override
+  String get disableStoragePermissionLegacyMessage =>
+      'يتطلب Android إيقاف تشغيل إذن التخزين من داخل إعدادات النظام. هل تريد فتح الإعدادات لإيقاف تشغيله؟';
+
+  @override
+  String get openSettings => 'فتح الإعدادات';
+
+  @override
+  String get useThisPasswordButton => 'استخدام كلمة المرور هذه';
+
+  @override
+  String get quickPasswordGeneratorSheetTitle => 'مولّد كلمات المرور';
+
+  @override
+  String get androidFileProviderTitle => 'مزوّد ملفات Android';
+
+  @override
+  String get androidFileProviderSubtitle =>
+      'عرض الحاويات الجديدة في منتقي ملفات Android افتراضيًا';
+
+  @override
+  String get thumbnailCachingDefaultLabel =>
+      'تخزين الصور المصغّرة مؤقتًا (افتراضي)';
+
+  @override
+  String get thumbnailQualityDefaultLabel => 'جودة الصور المصغّرة (افتراضي)';
+
+  @override
+  String get fileAssociationsHeader => 'ارتباطات الملفات';
+
+  @override
+  String get noFileAssociationsYet =>
+      'لا توجد ارتباطات ملفات محفوظة بعد. سيُطلب منك الاختيار عند فتح الملفات.';
+
+  @override
+  String get defaultActionsHeader =>
+      'الإجراءات الافتراضية عند فتح ملفات غير قياسية:';
+
+  @override
+  String get removeAssociationTooltip => 'إزالة الارتباط';
+
+  @override
+  String get sectionBackupRestore => 'النسخ الاحتياطي';
+
+  @override
+  String get exportSettingsTitle => 'تصدير الإعدادات';
+
+  @override
+  String get exportSettingsSubtitle =>
+      'حفظ إعدادات التطبيق ومدير الملفات ومشغل الوسائط ومحرر النصوص في ملف. المظاهر المخصصة اختيارية.';
+
+  @override
+  String get importSettingsTitle => 'استيراد الإعدادات';
+
+  @override
+  String get importSettingsSubtitle =>
+      'استعادة إعدادات التطبيق ومدير الملفات ومشغل الوسائط ومحرر النصوص من ملف';
+
+  @override
+  String get importSettingsConfirmTitle => 'استيراد الإعدادات؟';
+
+  @override
+  String get importSettingsConfirmMessage =>
+      'سيستبدل هذا إعدادات التطبيق الحالية. لن تتأثر مظاهرك وتخطيط الواجهة. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get exportSettingsOnlyTitle => 'الإعدادات فقط';
+
+  @override
+  String get exportSettingsOnlySubtitle =>
+      'إعدادات التطبيق ومدير الملفات ومشغل الوسائط ومحرر النصوص';
+
+  @override
+  String get exportSettingsWithSkinsTitle => 'الإعدادات والمظاهر';
+
+  @override
+  String get exportSettingsWithSkinsSubtitle =>
+      'يحفظ أيضًا مظاهر التطبيق المخصصة الخاصة بك';
+
+  @override
+  String get importSettingsConfirmFullMessage =>
+      'سيستبدل هذا الإعدادات الحالية للتطبيق ومدير الملفات ومشغل الوسائط ومحرر النصوص، بما في ذلك تخطيطها. لن تتأثر مظاهرك. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get importSettingsConfirmFullSkinsMessage =>
+      'سيستبدل هذا الإعدادات الحالية للتطبيق ومدير الملفات ومشغل الوسائط ومحرر النصوص، بما في ذلك تخطيطها، وسيضيف المظاهر الموجودة في هذا الملف. سيُستبدل أي مظهر لديك بالفعل بنسخة الملف. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get exportSettingsSuccessMessage => 'تم تصدير الإعدادات';
+
+  @override
+  String get importSettingsSuccessMessage => 'تم استيراد الإعدادات';
+
+  @override
+  String get exportSettingsErrorMessage => 'تعذّر تصدير الإعدادات';
+
+  @override
+  String get importSettingsInvalidFileMessage =>
+      'هذا الملف ليس ملف تصدير إعدادات صالحًا';
+
+  @override
+  String get sectionDebug => 'تصحيح الأخطاء';
+
+  @override
+  String get debugLoggingTitle => 'تسجيل تصحيح الأخطاء';
+
+  @override
+  String get debugLoggingSubtitle => 'تسجيل سجلات تشخيص مفصّلة لعمليات الحاوية';
+
+  @override
+  String get logcatTitle => 'Logcat';
+
+  @override
+  String get logcatSubtitle => 'عرض سجلات الجهاز وحفظها';
+
+  @override
+  String logcatSavedMessage(String path) {
+    return 'تم حفظ السجل في $path';
+  }
+
+  @override
+  String get logcatSaveErrorMessage => 'فشل حفظ السجل';
+
+  @override
+  String get logcatCopiedMessage => 'تم نسخ السجل إلى الحافظة';
+
+  @override
+  String get logcatUnavailableMessage => 'Logcat غير متاح على هذا الجهاز';
+
+  @override
+  String get logcatEmptyMessage => 'بانتظار أسطر السجل…';
+
+  @override
+  String get logcatClearTooltip => 'مسح السجل';
+
+  @override
+  String get logcatSaveTooltip => 'حفظ السجل';
+
+  @override
+  String get logcatFilterAppOnly => 'التطبيق فقط';
+
+  @override
+  String get logcatFilterAll => 'جميع السجلات';
+
+  @override
+  String get logcatSearchHint => 'البحث في السجلات…';
+
+  @override
+  String get logcatClearedMessage => 'تم مسح السجلات';
+
+  @override
+  String get logcatCopyTooltip => 'نسخ السجل';
+
+  @override
+  String get retryButton => 'إعادة المحاولة';
+
+  @override
+  String get aboutAppTitle => 'حول VaultExplorer';
+
+  @override
+  String versionInfoSubtitle(String version) {
+    return 'الإصدار $version · تراخيص المصدر المفتوح والتفاصيل';
+  }
+
+  @override
+  String get failedToSaveSettings => 'فشل حفظ الإعدادات';
+
+  @override
+  String get masterPasswordSetSnack => 'تم تعيين كلمة المرور الرئيسية';
+
+  @override
+  String get passwordCannotBeEmpty => 'لا يمكن أن تكون كلمة المرور فارغة';
+
+  @override
+  String get atLeast4CharsRequired => 'يلزم 4 أحرف على الأقل';
+
+  @override
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get failedToHashPassword =>
+      'فشل تجزئة كلمة المرور — يرجى المحاولة مرة أخرى';
+
+  @override
+  String get languageLabel => 'اللغة';
+
+  @override
+  String get biometricNotAvailable => 'البصمة الحيوية غير متاحة على هذا الجهاز';
+
+  @override
+  String get biometricsChangedFallbackMessage =>
+      'تغيّرت البيانات الحيوية للجهاز، لذلك تم إيقاف فتح القفل بالبصمة. استخدم كلمة المرور.';
+
+  @override
+  String get unlockVaultExplorerReason => 'فتح قفل VaultExplorer';
+
+  @override
+  String biometricErrorWithCode(String code) {
+    return 'خطأ في البصمة الحيوية: $code';
+  }
+
+  @override
+  String tooManyFailedAttempts(num seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds ثانية',
+      many: '$seconds ثانية',
+      few: '$seconds ثوانٍ',
+      two: 'ثانيتين',
+      one: 'ثانية واحدة',
+      zero: '0 ثانية',
+    );
+    return 'عدد كبير جدًا من المحاولات الفاشلة. حاول مرة أخرى خلال $_temp0.';
+  }
+
+  @override
+  String get enterMasterPasswordPrompt => 'أدخل كلمة المرور الرئيسية';
+
+  @override
+  String incorrectPasswordLockedFor(int seconds, num attempts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '$attempts محاولة فاشلة',
+      many: '$attempts محاولة فاشلة',
+      few: '$attempts محاولات فاشلة',
+      two: 'محاولتين فاشلتين',
+      one: 'محاولة فاشلة واحدة',
+      zero: 'لا محاولات فاشلة',
+    );
+    return 'كلمة مرور غير صحيحة. تم القفل لمدة $seconds ثانية بسبب $_temp0.';
+  }
+
+  @override
+  String incorrectPasswordAttempts(num attempts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '$attempts محاولة فاشلة',
+      many: '$attempts محاولة فاشلة',
+      few: '$attempts محاولات فاشلة',
+      two: 'محاولتان فاشلتان',
+      one: 'محاولة فاشلة واحدة',
+      zero: 'لا محاولات فاشلة',
+    );
+    return 'كلمة مرور غير صحيحة ($_temp0).';
+  }
+
+  @override
+  String get brandNameNoSpace => 'VaultExplorer';
+
+  @override
+  String get enterPasswordSubtitle => 'أدخل كلمة المرور الرئيسية للمتابعة';
+
+  @override
+  String get masterPasswordFieldLabelTitleCase => 'كلمة المرور الرئيسية';
+
+  @override
+  String get unlock => 'فتح القفل';
+
+  @override
+  String get useBiometric => 'استخدام البصمة الحيوية';
+
+  @override
+  String get connectAtLeast4Dots => 'صِل 4 نقاط على الأقل';
+
+  @override
+  String get patternsDontMatch => 'النمطان غير متطابقين — حاول مرة أخرى';
+
+  @override
+  String get drawUnlockPatternTitle => 'ارسم نمط فتح القفل';
+
+  @override
+  String get confirmPatternTitle => 'أكّد نمطك';
+
+  @override
+  String get drawSamePatternAgain => 'ارسم نفس النمط مرة أخرى';
+
+  @override
+  String get enterAtLeast4Digits => 'أدخل 4 أرقام على الأقل';
+
+  @override
+  String get pinsDontMatch => 'رمزا PIN غير متطابقين — حاول مرة أخرى';
+
+  @override
+  String get createUnlockPinTitle => 'أنشئ رمز PIN لفتح القفل';
+
+  @override
+  String get confirmPinTitle => 'أكّد رمز PIN الخاص بك';
+
+  @override
+  String get enterSamePinAgain => 'أدخل نفس رمز PIN مرة أخرى';
+
+  @override
+  String get enterUnlockPinTitle => 'أدخل رمز PIN لفتح القفل';
+
+  @override
+  String get wrongPinTryAgain => 'رمز PIN خاطئ — حاول مرة أخرى';
+
+  @override
+  String get enterYourPinSequence => 'أدخل رمز PIN الخاص بك';
+
+  @override
+  String get enterPinToMount => 'أدخل رمز PIN للتحميل';
+
+  @override
+  String get noPinConfiguredMessage =>
+      'لا يوجد رمز PIN مُعدّ. يرجى إدخال كلمة المرور يدويًا.';
+
+  @override
+  String pinLockedForSeconds(int seconds) {
+    return 'عدد كبير جدًا من المحاولات الفاشلة. تم القفل لمدة $seconds ثانية.';
+  }
+
+  @override
+  String get initSecureCredsPinMessage =>
+      'جارٍ تهيئة بيانات الاعتماد الآمنة. يرجى فتح القفل يدويًا مرة واحدة لتفويض الوصول عبر رمز PIN.';
+
+  @override
+  String get setPinButton => 'تعيين رمز PIN';
+
+  @override
+  String get changePinButton => 'تغيير رمز PIN';
+
+  @override
+  String get pinSetupRequiredBeforeSaving => 'أعدّ رمز PIN قبل الحفظ.';
+
+  @override
+  String get pinSetupRequiredAboveBeforeSaving =>
+      'أعدّ رمز PIN أعلاه قبل الحفظ.';
+
+  @override
+  String get verifyPinTitle => 'التحقق من رمز PIN';
+
+  @override
+  String get incorrectPinError => 'رمز PIN غير صحيح';
+
+  @override
+  String removedFromListSnack(String name) {
+    return 'تمت إزالة \"$name\" من القائمة';
+  }
+
+  @override
+  String get clearRecentHistoryTitle => 'مسح السجل الأخير؟';
+
+  @override
+  String get clearRecentHistoryMessage =>
+      'سيؤدي هذا إلى إزالة جميع المستندات الأخيرة من قائمتك. لن تتأثر الملفات الفعلية الموجودة على جهازك.';
+
+  @override
+  String get clearAll => 'مسح الكل';
+
+  @override
+  String get recentHistoryClearedSnack => 'تم مسح السجل الأخير';
+
+  @override
+  String get moreOptionsTooltip => 'المزيد من الخيارات';
+
+  @override
+  String get clearHistoryMenuItem => 'مسح السجل';
+
+  @override
+  String get openPdfFile => 'فتح ملف PDF';
+
+  @override
+  String get noDocumentsYetTitle => 'لا توجد مستندات بعد';
+
+  @override
+  String get openPdfToStartMessage => 'افتح ملف PDF من جهازك لبدء القراءة.';
+
+  @override
+  String get removeFromListMenuItem => 'إزالة من القائمة';
+
+  @override
+  String get justNow => 'الآن';
+
+  @override
+  String minutesAgo(int count) {
+    return 'قبل $count دقيقة';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return 'قبل $count ساعة';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return 'قبل $count يوم';
+  }
+
+  @override
+  String get usbDriveDisconnectedLocked => 'تم فصل محرك USB — تم قفل الحاوية';
+
+  @override
+  String get containerAlreadyMounted => 'هذه الحاوية مثبَّتة بالفعل.';
+
+  @override
+  String get noVaultFolderFormatDetected =>
+      'لم يتم العثور على masterkey.cryptomator أو gocryptfs.conf أو cryfs.config في ذلك المجلد.';
+
+  @override
+  String get savedContainerSettingsNotFound =>
+      'تعذّر العثور على الإعدادات المحفوظة لهذه الحاوية.';
+
+  @override
+  String couldNotUpdateContainerLocation(String error) {
+    return 'تعذّر تحديث موقع الحاوية: $error';
+  }
+
+  @override
+  String filePickerFailed(String error) {
+    return 'فشل منتقي الملفات: $error';
+  }
+
+  @override
+  String get selectContainerFirst => 'اختر حاوية أولاً';
+
+  @override
+  String get passwordOrKeyfilesRequired => 'مطلوب كلمة مرور أو ملفات مفاتيح';
+
+  @override
+  String get slowPerformanceWarningTitle => 'تحذير من بطء الأداء';
+
+  @override
+  String get slowPerformanceWarningMessage =>
+      'الوصول المباشر لوحدة التخزين مُعطّل حاليًا.\n\nيخزّن CryFS الملفات موزّعة على آلاف الكتل الصغيرة. سيكون فتح خزنات CryFS غير الفارغة عبر SAF الخاص بـ Android بطيئًا جدًا.\n\nهل تريد فتح الإعدادات لمنح \"الوصول إلى جميع الملفات\" لسرعة أفضل؟';
+
+  @override
+  String get unlockAnyway => 'فتح القفل رغم ذلك';
+
+  @override
+  String get defaultVaultName => 'الخزنة';
+
+  @override
+  String get defaultContainerName => 'الحاوية';
+
+  @override
+  String get incorrectPasswordOrInvalidVault =>
+      'كلمة مرور غير صحيحة أو خزنة غير صالحة';
+
+  @override
+  String get incorrectPasswordOrInvalidContainer =>
+      'كلمة مرور غير صحيحة أو حاوية غير صالحة';
+
+  @override
+  String get genericUnknownError => 'خطأ غير معروف';
+
+  @override
+  String get decryptingLabel => 'جارٍ فك التشفير…';
+
+  @override
+  String get loadingContainerFromStorage =>
+      'جارٍ تحميل الحاوية من وحدة التخزين… قد يستغرق ذلك بعض الوقت إذا كانت كبيرة أو محفوظة في السحابة.';
+
+  @override
+  String luksKeyslotProgress(int attempted, int total) {
+    return 'جارِ تجربة فتحة المفتاح $attempted من $total…';
+  }
+
+  @override
+  String get luksKeyslotProgressUnknown => 'جارِ تجربة فتحة مفتاح…';
+
+  @override
+  String bitlockerCredentialProgress(int attempted, int total) {
+    return 'جارٍ التحقق من بيانات الاعتماد $attempted من $total…';
+  }
+
+  @override
+  String get bitlockerCredentialProgressUnknown =>
+      'جارٍ التحقق من بيانات الاعتماد…';
+
+  @override
+  String veracryptAlgoProgress(String algo, String slotName) {
+    return 'جارِ تجربة $algo ($slotName)…';
+  }
+
+  @override
+  String get unlockContainerLabel => 'فتح قفل الحاوية';
+
+  @override
+  String get mountContainerTitle => 'تحميل حاوية';
+
+  @override
+  String get containerFileSegmentLabel => 'ملف حاوية';
+
+  @override
+  String get folderVaultSegmentLabel => 'خزنة مجلد';
+
+  @override
+  String formatContainerLabel(String format) {
+    return 'حاوية $format';
+  }
+
+  @override
+  String formatVaultLabel(String format) {
+    return 'خزنة $format';
+  }
+
+  @override
+  String formatDriveLabel(String format) {
+    return 'محرك $format';
+  }
+
+  @override
+  String get encryptedContainerLabel => 'حاوية مشفّرة';
+
+  @override
+  String get tapToSelectVaultFolder => 'اضغط لاختيار مجلد الخزنة…';
+
+  @override
+  String get tapToSelectContainerFile => 'اضغط لاختيار ملف الحاوية…';
+
+  @override
+  String get containerMissingTitle => 'الحاوية مفقودة';
+
+  @override
+  String get filePathCouldNotBeResolved => 'تعذّر تحديد مسار الملف';
+
+  @override
+  String get containerMissingExplanation =>
+      'ربما تم نقل ملف الحاوية أو حذفه، أو أن وحدة التخزين المضيفة له غير متصلة حاليًا.';
+
+  @override
+  String get retryButtonLabel => 'إعادة المحاولة';
+
+  @override
+  String get locateFileButtonLabel => 'تحديد موقع الملف';
+
+  @override
+  String get authenticateToMountSubtitle =>
+      'أجرِ المصادقة لتحميل الحاوية بأمان';
+
+  @override
+  String get usePasswordButtonLabel => 'استخدام كلمة المرور';
+
+  @override
+  String get authenticateButtonLabel => 'المصادقة';
+
+  @override
+  String get drawUnlockPatternCardTitle => 'ارسم نمط فتح القفل';
+
+  @override
+  String get wrongPatternTryAgain => 'نمط خاطئ — حاول مرة أخرى';
+
+  @override
+  String get connectYourPatternSequence => 'صِل تسلسل نمطك';
+
+  @override
+  String get usePasswordInsteadButtonLabel =>
+      'استخدام كلمة المرور بدلاً من ذلك';
+
+  @override
+  String get passwordHintFolderVault => 'أدخل كلمة مرور الخزنة';
+
+  @override
+  String get passwordHintBitlocker => 'أدخل كلمة المرور أو مفتاح الاسترداد';
+
+  @override
+  String get passwordHintContainer => 'أدخل كلمة مرور الحاوية';
+
+  @override
+  String get usingSavedPasswordTooltip => 'يتم استخدام كلمة المرور المحفوظة';
+
+  @override
+  String get luksKeyfileReplacesPasswordNote =>
+      'بالنسبة لحاويات LUKS، يحل ملف المفتاح محل كلمة المرور.';
+
+  @override
+  String get readOnlyModeUsbSubtitle =>
+      'التحميل دون السماح بإجراء تغييرات على هذا المحرك';
+
+  @override
+  String get readOnlyModeContainerSubtitle =>
+      'التحميل دون السماح بإجراء تغييرات على هذه الحاوية';
+
+  @override
+  String get rememberContainerLabel => 'تذكّر الحاوية';
+
+  @override
+  String get rememberContainerSubtitle =>
+      'تثبيت الحاوية في لوحة التحكم للوصول السريع';
+
+  @override
+  String get cancelUnlockButtonLabel => 'إلغاء فتح القفل';
+
+  @override
+  String get biometricSubjectContainer => 'الحاوية';
+
+  @override
+  String get biometricSubjectUsbDrive => 'محرك USB';
+
+  @override
+  String get usbNoSavedCredentialsMessage =>
+      'لم يتم العثور على كلمة مرور محفوظة. يرجى إدخالها يدويًا.';
+
+  @override
+  String get decryptingDriveLabel => 'جارٍ فك تشفير المحرك…';
+
+  @override
+  String get usbDeviceAlreadyActiveMounted =>
+      'جهاز USB هذا نشط ومثبَّت بالفعل.';
+
+  @override
+  String reconnectUsbDriveTitle(String label) {
+    return 'إعادة الاتصال بـ \"$label\"';
+  }
+
+  @override
+  String get unlockUsbDriveTitle => 'فتح قفل محرك USB';
+
+  @override
+  String get noUsbStorageDetectedTitle => 'لم يتم اكتشاف تخزين USB';
+
+  @override
+  String authenticateToUnlockPrompt(String subject) {
+    return 'أجرِ المصادقة لفتح قفل $subject';
+  }
+
+  @override
+  String get noPatternConfiguredMessage =>
+      'لا يوجد نمط مُعدّ. يرجى إدخال كلمة المرور يدويًا.';
+
+  @override
+  String patternLockedForSeconds(int seconds) {
+    return 'عدد كبير جدًا من المحاولات الفاشلة. تم القفل لمدة $seconds ثانية.';
+  }
+
+  @override
+  String get initSecureCredsBiometricMessage =>
+      'جارٍ تهيئة بيانات الاعتماد الآمنة. يرجى فتح القفل يدويًا مرة واحدة لتفويض الوصول بالبصمة الحيوية.';
+
+  @override
+  String get initSecureCredsPatternMessage =>
+      'جارٍ تهيئة بيانات الاعتماد الآمنة. يرجى فتح القفل يدويًا مرة واحدة لتفويض الوصول بالنمط.';
+
+  @override
+  String get mountExistingContainerTitle => 'تحميل حاوية موجودة';
+
+  @override
+  String get mountExistingContainerSubtitle =>
+      'فتح قفل حاوية ملف تملكها بالفعل';
+
+  @override
+  String get mountSplitContainerTitle => 'تحميل حاوية مجزّأة';
+
+  @override
+  String get mountSplitContainerSubtitle =>
+      'فتح قفل حاوية مجزّأة مباشرةً، دون دمجها أولاً';
+
+  @override
+  String get mountUsbDriveTitle => 'تحميل محرك USB';
+
+  @override
+  String get mountUsbDriveSubtitle => 'فتح قفل حاوية على محرك أقراص USB OTG';
+
+  @override
+  String get formatUsbDriveTitle => 'تهيئة محرك USB';
+
+  @override
+  String get formatUsbDriveSubtitle =>
+      'مسح محرك وإنشاء حاوية مشفّرة جديدة عليه';
+
+  @override
+  String get createNewContainerTitle => 'إنشاء حاوية جديدة';
+
+  @override
+  String get createNewContainerSubtitle => 'تهيئة خزنة مشفّرة جديدة تمامًا';
+
+  @override
+  String get lockBeforeRemovingWarning => 'اقفل الحاوية قبل إزالتها.';
+
+  @override
+  String get settingsTooltip => 'الإعدادات';
+
+  @override
+  String get addVaultFabLabel => 'إضافة خزنة';
+
+  @override
+  String removedLabelUndo(String label) {
+    return 'تمت إزالة \"$label\"';
+  }
+
+  @override
+  String get undo => 'تراجع';
+
+  @override
+  String get pdfViewerNoSourceProvided => 'لم يتم توفير مصدر PDF.';
+
+  @override
+  String get pdfViewerFileEmpty => 'ملف PDF فارغ أو غير قابل للقراءة.';
+
+  @override
+  String pdfViewerFailedToInspectSize(String error) {
+    return 'فشل فحص حجم ملف PDF: $error';
+  }
+
+  @override
+  String get pdfViewerErrorLoadingTitle => 'خطأ في تحميل PDF';
+
+  @override
+  String get pdfViewerNoDocumentLoaded => 'لا يوجد مستند PDF محمّل.';
+
+  @override
+  String get add => 'إضافة';
+
+  @override
+  String get reset => 'إعادة تعيين';
+
+  @override
+  String couldNotExpose(String name) {
+    return 'تعذّر عرض \"$name\".';
+  }
+
+  @override
+  String nowAvailableToOtherApps(String name) {
+    return 'أصبح \"$name\" متاحًا الآن للتطبيقات الأخرى.';
+  }
+
+  @override
+  String couldNotUnmount(String name) {
+    return 'تعذّر إلغاء تحميل \"$name\".';
+  }
+
+  @override
+  String pinnedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم تثبيت $count عنصر',
+      many: 'تم تثبيت $count عنصرًا',
+      few: 'تم تثبيت $count عناصر',
+      two: 'تم تثبيت عنصرين',
+      one: 'تم تثبيت عنصر واحد',
+      zero: 'لم يتم تثبيت عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unpinnedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم إلغاء تثبيت $count عنصر',
+      many: 'تم إلغاء تثبيت $count عنصرًا',
+      few: 'تم إلغاء تثبيت $count عناصر',
+      two: 'تم إلغاء تثبيت عنصرين',
+      one: 'تم إلغاء تثبيت عنصر واحد',
+      zero: 'لم يتم إلغاء تثبيت عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get readOnlyThumbnailWarning =>
+      'تحميل للقراءة فقط — ستظهر الصور المصغّرة لكن لن يتم حفظها داخل الحاوية في هذه الجلسة.';
+
+  @override
+  String failedLoadingFolder(String type) {
+    return 'فشل تحميل المجلد: $type';
+  }
+
+  @override
+  String failedToReadArchive(String type) {
+    return 'فشل قراءة الأرشيف: $type';
+  }
+
+  @override
+  String archiveFormatNotSupported(String ext) {
+    return 'تنسيق الأرشيف .$ext غير مدعوم بعد';
+  }
+
+  @override
+  String get archivePasswordPromptTitle => 'محمي بكلمة مرور';
+
+  @override
+  String get archivePasswordPromptMessage =>
+      'هذا الأرشيف محمي بكلمة مرور. أدخل كلمة المرور لعرض محتوياته.';
+
+  @override
+  String get archiveSolidWarning =>
+      'هذا أرشيف مصمت (Solid) — قد يكون فتح الملفات أبطأ، خاصة قرب النهاية.';
+
+  @override
+  String get failedToReadFileFromArchive => 'فشل قراءة الملف من الأرشيف';
+
+  @override
+  String failedToExtractFile(String type) {
+    return 'فشل استخراج الملف: $type';
+  }
+
+  @override
+  String get failedToReadSecureItem => 'فشل قراءة العنصر الآمن';
+
+  @override
+  String get openFileDialogTitle => 'فتح ملف';
+
+  @override
+  String chooseHowToOpen(String name) {
+    return 'اختر كيفية فتح \"$name\":';
+  }
+
+  @override
+  String get playVideoAudioViewImageInApp =>
+      'تشغيل الفيديو/الصوت أو عرض الصورة داخل التطبيق';
+
+  @override
+  String get viewEditTextMarkdownCode => 'عرض/تعديل النص أو Markdown أو الكود';
+
+  @override
+  String get sendFileToThirdPartyApp => 'إرسال الملف إلى تطبيق خارجي';
+
+  @override
+  String get openAsEllipsis => 'فتح كـ…';
+
+  @override
+  String get chooseFileTypeToOpenAs => 'اختر نوع الملف للفتح كـ';
+
+  @override
+  String alwaysRememberChoiceExt(String ext) {
+    return 'تذكّر الاختيار دائمًا لملفات .$ext';
+  }
+
+  @override
+  String get alwaysRememberChoiceNoExt =>
+      'تذكّر الاختيار دائمًا للملفات بدون امتداد';
+
+  @override
+  String get openAsDialogTitle => 'فتح كـ';
+
+  @override
+  String get mimeTypeText => 'نص';
+
+  @override
+  String get mimeTypeImage => 'صورة';
+
+  @override
+  String get mimeTypeVideo => 'فيديو';
+
+  @override
+  String get mimeTypeAudio => 'صوت';
+
+  @override
+  String get mimeTypeArchive => 'أرشيف';
+
+  @override
+  String get mimeTypeOther => 'أخرى';
+
+  @override
+  String get scanningSubfoldersForMedia =>
+      'جارٍ مسح المجلدات الفرعية بحثًا عن الوسائط…';
+
+  @override
+  String get noMediaFilesFoundRecursive =>
+      'لم يتم العثور على ملفات وسائط في هذا المجلد أو مجلداته الفرعية';
+
+  @override
+  String failedToScanSubfolders(String error) {
+    return 'فشل مسح المجلدات الفرعية: $error';
+  }
+
+  @override
+  String scanningSubfoldersForMediaProgress(int count) {
+    return 'جارٍ البحث عن الوسائط في المجلدات الفرعية… تم فحص $count';
+  }
+
+  @override
+  String get mediaScanCancelled => 'تم إلغاء البحث عن الوسائط';
+
+  @override
+  String get mediaScanLimitReached =>
+      'تم إيقاف البحث بعد فحص عدد كبير من المجلدات. لم يُعثر على وسائط.';
+
+  @override
+  String get noAppFoundForFileType =>
+      'لم يتم العثور على تطبيق لهذا النوع من الملفات';
+
+  @override
+  String couldNotOpenFile(String name) {
+    return 'تعذّر فتح \"$name\"';
+  }
+
+  @override
+  String get couldNotShareFiles => 'تعذّرت مشاركة الملفات المحددة';
+
+  @override
+  String get readOnlyCantMove =>
+      'هذه الحاوية مثبَّتة للقراءة فقط — لا يمكن نقل العناصر منها.';
+
+  @override
+  String get readOnlyCantPaste =>
+      'هذه الحاوية مثبَّتة للقراءة فقط — لا يمكن لصق العناصر هنا.';
+
+  @override
+  String get clipboardSourceInvalid => 'مصدر الحافظة غير صالح';
+
+  @override
+  String get crossContainerPasteNotConfigured =>
+      'اللصق بين الحاويات غير مُهيَّأ.';
+
+  @override
+  String get crossContainerPasteRequiresBothMounted =>
+      'يتطلب اللصق بين الحاويات بقاء كلتا الحاويتين مثبَّتتين.';
+
+  @override
+  String get readOnlyCantDelete =>
+      'هذه الحاوية مثبَّتة للقراءة فقط — لا يمكن حذف العناصر.';
+
+  @override
+  String deletedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم حذف $count عنصر',
+      many: 'تم حذف $count عنصرًا',
+      few: 'تم حذف $count عناصر',
+      two: 'تم حذف عنصرين',
+      one: 'تم حذف عنصر واحد',
+      zero: 'لم يتم حذف عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deletedWithFailures(int deleted, int failed) {
+    return 'تم حذف $deleted · فشل $failed';
+  }
+
+  @override
+  String exportedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم تصدير $count ملف',
+      many: 'تم تصدير $count ملفًا',
+      few: 'تم تصدير $count ملفات',
+      two: 'تم تصدير ملفين',
+      one: 'تم تصدير ملف واحد',
+      zero: 'لم يتم تصدير ملفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportCancelledOrFailed => 'تم إلغاء التصدير أو فشل';
+
+  @override
+  String exportError(String type) {
+    return 'خطأ في التصدير: $type';
+  }
+
+  @override
+  String get deleteOriginalTitle => 'حذف الأصل؟';
+
+  @override
+  String get deleteOriginalFolderMessage =>
+      'هل تريد حذف المجلد الأصلي من جهازك الآن بعد استيراده؟';
+
+  @override
+  String get deleteOriginalFilesMessage =>
+      'هل تريد حذف الملف (الملفات) الأصلية من جهازك الآن بعد استيرادها؟';
+
+  @override
+  String get keepOriginal => 'الاحتفاظ بالأصل';
+
+  @override
+  String get deleteOriginalButton => 'حذف الأصل';
+
+  @override
+  String deletedOriginalCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم حذف $count عنصر أصلي',
+      many: 'تم حذف $count عنصرًا أصليًا',
+      few: 'تم حذف $count عناصر أصلية',
+      two: 'تم حذف عنصرين أصليين',
+      one: 'تم حذف عنصر أصلي واحد',
+      zero: 'لم يتم حذف عناصر أصلية',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get couldNotDeleteOriginals => 'تعذّر حذف الملفات الأصلية';
+
+  @override
+  String get videoCapturedEncrypted => 'تم حفظ الفيديو';
+
+  @override
+  String get photoCapturedEncrypted => 'تم حفظ الصورة';
+
+  @override
+  String cameraCaptureFailed(String type) {
+    return 'فشل التقاط الكاميرا: $type';
+  }
+
+  @override
+  String extractAllFilesToFolder(String folder) {
+    return 'استخراج جميع الملفات إلى المجلد \"$folder\"؟';
+  }
+
+  @override
+  String get extract => 'استخراج';
+
+  @override
+  String extractedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم استخراج $count ملف',
+      many: 'تم استخراج $count ملفًا',
+      few: 'تم استخراج $count ملفات',
+      two: 'تم استخراج ملفين',
+      one: 'تم استخراج ملف واحد',
+      zero: 'لم يتم استخراج ملفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToExtractGeneric(String type) {
+    return 'فشل الاستخراج: $type';
+  }
+
+  @override
+  String get archiveSelectionAction => 'أرشفة';
+
+  @override
+  String get createArchiveTitle => 'إنشاء أرشيف';
+
+  @override
+  String get archiveNameHint => 'أرشيف.zip';
+
+  @override
+  String archivedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تمت أرشفة $count ملف',
+      many: 'تمت أرشفة $count ملفًا',
+      few: 'تمت أرشفة $count ملفات',
+      two: 'تمت أرشفة ملفين',
+      one: 'تمت أرشفة ملف واحد',
+      zero: 'لم تتم أرشفة أي ملفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToArchiveGeneric(String type) {
+    return 'فشل إنشاء الأرشيف: $type';
+  }
+
+  @override
+  String get createArchivePasswordHint => 'كلمة مرور اختيارية (AES-256)';
+
+  @override
+  String get createArchivePasswordUnavailableForFormat =>
+      'الحماية بكلمة مرور متاحة فقط لتنسيقات ZIP و 7-Zip';
+
+  @override
+  String get createArchiveEncryptFilenames => 'تشفير أسماء الملفات';
+
+  @override
+  String get createArchiveEncryptFilenamesHint =>
+      'يتطلب كلمة مرور. ستكون كلمة المرور مطلوبة حتى لعرض محتويات الأرشيف.';
+
+  @override
+  String get closeSearchTooltip => 'إغلاق البحث';
+
+  @override
+  String get searchInThisFolderTooltip => 'البحث في هذا المجلد';
+
+  @override
+  String get playMediaHereTooltip => 'تشغيل الوسائط هنا';
+
+  @override
+  String get rootFolderLabel => 'الجذر';
+
+  @override
+  String folderPickerFailed(String error) {
+    return 'فشل منتقي المجلد: $error';
+  }
+
+  @override
+  String get addAVaultTitle => 'إضافة خزنة';
+
+  @override
+  String get selectEmptyDestinationFolderFirst => 'اختر مجلد وجهة فارغًا أولاً';
+
+  @override
+  String get passwordRequired => 'كلمة المرور مطلوبة';
+
+  @override
+  String get vaultCreatedSuccessfully => 'تم إنشاء الخزنة بنجاح.';
+
+  @override
+  String get vaultCreationFailedEmptyFolder =>
+      'فشل إنشاء الخزنة — تأكد من أن المجلد المحدد فارغ.';
+
+  @override
+  String get unknownErrorOccurred => 'حدث خطأ غير معروف';
+
+  @override
+  String get containerNameRequired => 'اسم الحاوية مطلوب';
+
+  @override
+  String get enterValidSizeGreaterThanZero => 'أدخل حجمًا صالحًا أكبر من 0';
+
+  @override
+  String get passwordOrKeyfileRequired =>
+      'مطلوب كلمة مرور أو ملف مفتاح واحد على الأقل';
+
+  @override
+  String get standardVolumePasswordsDoNotMatch =>
+      'كلمتا مرور الوحدة القياسية غير متطابقتين';
+
+  @override
+  String get hiddenVolumePasswordsDoNotMatch =>
+      'كلمتا مرور الوحدة المخفية غير متطابقتين';
+
+  @override
+  String get containerFileCreatedSuccessfully => 'تم إنشاء ملف الحاوية بنجاح.';
+
+  @override
+  String get containerCreationCancelledOrFailed =>
+      'تم إلغاء إنشاء الحاوية أو فشل.';
+
+  @override
+  String insufficientSpaceForContainer(String needed, String available) {
+    return 'لا توجد مساحة كافية في الوجهة. المطلوب $needed، والمتاح فقط $available.';
+  }
+
+  @override
+  String get vaultKindContainerFile => 'ملف حاوية';
+
+  @override
+  String get vaultKindFolderVault => 'خزنة مجلد';
+
+  @override
+  String get formatFileSystemLabel => 'تهيئة نظام الملفات';
+
+  @override
+  String get standardVolumeHeader => 'الوحدة القياسية';
+
+  @override
+  String get containerFormatLabel => 'تنسيق الحاوية';
+
+  @override
+  String get fileNameLabel => 'اسم الملف';
+
+  @override
+  String get containerSizeLabel => 'حجم الحاوية';
+
+  @override
+  String get unitLabel => 'الوحدة';
+
+  @override
+  String get passwordFieldLabel => 'كلمة المرور';
+
+  @override
+  String get confirmPasswordFieldLabelTitleCase => 'تأكيد كلمة المرور';
+
+  @override
+  String get hiddenVolumeHeader => 'الوحدة المخفية';
+
+  @override
+  String get createHiddenVolumeToggleTitle => 'إنشاء وحدة مخفية';
+
+  @override
+  String get createInvisibleSecondaryVolume => 'إنشاء وحدة ثانوية غير مرئية';
+
+  @override
+  String get setOuterPasswordFirstToEnable =>
+      'عيّن كلمة المرور أو ملفات المفاتيح الخارجية أولاً للتفعيل';
+
+  @override
+  String get hiddenPasswordLabel => 'كلمة المرور المخفية';
+
+  @override
+  String get confirmHiddenPasswordLabel => 'تأكيد كلمة المرور المخفية';
+
+  @override
+  String get hiddenSizeLabel => 'الحجم المخفي';
+
+  @override
+  String get unitMbMegabytes => 'ميغابايت (MB)';
+
+  @override
+  String get unitGbGigabytes => 'غيغابايت (GB)';
+
+  @override
+  String get hiddenFileSystemLabel => 'نظام الملفات المخفي';
+
+  @override
+  String get vaultFormatLabel => 'تنسيق الخزنة';
+
+  @override
+  String get gocryptfsCipherLabel => 'شيفرة المحتوى';
+
+  @override
+  String get cryfsCipherLabel => 'شيفرة المحتوى';
+
+  @override
+  String get cryfsBlockSizeLabel => 'حجم الكتلة';
+
+  @override
+  String get destinationFolderLabel => 'مجلد الوجهة';
+
+  @override
+  String get selectEmptyFolderLabel => 'اختر مجلدًا فارغًا';
+
+  @override
+  String get tapToChooseVaultLocation => 'اضغط لاختيار مكان إنشاء الخزنة…';
+
+  @override
+  String get folderVaultLimitationsNote =>
+      'لا تدعم خزنات المجلدات ملفات المفاتيح أو PIM أو الوحدات المخفية أو اختيار شيفرات VeraCrypt/LUKS.';
+
+  @override
+  String get createVaultButton => 'إنشاء الخزنة';
+
+  @override
+  String get createContainerButton => 'إنشاء الحاوية';
+
+  @override
+  String get vaultCreationInProgressWait => 'جارٍ إنشاء الخزنة. يرجى الانتظار.';
+
+  @override
+  String get containerCreationInProgressWait =>
+      'جارٍ إنشاء الحاوية. يرجى الانتظار.';
+
+  @override
+  String get createEncryptedVaultTitle => 'إنشاء خزنة مشفّرة';
+
+  @override
+  String get createEncryptedContainerTitle => 'إنشاء حاوية مشفّرة';
+
+  @override
+  String get unitMbShort => 'MB';
+
+  @override
+  String get unitGbShort => 'GB';
+
+  @override
+  String failedToListUsbDevices(String error) {
+    return 'فشل سرد أجهزة USB: $error';
+  }
+
+  @override
+  String get usbPermissionDenied => 'تم رفض إذن USB';
+
+  @override
+  String get couldNotReadDriveCapacity =>
+      'تعذّر قراءة سعة المحرك — أدخل الحجم يدويًا.';
+
+  @override
+  String get selectUsbDriveFirst => 'اختر محرك USB أولاً';
+
+  @override
+  String eraseDeviceTitle(String name) {
+    return 'مسح \"$name\"؟';
+  }
+
+  @override
+  String get eraseDeviceMessage =>
+      'سيؤدي هذا إلى مسح كل ما هو موجود حاليًا على محرك USB هذا نهائيًا واستبداله بحاوية مشفّرة جديدة. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get eraseAndCreateButton => 'مسح وإنشاء';
+
+  @override
+  String get usbPermissionRequiredToContinue => 'إذن USB مطلوب للمتابعة';
+
+  @override
+  String get usbContainerCreatedSnack =>
+      'تم إنشاء حاوية USB. استخدم \"تحميل محرك USB\" لفتح قفلها.';
+
+  @override
+  String get usbContainerCreationFailed => 'فشل إنشاء حاوية USB.';
+
+  @override
+  String get usbStandardVolumeSectionHeader => 'محرك USB والوحدة القياسية';
+
+  @override
+  String get formattingErasesEverythingWarning =>
+      'تؤدي التهيئة إلى مسح كل ما هو موجود حاليًا على المحرك المحدد.';
+
+  @override
+  String get selectUsbDriveLabel => 'اختيار محرك USB';
+
+  @override
+  String get noUsbStorageDetected => 'لم يتم اكتشاف تخزين USB';
+
+  @override
+  String get connectOtgDriveToFormat => 'قم بتوصيل محرك OTG للتهيئة';
+
+  @override
+  String get refreshListButton => 'تحديث القائمة';
+
+  @override
+  String get readyToFormat => 'جاهز للتهيئة';
+
+  @override
+  String get permissionRequired => 'الإذن مطلوب';
+
+  @override
+  String get readingDriveCapacity => 'جارٍ قراءة سعة المحرك…';
+
+  @override
+  String get mustNotExceedDriveCapacity =>
+      'يجب ألا يتجاوز السعة الفعلية للمحرك.';
+
+  @override
+  String get quickFormatTitle => 'تهيئة سريعة';
+
+  @override
+  String get quickFormatDescription =>
+      'تخطي ملء المحرك بالأصفار. أسرع، لكن لا يمحو البيانات القديمة بأمان.';
+
+  @override
+  String get eraseAndCreateContainerButton => 'مسح وإنشاء الحاوية';
+
+  @override
+  String get usbContainerCreationInProgressWait =>
+      'جارٍ إنشاء الحاوية. يرجى الانتظار.';
+
+  @override
+  String get formatUsbDriveScreenTitle => 'تهيئة محرك USB';
+
+  @override
+  String get playlistTransitionAnimationLabel => 'حركة انتقال قائمة التشغيل';
+
+  @override
+  String get playlistTransitionSlideLabel => 'انزلاق (افتراضي)';
+
+  @override
+  String get playlistTransitionFadeLabel => 'تلاشٍ';
+
+  @override
+  String get playlistTransitionZoomLabel => 'تكبير وتحجيم';
+
+  @override
+  String get playlistTransitionDepthLabel => 'تكديس بالعمق';
+
+  @override
+  String get playlistTransitionCubeLabel => 'مكعب ثلاثي الأبعاد';
+
+  @override
+  String get playlistTransitionFlipLabel => 'قلب ثلاثي الأبعاد';
+
+  @override
+  String get unlockVaultTitle => 'فتح قفل الخزنة';
+
+  @override
+  String get openContainerTitle => 'فتح الحاوية';
+
+  @override
+  String get selectContainerFileOrFolder => 'اختيار ملف أو مجلد';
+
+  @override
+  String get readOnlyModeLabel => 'وضع القراءة فقط';
+
+  @override
+  String get readOnlyModeSubtitle => 'يمنع أي عمليات كتابة أو تعديل على الخزنة';
+
+  @override
+  String get alwaysOpenReadOnlyLabel => 'القراءة فقط دائمًا';
+
+  @override
+  String get alwaysOpenReadOnlySubtitle =>
+      'تبدأ الجلسات الجديدة بوضع القراءة فقط.';
+
+  @override
+  String get selectUsbDeviceLabel => 'اختيار جهاز USB';
+
+  @override
+  String get noUsbDevicesFound => 'لم يتم العثور على أجهزة تخزين USB متوافقة';
+
+  @override
+  String get containerConfigTitle => 'تكوين الخزنة';
+
+  @override
+  String get changePasswordTitle => 'تغيير كلمة المرور';
+
+  @override
+  String get confirmNewPasswordLabel => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get cameraCaptureTitle => 'كاميرا الخزنة';
+
+  @override
+  String get takingPhoto => 'جارٍ التقاط الصورة…';
+
+  @override
+  String get noVaultSelected => 'لم يتم تحديد خزنة';
+
+  @override
+  String get mediaDiagnosticsTitle => 'تشخيص الوسائط';
+
+  @override
+  String get advancedViewerSettingsTitle => 'إعدادات العارض';
+
+  @override
+  String get textEditorSwitchToReadModeTooltip => 'التبديل إلى وضع القراءة فقط';
+
+  @override
+  String get textEditorSwitchToEditModeTooltip => 'التبديل إلى وضع التعديل';
+
+  @override
+  String get textEditorReadOnlyIndicatorLabel => 'للقراءة فقط';
+
+  @override
+  String get textEditorMoveCursorLeftTooltip => 'تحريك المؤشر لليسار';
+
+  @override
+  String get textEditorMoveCursorRightTooltip => 'تحريك المؤشر لليمين';
+
+  @override
+  String get textEditorSelectWordTooltip => 'تحديد الكلمة';
+
+  @override
+  String get textEditorSwitchToHorizontalScrollTooltip =>
+      'التبديل إلى التمرير الأفقي';
+
+  @override
+  String get textEditorSwitchToSoftWrapTooltip =>
+      'التبديل إلى الالتفاف التلقائي';
+
+  @override
+  String get textEditorCaretScrubberLabel =>
+      'اسحب لليسار أو لليمين لتحريك المؤشر';
+
+  @override
+  String get textEditorFindTooltip => 'البحث في الملف';
+
+  @override
+  String get textEditorFindHint => 'بحث';
+
+  @override
+  String get textEditorReplaceHint => 'استبدال';
+
+  @override
+  String get textEditorToggleReplaceTooltip => 'تبديل الاستبدال';
+
+  @override
+  String get textEditorPreviousMatchTooltip => 'المطابقة السابقة';
+
+  @override
+  String get textEditorNextMatchTooltip => 'المطابقة التالية';
+
+  @override
+  String get textEditorCaseSensitiveTooltip => 'مطابقة حالة الأحرف';
+
+  @override
+  String get textEditorRegexTooltip => 'استخدام تعبير نمطي';
+
+  @override
+  String get textEditorCloseFindTooltip => 'إغلاق البحث';
+
+  @override
+  String get textEditorNoMatches => 'لا توجد نتائج';
+
+  @override
+  String get textEditorReplaceButton => 'استبدال';
+
+  @override
+  String get textEditorReplaceAllButton => 'استبدال الكل';
+
+  @override
+  String get textEditorMoreActionsTooltip => 'المزيد من الإجراءات';
+
+  @override
+  String get textEditorGoToLineMenuItem => 'الانتقال إلى سطر…';
+
+  @override
+  String get textEditorGoToStartMenuItem => 'الانتقال إلى البداية';
+
+  @override
+  String get textEditorGoToEndMenuItem => 'الانتقال إلى النهاية';
+
+  @override
+  String get textEditorFormatDocumentMenuItem => 'تنسيق المستند';
+
+  @override
+  String get textEditorMinifyJsonMenuItem => 'ضغط JSON';
+
+  @override
+  String get textEditorFormatFailedMessage =>
+      'تعذر تنسيق هذا الملف — تحقق من صحته أولاً';
+
+  @override
+  String get textEditorGoToLineDialogTitle => 'الانتقال إلى سطر';
+
+  @override
+  String get textEditorGoToLineFieldLabel => 'رقم السطر';
+
+  @override
+  String textEditorGoToLineHelperText(int maxLine) {
+    return '1–$maxLine';
+  }
+
+  @override
+  String textEditorGoToLineInvalidNumber(int maxLine) {
+    return 'أدخل رقم سطر بين 1 و $maxLine';
+  }
+
+  @override
+  String get goToLineButton => 'انتقال';
+
+  @override
+  String get textEditorSaveConfirmTitle => 'تغييرات غير محفوظة';
+
+  @override
+  String get textEditorSaveConfirmMessage =>
+      'هل تريد حفظ تغييراتك قبل الإغلاق؟';
+
+  @override
+  String get saveAndClose => 'حفظ وإغلاق';
+
+  @override
+  String get discardChanges => 'تجاهل التغييرات';
+
+  @override
+  String selectionBarSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم تحديد $count عنصر',
+      many: 'تم تحديد $count عنصرًا',
+      few: 'تم تحديد $count عناصر',
+      two: 'تم تحديد عنصرين',
+      one: 'تم تحديد عنصر واحد',
+      zero: 'لم يتم تحديد عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectAll => 'تحديد الكل';
+
+  @override
+  String get deselectAll => 'إلغاء تحديد الكل';
+
+  @override
+  String get sortOptionsTitle => 'فرز الملفات';
+
+  @override
+  String get layoutModeList => 'عرض القائمة';
+
+  @override
+  String get layoutModeGrid => 'عرض شبكي';
+
+  @override
+  String get layoutModeMasonry => 'شبكة متدرّجة';
+
+  @override
+  String get fileOperationsTitle => 'عمليات الملفات';
+
+  @override
+  String get conflictResolutionTitle => 'تعارض في الملف';
+
+  @override
+  String get replaceExistingFile => 'استبدال الملف الموجود';
+
+  @override
+  String get keepBothFiles => 'الاحتفاظ بكليهما (إعادة تسمية الملف الجديد)';
+
+  @override
+  String get skipFile => 'تخطي هذا الملف';
+
+  @override
+  String get noVaultsFoundTitle => 'لم يتم العثور على خزنات';
+
+  @override
+  String get noVaultsFoundSubtitle =>
+      'أنشئ حاوية مشفّرة جديدة أو أضف خزنة موجودة للبدء.';
+
+  @override
+  String get addExistingVaultButton => 'إضافة خزنة موجودة';
+
+  @override
+  String get sortContainersModeManual => 'يدوي (اسحب لإعادة الترتيب)';
+
+  @override
+  String get sortContainersModeUnlockStatus =>
+      'حالة فتح القفل (المفتوحة أولاً)';
+
+  @override
+  String get sortContainersModeNameAZ => 'الاسم (أ–ي)';
+
+  @override
+  String get sortContainersModeNameZA => 'الاسم (ي–أ)';
+
+  @override
+  String get sortContainersModeNewest => 'الأحدث أولاً';
+
+  @override
+  String get sortContainersModeOldest => 'الأقدم أولاً';
+
+  @override
+  String get thumbnailCacheAppCacheLabel => 'ذاكرة التخزين المؤقت للتطبيق';
+
+  @override
+  String get thumbnailCacheAppCacheDesc =>
+      'مخزَّنة بشكل مشفّر في ذاكرة التخزين المؤقت للتطبيق. سريعة؛ تُمسح تلقائيًا عند ضغط التخزين.';
+
+  @override
+  String get thumbnailCacheInContainerLabel => 'داخل الحاوية';
+
+  @override
+  String get thumbnailCacheInContainerDesc =>
+      'مخزَّنة داخل الحاوية المشفّرة. محمية بواسطة الحاوية نفسها، لكن الكتابة أبطأ.';
+
+  @override
+  String get thumbnailCacheHiddenFolderLabel => 'مجلد مخفي';
+
+  @override
+  String get thumbnailCacheHiddenFolderDesc =>
+      'يُخزَّن في مجلد مخفي باسم .thumbcache داخل المجلد الجذري. على عكس ذاكرة التخزين المؤقت للتطبيق، لا يُحذف تلقائيًا.';
+
+  @override
+  String get thumbnailCacheDisabledLabel => 'معطّل';
+
+  @override
+  String get thumbnailCacheDisabledDesc =>
+      'لا يوجد تخزين مؤقت على القرص. يُعاد إنشاء الصور المصغّرة في كل تحميل.';
+
+  @override
+  String get unlockContainerTitle => 'فتح قفل الحاوية';
+
+  @override
+  String get containerFileSegment => 'ملف حاوية';
+
+  @override
+  String get folderVaultSegment => 'خزنة مجلد';
+
+  @override
+  String get enableButtonLabel => 'تفعيل';
+
+  @override
+  String get retryButtonLabelShort => 'إعادة المحاولة';
+
+  @override
+  String get locateFileButton => 'تحديد موقع الملف';
+
+  @override
+  String get authenticateButton => 'المصادقة';
+
+  @override
+  String get cancelUnlockButton => 'إلغاء فتح القفل';
+
+  @override
+  String tryingKeyslotProgress(int attempted, int total) {
+    return 'جارِ تجربة فتحة المفتاح $attempted من $total…';
+  }
+
+  @override
+  String get tryingKeyslotSingle => 'جارِ تجربة فتحة مفتاح…';
+
+  @override
+  String verifyingCredentialProgress(int attempted, int total) {
+    return 'جارٍ التحقق من بيانات الاعتماد $attempted من $total…';
+  }
+
+  @override
+  String get verifyingCredentialSingle => 'جارٍ التحقق من بيانات الاعتماد…';
+
+  @override
+  String tryingAlgoSlot(String algo, String slotName) {
+    return 'جارِ تجربة $algo ($slotName)…';
+  }
+
+  @override
+  String get hiddenVolumeSlotName => 'الوحدة المخفية';
+
+  @override
+  String get standardVolumeSlotName => 'الوحدة القياسية';
+
+  @override
+  String get containerMissingSubtitle => 'تعذّر تحديد مسار الملف';
+
+  @override
+  String get containerMissingBody =>
+      'ربما تم نقل ملف الحاوية أو حذفه، أو أن وحدة التخزين المضيفة له غير متصلة حاليًا.';
+
+  @override
+  String get connectPatternSequence => 'صِل تسلسل نمطك';
+
+  @override
+  String get passwordLabel => 'كلمة المرور';
+
+  @override
+  String get enterVaultPasswordHint => 'أدخل كلمة مرور الخزنة';
+
+  @override
+  String get enterBitlockerPasswordHint =>
+      'أدخل كلمة المرور أو مفتاح الاسترداد';
+
+  @override
+  String get enterContainerPasswordHint => 'أدخل كلمة مرور الحاوية';
+
+  @override
+  String get readOnlyModeUsbSubtitleDrive =>
+      'التحميل دون السماح بإجراء تغييرات على هذا المحرك';
+
+  @override
+  String get rememberDriveLabel => 'تذكّر المحرك';
+
+  @override
+  String get rememberDriveSubtitle =>
+      'تثبيت المحرك في لوحة التحكم للوصول السريع';
+
+  @override
+  String get unlockVaultButtonLabel => 'فتح قفل الخزنة';
+
+  @override
+  String get cryfsStorageAccessWarning =>
+      'تستخدم خزنات CryFS آلاف ملفات الكتل الصغيرة. بدون الوصول المباشر لوحدة التخزين، سيكون الأداء أبطأ بكثير.';
+
+  @override
+  String get folderVaultStorageAccessWarning =>
+      'الوصول المباشر لوحدة التخزين مُعطّل. قد يكون فتح الملفات وقراءتها في خزنات المجلدات أبطأ.';
+
+  @override
+  String get requestingPermission => 'جارٍ طلب الإذن…';
+
+  @override
+  String get unlockAndMountButton => 'فتح القفل والتحميل';
+
+  @override
+  String get unlockDriveButton => 'فتح قفل المحرك';
+
+  @override
+  String couldntFindDevice(String deviceName) {
+    return 'تعذّر العثور على \"$deviceName\"';
+  }
+
+  @override
+  String get plugDriveBackInRetry =>
+      'أعد توصيل المحرك واضغط على إعادة المحاولة، أو اختره أدناه إذا ظهر باسم مختلف.';
+
+  @override
+  String get retryConnectionButton => 'إعادة محاولة الاتصال';
+
+  @override
+  String get refreshDevicesButton => 'تحديث الأجهزة';
+
+  @override
+  String get connectOtgDriveToMount => 'قم بتوصيل محرك أقراص USB OTG للتحميل';
+
+  @override
+  String get alreadyActive => 'نشط بالفعل';
+
+  @override
+  String get active => 'نشط';
+
+  @override
+  String get readyToUnlock => 'جاهز لفتح القفل';
+
+  @override
+  String get enterUsbPartitionPassword => 'أدخل كلمة مرور قسم USB';
+
+  @override
+  String get biometricAuthenticationTitle => 'المصادقة بالبصمة الحيوية';
+
+  @override
+  String get biometricAuthUsbSubtitle =>
+      'أجرِ المصادقة لفتح قفل هذا الجهاز USB وتحميله';
+
+  @override
+  String get connectPatternSequenceToMount => 'صِل تسلسل نمطك للتحميل';
+
+  @override
+  String get selectAllAction => 'تحديد الكل';
+
+  @override
+  String get clearSelectionAction => 'مسح التحديد';
+
+  @override
+  String get clearSelectionTooltip => 'مسح التحديد';
+
+  @override
+  String get selectionOptionsTooltip => 'خيارات التحديد';
+
+  @override
+  String get readOnlyContainerTooltip => 'حاوية للقراءة فقط';
+
+  @override
+  String get copyAction => 'نسخ';
+
+  @override
+  String get moveAction => 'نقل';
+
+  @override
+  String get renameAction => 'إعادة تسمية';
+
+  @override
+  String get exportToDeviceAction => 'التصدير إلى الجهاز';
+
+  @override
+  String get openWithAppAction => 'الفتح باستخدام تطبيق';
+
+  @override
+  String get shareAction => 'مشاركة';
+
+  @override
+  String get pinAction => 'تثبيت';
+
+  @override
+  String get pinSelectedAction => 'تثبيت المحدد';
+
+  @override
+  String get unpinAction => 'إلغاء التثبيت';
+
+  @override
+  String get unpinSelectedAction => 'إلغاء تثبيت المحدد';
+
+  @override
+  String get documentProviderSettingsMenu => 'إعدادات مزوّد المستندات';
+
+  @override
+  String get exposeAsDocumentProviderMenu => 'العرض كمزوّد مستندات';
+
+  @override
+  String get moreOptionsTooltipShort => 'المزيد من الخيارات';
+
+  @override
+  String get copyTooltip => 'نسخ';
+
+  @override
+  String get searchInThisFolderHint => 'البحث في هذا المجلد…';
+
+  @override
+  String get clearTooltip => 'مسح';
+
+  @override
+  String get backToDashboardTooltip => 'العودة إلى لوحة التحكم';
+
+  @override
+  String get cancelPasteButton => 'إلغاء اللصق';
+
+  @override
+  String get cancelImportButton => 'إلغاء الاستيراد';
+
+  @override
+  String get continueButton => 'متابعة';
+
+  @override
+  String get skipButton => 'تخطي';
+
+  @override
+  String get keepBothButton => 'الاحتفاظ بكليهما';
+
+  @override
+  String get clearAllButton => 'مسح الكل';
+
+  @override
+  String get autoMountWhenUnlocksTitle =>
+      'التحميل التلقائي عند فتح قفل الحاوية';
+
+  @override
+  String get autoMountWhenUnlocksSubtitle =>
+      'عرض هذا المجلد تلقائيًا مرة أخرى في المرة القادمة';
+
+  @override
+  String get unmountButton => 'إلغاء التحميل';
+
+  @override
+  String get filtersMenuItem => 'عوامل التصفية';
+
+  @override
+  String get settingsMenuItem => 'الإعدادات';
+
+  @override
+  String get sortOptionsTooltip => 'خيارات الفرز';
+
+  @override
+  String get layoutOptionsTooltip => 'خيارات التخطيط';
+
+  @override
+  String get lockContainerTooltip => 'قفل الحاوية';
+
+  @override
+  String get renameTooltip => 'إعادة تسمية';
+
+  @override
+  String get cancelUpdatingPasswordTooltip => 'إلغاء تحديث كلمة المرور';
+
+  @override
+  String get unlockSettingsButton => 'إعدادات فتح القفل';
+
+  @override
+  String get updateSavedCredentialsButton => 'تحديث بيانات الاعتماد المحفوظة';
+
+  @override
+  String get verifyCredentialsTitle => 'التحقق من بيانات الاعتماد';
+
+  @override
+  String get verifyButton => 'تحقق';
+
+  @override
+  String get displayNameTitle => 'اسم العرض';
+
+  @override
+  String get containerNameHint => 'اسم الحاوية';
+
+  @override
+  String get deleteFileDialogTitle => 'حذف الملف؟';
+
+  @override
+  String get deleteFilePermanentWarning =>
+      'هذا الإجراء نهائي ولا يمكن التراجع عنه.';
+
+  @override
+  String get unsavedChangesTitle => 'تغييرات غير محفوظة';
+
+  @override
+  String get unsavedChangesMessage =>
+      'لديك تغييرات غير محفوظة. هل تريد حفظها قبل الإغلاق؟';
+
+  @override
+  String get discardButton => 'تجاهل';
+
+  @override
+  String get decryptingFileContent => 'جارٍ فك تشفير محتوى الملف...';
+
+  @override
+  String get cannotOpenFile => 'لا يمكن فتح الملف';
+
+  @override
+  String get changesSavedSuccessfully => 'تم حفظ التغييرات بنجاح';
+
+  @override
+  String saveFailedWithError(String error) {
+    return 'فشل الحفظ: $error';
+  }
+
+  @override
+  String linesCount(int count) {
+    return 'الأسطر: $count';
+  }
+
+  @override
+  String charsCount(int count) {
+    return 'الأحرف: $count';
+  }
+
+  @override
+  String get unsavedChangesLabel => 'تغييرات غير محفوظة';
+
+  @override
+  String get savedToVault => 'تم الحفظ في الخزنة';
+
+  @override
+  String get saveChangesTooltip => 'حفظ التغييرات';
+
+  @override
+  String get textEditorDecryptFailedMessage => 'فشل فك تشفير الملف من الخزنة.';
+
+  @override
+  String get textEditorInvalidTextFileMessage =>
+      'لا يبدو أن هذا الملف ملف نصي صالح.';
+
+  @override
+  String get textEditorWriteBackFailedMessage =>
+      'فشلت إعادة كتابة الملف إلى الخزنة.';
+
+  @override
+  String get markdownViewerEditTooltip => 'تعديل';
+
+  @override
+  String get markdownViewerPreviewTooltip => 'معاينة';
+
+  @override
+  String get markdownEmptyPreviewMessage => 'لا يوجد شيء لمعاينته بعد.';
+
+  @override
+  String get backTooltip => 'رجوع';
+
+  @override
+  String get forwardTooltip => 'التالي';
+
+  @override
+  String get reloadTooltip => 'إعادة التحميل';
+
+  @override
+  String get optionsTooltip => 'خيارات';
+
+  @override
+  String get htmlViewerErrorTitle => 'تعذّر عرض هذه الصفحة';
+
+  @override
+  String get htmlViewerLoadFailedMessage => 'فشل تحميل الملف';
+
+  @override
+  String get enableJavaScriptDialogTitle => 'تفعيل JavaScript؟';
+
+  @override
+  String get enableJavaScriptDialogMessage =>
+      'سيُسمح للصفحة بتشغيل نصوصها البرمجية المحلية الخاصة بها. ما زال لا يوجد لديها وصول إلى الشبكة — لا يمكن إرسال أو استقبال أي شيء في هذه الخزنة عبر الإنترنت.';
+
+  @override
+  String get disableJavaScriptMenu => 'تعطيل JavaScript';
+
+  @override
+  String get enableJavaScriptMenu => 'تفعيل JavaScript';
+
+  @override
+  String get enterFullscreenMenu => 'الدخول إلى ملء الشاشة';
+
+  @override
+  String failedToOpenExternalApp(String error) {
+    return 'فشل الفتح في تطبيق خارجي: $error';
+  }
+
+  @override
+  String get thisFolderMenu => 'هذا المجلد';
+
+  @override
+  String get allInclSubfoldersMenu => 'الكل (بما في ذلك المجلدات الفرعية)';
+
+  @override
+  String get disableShuffleMenu => 'تعطيل التشغيل العشوائي';
+
+  @override
+  String get shufflePlaylistMenu => 'تشغيل قائمة التشغيل عشوائيًا';
+
+  @override
+  String get playlistOptionsTooltip => 'خيارات قائمة التشغيل';
+
+  @override
+  String get enablePlaylistTooltip => 'تفعيل قائمة التشغيل';
+
+  @override
+  String get moreActionsTooltip => 'المزيد من الإجراءات';
+
+  @override
+  String get forcePortraitMenu => 'فرض الوضع الرأسي';
+
+  @override
+  String get forceLandscapeMenu => 'فرض الوضع الأفقي';
+
+  @override
+  String get autoRotateSensorMenu => 'تدوير تلقائي (المستشعر)';
+
+  @override
+  String get screenOrientationMenu => 'اتجاه الشاشة';
+
+  @override
+  String get playlistTransitionMenu => 'انتقال قائمة التشغيل';
+
+  @override
+  String get renameFileMenu => 'إعادة تسمية الملف';
+
+  @override
+  String get deleteFileMenu => 'حذف الملف';
+
+  @override
+  String get thumbnailCarouselTooltip => 'عرض دائري للصور المصغّرة';
+
+  @override
+  String get advancedSettingsTooltip => 'إعدادات متقدمة';
+
+  @override
+  String get previousTooltip => 'السابق';
+
+  @override
+  String get nextTooltip => 'التالي';
+
+  @override
+  String get diagnosticsCopiedToClipboard => 'تم نسخ التشخيص إلى الحافظة';
+
+  @override
+  String get diagnosticsTitle => 'التشخيص';
+
+  @override
+  String get copyDiagnosticsTooltip => 'نسخ التشخيص';
+
+  @override
+  String get closeTooltip => 'إغلاق';
+
+  @override
+  String get diagnosticsPlaybackSection => 'التشغيل';
+
+  @override
+  String get diagnosticsEngineSection => 'المحرك';
+
+  @override
+  String get diagnosticsStateLabel => 'الحالة';
+
+  @override
+  String get diagnosticsResolutionLabel => 'الدقة';
+
+  @override
+  String get diagnosticsAspectRatioLabel => 'نسبة العرض إلى الارتفاع';
+
+  @override
+  String get diagnosticsPositionLabel => 'الموضع';
+
+  @override
+  String get diagnosticsDurationLabel => 'المدة';
+
+  @override
+  String get diagnosticsErrorLabel => 'خطأ';
+
+  @override
+  String get diagnosticsPlayerLabel => 'المشغّل';
+
+  @override
+  String get diagnosticsDecodingLabel => 'فك الترميز';
+
+  @override
+  String get diagnosticsExoPlayerValue => 'ExoPlayer (Android)';
+
+  @override
+  String get diagnosticsHardwareAcceleratedValue => 'مُسرَّع بالأجهزة';
+
+  @override
+  String get diagnosticsUnknownValue => 'غير معروف';
+
+  @override
+  String get diagnosticsStateBuffering => 'جارٍ التخزين المؤقت';
+
+  @override
+  String get diagnosticsStatePlaying => 'قيد التشغيل';
+
+  @override
+  String get diagnosticsStatePaused => 'متوقف مؤقتًا';
+
+  @override
+  String get diagnosticsDurationUnavailable => '--:--';
+
+  @override
+  String get rotate90Label => 'تدوير 90°';
+
+  @override
+  String get imageFitModeLabel => 'وضع ملاءمة الصورة';
+
+  @override
+  String get slideshowDelayLabel => 'مدة عرض الشرائح';
+
+  @override
+  String get playbackSpeedLabel => 'سرعة التشغيل';
+
+  @override
+  String get subtitlesLabel => 'الترجمة';
+
+  @override
+  String get imageSettingsTitle => 'إعدادات الصورة';
+
+  @override
+  String get playbackSettingsTitle => 'إعدادات التشغيل';
+
+  @override
+  String get imageFitContain => 'احتواء';
+
+  @override
+  String get imageFitWidth => 'ملاءمة العرض';
+
+  @override
+  String get imageFitHeight => 'ملاءمة الارتفاع';
+
+  @override
+  String nSecondsDelay(int n) {
+    return '$n ثانية';
+  }
+
+  @override
+  String playbackSpeedNormal(String speed) {
+    return '${speed}x (عادي)';
+  }
+
+  @override
+  String playbackSpeedValue(String speed) {
+    return '${speed}x';
+  }
+
+  @override
+  String slideshowDelaySecondsValue(int seconds) {
+    return '$seconds ث';
+  }
+
+  @override
+  String rotationDegreesValue(int degrees) {
+    return '$degrees°';
+  }
+
+  @override
+  String get settingsTooltipShort => 'الإعدادات';
+
+  @override
+  String get sourceCodeTooltip => 'الكود المصدري';
+
+  @override
+  String get donateTooltip => 'تبرّع';
+
+  @override
+  String get shareAppTooltip => 'مشاركة التطبيق';
+
+  @override
+  String get resetToDefaultsTooltip => 'إعادة التعيين إلى الافتراضي';
+
+  @override
+  String get usbUnlockContainerTitle => 'فتح قفل حاوية USB';
+
+  @override
+  String get usbMountContainerTitle => 'تحميل محرك USB';
+
+  @override
+  String get staticLabel => 'ثابت';
+
+  @override
+  String get unmuteTooltip => 'إلغاء كتم الصوت';
+
+  @override
+  String get muteTooltip => 'كتم الصوت';
+
+  @override
+  String get playOnceDisabledTooltip =>
+      'تشغيل مرة واحدة (التقدم التلقائي معطّل)';
+
+  @override
+  String get playAndAdvanceTooltip => 'تشغيل والانتقال إلى التالي';
+
+  @override
+  String get loopCurrentVideoTooltip => 'تكرار الفيديو الحالي';
+
+  @override
+  String get clearThumbnailCacheDialogTitle =>
+      'مسح ذاكرة الصور المصغّرة المؤقتة؟';
+
+  @override
+  String get clearThumbnailCacheDialogMessage =>
+      'سيؤدي هذا إلى حذف الصور المصغّرة المخزّنة مؤقتًا لهذه الخزنة. سيُعاد إنشاؤها في المرة التالية التي تتصفح فيها الوسائط.';
+
+  @override
+  String get clearCacheButton => 'مسح ذاكرة التخزين المؤقت';
+
+  @override
+  String get appCacheClearedUnlockMessage =>
+      'تم مسح ذاكرة التخزين المؤقت للتطبيق. افتح قفل الحاوية لمسح الذاكرة المؤقتة الداخلية.';
+
+  @override
+  String get allThumbnailCachesClearedMessage =>
+      'تم مسح جميع ذاكرات التخزين المؤقت للصور المصغّرة بنجاح.';
+
+  @override
+  String get appCacheClearedContainerFailedMessage =>
+      'تم مسح ذاكرة التخزين المؤقت للتطبيق، لكن فشل المسح داخل الحاوية.';
+
+  @override
+  String get failedToClearThumbnailCachesMessage =>
+      'فشل مسح ذاكرات التخزين المؤقت للصور المصغّرة.';
+
+  @override
+  String get authenticateToModifySettingsPrompt =>
+      'أجرِ المصادقة لتعديل الإعدادات';
+
+  @override
+  String get usbVaultSettingsTitle => 'إعدادات خزنة USB';
+
+  @override
+  String get vaultSettingsTitle => 'إعدادات الخزنة';
+
+  @override
+  String get generalSectionHeader => 'عام';
+
+  @override
+  String get securityCredentialsSectionHeader => 'الأمان وبيانات الاعتماد';
+
+  @override
+  String get securityOptionsLockedTitle => 'خيارات الأمان مقفلة';
+
+  @override
+  String get authenticateOriginalCredentialsMessage =>
+      'أجرِ المصادقة ببيانات اعتماد الحاوية الأصلية لتعديل إعدادات الأمان.';
+
+  @override
+  String get unlockCredentialsLabel => 'بيانات اعتماد فتح القفل';
+
+  @override
+  String get unavailableSuffixLabel => '(غير متاح)';
+
+  @override
+  String get patternSetupRequiredBeforeSaving => 'أعدّ نمطًا قبل الحفظ.';
+
+  @override
+  String get passwordKeystoreEncryptedHelperText =>
+      'يتم تشفير كلمة المرور باستخدام Android Keystore. اتركها فارغة إذا كنت تستخدم ملفات المفاتيح فقط.';
+
+  @override
+  String get changePatternButton => 'تغيير النمط';
+
+  @override
+  String get setPatternButton => 'تعيين نمط';
+
+  @override
+  String get cacheDerivedKeyLabel => 'تخزين المفتاح المشتق مؤقتًا';
+
+  @override
+  String get cryfsSkipScryptKdfSubtitle =>
+      'تخطي دالة اشتقاق المفتاح scrypt الخاصة بـ CryFS في المرة القادمة (يبقى المفتاح في Android Keystore)';
+
+  @override
+  String get reuseKeyMaterialKeystoreSubtitle =>
+      'إعادة استخدام مادة المفتاح في Android Keystore';
+
+  @override
+  String nDays(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count يوم',
+      many: '$count يومًا',
+      few: '$count أيام',
+      two: 'يومان',
+      one: 'يوم واحد',
+      zero: '0 يوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cacheDerivedKeyLifetimeTitle =>
+      'مدة الاحتفاظ بالمفتاح المخزَّن مؤقتًا';
+
+  @override
+  String get cacheDerivedKeyLifetimeNever => 'حتى أوقفه بنفسي';
+
+  @override
+  String cacheDerivedKeyLifetimeExpiresOn(String date) {
+    return 'تتم الإزالة تلقائيًا في $date';
+  }
+
+  @override
+  String get pinAlgorithmSkipAutoDetectSubtitle =>
+      'تثبيت الخوارزمية لتخطي الكشف التلقائي عند فتح القفل.';
+
+  @override
+  String get changeContainerPasswordTitle => 'تغيير كلمة مرور الحاوية';
+
+  @override
+  String get bitlockerCredentialsChangeNotSupportedMessage =>
+      'لا يمكن تغيير بيانات اعتماد BitLocker داخل التطبيق. استخدم \"إدارة BitLocker\" على Windows.';
+
+  @override
+  String get systemIntegrationSectionHeader => 'النظام والتكامل';
+
+  @override
+  String get autoLockDurationLabel => 'مدة القفل التلقائي';
+
+  @override
+  String get neverAutoLockOption => 'أبدًا';
+
+  @override
+  String get neverAutoLockOptionSubtitle =>
+      'يبقى مفتوحًا حتى عند قفل التطبيق أو إيقاف تشغيل الشاشة';
+
+  @override
+  String get defaultAutoLockOptionSubtitle =>
+      'يتبع إعدادات القفل التلقائي للتطبيق وقفل الشاشة';
+
+  @override
+  String get exposeContentToFilePickerSubtitle =>
+      'عرض المحتوى في منتقي ملفات النظام عند فتح القفل';
+
+  @override
+  String get thumbnailStorageSectionHeader => 'تخزين الصور المصغّرة';
+
+  @override
+  String get cacheModeLabel => 'وضع التخزين المؤقت';
+
+  @override
+  String get useGlobalDefaultSubtitle => 'استخدام الإعداد الافتراضي العام';
+
+  @override
+  String get thumbnailQualityLabel => 'جودة الصور المصغّرة';
+
+  @override
+  String get clearThumbnailCacheTitle => 'مسح ذاكرة الصور المصغّرة المؤقتة';
+
+  @override
+  String get removeCachedThumbnailsSubtitle =>
+      'إزالة الصور المصغّرة المخزَّنة مؤقتًا للصور والفيديوهات';
+
+  @override
+  String get vaultInformationSectionHeader => 'معلومات الخزنة';
+
+  @override
+  String get vaultInformationTileTitle => 'عرض تفاصيل الخزنة';
+
+  @override
+  String get vaultInformationTileSubtitle =>
+      'الشيفرة والتنسيق وتفاصيل تقنية أخرى';
+
+  @override
+  String get vaultInfoLocationLabel => 'الموقع';
+
+  @override
+  String get vaultInfoRequiresUnlockTitle => 'يلزم فتح القفل';
+
+  @override
+  String get vaultInfoRequiresUnlockMessage =>
+      'افتح قفل هذه الخزنة لعرض تفاصيلها التقنية.';
+
+  @override
+  String get vaultInfoLoadFailedTitle => 'تعذّر تحميل معلومات الخزنة';
+
+  @override
+  String get vaultInfoLoadFailedMessage =>
+      'حدث خطأ ما أثناء قراءة تفاصيل هذه الخزنة.';
+
+  @override
+  String get vaultInfoVolumeSizeLabel => 'حجم الوحدة';
+
+  @override
+  String get vaultInfoFileSystemLabel => 'نظام الملفات';
+
+  @override
+  String get vaultInfoHiddenVolumeLabel => 'الوحدة المخفية';
+
+  @override
+  String get vaultInfoReadOnlyLabel => 'للقراءة فقط';
+
+  @override
+  String get vaultInfoLuksVersionLabel => 'إصدار LUKS';
+
+  @override
+  String get vaultInfoSectorSizeLabel => 'حجم القطاع';
+
+  @override
+  String get vaultInfoVaultFormatLabel => 'تنسيق الخزنة';
+
+  @override
+  String get vaultInfoCipherComboLabel => 'مجموعة الشيفرات';
+
+  @override
+  String get vaultInfoShorteningThresholdLabel => 'عتبة اختصار اسم الملف';
+
+  @override
+  String get vaultInfoFormatVersionLabel => 'إصدار التنسيق';
+
+  @override
+  String get vaultInfoContentCipherLabel => 'شيفرة المحتوى';
+
+  @override
+  String get vaultInfoFilenameEncryptionLabel => 'أسماء الملفات';
+
+  @override
+  String get vaultInfoPlaintextNamesValue => 'نص عادي';
+
+  @override
+  String get vaultInfoEncryptedNamesValue => 'مشفّرة';
+
+  @override
+  String get vaultInfoBlockCipherLabel => 'شيفرة الكتلة';
+
+  @override
+  String get vaultInfoBlockSizeLabel => 'حجم الكتلة';
+
+  @override
+  String get vaultInfoCreatedWithVersionLabel => 'أُنشئت باستخدام';
+
+  @override
+  String get vaultInfoLastOpenedWithVersionLabel => 'آخر فتح باستخدام';
+
+  @override
+  String get vaultInfoYesValue => 'نعم';
+
+  @override
+  String get vaultInfoNoValue => 'لا';
+
+  @override
+  String get vaultInfoBitlockerNote =>
+      'لا يقوم هذا التطبيق بتحليل بيانات تعريف رأس BitLocker الخاصة به، لذا فإن تفاصيل الشيفرة والإصدار غير متاحة هنا.';
+
+  @override
+  String get patternSetupRequiredAboveBeforeSaving =>
+      'أعدّ نمطًا أعلاه قبل الحفظ.';
+
+  @override
+  String get passwordOrCacheDerivedKeyRequiredMessage =>
+      'مطلوب كلمة مرور أو \"تخزين المفتاح المشتق مؤقتًا\" مع ملفات مفاتيح لطريقة فتح القفل هذه.';
+
+  @override
+  String get saveConfigurationButton => 'حفظ التكوين';
+
+  @override
+  String get incorrectPatternError => 'نمط غير صحيح';
+
+  @override
+  String get verifyPatternTitle => 'التحقق من النمط';
+
+  @override
+  String get incorrectPasswordError => 'كلمة مرور غير صحيحة';
+
+  @override
+  String get verificationFailedError => 'فشل التحقق';
+
+  @override
+  String get incorrectCredentialsError => 'بيانات اعتماد غير صحيحة';
+
+  @override
+  String get containerPasswordOptionalLabel =>
+      'كلمة مرور الحاوية (اختيارية عند استخدام ملف مفتاح فقط)';
+
+  @override
+  String get pimOptionalLabel => 'PIM (اختياري)';
+
+  @override
+  String get usbDriveLockedLabel => 'محرك USB · مقفل';
+
+  @override
+  String get lockedContainerLabel => 'حاوية مقفلة';
+
+  @override
+  String get operationInProgressWaitMessage =>
+      'هناك عملية قيد التنفيذ. يرجى الانتظار قبل القفل.';
+
+  @override
+  String get reconnectUsbTooltip => 'إعادة توصيل USB';
+
+  @override
+  String get unlockContainerTooltip => 'فتح قفل الحاوية';
+
+  @override
+  String lockFailedMessage(String errorType) {
+    return 'فشل القفل: $errorType';
+  }
+
+  @override
+  String get newPasswordOrKeyfilesRequired =>
+      'مطلوب كلمة مرور جديدة أو ملفات مفاتيح.';
+
+  @override
+  String get newPasswordsDoNotMatch => 'كلمتا المرور الجديدتان غير متطابقتين.';
+
+  @override
+  String get passwordChangedSuccessfullyMessage =>
+      'تم تغيير كلمة المرور بنجاح.';
+
+  @override
+  String get failedToChangePasswordMessage =>
+      'فشل تغيير كلمة المرور. تحقق من بيانات الاعتماد القديمة.';
+
+  @override
+  String get currentCredentialsSectionHeader => 'بيانات الاعتماد الحالية';
+
+  @override
+  String get oldPasswordLabel => 'كلمة المرور القديمة';
+
+  @override
+  String get oldPimOptionalLabel => 'PIM القديم (اختياري)';
+
+  @override
+  String get newCredentialsSectionHeader => 'بيانات الاعتماد الجديدة';
+
+  @override
+  String get newPimOptionalLabel => 'PIM الجديد (اختياري)';
+
+  @override
+  String get noContainersYetTitle => 'لا توجد حاويات بعد';
+
+  @override
+  String get dashboardEmptyStateMessage =>
+      'قم بتحميل حاوية VeraCrypt، أو وصّل محرك USB، أو أنشئ خزنة مشفّرة جديدة تمامًا للبدء.';
+
+  @override
+  String get sortFieldName => 'الاسم';
+
+  @override
+  String get sortFieldSize => 'الحجم';
+
+  @override
+  String get sortFieldType => 'النوع';
+
+  @override
+  String get sortFieldDate => 'التاريخ';
+
+  @override
+  String get layoutModeDetailedList => 'قائمة مفصّلة';
+
+  @override
+  String get layoutModeCompactList => 'قائمة مضغوطة';
+
+  @override
+  String get layoutModeGalleryGrid => 'شبكة معرض';
+
+  @override
+  String get readOnlyCantDeleteTooltip => 'للقراءة فقط — لا يمكن الحذف';
+
+  @override
+  String get readOnlyCantMoveTooltip => 'للقراءة فقط — لا يمكن النقل';
+
+  @override
+  String get readOnlyCantRenameTooltip => 'للقراءة فقط — لا يمكن إعادة التسمية';
+
+  @override
+  String sizeCalculatingWithBytesLabel(String bytes) {
+    return '$bytes (جارٍ الحساب…)';
+  }
+
+  @override
+  String get sizeCalculatingLabel => 'جارٍ الحساب…';
+
+  @override
+  String get editSecureItemsToRenameMessage =>
+      'عدّل العناصر الآمنة لإعادة تسميتها';
+
+  @override
+  String get vaultItemsCannotBeOpenedExternallyMessage =>
+      'لا يمكن فتح عناصر الخزنة في تطبيقات خارجية';
+
+  @override
+  String get itemsCannotBeSharedMessage =>
+      'لا يمكن مشاركة هذه العناصر مع تطبيقات أخرى';
+
+  @override
+  String get mountedReadOnlyTooltip => 'مُحمَّلة للقراءة فقط';
+
+  @override
+  String get readOnlyBadgeAbbreviation => 'قراءة فقط';
+
+  @override
+  String freeSpaceLabel(String bytes) {
+    return '$bytes متاحة';
+  }
+
+  @override
+  String get filteredLabel => 'مُصفّى';
+
+  @override
+  String get statsStorageSectionHeader => 'التخزين';
+
+  @override
+  String statsFolderCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مجلد',
+      many: '$count مجلدًا',
+      few: '$count مجلدات',
+      two: 'مجلدان',
+      one: 'مجلد واحد',
+      zero: 'لا مجلدات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsFileCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ملف',
+      many: '$count ملفًا',
+      few: '$count ملفات',
+      two: 'ملفان',
+      one: 'ملف واحد',
+      zero: 'لا ملفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filterAllFilesOption => 'جميع الملفات';
+
+  @override
+  String get filterImagesOption => 'الصور';
+
+  @override
+  String get filterVideosOption => 'الفيديوهات';
+
+  @override
+  String get filterAudioOption => 'الصوت';
+
+  @override
+  String get filterDocumentsOption => 'المستندات';
+
+  @override
+  String get folderExposedAsStorageExplanation =>
+      'يُعرض هذا المجلد كموقع تخزين مستقل خاص به، بحيث يمكن للتطبيقات الأخرى تصفح ملفاته وفتحها مباشرةً.';
+
+  @override
+  String conflictItemsAlreadyExistTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر موجود بالفعل',
+      many: '$count عنصرًا موجودًا بالفعل',
+      few: '$count عناصر موجودة بالفعل',
+      two: 'عنصران موجودان بالفعل',
+      one: 'عنصر واحد موجود بالفعل',
+      zero: 'لا عناصر موجودة بالفعل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get conflictResolutionSubtitle =>
+      'اختر ما سيحدث لكل عنصر، أو طبّق اختيارًا واحدًا على الكل.';
+
+  @override
+  String get skipAllChipLabel => 'تخطي الكل';
+
+  @override
+  String get overwriteAllChipLabel => 'استبدال الكل';
+
+  @override
+  String get overwriteItemDropdownLabel => 'استبدال';
+
+  @override
+  String get overwriteFolderDropdownLabel => 'استبدال المجلد';
+
+  @override
+  String get fileOpsTransfersInProgressTitle => 'عمليات نقل جارية';
+
+  @override
+  String get fileOpsRecentTransfersTitle => 'عمليات النقل الأخيرة';
+
+  @override
+  String get fileOpsNoRecentTransfersMessage => 'لا توجد عمليات نقل حديثة';
+
+  @override
+  String get fileOpsNoRecentTransfersSubtitle =>
+      'ستظهر هنا عمليات النسخ والنقل والحذف أثناء تنفيذها.';
+
+  @override
+  String fileOpsShowDetailsLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصرًا',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fileOpsCancelTooltip => 'إلغاء';
+
+  @override
+  String get fileOpsDismissTooltip => 'إغلاق';
+
+  @override
+  String get fileOpsRootDestinationLabel => 'الجذر';
+
+  @override
+  String get fileOpsCancelledStatusLabel => 'أُلغي';
+
+  @override
+  String fileOpsItemsFailedLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فشل $count عنصر:',
+      many: 'فشل $count عنصرًا:',
+      few: 'فشلت $count عناصر:',
+      two: 'فشل عنصران:',
+      one: 'فشل عنصر واحد:',
+      zero: 'فشلت لا عناصر:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpsMoreItemsLabel(num count) {
+    return '+ $count أخرى';
+  }
+
+  @override
+  String get transferActivityTooltip => 'عمليات النقل';
+
+  @override
+  String fileOpsSpeedLabel(String speed) {
+    return '$speed/ث';
+  }
+
+  @override
+  String fileOpsEtaLabel(String time) {
+    return '~$time متبقٍ';
+  }
+
+  @override
+  String archiveErrorReadingFile(String error) {
+    return 'خطأ في قراءة الملف: $error';
+  }
+
+  @override
+  String get archivePreviewNotAvailableMessage =>
+      'المعاينة غير متاحة لهذا النوع من الملفات.';
+
+  @override
+  String get avifFailedToRenderMessage => 'فشل عرض AVIF';
+
+  @override
+  String get encryptedImageLoadFailedMessage => 'فشل تحميل الصورة المشفّرة';
+
+  @override
+  String encryptedImageLoadFailedWithReasonMessage(String error) {
+    return 'فشل تحميل الصورة المشفّرة: $error';
+  }
+
+  @override
+  String get imagePreviewTooLargeMessage =>
+      'هذه الصورة كبيرة جدًا بحيث يتعذر معاينتها';
+
+  @override
+  String get imagePreviewOutOfMemoryMessage =>
+      'لا توجد ذاكرة كافية لمعاينة هذه الصورة. أغلق التطبيقات الأخرى وحاول مرة أخرى.';
+
+  @override
+  String get invalidOrCorruptedImageMessage => 'تنسيق صورة غير صالح أو تالف.';
+
+  @override
+  String mediaViewerPlaylistPositionLabel(num current, num total) {
+    return '$current من $total';
+  }
+
+  @override
+  String mediaViewerPlaylistPositionScanningLabel(num current, num total) {
+    return '$current من $total  ·  جارٍ الفحص…';
+  }
+
+  @override
+  String get mediaViewerScanningLabel => 'جارٍ الفحص…';
+
+  @override
+  String get mediaFileDeletedMessage => 'تم حذف الملف بنجاح';
+
+  @override
+  String get mediaFileDeleteFailedMessage => 'فشل حذف الملف';
+
+  @override
+  String get mediaFileRenamedMessage => 'تمت إعادة تسمية الملف بنجاح';
+
+  @override
+  String get aboutScreenTitle => 'حول';
+
+  @override
+  String get couldNotOpenLinkMessage => 'تعذّر فتح الرابط';
+
+  @override
+  String get fileManagerSettingsTitle => 'إعدادات مدير الملفات';
+
+  @override
+  String get showMediaThumbnailsLabel => 'إظهار الصور المصغّرة للوسائط';
+
+  @override
+  String get showMediaThumbnailsDesc =>
+      'عرض معاينات مصغّرة للصور والفيديوهات في طريقة عرض القائمة';
+
+  @override
+  String get showFileNamesLabel => 'إظهار أسماء الملفات';
+
+  @override
+  String get showFileNamesDesc =>
+      'عرض تسميات نصية أسفل العناصر في تخطيط الشبكة';
+
+  @override
+  String get showBreadcrumbBarLabel => 'إظهار شريط المسار';
+
+  @override
+  String get showBreadcrumbBarDesc => 'شريط التنقل بالمسار أعلى المتصفح';
+
+  @override
+  String get showStatsBarLabel => 'إظهار شريط الإحصاءات';
+
+  @override
+  String get showStatsBarDesc => 'شريط معلومات عدد الملفات والمساحة الحرة';
+
+  @override
+  String get autoStartPlaylistModeLabel => 'بدء وضع قائمة التشغيل تلقائيًا';
+
+  @override
+  String get autoStartPlaylistModeDesc =>
+      'البدء تلقائيًا في وضع قائمة التشغيل عند فتح عنصر وسائط';
+
+  @override
+  String get showPlaylistCarouselLabel => 'إظهار عرض قائمة التشغيل الدائري';
+
+  @override
+  String get showPlaylistCarouselDesc =>
+      'إظهار زر العرض الدائري للصور المصغّرة عند عرض قوائم تشغيل الوسائط';
+
+  @override
+  String get videoPlaybackSliderLabel => 'شريط تمرير موضع تشغيل الفيديو';
+
+  @override
+  String get longPressPlaybackDiagnosticsHint =>
+      'اضغط مطولاً لعرض تشخيص التشغيل';
+
+  @override
+  String get staticImageModeLabel => 'وضع الصورة الثابتة';
+
+  @override
+  String slideshowModeActiveLabel(int seconds) {
+    return 'وضع عرض الشرائح مفعّل بمهلة $seconds ثانية';
+  }
+
+  @override
+  String videoPlaybackModeLabel(String mode) {
+    return 'وضع تشغيل الفيديو: $mode';
+  }
+
+  @override
+  String get pauseLabel => 'إيقاف مؤقت';
+
+  @override
+  String get playLabel => 'تشغيل';
+
+  @override
+  String get emptyFolderTitle => 'مجلد فارغ';
+
+  @override
+  String get emptyFolderMessage =>
+      'استخدم إجراء الإضافة لإنشاء ملفات أو الاستيراد من الجهاز.';
+
+  @override
+  String get noResultsTitle => 'لا توجد نتائج';
+
+  @override
+  String noResultsForQueryMessage(String query) {
+    return 'لا يوجد في هذا المجلد ما يطابق \"$query\".';
+  }
+
+  @override
+  String get closeCarouselTooltip => 'إغلاق العرض الدائري';
+
+  @override
+  String get playlistScrollModeMenu => 'وضع تمرير قائمة التشغيل';
+
+  @override
+  String get playlistScrollHorizontalLabel => 'أفقي';
+
+  @override
+  String get playlistScrollVerticalPageLabel => 'رأسي بالصفحات';
+
+  @override
+  String get playlistScrollVerticalContinuousLabel => 'رأسي متواصل';
+
+  @override
+  String get undoTooltip => 'تراجع';
+
+  @override
+  String get redoTooltip => 'إعادة';
+
+  @override
+  String get autosavingLabel => 'جارٍ الحفظ التلقائي…';
+
+  @override
+  String get savingLabel => 'جارٍ الحفظ…';
+
+  @override
+  String autosavedAtLabel(String time) {
+    return 'تم الحفظ التلقائي في $time';
+  }
+
+  @override
+  String cameraDisconnectedError(String message) {
+    return 'انقطع اتصال الكاميرا: $message';
+  }
+
+  @override
+  String get unknownErrorFallback => 'خطأ غير معروف';
+
+  @override
+  String get cameraPermissionsRequiredMessage =>
+      'يلزم إذنا الكاميرا والميكروفون لاستخدام الكاميرا.';
+
+  @override
+  String cameraErrorMessage(String error) {
+    return 'خطأ في الكاميرا: $error';
+  }
+
+  @override
+  String get cameraPhotoCaptureFailedMessage => 'فشل التقاط الصورة';
+
+  @override
+  String get cameraRecordingFailedMessage => 'فشل التسجيل';
+
+  @override
+  String cameraRecordingFailedWithReasonMessage(String error) {
+    return 'فشل التسجيل: $error';
+  }
+
+  @override
+  String get cameraRecordingTooShortMessage =>
+      'كان التسجيل قصيرًا جدًا ولا يمكن حفظه';
+
+  @override
+  String get cameraCouldNotSaveRecordingMessage => 'تعذّر حفظ التسجيل';
+
+  @override
+  String get cameraCouldNotSaveCaptureMessage =>
+      'تعذّر حفظ اللقطة. ما زالت متاحة لإعادة المحاولة.';
+
+  @override
+  String get cameraNotEnoughVaultSpaceMessage =>
+      'لا توجد مساحة كافية في الخزنة. أفرغ بعض المساحة ثم حاول مرة أخرى.';
+
+  @override
+  String cameraCouldNotSaveRecordingWithReasonMessage(String error) {
+    return 'تعذّر حفظ التسجيل: $error';
+  }
+
+  @override
+  String get cameraCouldNotSwitchLensMessage => 'تعذّر تبديل العدسة';
+
+  @override
+  String get cameraEncryptingPhotoLabel => 'جارٍ تشفير الصورة…';
+
+  @override
+  String get cameraEncryptingVideoLabel => 'جارٍ تشفير الفيديو…';
+
+  @override
+  String get aboutApplicationSectionHeader => 'التطبيق';
+
+  @override
+  String get aboutTagline => 'مجاني · مفتوح المصدر · خزنة مشفّرة دون اتصال';
+
+  @override
+  String get aboutVersionTitle => 'الإصدار';
+
+  @override
+  String aboutVersionSubtitle(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String get aboutWhatsNewTitle => 'ما الجديد';
+
+  @override
+  String get aboutWhatsNewSubtitle =>
+      'الاطلاع على التغييرات الأخيرة وملاحظات الإصدار';
+
+  @override
+  String get aboutPrivacySecurityTitle => 'الخصوصية والأمان';
+
+  @override
+  String get aboutPrivacySecuritySubtitle =>
+      'لا وصول للشبكة، وفك التشفير يتم داخل الذاكرة';
+
+  @override
+  String get aboutSupportedFormatsSectionHeader => 'التنسيقات المدعومة';
+
+  @override
+  String get aboutVeraCryptLuksTitle => 'VeraCrypt و LUKS1/2';
+
+  @override
+  String get aboutVeraCryptLuksSubtitle =>
+      'الوحدات القياسية والمخفية، PIM مخصّص، ملفات المفاتيح، xts-plain64، Argon2id/i';
+
+  @override
+  String get aboutBitLockerTitle => 'BitLocker و BitLocker To Go';
+
+  @override
+  String get aboutBitLockerSubtitle =>
+      'دعم عبارات مرور المستخدم ومفتاح الاسترداد الرقمي المكوّن من 48 رقمًا';
+
+  @override
+  String get aboutDirectoryVaultsTitle => 'خزنات المجلدات';
+
+  @override
+  String get aboutDirectoryVaultsSubtitle =>
+      'Cryptomator (v7/v8 SIV_GCM و SIV_CTRMAC)، gocryptfs (v2 AES-GCM و XChaCha20)، CryFS (v0.10+ XChaCha20 و AES)';
+
+  @override
+  String get aboutVhdTitle => 'الأقراص الصلبة الافتراضية (VHD / VHDX)';
+
+  @override
+  String get aboutVhdSubtitle =>
+      'تحويل BAT لصور الأقراص الثابتة والديناميكية القابلة للتوسيع';
+
+  @override
+  String get aboutNativeCoreEngineSectionHeader => 'المحرك الأساسي الأصلي';
+
+  @override
+  String get aboutCompiledLibrariesTitle => 'مكتبات ++C المُجمَّعة';
+
+  @override
+  String get aboutCompiledLibrariesBody =>
+      '• mbedTLS v3.6.7 (تشفير الأجهزة ARMv8 و SHA-2)\n• libavif و libgav1 (وحدة فك ترميز صور AVIF الأصلية)\n• libarchive v3.8.9 (محرك الأرشيفات ZIP و 7-Zip و RAR و TAR)\n• ChaN FatFs v4.0.4 (FAT12/16/32 و exFAT)\n• Tuxera NTFS-3G و mkntfs المدمج\n• e2fsprogs v1.47.4 libext2fs (ext2/ext3/ext4)\n• Dislocker Virtual I/O (BitLocker FVE / To Go)\n• VeraCrypt 1.26.29 (Twofish، Serpent، Camellia، Kuznyechik، Whirlpool، Streebog، BLAKE2s، Argon2id/i)\n• cJSON v1.7.18 (بيانات وصفية لـ LUKS2 و Cryptomator)';
+
+  @override
+  String get aboutCommunitySectionHeader => 'المجتمع والمصادر المفتوحة';
+
+  @override
+  String get aboutReportIssueTitle => 'الإبلاغ عن مشكلة';
+
+  @override
+  String get aboutReportIssueSubtitle => 'وجدت خطأً؟ أرسل بلاغًا على GitHub';
+
+  @override
+  String get reportIssueSheetTitle => 'الإبلاغ عن مشكلة';
+
+  @override
+  String get reportIssueSheetSubtitle =>
+      'اختر الخيار الأنسب لمشكلتك — سيؤدي ذلك إلى فتح نموذج GitHub معبأ مسبقًا';
+
+  @override
+  String get reportIssueBugTitle => 'الإبلاغ عن خلل';
+
+  @override
+  String get reportIssueBugSubtitle => 'حدث تعطل أو شيء ما لا يعمل كما ينبغي';
+
+  @override
+  String get reportIssueContainerTitle => 'مشكلة في الحاوية / الخزنة';
+
+  @override
+  String get reportIssueContainerSubtitle =>
+      'مشكلة في فتح القفل أو التحميل أو خاصة بتنسيق معيّن';
+
+  @override
+  String get reportIssueFeatureTitle => 'طلب ميزة';
+
+  @override
+  String get reportIssueFeatureSubtitle => 'اقترح فكرة أو تحسينًا';
+
+  @override
+  String get reportIssueOtherTitle => 'شيء آخر';
+
+  @override
+  String get reportIssueOtherSubtitle => 'تصفح جميع القوالب على GitHub';
+
+  @override
+  String get aboutContributorsTitle => 'المساهمون';
+
+  @override
+  String get aboutContributorsSubtitle =>
+      'الأشخاص الذين ساعدوا في بناء VaultExplorer';
+
+  @override
+  String get aboutLicensesTitle => 'تراخيص المصدر المفتوح';
+
+  @override
+  String get aboutLicensesSubtitle =>
+      'المكتبات الخارجية المستخدَمة في هذا التطبيق';
+
+  @override
+  String get aboutFooterMadeWithLove => 'صُنع بـ ❤ من أجل الخصوصية.';
+
+  @override
+  String get aboutVersionCopiedMessage =>
+      'تم نسخ معلومات الإصدار — مفيدة لتقارير الأخطاء';
+
+  @override
+  String aboutVersionClipboardText(String version) {
+    return 'VaultExplorer v$version (Android)';
+  }
+
+  @override
+  String aboutShareText(String url) {
+    return 'VaultExplorer — خزنة مجانية ومفتوحة المصدر وتعمل دون اتصال لأجهزة Android.\n\nخزّن كلمات المرور والملاحظات والملفات داخل حاوية مشفّرة (VeraCrypt وLUKS وBitLocker وCryptomator وGocryptfs وCryFS).\n\n$url';
+  }
+
+  @override
+  String get aboutShareLinkCopiedMessage =>
+      'تم نسخ رابط قابل للمشاركة إلى الحافظة';
+
+  @override
+  String get aboutPrivacySheetTitle => 'الخصوصية وأمان البيانات';
+
+  @override
+  String get aboutPrivacySheetSubtitle =>
+      'تصميم أمني محلي 100% دون اتصال بالشبكة';
+
+  @override
+  String get privacyPointNoNetworkTitle => 'لا حاجة للوصول إلى الشبكة';
+
+  @override
+  String get privacyPointNoNetworkBody =>
+      'لا يطلب VaultExplorer إذن android.permission.INTERNET على Android. ولا يمكنه التواصل عبر أي شبكة.';
+
+  @override
+  String get privacyPointNoDiskLeaksTitle => 'فك التشفير داخل الذاكرة';
+
+  @override
+  String get privacyPointNoDiskLeaksBody =>
+      'يتم فك التشفير وإعادة التشفير داخل ذاكرة النظام. أما العمليات القليلة التي تحتاج إلى ملف مؤقت، مثل تسجيل الفيديو أو التصدير، فتحتفظ به في مساحة التخزين الخاصة بالتطبيق وتكتب فوقه أصفارًا عند الانتهاء.';
+
+  @override
+  String get privacyPointNoAnalyticsTitle => 'لا تحليلات ولا قياس عن بُعد';
+
+  @override
+  String get privacyPointNoAnalyticsBody =>
+      'لا يوجد أي إبلاغ عن الأعطال، أو تتبع للاستخدام، أو حزمة تطوير برمجيات (SDK) خارجية تجمع بيانات عنك أو عن جهازك.';
+
+  @override
+  String get privacyPointKeystoreTitle => 'تبقى الأسرار داخل Android Keystore';
+
+  @override
+  String get privacyPointKeystoreBody =>
+      'يتم تشفير كلمات المرور المحفوظة والأنماط والمفاتيح المشتقة المخزَّنة مؤقتًا باستخدام AES-GCM بمفتاح محفوظ في Android Keystore (مدعوم بالأجهزة حيثما كان ذلك متاحًا).';
+
+  @override
+  String get privacyPointPosixTitle => 'تسريع POSIX والوصول إلى وحدة التخزين';
+
+  @override
+  String get privacyPointPosixBody =>
+      'تُقرأ الملفات داخل خزنات المجلدات وتُكتب مباشرةً عند الإمكان، متجاوزةً طبقة SAF الأبطأ في Android بالنسبة للمجلدات الكبيرة.';
+
+  @override
+  String get privacyPointScreenClipboardTitle => 'حماية الشاشة والحافظة';
+
+  @override
+  String get privacyPointScreenClipboardBody =>
+      'حظر معاينة مبدّل المهام، وحظر اختياري للقطات الشاشة (FLAG_SECURE)، بالإضافة إلى تعقيم تلقائي للحافظة التالفة عند تركيز النافذة. تُوسَم كلمات المرور المنسوخة من خزنة العناصر كحساسة على Android 13 فأعلى وتُمسح تلقائيًا بعد 30 ثانية إذا لم تُستخدم.';
+
+  @override
+  String get privacyPointMaskModeTitle => 'وضع التمويه';
+
+  @override
+  String get privacyPointMaskModeBody =>
+      'يموّه التطبيق اختياريًا كمدير ملفات محلي يعمل فعليًا، بأيقونة واسم مختلفين. اضغط مطولاً على العنوان لمدة ثانيتين للوصول إلى خزنتك الحقيقية.';
+
+  @override
+  String get privacyPointExternalLinksTitle =>
+      'تُفتح الروابط الخارجية في المتصفح';
+
+  @override
+  String get privacyPointExternalLinksBody =>
+      'يؤدي الضغط على الروابط إلى تسليم الطلب لتطبيق المتصفح الافتراضي لديك، الذي يتولى معالجته.';
+
+  @override
+  String get truncatedListingWarning =>
+      'يتم عرض أول 50,000 عنصر — يحتوي هذا المجلد على ملفات أكثر.';
+
+  @override
+  String get gridCornerStyleLabel => 'زوايا الصور المصغرة';
+
+  @override
+  String get gridCornerRoundedLabel => 'مستديرة';
+
+  @override
+  String get gridCornerSquareLabel => 'مربعة';
+
+  @override
+  String get gridSpacingLabel => 'تباعد الصور المصغرة';
+
+  @override
+  String get gridSpacingNone => 'بلا';
+
+  @override
+  String gridSpacingValue(int value) {
+    return '$value dp';
+  }
+
+  @override
+  String get thumbnailAutoSizeLabel => 'مطابقة حجم خلية الشبكة';
+
+  @override
+  String get thumbnailAutoSizeDescription =>
+      'يتم إنشاء الصور المصغرة للشبكة والفسيفساء بالحجم الفعلي لكل خلية على الشاشة، لذا فإن عدد أعمدة أقل يمنح صورًا مصغرة أكثر وضوحًا. يُستخدم الحجم الموضح أدناه في كل مكان آخر.';
+
+  @override
+  String thumbnailQualityAutoSummary(int quality) {
+    return 'حجم تلقائي · جودة $quality٪';
+  }
+
+  @override
+  String thumbnailQualitySummary(int size, int quality) {
+    return '$size بكسل · جودة $quality%';
+  }
+
+  @override
+  String holdToSpeedIndicatorLabel(String speed) {
+    return 'سرعة ×$speed';
+  }
+
+  @override
+  String get toolbarLayoutSectionHeader => 'تخطيط شريط الأدوات';
+
+  @override
+  String get listViewOptionsSectionHeader => 'خيارات عرض القائمة';
+
+  @override
+  String get detailedListViewColumnsSectionHeader =>
+      'أعمدة عرض القائمة المفصّلة';
+
+  @override
+  String get galleryGridViewSectionHeader => 'عرض شبكة المعرض';
+
+  @override
+  String get browserLayoutSectionHeader => 'تخطيط المتصفح';
+
+  @override
+  String get mediaViewerSectionHeader => 'عارض الوسائط';
+
+  @override
+  String get viewModeAction => 'وضع العرض';
+
+  @override
+  String get sortAction => 'فرز';
+
+  @override
+  String get playMediaAction => 'تشغيل الوسائط';
+
+  @override
+  String containerSpaceSummary(String free, String total) {
+    return '$free متاح / $total';
+  }
+
+  @override
+  String volMountedSummary(int volId) {
+    return 'المجلد $volId · مثبَّت';
+  }
+
+  @override
+  String vaultOccupiedSpaceSummary(String used) {
+    return '$used مستخدمة';
+  }
+
+  @override
+  String get incorrectPasswordOrKeyfilesDriveError =>
+      'كلمة مرور/ملفات مفاتيح غير صحيحة أو محرك غير مدعوم';
+
+  @override
+  String driveUsableCapacity(int mb) {
+    return 'السعة القابلة للاستخدام للمحرك: $mb ميغابايت. يجب ألا تتجاوزها.';
+  }
+
+  @override
+  String get unlockMethodManualPassword => 'كلمة مرور يدوية';
+
+  @override
+  String get unlockMethodRememberPassword => 'تذكّر كلمة المرور';
+
+  @override
+  String get unlockMethodBiometrics => 'فتح القفل بالبصمة الحيوية';
+
+  @override
+  String get unlockMethodPattern => 'فتح القفل بالنمط';
+
+  @override
+  String get unlockMethodPin => 'فتح القفل برمز PIN';
+
+  @override
+  String get unlockMethodSubtitlePassword => 'اكتب كلمة المرور في كل مرة';
+
+  @override
+  String get unlockMethodSubtitleRememberPassword =>
+      'مخزَّنة بأمان في Android Keystore';
+
+  @override
+  String get unlockMethodSubtitleBiometrics =>
+      'استخدم بصمة الإصبع أو الوجه لفتح القفل';
+
+  @override
+  String get unlockMethodSubtitlePattern => 'ارسم نمطًا لفتح القفل';
+
+  @override
+  String get unlockMethodSubtitlePin => 'أدخل رمز PIN لفتح القفل';
+
+  @override
+  String selectionSummaryCombined(String filePart, String folderPart) {
+    return '$filePart + $folderPart';
+  }
+
+  @override
+  String get videoDecoderUnavailableError =>
+      'وحدة فك ترميز الفيديو غير متاحة — تعارض في برنامج ترميز الأجهزة';
+
+  @override
+  String get mediaStreamInitFailedError => 'فشلت تهيئة تدفق الوسائط';
+
+  @override
+  String get invalidAvifImage => 'صورة AVIF غير صالحة';
+
+  @override
+  String get verbImport => 'استيراد';
+
+  @override
+  String get verbExport => 'تصدير';
+
+  @override
+  String get verbMove => 'نقل';
+
+  @override
+  String get verbCopy => 'نسخ';
+
+  @override
+  String get verbDelete => 'حذف';
+
+  @override
+  String get verbImported => 'مستورَد';
+
+  @override
+  String get verbExported => 'تم التصدير';
+
+  @override
+  String get verbMoved => 'منقول';
+
+  @override
+  String get verbCopied => 'منسوخ';
+
+  @override
+  String get verbDeleted => 'محذوف';
+
+  @override
+  String get verbImporting => 'جارٍ الاستيراد';
+
+  @override
+  String get verbExporting => 'جارٍ التصدير';
+
+  @override
+  String get verbMoving => 'جارٍ النقل';
+
+  @override
+  String get verbCopying => 'جارٍ النسخ';
+
+  @override
+  String get verbDeleting => 'جارٍ الحذف';
+
+  @override
+  String fileOpItemsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصرًا',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'لا عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpSummaryCount(num count, String verb) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر $verb',
+      many: '$count عنصرًا $verb',
+      few: '$count عناصر $verb',
+      two: 'عنصران $verb',
+      one: 'عنصر واحد $verb',
+      zero: 'لا عناصر $verb',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpSummarySkipped(num count) {
+    return 'تم تخطي $count';
+  }
+
+  @override
+  String fileOpSummaryFailed(num count) {
+    return 'فشل $count';
+  }
+
+  @override
+  String get statusCancelled => 'أُلغي';
+
+  @override
+  String get statusFailed => 'فشل';
+
+  @override
+  String get statusCompleted => 'اكتمل';
+
+  @override
+  String get fileOpCheckingSpace => 'جارٍ التحقق من المساحة المتاحة…';
+
+  @override
+  String get fileOpResolvingConflicts => 'جارٍ حل التعارضات…';
+
+  @override
+  String fileOpNotEnoughSpace(String required, String free) {
+    return 'لا توجد مساحة كافية — مطلوب $required، والمتاح فقط $free';
+  }
+
+  @override
+  String get fileOpDiskFullPartialRemoved =>
+      'القرص ممتلئ — تمت إزالة الملفات الجزئية';
+
+  @override
+  String get fileOpMoveFailed => 'فشل النقل';
+
+  @override
+  String get fileOpCopyFailed => 'فشل النسخ';
+
+  @override
+  String get fileOpDeleteFailed => 'فشل الحذف';
+
+  @override
+  String get fileOpDiskFull => 'القرص ممتلئ';
+
+  @override
+  String get fileOpImporting => 'جارٍ الاستيراد…';
+
+  @override
+  String get fileOpExporting => 'جارٍ التصدير…';
+
+  @override
+  String fileOpImportingName(String name) {
+    return 'جارٍ استيراد $name…';
+  }
+
+  @override
+  String fileOpExportingName(String name) {
+    return 'جارٍ تصدير $name…';
+  }
+
+  @override
+  String fileOpMovingName(String name) {
+    return 'جارٍ نقل $name…';
+  }
+
+  @override
+  String fileOpCopyingName(String name) {
+    return 'جارٍ نسخ $name…';
+  }
+
+  @override
+  String get fileOpDeleting => 'جارٍ الحذف…';
+
+  @override
+  String fileOpDeletingName(String name) {
+    return 'جارٍ حذف $name…';
+  }
+
+  @override
+  String fileOpDeletedSoFar(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تمت إزالة $count عنصر',
+      many: 'تمت إزالة $count عنصرًا',
+      few: 'تمت إزالة $count عناصر',
+      two: 'تمت إزالة عنصرين',
+      one: 'تمت إزالة عنصر واحد',
+      zero: 'لم تتم إزالة عناصر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchInSubfoldersHint => 'البحث في جميع المجلدات الفرعية…';
+
+  @override
+  String get deepSearchEnabledTooltip =>
+      'جارٍ البحث في المجلدات الفرعية — اضغط للبحث في المجلد الحالي فقط';
+
+  @override
+  String get deepSearchDisabledTooltip =>
+      'جارٍ البحث في المجلد الحالي — اضغط للبحث في المجلدات الفرعية';
+
+  @override
+  String get filterAction => 'تصفية';
+
+  @override
+  String get bookmarkAction => 'إضافة إلى المفضلة';
+
+  @override
+  String get unbookmarkAction => 'إزالة من المفضلة';
+
+  @override
+  String get bookmarkSelectedAction => 'إضافة المحدد إلى المفضلة';
+
+  @override
+  String get unbookmarkSelectedAction => 'إزالة المحدد من المفضلة';
+
+  @override
+  String bookmarkedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تمت إضافة $count عنصر إلى المفضلة',
+      many: 'تمت إضافة $count عنصرًا إلى المفضلة',
+      few: 'تمت إضافة $count عناصر إلى المفضلة',
+      two: 'تمت إضافة عنصرين إلى المفضلة',
+      one: 'تمت إضافة عنصر واحد إلى المفضلة',
+      zero: 'لم تتم إضافة عناصر إلى المفضلة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unbookmarkedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تمت إزالة $count عنصر من المفضلة',
+      many: 'تمت إزالة $count عنصرًا من المفضلة',
+      few: 'تمت إزالة $count عناصر من المفضلة',
+      two: 'تمت إزالة عنصرين من المفضلة',
+      one: 'تمت إزالة عنصر واحد من المفضلة',
+      zero: 'لم تتم إزالة عناصر من المفضلة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get showBookmarkBarLabel => 'إظهار شريط المفضلة';
+
+  @override
+  String get showBookmarkBarDesc =>
+      'عرض العناصر المفضّلة في شريط أو لوحة جانبية للمفضلة';
+
+  @override
+  String get bookmarkBarSectionHeader => 'شريط المفضلة';
+
+  @override
+  String get noBookmarksYet => 'لا توجد عناصر في المفضلة بعد';
+
+  @override
+  String get reorderBookmarksTitle => 'إعادة ترتيب المفضلة';
+
+  @override
+  String get reorderBookmarksDesc =>
+      'اسحب العناصر لإعادة ترتيبها في شريط المفضلة';
+
+  @override
+  String get drawerBookmarksSectionTitle => 'المفضلة';
+
+  @override
+  String get openAction => 'فتح';
+
+  @override
+  String get bookmarkTargetMissing =>
+      'العنصر المضاف إلى المفضلة لم يعد موجودًا';
+
+  @override
+  String get navBarVaultsLabel => 'الخزنات';
+
+  @override
+  String get navBarToolsLabel => 'الأدوات';
+
+  @override
+  String get toolsScreenTitle => 'الأدوات';
+
+  @override
+  String get toolsSectionContainerUtilities => 'أدوات الحاوية المساعدة';
+
+  @override
+  String get toolsSectionFileCryptography => 'تشفير الملفات';
+
+  @override
+  String get toolsSectionStorageDiagnostics => 'التخزين والتشخيص';
+
+  @override
+  String get toolContainerSplitterTitle => 'التقسيم والدمج';
+
+  @override
+  String get toolContainerSplitterSubtitle =>
+      'تقسيم حاوية إلى أجزاء، أو دمجها مرة أخرى';
+
+  @override
+  String get toolContainerRepairTitle => 'الفحص والإصلاح';
+
+  @override
+  String get toolContainerRepairSubtitle =>
+      'تشخيص مشكلات الرأس أو نظام الملفات';
+
+  @override
+  String get toolSingleFileCryptoTitle => 'تشفير / فك تشفير الملفات';
+
+  @override
+  String get toolSingleFileCryptoSubtitle =>
+      'حماية ملف واحد أو أكثر دون حاوية كاملة';
+
+  @override
+  String get toolStorageAnalyzerTitle => 'محلل التخزين';
+
+  @override
+  String get toolStorageAnalyzerSubtitle =>
+      'معرفة ما يشغل المساحة في خزنة مثبَّتة';
+
+  @override
+  String get toolDuplicateFinderTitle => 'أداة العثور على الملفات المكررة';
+
+  @override
+  String get toolDuplicateFinderSubtitle =>
+      'العثور على الملفات المكررة المطابقة بايتًا بايت وإزالتها لاستعادة المساحة';
+
+  @override
+  String get toolHashVerifierTitle =>
+      'أداة التحقق من المجموع الاختباري والتجزئة للملفات';
+
+  @override
+  String get toolHashVerifierSubtitle =>
+      'تحقق من أن الملفات الكبيرة لم تتلف باستخدام مجاميع MD5/SHA الاختبارية';
+
+  @override
+  String get hashVerifierModeCompute => 'حساب';
+
+  @override
+  String get hashVerifierModeVerify => 'تحقق';
+
+  @override
+  String get hashVerifierSelectSourceTitle => 'اختيار مصدر الملف';
+
+  @override
+  String get hashVerifierAlgorithmsLabel => 'الخوارزميات';
+
+  @override
+  String get hashVerifierNoAlgorithmSelected => 'اختر خوارزمية واحدة على الأقل';
+
+  @override
+  String get hashVerifierFilesLabel => 'الملفات المطلوب تجزئتها';
+
+  @override
+  String hashVerifierFilesQueuedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم تحديد $count ملف',
+      many: 'تم تحديد $count ملفًا',
+      few: 'تم تحديد $count ملفات',
+      two: 'تم تحديد ملفين',
+      one: 'تم تحديد ملف واحد',
+      zero: 'لم يتم تحديد ملفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierComputeButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'حساب $count تجزئة',
+      one: 'حساب التجزئة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierCancelButton => 'إلغاء';
+
+  @override
+  String hashVerifierBatchProgressLabel(Object current, Object total) {
+    return 'الملف $current من $total';
+  }
+
+  @override
+  String get hashVerifierCancelledMessage => 'أُلغي.';
+
+  @override
+  String hashVerifierComputeErrorsMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فشلت تجزئة $count ملف',
+      many: 'فشلت تجزئة $count ملفًا',
+      few: 'فشلت تجزئة $count ملفات',
+      two: 'فشلت تجزئة ملفين',
+      one: 'فشلت تجزئة ملف واحد',
+      zero: 'لم يفشل أي ملف',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierCopiedMessage => 'تم النسخ إلى الحافظة';
+
+  @override
+  String get hashVerifierExportManifestButton => 'التصدير كقائمة بيانات';
+
+  @override
+  String get hashVerifierExportAlgorithmLabel => 'خوارزمية قائمة البيانات';
+
+  @override
+  String hashVerifierExportSuccessMessage(Object path) {
+    return 'تم الحفظ في $path';
+  }
+
+  @override
+  String hashVerifierExportFailedMessage(Object error) {
+    return 'فشل التصدير: $error';
+  }
+
+  @override
+  String get hashVerifierLoadManifestButton => 'تحميل قائمة البيانات';
+
+  @override
+  String get hashVerifierChangeManifestButton => 'تغيير';
+
+  @override
+  String get hashVerifierManifestLabel => 'ملف قائمة البيانات';
+
+  @override
+  String hashVerifierManifestEntryCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count إدخال',
+      many: '$count إدخالًا',
+      few: '$count إدخالات',
+      two: 'إدخالان',
+      one: 'إدخال واحد',
+      zero: 'لا إدخالات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierAutoAddFolderButton =>
+      'إضافة جميع الملفات من هذا المجلد';
+
+  @override
+  String get hashVerifierAddFilesToVerifyButton => 'إضافة ملفات للتحقق منها';
+
+  @override
+  String get hashVerifierVerifyAllButton => 'التحقق من الكل';
+
+  @override
+  String hashVerifierVerifyProgressLabel(Object current, Object total) {
+    return 'جارٍ التحقق من الملف $current من $total';
+  }
+
+  @override
+  String hashVerifierSummaryMessage(
+    Object ok,
+    Object mismatch,
+    Object missing,
+  ) {
+    return '$ok مطابقة، $mismatch غير مطابقة، $missing مفقودة';
+  }
+
+  @override
+  String get hashVerifierStatusMatch => 'متطابق';
+
+  @override
+  String get hashVerifierStatusMismatch => 'غير متطابق';
+
+  @override
+  String get hashVerifierStatusMissing => 'الملف غير مُضاف';
+
+  @override
+  String get hashVerifierStatusPending => 'لم يتم التحقق بعد';
+
+  @override
+  String get hashVerifierExpectedLabel => 'المتوقَّع';
+
+  @override
+  String get hashVerifierActualLabel => 'الفعلي';
+
+  @override
+  String hashVerifierExtraFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ملف إضافي غير مدرج في قائمة البيانات',
+      many: '$count ملفًا إضافيًا غير مدرج في قائمة البيانات',
+      few: '$count ملفات إضافية غير مدرجة في قائمة البيانات',
+      two: 'ملفان إضافيان غير مدرجين في قائمة البيانات',
+      one: 'ملف إضافي واحد غير مدرج في قائمة البيانات',
+      zero: 'لا ملفات إضافية غير مدرجة في قائمة البيانات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierNoManifestLoadedMessage =>
+      'حمّل ملف قائمة بيانات للبدء';
+
+  @override
+  String get hashVerifierManifestParseEmptyMessage =>
+      'لم يتم العثور على إدخالات مجموع اختباري في هذا الملف';
+
+  @override
+  String hashVerifierLoadManifestFailedMessage(Object error) {
+    return 'تعذّرت قراءة قائمة البيانات: $error';
+  }
+
+  @override
+  String hashVerifierAutoAddedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تمت إضافة $count ملف من مجلد الخزنة',
+      many: 'تمت إضافة $count ملفًا من مجلد الخزنة',
+      few: 'تمت إضافة $count ملفات من مجلد الخزنة',
+      two: 'تمت إضافة ملفين من مجلد الخزنة',
+      one: 'تمت إضافة ملف واحد من مجلد الخزنة',
+      zero: 'لم يتم العثور على ملفات جديدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierModeVault => 'الخزنة';
+
+  @override
+  String get hashVerifierVaultPickerLabel => 'الخزنة';
+
+  @override
+  String get hashVerifierVaultNoVaultsMessage => 'لا توجد خزنات مثبَّتة حاليًا';
+
+  @override
+  String get hashVerifierCheckEntireVaultButton => 'فحص الخزنة بالكامل';
+
+  @override
+  String get hashVerifierVaultScanningLabel => 'جارٍ فحص الخزنة…';
+
+  @override
+  String hashVerifierVaultFilesDiscoveredLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم اكتشاف $count ملف',
+      many: 'تم اكتشاف $count ملفًا',
+      few: 'تم اكتشاف $count ملفات',
+      two: 'تم اكتشاف ملفين',
+      one: 'تم اكتشاف ملف واحد',
+      zero: 'لم يتم اكتشاف ملفات بعد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierVaultConfirmTitle => 'فحص الخزنة بالكامل؟';
+
+  @override
+  String hashVerifierVaultConfirmFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ملف',
+      many: '$count ملفًا',
+      few: '$count ملفات',
+      two: 'ملفان',
+      one: 'ملف واحد',
+      zero: 'لا ملفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierVaultConfirmWarning =>
+      'سيتم قراءة كل ملف في هذه الخزنة.';
+
+  @override
+  String get hashVerifierVaultEmptyMessage =>
+      'لا توجد ملفات في هذه الخزنة للفحص';
+
+  @override
+  String get hashVerifierVaultStartButton => 'بدء الفحص';
+
+  @override
+  String hashVerifierVaultHashingProgressLabel(Object current, Object total) {
+    return 'جارٍ الفحص $current / $total';
+  }
+
+  @override
+  String get hashVerifierVaultCompleteTitle => 'اكتمل فحص الخزنة';
+
+  @override
+  String hashVerifierVaultCompleteFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم فحص $count ملف',
+      many: 'تم فحص $count ملفًا',
+      few: 'تم فحص $count ملفات',
+      two: 'تم فحص ملفين',
+      one: 'تم فحص ملف واحد',
+      zero: 'لم يتم فحص ملفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultCompleteBytesLabel(Object size) {
+    return 'تمت معالجة $size';
+  }
+
+  @override
+  String hashVerifierVaultCompleteSucceededLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نجاح',
+      many: '$count نجاحًا',
+      few: '$count نجاحات',
+      two: 'نجاحان',
+      one: 'نجاح واحد',
+      zero: 'لا نجاحات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultCompleteFailedLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count فشل',
+      many: '$count حالة فشل',
+      few: '$count حالات فشل',
+      two: 'فشلان',
+      one: 'فشل واحد',
+      zero: '0 فشل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultElapsedLabel(Object time) {
+    return 'الوقت المنقضي: $time';
+  }
+
+  @override
+  String get hashVerifierVaultCancelledMessage => 'تم إلغاء فحص الخزنة.';
+
+  @override
+  String hashVerifierVaultFailedMessage(Object error) {
+    return 'فشل فحص الخزنة: $error';
+  }
+
+  @override
+  String get hashVerifierVaultNewCheckButton => 'فحص جديد';
+
+  @override
+  String get hashVerifierVaultActionComputeTitle => 'حساب الخزنة بالكامل';
+
+  @override
+  String get hashVerifierVaultActionComputeSubtitle => 'تجزئة كل ملف في الخزنة';
+
+  @override
+  String get hashVerifierVaultActionVerifyTitle => 'التحقق من الخزنة بالكامل';
+
+  @override
+  String get hashVerifierVaultActionVerifySubtitle =>
+      'فحص كل ملف في الخزنة مقابل قائمة بيانات محمَّلة';
+
+  @override
+  String get hashVerifierVaultChangeActionButton => 'تغيير';
+
+  @override
+  String get hashVerifierVaultVerifyButton => 'التحقق من الخزنة بالكامل';
+
+  @override
+  String get hashVerifierVaultVerifyRequiresVaultManifestMessage =>
+      'يتطلب التحقق من خزنة بأكملها قائمة بيانات مُحمَّلة من داخل خزنة.';
+
+  @override
+  String get duplicateFinderTargetLabel => 'الخزنة المستهدفة';
+
+  @override
+  String get duplicateFinderTargetAllVaults => 'جميع الخزنات المفتوحة';
+
+  @override
+  String get duplicateFinderStartScan => 'بدء الفحص';
+
+  @override
+  String get duplicateFinderCancelScan => 'إلغاء الفحص';
+
+  @override
+  String get duplicateFinderRescan => 'إعادة الفحص';
+
+  @override
+  String get duplicateFinderScanningStage1 =>
+      'المرحلة 1: الفهرسة والتجميع حسب الحجم...';
+
+  @override
+  String get duplicateFinderScanningStage2 =>
+      'المرحلة 2: فحص رؤوس الملفات الجزئية...';
+
+  @override
+  String get duplicateFinderScanningStage3 =>
+      'المرحلة 3: التحقق من تجزئات البايتات الكاملة...';
+
+  @override
+  String get duplicateFinderScanComplete => 'اكتمل الفحص';
+
+  @override
+  String get duplicateFinderNoDuplicatesTitle =>
+      'لم يتم العثور على ملفات مكررة';
+
+  @override
+  String get duplicateFinderNoDuplicatesMessage =>
+      'تحتوي جميع الملفات في الخزنة (الخزنات) التي تم فحصها على محتوى بايتات فريد.';
+
+  @override
+  String get duplicateFinderSelectRedundant => 'تحديد النسخ الزائدة';
+
+  @override
+  String get duplicateFinderSelectAll => 'تحديد الكل';
+
+  @override
+  String get duplicateFinderDeselectAll => 'إلغاء تحديد الكل';
+
+  @override
+  String get duplicateFinderOriginalLabel => 'الأصل';
+
+  @override
+  String get duplicateFinderDuplicateLabel => 'مكرر';
+
+  @override
+  String get duplicateFinderConfirmDeleteTitle => 'حذف الملفات المكررة؟';
+
+  @override
+  String get duplicateFinderSearchHint =>
+      'البحث عن التكرارات حسب اسم الملف أو المسار...';
+
+  @override
+  String get toolNotImplementedYetMessage =>
+      'لم يتم ربط هذه الأداة بالمحرك الأصلي بعد — تحقق مرة أخرى في تحديث مستقبلي.';
+
+  @override
+  String get splitJoinModeSplit => 'تقسيم';
+
+  @override
+  String get splitJoinModeJoin => 'دمج';
+
+  @override
+  String get splitSourceFileLabel => 'الملف المصدر';
+
+  @override
+  String get splitDestinationFolderLabel => 'مجلد الوجهة';
+
+  @override
+  String get splitChunkSizeLabel => 'حجم الجزء';
+
+  @override
+  String get splitChunkSizeCustomLabel => 'حجم مخصص (ميغابايت)';
+
+  @override
+  String get splitChunkSizeFourMb => '4 ميغابايت';
+
+  @override
+  String get splitChunkSizeCloud8mb => '8 ميغابايت';
+
+  @override
+  String get splitChunkSizeCloud32mb => '32 ميغابايت';
+
+  @override
+  String get splitChunkSizeCloud => '100 ميغابايت';
+
+  @override
+  String get splitChunkSizeFat32 => '2 غيغابايت';
+
+  @override
+  String get splitChunkSizeFourGb => '4 غيغابايت';
+
+  @override
+  String get splitChunkSizeCustom => 'مخصص';
+
+  @override
+  String get splitContainerButton => 'تقسيم الحاوية';
+
+  @override
+  String get joinFirstPartLabel => 'الجزء الأول';
+
+  @override
+  String get joinOutputFileNameLabel => 'اسم ملف الإخراج';
+
+  @override
+  String get joinContainerButton => 'دمج الملفات';
+
+  @override
+  String get chooseFileButton => 'اختيار ملف';
+
+  @override
+  String get chooseFolderButton => 'اختيار مجلد';
+
+  @override
+  String get noFileSelectedLabel => 'لم يتم اختيار ملف';
+
+  @override
+  String get noFolderSelectedLabel => 'لم يتم اختيار مجلد';
+
+  @override
+  String splitJoinOperationProgress(String done, String total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get splitContainerSuccessMessage => 'تم تقسيم الحاوية بنجاح';
+
+  @override
+  String get joinContainerSuccessMessage => 'تم دمج الملفات بنجاح';
+
+  @override
+  String get cryptoDirectionEncrypt => 'تشفير';
+
+  @override
+  String get cryptoDirectionDecrypt => 'فك التشفير';
+
+  @override
+  String get singleFileCryptoInputFileLabel => 'ملفات الإدخال';
+
+  @override
+  String get singleFileCryptoCipherLabel => 'الشيفرة';
+
+  @override
+  String get singleFileCryptoDeleteOriginalLabel =>
+      'حذف الملفات الأصلية بعد التشفير';
+
+  @override
+  String singleFileCryptoEncryptButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تشفير $count ملف',
+      many: 'تشفير $count ملفًا',
+      few: 'تشفير $count ملفات',
+      two: 'تشفير الملفين',
+      one: 'تشفير الملف',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoDecryptButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فك تشفير $count ملف',
+      many: 'فك تشفير $count ملفًا',
+      few: 'فك تشفير $count ملفات',
+      two: 'فك تشفير الملفين',
+      one: 'فك تشفير الملف',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoSuccessMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم — $count ملف تمت معالجته',
+      one: 'تم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoPartialFailureMessage(
+    Object succeeded,
+    Object total,
+    Object failed,
+  ) {
+    return 'تمت معالجة $succeeded من $total ملفًا — فشل $failed';
+  }
+
+  @override
+  String get singleFileCryptoAddFilesButton => 'إضافة ملفات';
+
+  @override
+  String get singleFileCryptoClearFilesButton => 'مسح';
+
+  @override
+  String singleFileCryptoFilesQueuedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم تحديد $count ملف',
+      many: 'تم تحديد $count ملفًا',
+      few: 'تم تحديد $count ملفات',
+      two: 'تم تحديد ملفين',
+      one: 'تم تحديد ملف واحد',
+      zero: 'لم يتم تحديد ملفات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoBatchProgressLabel(Object current, Object total) {
+    return 'الملف $current من $total';
+  }
+
+  @override
+  String get repairTargetStepTitle => 'اختيار هدف';
+
+  @override
+  String get repairTargetUnmountedFileOption => 'ملف غير مثبَّت';
+
+  @override
+  String get repairTargetUnmountedFileSubtitle =>
+      'استعادة رأس النسخة الاحتياطية على حاوية لم تفتحها';
+
+  @override
+  String get repairTargetMountedVolumeSubtitle =>
+      'تشغيل فحص لنظام الملفات على خزنة مفتوحة بالفعل';
+
+  @override
+  String get repairNoMountedVolumes => 'لا توجد خزنات مثبَّتة حاليًا';
+
+  @override
+  String get repairScanButton => 'تشغيل الفحص التشخيصي';
+
+  @override
+  String get repairChangeTargetButton => 'تغيير الهدف';
+
+  @override
+  String get repairDiagnosisHealthy => 'لم يتم العثور على مشكلات';
+
+  @override
+  String get repairDiagnosisHeaderCorrupted => 'الرأس تالف';
+
+  @override
+  String get repairDiagnosisFilesystemDirty =>
+      'نظام الملفات غير سليم / إلغاء تحميل غير نظيف';
+
+  @override
+  String get repairRestoreBackupHeaderButton => 'استعادة رأس النسخة الاحتياطية';
+
+  @override
+  String get repairRunFilesystemCheckButton => 'تشغيل فحص وإصلاح نظام الملفات';
+
+  @override
+  String get repairActionSucceededMessage => 'اكتمل الإصلاح بنجاح';
+
+  @override
+  String get repairActionFailedMessage => 'لم ينجح إجراء الإصلاح';
+
+  @override
+  String get storageAnalyzerTargetLabel => 'الوحدة';
+
+  @override
+  String get storageAnalyzerNoTargetsTitle => 'لا يوجد ما يمكن تحليله';
+
+  @override
+  String get storageAnalyzerNoTargetsMessage =>
+      'قم بتحميل خزنة أولاً، ثم عد إلى هنا لعرض توزيع مساحة التخزين الخاصة بها.';
+
+  @override
+  String storageAnalyzerUsedOfTotal(String used, String total) {
+    return '$used من $total مستخدَمة';
+  }
+
+  @override
+  String get storageAnalyzerHeaviestFilesHeader => 'أكبر الملفات';
+
+  @override
+  String get storageAnalyzerBreakdownHeader => 'حسب نوع الملف';
+
+  @override
+  String get storageAnalyzerScanningMessage => 'جارٍ فحص الوحدة…';
+
+  @override
+  String storageAnalyzerScanTruncatedNotice(String count) {
+    return 'توقف الفحص مبكرًا بعد $count ملف — قد تكون النتائج غير مكتملة.';
+  }
+
+  @override
+  String get storageAnalyzerNoFilesFound => 'لم يتم العثور على ملفات';
+
+  @override
+  String get storageCategoryImages => 'الصور';
+
+  @override
+  String get storageCategoryVideos => 'الفيديوهات';
+
+  @override
+  String get storageCategoryAudio => 'الصوت';
+
+  @override
+  String get storageCategoryDocuments => 'المستندات';
+
+  @override
+  String get storageCategoryArchives => 'الأرشيفات';
+
+  @override
+  String get storageCategoryOther => 'أخرى';
+
+  @override
+  String get keyfilePassphraseGeneratorTitle =>
+      'مولّد ملفات المفاتيح وعبارات المرور';
+
+  @override
+  String get keyfilePassphraseGeneratorSubtitle =>
+      'توليد عبارات مرور Diceware وكلمات مرور مخصصة وملفات مفاتيح عالية العشوائية';
+
+  @override
+  String get tabPassphrase => 'عبارة المرور';
+
+  @override
+  String get tabKeyfile => 'ملف المفتاح';
+
+  @override
+  String get modeDiceware => 'عبارة مرور Diceware';
+
+  @override
+  String get modeCustomPassword => 'كلمة مرور مخصصة';
+
+  @override
+  String get keyfileTypeBinary => 'ملف مفتاح ثنائي (.key)';
+
+  @override
+  String get keyfileTypeImage => 'ملف مفتاح صورة ضوضاء (.png)';
+
+  @override
+  String get copyPassphraseSuccess => 'تم نسخ عبارة المرور إلى الحافظة الحساسة';
+
+  @override
+  String get copyFingerprintSuccess => 'تم نسخ بصمة SHA-256 إلى الحافظة';
+
+  @override
+  String get saveKeyfileToVault => 'الحفظ في خزنة مثبَّتة';
+
+  @override
+  String get exportKeyfileToStorage => 'التصدير إلى تخزين الجهاز';
+
+  @override
+  String get keyfileNoOpenVaultsMessage =>
+      'لا توجد خزنات مفتوحة متاحة. يرجى تحميل خزنة أولاً.';
+
+  @override
+  String get keyfileSelectDestinationVaultTitle => 'اختيار خزنة الوجهة';
+
+  @override
+  String keyfileVolumeIdLabel(Object volId) {
+    return 'معرّف الوحدة: $volId';
+  }
+
+  @override
+  String keyfileExportSuccessMessage(Object path) {
+    return 'تم تصدير ملف المفتاح إلى $path';
+  }
+
+  @override
+  String keyfileExportFailedMessage(Object error) {
+    return 'فشل التصدير: $error';
+  }
+
+  @override
+  String keyfileSavedToVaultMessage(Object vaultName, Object path) {
+    return 'تم حفظ ملف المفتاح في $vaultName: $path';
+  }
+
+  @override
+  String get keyfileWriteFailedMessage => 'فشلت كتابة ملف المفتاح إلى الخزنة';
+
+  @override
+  String keyfileSaveErrorMessage(Object error) {
+    return 'خطأ أثناء الحفظ في الخزنة: $error';
+  }
+
+  @override
+  String get passphraseGeneratedSecretLabel => 'السر المُولَّد';
+
+  @override
+  String get copyToClipboardTooltip => 'نسخ إلى الحافظة';
+
+  @override
+  String get generateNewTooltip => 'توليد جديد';
+
+  @override
+  String get passphraseStrengthWeak => 'ضعيفة';
+
+  @override
+  String get passphraseStrengthGood => 'جيدة';
+
+  @override
+  String get passphraseStrengthStrong => 'قوية';
+
+  @override
+  String get passphraseStrengthUnbreakable => 'غير قابلة للكسر';
+
+  @override
+  String get passphraseCrackTimeInstant => 'أقل من ثانية واحدة';
+
+  @override
+  String get passphraseCrackTimeShort => 'بضعة أيام / أشهر';
+
+  @override
+  String get passphraseCrackTimeCenturies => 'عدة قرون';
+
+  @override
+  String get passphraseCrackTimeMillionsOfYears => 'ملايين السنين';
+
+  @override
+  String passphraseStrengthLabel(Object label) {
+    return 'القوة: $label';
+  }
+
+  @override
+  String passphraseEntropyBitsLabel(Object bits) {
+    return 'إنتروبيا $bits بت';
+  }
+
+  @override
+  String passphraseCrackTimeLabel(Object crackTime) {
+    return 'الوقت المقدَّر للكسر: $crackTime';
+  }
+
+  @override
+  String get dicewareOptionsTitle => 'خيارات EFF Diceware';
+
+  @override
+  String dicewareWordCountLabel(Object count) {
+    return 'عدد الكلمات: $count كلمة';
+  }
+
+  @override
+  String dicewareWordCountBitsLabel(Object bits) {
+    return '$bits بت';
+  }
+
+  @override
+  String dicewareWordCountSliderLabel(Object count) {
+    return '$count كلمة';
+  }
+
+  @override
+  String get dicewareWordSeparatorLabel => 'فاصل الكلمات';
+
+  @override
+  String get dicewareSeparatorHyphen => 'شرطة ( - )';
+
+  @override
+  String get dicewareSeparatorSpace => 'مسافة (   )';
+
+  @override
+  String get dicewareSeparatorUnderscore => 'شرطة سفلية ( _ )';
+
+  @override
+  String get dicewareSeparatorDot => 'نقطة ( . )';
+
+  @override
+  String get dicewareSeparatorSlash => 'شرطة مائلة ( / )';
+
+  @override
+  String get dicewareWordCasingLabel => 'حالة أحرف الكلمات';
+
+  @override
+  String get dicewareCasingLowercase => 'أحرف صغيرة';
+
+  @override
+  String get dicewareCasingTitleCase => 'حالة العنوان';
+
+  @override
+  String get dicewareCasingUppercase => 'أحرف كبيرة';
+
+  @override
+  String get dicewareAppendDigitLabel => 'إضافة رقم عشوائي (0-9)';
+
+  @override
+  String get dicewareAppendSymbolLabel => 'إضافة رمز عشوائي (!@#\$%)';
+
+  @override
+  String get customPasswordOptionsTitle => 'خيارات كلمة المرور المخصصة';
+
+  @override
+  String customPasswordLengthLabel(Object length) {
+    return 'الطول: $length حرفًا';
+  }
+
+  @override
+  String customPasswordLengthSliderLabel(Object length) {
+    return '$length حرفًا';
+  }
+
+  @override
+  String get customPasswordUppercaseLabel => 'أحرف كبيرة (A-Z)';
+
+  @override
+  String get customPasswordLowercaseLabel => 'أحرف صغيرة (a-z)';
+
+  @override
+  String get customPasswordNumbersLabel => 'أرقام (0-9)';
+
+  @override
+  String get customPasswordSymbolsLabel => 'رموز (!@#\$%^&*)';
+
+  @override
+  String get customPasswordExcludeAmbiguousLabel =>
+      'استبعاد الأحرف الملتبسة (1، l، I، 0، O)';
+
+  @override
+  String get keyfileBinarySizeTitle => 'حجم ملف المفتاح الثنائي';
+
+  @override
+  String get keyfileImageResolutionTitle => 'دقة صورة الضوضاء';
+
+  @override
+  String get keyfilePresetBytes64 => '64 بايت (معيار VeraCrypt)';
+
+  @override
+  String get keyfilePresetBytes256 => '256 بايت';
+
+  @override
+  String get keyfilePresetBytes2048 => '2 كيلوبايت';
+
+  @override
+  String get keyfilePresetBytes64kb => '64 كيلوبايت';
+
+  @override
+  String get keyfilePresetBytes1mb => '1 ميغابايت (الحد الأقصى)';
+
+  @override
+  String get keyfilePresetRes64 => '64×64 بكسل (~16 كيلوبايت)';
+
+  @override
+  String get keyfilePresetRes256 => '256×256 بكسل (~256 كيلوبايت)';
+
+  @override
+  String get keyfilePresetRes512 => '512×512 بكسل (~1 ميغابايت)';
+
+  @override
+  String get keyfileGenerateNewTooltip => 'توليد ملف مفتاح جديد';
+
+  @override
+  String keyfileSizeLabel(Object size) {
+    return 'الحجم: $size';
+  }
+
+  @override
+  String get keyfileFingerprintLabel => 'بصمة SHA-256';
+
+  @override
+  String get keyfileCopyFingerprintTooltip => 'نسخ البصمة';
+
+  @override
+  String get duplicateFinderNoVaultsTitle => 'لا توجد خزنات مثبَّتة';
+
+  @override
+  String get duplicateFinderNoVaultsMessage =>
+      'افتح قفل حاوية خزنة واحدة على الأقل وقم بتحميلها للبحث عن الملفات المكررة.';
+
+  @override
+  String duplicateFinderConfirmDeleteMessage(Object count, Object size) {
+    return 'هل أنت متأكد من رغبتك في حذف $count ملف مكرر ($size) نهائيًا من خزنتك (خزناتك)؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String get duplicateFinderDeletePermanentlyButton => 'حذف نهائي';
+
+  @override
+  String duplicateFinderDeleteSuccessMessage(Object count) {
+    return 'تم حذف $count ملف مكرر بنجاح.';
+  }
+
+  @override
+  String get duplicateFinderIntroTitle =>
+      'أداة عثور من 3 مراحل بمطابقة البايتات';
+
+  @override
+  String get duplicateFinderIntroSubtitle =>
+      'اكتشاف المحتوى المطابق تمامًا بصرف النظر عن أسماء الملفات.';
+
+  @override
+  String get duplicateFinderStagesDescription =>
+      '• المرحلة 1: التجميع حسب الحجم (فحص فوري للبيانات الوصفية)\n• المرحلة 2: فحص الرأس الجزئي (رأس SHA-256 بحجم 16 كيلوبايت)\n• المرحلة 3: التحقق الكامل من التجزئة (مطابقة دقيقة للبايتات عبر SHA-256)';
+
+  @override
+  String get duplicateFinderScanningVaultFallback => 'جارٍ فحص الخزنة...';
+
+  @override
+  String duplicateFinderProcessingFileLabel(Object fileName) {
+    return 'جارٍ المعالجة: $fileName';
+  }
+
+  @override
+  String duplicateFinderScanStatsLabel(
+    Object scanned,
+    Object groups,
+    Object saved,
+  ) {
+    return 'الملفات التي تم فحصها: $scanned | التكرارات الموجودة: $groups مجموعات ($saved)';
+  }
+
+  @override
+  String duplicateFinderGroupsFoundLabel(Object count) {
+    return 'تم العثور على $count مجموعة مكررة';
+  }
+
+  @override
+  String duplicateFinderGroupsSummaryLabel(Object copies, Object saved) {
+    return 'تم العثور على $copies نسخة • وفّر $saved من مساحة التخزين';
+  }
+
+  @override
+  String duplicateFinderVaultsSelectedLabel(Object count) {
+    return 'تم تحديد $count خزنة';
+  }
+
+  @override
+  String duplicateFinderGroupTitleLabel(
+    Object groupIndex,
+    Object size,
+    Object count,
+  ) {
+    return 'المجموعة $groupIndex: $size (تم العثور على $count نسخة)';
+  }
+
+  @override
+  String duplicateFinderRecoverableSpaceLabel(Object size) {
+    return 'المساحة القابلة للاسترداد: $size';
+  }
+
+  @override
+  String get duplicateFinderPreviewFileTooltip => 'معاينة الملف';
+
+  @override
+  String duplicateFinderPreviewFailedMessage(Object fileName) {
+    return 'تعذّر فتح معاينة الملف لـ $fileName';
+  }
+
+  @override
+  String duplicateFinderPreviewErrorMessage(Object error) {
+    return 'خطأ في معاينة الملف: $error';
+  }
+
+  @override
+  String duplicateFinderFilesSelectedLabel(Object count) {
+    return 'تم تحديد $count ملف';
+  }
+
+  @override
+  String duplicateFinderBytesToBeFreedLabel(Object size) {
+    return 'سيتم تحرير $size';
+  }
+
+  @override
+  String duplicateFinderDeleteSelectedButton(Object count) {
+    return 'حذف المحدد ($count)';
+  }
+
+  @override
+  String get vaultBrowserSwitchVaultTooltip => 'تبديل الخزنة';
+
+  @override
+  String get vaultBrowserRootFolderLabel => 'المجلد الجذر';
+
+  @override
+  String vaultFilePickerTitle(Object vaultName) {
+    return 'اختيار ملفات ($vaultName)';
+  }
+
+  @override
+  String get vaultFilePickerEmptyMessage => 'المجلد فارغ';
+
+  @override
+  String vaultFilePickerConfirmButton(Object count) {
+    return 'اختيار $count ملف';
+  }
+
+  @override
+  String vaultFolderPickerTitle(Object vaultName) {
+    return 'اختيار مجلد ($vaultName)';
+  }
+
+  @override
+  String get vaultFolderPickerEmptyMessage => 'لا توجد مجلدات فرعية هنا';
+
+  @override
+  String get vaultFolderPickerRootLabel => 'الجذر';
+
+  @override
+  String get vaultFolderPickerConfirmRootButton => 'اختيار المجلد الجذر';
+
+  @override
+  String vaultFolderPickerConfirmNamedButton(Object folderName) {
+    return 'اختيار \"$folderName\"';
+  }
+
+  @override
+  String get singleFileCryptoSelectInputTitle => 'اختيار ملفات الإدخال';
+
+  @override
+  String get singleFileCryptoFromDeviceTitle => 'من تخزين الجهاز';
+
+  @override
+  String get singleFileCryptoFromDeviceSubtitle =>
+      'اختيار ملفات من الجهاز باستخدام منتقي ملفات النظام';
+
+  @override
+  String get singleFileCryptoFromVaultTitle => 'من خزنة مثبَّتة';
+
+  @override
+  String get singleFileCryptoFromVaultSubtitle =>
+      'اختيار ملفات من حاوية مشفّرة مفتوحة';
+
+  @override
+  String get singleFileCryptoSelectDestinationTitle => 'اختيار مجلد الوجهة';
+
+  @override
+  String get singleFileCryptoDeviceFolderTitle => 'مجلد تخزين الجهاز';
+
+  @override
+  String get singleFileCryptoDeviceFolderSubtitle =>
+      'حفظ الإخراج في مجلد على تخزين الجهاز';
+
+  @override
+  String get singleFileCryptoVaultFolderTitle => 'مجلد خزنة مثبَّتة';
+
+  @override
+  String get singleFileCryptoVaultFolderSubtitle =>
+      'حفظ الإخراج داخل حاوية مشفّرة مفتوحة';
+
+  @override
+  String get toolsSectionBackupSync => 'النسخ الاحتياطي والمزامنة';
+
+  @override
+  String get toolVaultSyncTitle => 'مزامنة الخزنات';
+
+  @override
+  String get toolVaultSyncSubtitle => 'مقارنة خزنتين ونسخ ما هو مفقود أو أحدث';
+
+  @override
+  String get vaultSyncNoVaultsTitle => 'لا توجد خزنات مثبَّتة';
+
+  @override
+  String get vaultSyncNoVaultsMessage =>
+      'قم بتحميل خزنة واحدة على الأقل لمقارنة ملفاتها ومزامنتها.';
+
+  @override
+  String get vaultSyncLeftLabel => 'اليسار';
+
+  @override
+  String get vaultSyncRightLabel => 'اليمين';
+
+  @override
+  String get vaultSyncTapToSelect => 'اضغط لاختيار خزنة ومجلد';
+
+  @override
+  String get vaultSyncSwapTooltip => 'تبديل اليسار واليمين';
+
+  @override
+  String get vaultSyncSameLocationWarning =>
+      'يجب أن يكون اليسار واليمين مجلدين مختلفين.';
+
+  @override
+  String get vaultSyncIntroTitle => 'مقارنة خزنتين';
+
+  @override
+  String get vaultSyncIntroSubtitle =>
+      'اختر خزنة يسرى وأخرى يمنى (أو مجلدين في نفس الخزنة) لمعرفة ما هو مفقود أو مُعدَّل أو أحدث في كل جانب.';
+
+  @override
+  String get vaultSyncCompareButton => 'مقارنة';
+
+  @override
+  String get vaultSyncComparingLabel => 'جارٍ مقارنة الخزنات…';
+
+  @override
+  String vaultSyncCompareStatsLabel(Object dirs, Object entries) {
+    return 'المجلدات التي تم فحصها: $dirs | الفروقات الموجودة: $entries';
+  }
+
+  @override
+  String get vaultSyncCancelCompareButton => 'إلغاء';
+
+  @override
+  String get vaultSyncInSyncTitle => 'متزامنة بالفعل';
+
+  @override
+  String vaultSyncInSyncMessage(Object count) {
+    return 'جميع الملفات المتطابقة البالغ عددها $count متطابقة في كلا الجانبين.';
+  }
+
+  @override
+  String get vaultSyncRecompareButton => 'مقارنة مرة أخرى';
+
+  @override
+  String vaultSyncDifferencesFoundLabel(Object count) {
+    return 'تم العثور على $count فرق';
+  }
+
+  @override
+  String vaultSyncInSyncCountLabel(Object count) {
+    return '$count ملف متطابق بالفعل في كلا الجانبين';
+  }
+
+  @override
+  String vaultSyncBadgeOnlyLeft(Object count) {
+    return '$count في اليسار فقط';
+  }
+
+  @override
+  String vaultSyncBadgeOnlyRight(Object count) {
+    return '$count في اليمين فقط';
+  }
+
+  @override
+  String vaultSyncBadgeLeftNewer(Object count) {
+    return '$count أحدث في اليسار';
+  }
+
+  @override
+  String vaultSyncBadgeRightNewer(Object count) {
+    return '$count أحدث في اليمين';
+  }
+
+  @override
+  String vaultSyncBadgeConflicts(Object count) {
+    return '$count بحاجة إلى مراجعة';
+  }
+
+  @override
+  String get vaultSyncDirectionLabel => 'اتجاه المزامنة';
+
+  @override
+  String get vaultSyncDirectionTwoWay => 'ثنائي الاتجاه (موصى به)';
+
+  @override
+  String get vaultSyncDirectionTwoWaySubtitle =>
+      'ينسخ كل ملف إلى الجانب الذي يفتقده أو لديه نسخة أقدم';
+
+  @override
+  String get vaultSyncDirectionLeftToRight => 'اليسار ← اليمين (اتجاه واحد)';
+
+  @override
+  String get vaultSyncDirectionLeftToRightSubtitle =>
+      'يدفع الملفات الجديدة والمحدَّثة من اليسار إلى اليمين؛ لا يغيّر اليسار أبدًا';
+
+  @override
+  String get vaultSyncDirectionRightToLeft => 'اليمين ← اليسار (اتجاه واحد)';
+
+  @override
+  String get vaultSyncDirectionRightToLeftSubtitle =>
+      'يدفع الملفات الجديدة والمحدَّثة من اليمين إلى اليسار؛ لا يغيّر اليمين أبدًا';
+
+  @override
+  String get vaultSyncSearchHint => 'البحث في الفروقات';
+
+  @override
+  String get vaultSyncStatusOnlyLeft => 'اليسار فقط';
+
+  @override
+  String get vaultSyncStatusOnlyRight => 'اليمين فقط';
+
+  @override
+  String get vaultSyncStatusLeftNewer => 'اليسار أحدث';
+
+  @override
+  String get vaultSyncStatusRightNewer => 'اليمين أحدث';
+
+  @override
+  String get vaultSyncStatusConflict => 'بحاجة إلى مراجعة';
+
+  @override
+  String get vaultSyncStatusTypeMismatch => 'عدم تطابق النوع';
+
+  @override
+  String get vaultSyncFolderOnlyLeftDetail => 'مجلد — اليسار فقط';
+
+  @override
+  String get vaultSyncFolderOnlyRightDetail => 'مجلد — اليمين فقط';
+
+  @override
+  String vaultSyncBothSidesDetail(
+    Object leftSize,
+    Object leftDate,
+    Object rightSize,
+    Object rightDate,
+  ) {
+    return 'يسار: $leftSize · $leftDate  ←  يمين: $rightSize · $rightDate';
+  }
+
+  @override
+  String get vaultSyncTypeMismatchTooltip =>
+      'ملف في جانب ومجلد في الآخر — يُحل يدويًا في متصفح الملفات';
+
+  @override
+  String get vaultSyncChangeActionTooltip => 'تغيير إجراء المزامنة';
+
+  @override
+  String get vaultSyncActionCopyToRight => 'نسخ ← اليمين';
+
+  @override
+  String get vaultSyncActionCopyToLeft => 'نسخ ← اليسار';
+
+  @override
+  String get vaultSyncActionSkip => 'تخطي';
+
+  @override
+  String vaultSyncChangesQueuedLabel(Object count) {
+    return '$count تغيير في قائمة الانتظار';
+  }
+
+  @override
+  String get vaultSyncSyncNowButton => 'مزامنة الآن';
+
+  @override
+  String get vaultSyncConfirmTitle => 'بدء المزامنة؟';
+
+  @override
+  String vaultSyncConfirmMessage(Object count, Object bytes) {
+    return 'سيؤدي هذا إلى نسخ $count عنصر ($bytes إجمالاً) بين الجانبين. سيتم استبدال الملفات الموجودة التي تحمل نفس الاسم.';
+  }
+
+  @override
+  String vaultSyncStartedMessage(Object count) {
+    return 'بدأت المزامنة — $count عنصر في قائمة الانتظار';
+  }
+
+  @override
+  String vaultSyncPickLocationTitle(Object side) {
+    return 'اختيار خزنة ومجلد ($side)';
+  }
+
+  @override
+  String get vaultSyncOverlapWarning =>
+      'Left and Right must not be the same folder or nested inside each other.';
+
+  @override
+  String vaultSyncPlaintextWarning(Object targets) {
+    return 'Files copied out of a vault to $targets will be stored unencrypted.';
+  }
+
+  @override
+  String get vaultSyncStorageSelectorLabel => 'Storage';
+
+  @override
+  String get vaultSyncTargetKindVault => 'Encrypted vault';
+
+  @override
+  String get vaultSyncTargetKindDevice => 'Device storage · not encrypted';
+
+  @override
+  String get vaultSyncTargetKindProvider => 'Document provider · not encrypted';
+
+  @override
+  String get vaultSyncAddStorageTooltip => 'Add storage location';
+
+  @override
+  String get vaultSyncEnableLocalStorageTooltip =>
+      'Enable Local Storage access';
+
+  @override
+  String get vaultSyncNoStoragesTitle => 'No storage to sync yet';
+
+  @override
+  String get vaultSyncNoStoragesMessage =>
+      'Add a folder or document provider with the + button, or mount a vault.';
+
+  @override
+  String get vaultSyncReadOnlyBadge => 'للقراءة فقط';
+
+  @override
+  String get vaultSyncReadOnlyTooltip =>
+      'هذه الخزنة مثبَّتة للقراءة فقط — لا يمكن نسخ ملفات إليها';
+
+  @override
+  String get vaultSyncSyncingButton => 'جارٍ المزامنة…';
+
+  @override
+  String get vaultSyncNotEnoughSpaceTitle => 'لا توجد مساحة كافية';
+
+  @override
+  String vaultSyncNotEnoughSpaceMessage(
+    Object side,
+    Object required,
+    Object free,
+  ) {
+    return 'لا توجد مساحة كافية في $side — مطلوب $required، والمتاح فقط $free.';
+  }
+
+  @override
+  String get removeMasterPasswordTitle => 'إزالة كلمة المرور الرئيسية';
+
+  @override
+  String get confirmRemoveMasterPasswordMessage =>
+      'أدخل كلمة المرور الرئيسية الحالية لتأكيد الإزالة:';
+
+  @override
+  String get authenticateToRemoveMasterPassword =>
+      'أجرِ المصادقة لإزالة كلمة المرور الرئيسية';
+
+  @override
+  String get incorrectPassword => 'كلمة مرور غير صحيحة';
+
+  @override
+  String get rememberPerFolderLayoutLabel => 'تذكر التخطيط والترتيب لكل مجلد';
+
+  @override
+  String get rememberPerFolderLayoutDesc =>
+      'حفظ تخطيط العرض (قائمة، شبكة، بناء) وترتيب الفرز لكل مجلد بشكل منفصل';
+
+  @override
+  String get defaultFolderLayoutLabel => 'تخطيط المجلد الافتراضي';
+
+  @override
+  String get fileInfoAction => 'معلومات';
+
+  @override
+  String get goToLocationAction => 'الانتقال إلى الموقع';
+
+  @override
+  String get copyPathAction => 'نسخ المسار';
+
+  @override
+  String get automationSectionHeader => 'الأتمتة';
+
+  @override
+  String get automationTileTitle => 'الأتمتة';
+
+  @override
+  String get automationTileSubtitle =>
+      'السماح للأتمتة بفتح قفل هذه الخزنة أو قفلها أو استيراد ملفات منها أو تصديرها إليها';
+
+  @override
+  String get automationScreenTitle => 'الأتمتة (Tasker / MacroDroid)';
+
+  @override
+  String get automationUsbUnsupportedMessage =>
+      'الأتمتة غير متاحة بعد للخزنات المتصلة عبر USB.';
+
+  @override
+  String get automationThisVaultSectionHeader => 'هذه الخزنة';
+
+  @override
+  String get automationAccessLabel => 'الوصول إلى الأتمتة';
+
+  @override
+  String get automationPasswordSectionHeader => 'كلمة مرور الأتمتة';
+
+  @override
+  String get automationPasswordStoredHint =>
+      'توجد كلمة مرور محفوظة لطلبات UNLOCK_VAULT غير المراقَبة. احفظ كلمة جديدة لاستبدالها، أو احفظ حقلاً فارغًا لمسحها — يمكن للأتمتة أيضًا توفير كلمة مرور مباشرةً ضمن البث بدلاً من الاعتماد على هذه.';
+
+  @override
+  String get automationPasswordNotStoredHint =>
+      'اختياري. بدون كلمة مرور محفوظة، يجب على الأتمتة توفير واحدة مع كل بث UNLOCK_VAULT.';
+
+  @override
+  String get automationNewPasswordFieldLabel => 'كلمة مرور جديدة';
+
+  @override
+  String get automationPasswordFieldLabel => 'كلمة المرور';
+
+  @override
+  String get automationClearPasswordButton => 'مسح كلمة المرور المحفوظة';
+
+  @override
+  String get automationSavePasswordButton => 'حفظ كلمة المرور';
+
+  @override
+  String get automationTokenSectionHeader => 'رمز API';
+
+  @override
+  String get automationTokenDescription =>
+      'مشترك بين جميع الخزنات التي تم تفعيل وصول الأتمتة لها. ترسل الأتمتة هذا الرمز مرة أخرى مع كل بث؛ يتم تجاهل الرمز الخاطئ أو المفقود بصمت دون ظهور خطأ.';
+
+  @override
+  String get automationRegenerateTokenButton => 'إعادة توليد الرمز';
+
+  @override
+  String get automationRegenerateTokenDialogTitle => 'إعادة توليد الرمز؟';
+
+  @override
+  String get automationRegenerateTokenDialogMessage =>
+      'سيتوقف أي ملف تعريف Tasker أو ماكرو MacroDroid يستخدم الرمز الحالي عن العمل بصمت إلى أن تُحدّثه بالرمز الجديد.';
+
+  @override
+  String get automationRegenerateConfirmLabel => 'إعادة التوليد';
+
+  @override
+  String get automationTokenRegeneratedMessage => 'تمت إعادة توليد الرمز.';
+
+  @override
+  String get automationRegenerateTokenFailedMessage =>
+      'تعذّرت إعادة توليد الرمز.';
+
+  @override
+  String get automationUpdateSettingsFailedMessage =>
+      'تعذّر تحديث إعدادات الأتمتة.';
+
+  @override
+  String get automationSavePasswordFailedMessage =>
+      'تعذّر حفظ كلمة مرور الأتمتة.';
+
+  @override
+  String get automationPasswordClearedMessage => 'تم مسح كلمة مرور الأتمتة.';
+
+  @override
+  String get automationPasswordSavedMessage => 'تم حفظ كلمة مرور الأتمتة.';
+
+  @override
+  String get automationConfigSectionHeader => 'سلاسل التكوين';
+
+  @override
+  String get automationConfigIntro =>
+      'اضغط على أي قيمة أدناه لنسخها. في Tasker، استخدم إجراء \"Send Intent\"؛ وفي MacroDroid، استخدم إجراء \"Intent\" مع ضبط Intent Type على Broadcast — وليس Activity أو Service، اللذين يفشلان بخطأ \"unable to find explicit activity class\".';
+
+  @override
+  String get automationConfigPackageLabel => 'اسم الحزمة';
+
+  @override
+  String get automationConfigClassLabel => 'فئة المستقبِل';
+
+  @override
+  String get automationConfigVaultUriLabel => 'عنوان URI لهذه الخزنة';
+
+  @override
+  String get automationConfigActionsSectionHeader => 'إجراءات البث';
+
+  @override
+  String get automationActionUnlockLabel => 'فتح قفل الخزنة';
+
+  @override
+  String get automationActionLockLabel => 'قفل الخزنة';
+
+  @override
+  String get automationActionImportLabel => 'استيراد ملف';
+
+  @override
+  String get automationActionExportLabel => 'تصدير ملف';
+
+  @override
+  String get automationActionWipeLabel => 'مسح ملف';
+
+  @override
+  String get automationActionEmergencyLockLabel => 'قفل الطوارئ (المستوى 1)';
+
+  @override
+  String get automationActionEmergencyPurgeLabel => 'تطهير الطوارئ';
+
+  @override
+  String get automationDocCommentFootnote =>
+      'جميع العناصر الإضافية وعقد بث النتائج موثّقة في VaultAutomationReceiver.kt.';
+
+  @override
+  String get automationTierOffLabel => 'إيقاف';
+
+  @override
+  String get automationTierOffSubtitle =>
+      'لا يمكن للأتمتة الوصول إلى هذه الخزنة';
+
+  @override
+  String get automationTierLifecycleLabel => 'فتح القفل / القفل فقط';
+
+  @override
+  String get automationTierLifecycleSubtitle =>
+      'يمكن للأتمتة فتح قفل هذه الخزنة وقفلها فقط، ولا شيء غير ذلك';
+
+  @override
+  String get automationTierFullLabel =>
+      'فتح القفل / القفل + استيراد وتصدير الملفات + المزامنة';
+
+  @override
+  String get automationTierFullSubtitle =>
+      'يمكن للأتمتة أيضًا مزامنة المجلدات المُعدّة واستيراد الملفات وتصديرها أثناء فتح قفل هذه الخزنة';
+
+  @override
+  String get automationTutorialLinkLabel =>
+      'قراءة الدليل التفصيلي الكامل خطوة بخطوة';
+
+  @override
+  String get showHiddenFilesLabel => 'إظهار الملفات المخفية';
+
+  @override
+  String get showHiddenFilesDesc => 'عرض الملفات ذات النقطة ومجلدات النظام';
+
+  @override
+  String get dontAskAgain => 'عدم السؤال مرة أخرى';
+
+  @override
+  String get deleteAfterImportLabel => 'حذف الملفات بعد الاستيراد';
+
+  @override
+  String get deleteAfterImportModeAsk => 'السؤال في كل مرة';
+
+  @override
+  String get deleteAfterImportModeAskSubtitle =>
+      'السؤال عمّا إذا كان يجب حذف الملفات الأصلية بعد الاستيراد';
+
+  @override
+  String get deleteAfterImportModeKeep =>
+      'الاحتفاظ بالملفات الأصلية (عدم الحذف)';
+
+  @override
+  String get deleteAfterImportModeKeepSubtitle =>
+      'عدم حذف الملفات الأصلية أبدًا وعدم السؤال';
+
+  @override
+  String get deleteAfterImportModeDelete => 'حذف الملفات الأصلية تلقائيًا';
+
+  @override
+  String get deleteAfterImportModeDeleteSubtitle =>
+      'حذف الملفات الأصلية من الجهاز تلقائيًا بعد الاستيراد';
+
+  @override
+  String get deleteAfterImportVaultSettingLabel =>
+      'تنظيف الملفات بعد الاستيراد للخزنة';
+
+  @override
+  String get deleteAfterImportInheritGlobal => 'استخدام الإعداد العام';
+
+  @override
+  String deleteAfterImportInheritGlobalSubtitle(String mode) {
+    return 'يتبع الإعداد العام: $mode';
+  }
+
+  @override
+  String get deleteAfterImportVaultAsk => 'السؤال في كل مرة';
+
+  @override
+  String get deleteAfterImportVaultKeep => 'الاحتفاظ دائمًا بالملفات المصدر';
+
+  @override
+  String get deleteAfterImportVaultDelete => 'حذف الملفات المصدر دائمًا';
+
+  @override
+  String get wizardBackButton => 'رجوع';
+
+  @override
+  String get wizardNextButton => 'التالي';
+
+  @override
+  String get wizardStepTypeTitle => 'النوع';
+
+  @override
+  String get wizardStepBasicInfoTitle => 'معلومات أساسية';
+
+  @override
+  String get wizardStepAdvancedTitle => 'متقدم';
+
+  @override
+  String get wizardStepReviewTitle => 'مراجعة';
+
+  @override
+  String get wizardCreateTypePrompt => 'ماذا تريد أن تنشئ؟';
+
+  @override
+  String get wizardChooseFormatPrompt => 'اختر تنسيق حاوية';
+
+  @override
+  String get wizardEncryptionDetailsRowTitle => 'تفاصيل التشفير';
+
+  @override
+  String get wizardHiddenVolumeRowSubtitleConfigured =>
+      'تم الإعداد — اضغط للمراجعة';
+
+  @override
+  String get wizardHiddenVolumeRowSubtitleNeedsSetup => 'اضغط للإعداد';
+
+  @override
+  String get wizardSummaryTitle => 'الملخص';
+
+  @override
+  String get wizardSummaryPasswordLabel => 'كلمة المرور';
+
+  @override
+  String get wizardPasswordSetValue => 'تم التعيين';
+
+  @override
+  String get wizardPasswordNotSetValue =>
+      'غير معيّنة (باستخدام ملفات المفاتيح)';
+
+  @override
+  String get wizardSummaryKeyfilesLabel => 'ملفات المفاتيح';
+
+  @override
+  String get wizardSummaryPimDefaultValue => 'افتراضي';
+
+  @override
+  String get wizardSummaryPimLabel => 'PIM';
+
+  @override
+  String get wizardSummaryDriveLabel => 'محرك USB';
+
+  @override
+  String get sectionKeyStorageIntegration =>
+      'تخزين المفاتيح والوصول إلى النظام';
+
+  @override
+  String get sectionMaskMode => 'وضع التمويه';
+
+  @override
+  String get advancedOptionsTitle => 'خيارات متقدمة';
+
+  @override
+  String get audioTrackTitle => 'مسار الصوت';
+
+  @override
+  String get noAudioTracksAvailable => 'لا توجد مسارات صوتية متاحة';
+
+  @override
+  String trackNumberLabel(int number) {
+    return 'المسار $number';
+  }
+
+  @override
+  String subtitleTrackNumberLabel(int number) {
+    return 'الترجمة $number';
+  }
+
+  @override
+  String get offLabel => 'إيقاف';
+
+  @override
+  String get externalSubtitlesLabel => 'ترجمات خارجية (.srt/.vtt)';
+
+  @override
+  String get externalLabel => 'خارجي';
+
+  @override
+  String get subtitleSizeLabel => 'الحجم';
+
+  @override
+  String get subtitleSizeSmall => 'ص';
+
+  @override
+  String get subtitleSizeMedium => 'م';
+
+  @override
+  String get subtitleSizeLarge => 'ك';
+
+  @override
+  String get subtitleSizeExtraLarge => 'ك.ج';
+
+  @override
+  String get subtitlePositionLabel => 'الموضع';
+
+  @override
+  String get subtitlePositionBottom => 'أسفل';
+
+  @override
+  String get subtitlePositionLower => 'أسفل قليلاً';
+
+  @override
+  String get subtitlePositionCenter => 'وسط';
+
+  @override
+  String get subtitlePositionTop => 'أعلى';
+
+  @override
+  String get editImageAction => 'تحرير الصورة';
+
+  @override
+  String get imageEditorUnsupportedFormatMessage =>
+      'تنسيق هذه الصورة غير مدعوم للتحرير.';
+
+  @override
+  String get cropToolLabel => 'قص';
+
+  @override
+  String get drawToolLabel => 'رسم';
+
+  @override
+  String get textToolLabel => 'نص';
+
+  @override
+  String get redactToolLabel => 'تعتيم';
+
+  @override
+  String get rotateLeftTooltip => 'تدوير لليسار';
+
+  @override
+  String get rotateRightTooltip => 'تدوير لليمين';
+
+  @override
+  String get cropAspectFreeLabel => 'حر';
+
+  @override
+  String get cropAspectSquareLabel => 'مربع';
+
+  @override
+  String get cropAspectOriginalLabel => 'الأصلي';
+
+  @override
+  String get applyCropTooltip => 'تطبيق القص';
+
+  @override
+  String get annotationColorTooltip => 'اللون';
+
+  @override
+  String get annotationStrokeWidthTooltip => 'سُمك الخط';
+
+  @override
+  String get clearAnnotationsTooltip => 'مسح كل التعليقات التوضيحية';
+
+  @override
+  String get resetImageTooltip => 'إعادة التعيين إلى الأصل';
+
+  @override
+  String get resetImageConfirmTitle => 'إعادة تعيين الصورة؟';
+
+  @override
+  String get resetImageConfirmMessage =>
+      'سيؤدي هذا إلى إلغاء كل عمليات القص والرسم التي تمت في هذه الجلسة.';
+
+  @override
+  String get addTextAnnotationTitle => 'إضافة نص';
+
+  @override
+  String get addTextAnnotationHint => 'اكتب شيئًا…';
+
+  @override
+  String get textToolHint => 'اضغط على الصورة لإضافة نص';
+
+  @override
+  String get saveImageSheetTitle => 'حفظ التغييرات';
+
+  @override
+  String get saveAsNewFileOption => 'حفظ كملف جديد';
+
+  @override
+  String get saveAsNewFileDescription => 'يحافظ على الملف الأصلي دون تغيير';
+
+  @override
+  String get overwriteOriginalOption => 'استبدال الأصل';
+
+  @override
+  String get overwriteOriginalDescription => 'يستبدل الملف الأصلي';
+
+  @override
+  String get newFileNameLabel => 'اسم الملف';
+
+  @override
+  String get imageEditorPngNoteMessage => 'تُحفظ الصور المعدَّلة بتنسيق PNG.';
+
+  @override
+  String get imageSavedMessage => 'تم حفظ الصورة';
+
+  @override
+  String imageSaveFailedMessage(String error) {
+    return 'تعذّر حفظ الصورة: $error';
+  }
+
+  @override
+  String get advancedRenameButton => 'متقدم';
+
+  @override
+  String get advancedRenameBatchTitle => 'إعادة تسمية دفعية';
+
+  @override
+  String get advancedRenameRulesTab => 'القواعد';
+
+  @override
+  String advancedRenamePreviewTab(int count) {
+    return 'معاينة ($count)';
+  }
+
+  @override
+  String get advancedRenameSearchReplaceTitle => 'بحث واستبدال';
+
+  @override
+  String get advancedRenameFindTextLabel => 'البحث عن نص';
+
+  @override
+  String get advancedRenameFindTextHint => 'أدخل نصًا أو نمطًا للمطابقة...';
+
+  @override
+  String get advancedRenameReplaceWithLabel => 'استبدال بـ';
+
+  @override
+  String get advancedRenameReplaceWithHint => 'نص جديد أو متغيرات...';
+
+  @override
+  String get advancedRenameInsertVariableTooltip => 'إدراج رمز متغيّر ديناميكي';
+
+  @override
+  String get advancedRenameDateTimeTokens => 'رموز التاريخ والوقت';
+
+  @override
+  String advancedRenameStandardDate(String token) {
+    return 'التاريخ القياسي ($token)';
+  }
+
+  @override
+  String advancedRenameYearFourDigit(String token) {
+    return 'سنة من 4 أرقام ($token)';
+  }
+
+  @override
+  String advancedRenameMonth(String token) {
+    return 'الشهر ($token)';
+  }
+
+  @override
+  String advancedRenameDayOfMonth(String token) {
+    return 'يوم الشهر ($token)';
+  }
+
+  @override
+  String advancedRenameTime(String token) {
+    return 'الوقت ($token)';
+  }
+
+  @override
+  String get advancedRenameDynamicIdentifiers => 'معرّفات ديناميكية';
+
+  @override
+  String advancedRenameUniqueUuid(String token) {
+    return 'معرّف UUID v4 فريد ($token)';
+  }
+
+  @override
+  String get advancedRenameRandomAlphanumeric => 'أحرف وأرقام عشوائية (8 أحرف)';
+
+  @override
+  String get advancedRenameRandomDigits => 'أرقام عشوائية (6 أرقام)';
+
+  @override
+  String get advancedRenameEmbeddedCounter => 'عدّاد مضمّن';
+
+  @override
+  String advancedRenamePaddedCounter(String token) {
+    return 'عدّاد بأصفار بادئة ($token)';
+  }
+
+  @override
+  String get advancedRenameRegex => 'تعبير نمطي';
+
+  @override
+  String get advancedRenameMatchCase => 'مطابقة حالة الأحرف';
+
+  @override
+  String get advancedRenameAllOccurrences => 'كل التكرارات';
+
+  @override
+  String get advancedRenameScopeFormatting => 'النطاق والتنسيق';
+
+  @override
+  String get advancedRenameApplyChangesTo => 'تطبيق التغييرات على';
+
+  @override
+  String get advancedRenameFilename => 'اسم الملف';
+
+  @override
+  String get advancedRenameExtension => 'الامتداد';
+
+  @override
+  String get advancedRenameBoth => 'كلاهما';
+
+  @override
+  String get advancedRenameCaseTransformation => 'تحويل حالة الأحرف';
+
+  @override
+  String get advancedRenameNoChange => 'بدون تغيير';
+
+  @override
+  String get advancedRenameLowercase => 'أحرف صغيرة';
+
+  @override
+  String get advancedRenameUppercase => 'أحرف كبيرة';
+
+  @override
+  String get advancedRenameTitleCase => 'حالة العنوان';
+
+  @override
+  String get advancedRenameCapitalize => 'بدء الجملة بحرف كبير';
+
+  @override
+  String get advancedRenameSequentialCounter => 'عدّاد تسلسلي';
+
+  @override
+  String get advancedRenameCounterDescription => 'إلحاق أو إضافة أرقام مرتّبة';
+
+  @override
+  String get advancedRenameSuffix => 'لاحقة (النهاية)';
+
+  @override
+  String get advancedRenamePrefix => 'بادئة (البداية)';
+
+  @override
+  String get advancedRenameStartAt => 'البدء من';
+
+  @override
+  String get advancedRenameDigits => 'عدد الأرقام';
+
+  @override
+  String get advancedRenameDigitsHint => 'مثال: 2 (01)';
+
+  @override
+  String get advancedRenameSeparator => 'الفاصل';
+
+  @override
+  String get advancedRenameSeparatorHint => '_ or -';
+
+  @override
+  String get advancedRenameLivePreview => 'معاينة حيّة';
+
+  @override
+  String get advancedRenameDeselect => 'إلغاء التحديد';
+
+  @override
+  String get advancedRenameSelectAll => 'تحديد الكل';
+
+  @override
+  String get advancedRenameNoFilesSelected => 'لم يتم تحديد أي ملفات';
+
+  @override
+  String get advancedRenameNameConflictDetected => 'تم اكتشاف تعارض في الأسماء';
+
+  @override
+  String get advancedRenameCheckPreviewToFix =>
+      'تحقق من علامة تبويب المعاينة للإصلاح';
+
+  @override
+  String get advancedRenameReadyToRename => 'جاهز لإعادة التسمية';
+
+  @override
+  String get advancedRenameErrorsDetected => 'تم اكتشاف أخطاء';
+
+  @override
+  String advancedRenameApply(int count) {
+    return 'تطبيق ($count)';
+  }
+
+  @override
+  String get advancedRenameNameCollisionWithinBatch => 'تعارض اسم ضمن الدفعة.';
+
+  @override
+  String get advancedRenameCollidesWithUnselectedFile =>
+      'يتعارض مع ملف غير محدد.';
+
+  @override
+  String advancedRenameReadyCount(int valid, int total) {
+    return '$valid جاهز لإعادة التسمية (من أصل $total)';
+  }
+
+  @override
+  String advancedRenameReadyOfTotal(int valid, int total) {
+    return '$valid من $total جاهز';
+  }
+
+  @override
+  String advancedRenameRenamedItems(int succeeded, int failed) {
+    return 'تمت إعادة تسمية $succeeded عنصرًا ($failed فشل).';
+  }
+
+  @override
+  String advancedRenameSuccessfullyRenamed(int count) {
+    return 'تمت إعادة تسمية $count عنصرًا بنجاح.';
+  }
+
+  @override
+  String get advancedRenameMonthsFull =>
+      'يناير|فبراير|مارس|أبريل|مايو|يونيو|يوليو|أغسطس|سبتمبر|أكتوبر|نوفمبر|ديسمبر';
+
+  @override
+  String get advancedRenameMonthsAbbr =>
+      'ينا|فبر|مار|أبر|ماي|يون|يول|أغس|سبت|أكت|نوف|ديس';
+
+  @override
+  String get advancedRenameDaysFull =>
+      'الاثنين|الثلاثاء|الأربعاء|الخميس|الجمعة|السبت|الأحد';
+
+  @override
+  String get advancedRenameDaysAbbr => 'إثن|ثلا|أرب|خمی|جمع|سبت|أحد';
+
+  @override
+  String get advancedRenameResolveConflicts => 'حل تعارضات الأسماء قبل التطبيق';
+
+  @override
+  String advancedRenameChangedCount(int changed, int total) {
+    return '$changed من $total';
+  }
+
+  @override
+  String get automationKeyfilesPimSectionHeader => 'ملفات المفاتيح و PIM';
+
+  @override
+  String get automationKeyfilesPimDescription =>
+      'يُخزَّن إلى جانب كلمة مرور الأتمتة أعلاه ويُستخدم بنفس الطريقة لاستدعاءات UNLOCK_VAULT — لخزنة VeraCrypt/LUKS التي تُفتح عادةً بملف مفتاح و/أو قيمة PIM غير افتراضية بدلاً من كلمة مرور فقط.';
+
+  @override
+  String get automationSavePimButton => 'حفظ PIM';
+
+  @override
+  String get automationCameraSectionHeader => 'أتمتة الكاميرا';
+
+  @override
+  String get automationCameraDescription =>
+      'تتيح للأتمتة تشغيل TAKE_PHOTO / START_RECORDING / STOP_RECORDING / START_AUDIO_RECORDING / STOP_AUDIO_RECORDING لهذه الخزنة. مُعطَّل افتراضيًا حتى مع الوصول الكامل — على عكس استيراد/تصدير الملفات، لا تحتاج الصورة إلى أي مؤشر على الشاشة على الإطلاق، لذا فهذا خيار انضمام منفصل وصريح.';
+
+  @override
+  String get automationAllowCameraCapture => 'السماح بالتقاط الصور بالكاميرا';
+
+  @override
+  String get automationOverlayPermissionTitle => 'الظهور فوق التطبيقات الأخرى';
+
+  @override
+  String get automationOverlayPermissionMessage =>
+      'يتطلب التقاط الكاميرا في الخلفية إذن \'الظهور فوق التطبيقات الأخرى\' على نظام Android 14+. يُرجى منح هذا الإذن للسماح بالالتقاط التلقائي أثناء قفل الشاشة أو تشغيل التطبيق في الخلفية.';
+
+  @override
+  String get automationPimSavedMessage => 'تم حفظ PIM';
+
+  @override
+  String get automationActionImportFolderLabel => 'استيراد مجلد';
+
+  @override
+  String get automationActionExportFolderLabel => 'تصدير مجلد';
+
+  @override
+  String get automationActionTakePhotoLabel => 'التقاط صورة';
+
+  @override
+  String get automationActionStartRecordingLabel => 'بدء التسجيل';
+
+  @override
+  String get automationActionStopRecordingLabel => 'إيقاف التسجيل';
+
+  @override
+  String get automationActionStartAudioRecordingLabel => 'بدء تسجيل الصوت';
+
+  @override
+  String get automationActionStopAudioRecordingLabel => 'إيقاف تسجيل الصوت';
+
+  @override
+  String get filePropertiesSectionHeader => 'خصائص الملف';
+
+  @override
+  String get fullPathLabel => 'المسار الكامل';
+
+  @override
+  String get sizeLabel => 'الحجم';
+
+  @override
+  String get modifiedLabel => 'تاريخ التعديل';
+
+  @override
+  String get vaultLabel => 'الخزنة';
+
+  @override
+  String get mediaDimensionsSectionHeader => 'الوسائط والأبعاد';
+
+  @override
+  String get resolutionLabel => 'الدقة';
+
+  @override
+  String get aspectRatioLabel => 'نسبة العرض إلى الارتفاع';
+
+  @override
+  String get formatLabel => 'التنسيق';
+
+  @override
+  String get exifCameraDataSectionHeader => 'بيانات EXIF والكاميرا';
+
+  @override
+  String get cameraLabel => 'الكاميرا';
+
+  @override
+  String get lensLabel => 'العدسة';
+
+  @override
+  String get dateTakenLabel => 'تاريخ الالتقاط';
+
+  @override
+  String get shutterSpeedLabel => 'سرعة الغالق';
+
+  @override
+  String get apertureLabel => 'فتحة العدسة';
+
+  @override
+  String get isoLabel => 'ISO';
+
+  @override
+  String get focalLengthLabel => 'البعد البؤري';
+
+  @override
+  String get flashLabel => 'الفلاش';
+
+  @override
+  String get softwareLabel => 'البرنامج';
+
+  @override
+  String get gpsLocationLabel => 'موقع GPS';
+
+  @override
+  String get integrityChecksumSectionHeader => 'السلامة والمجموع الاختباري';
+
+  @override
+  String get computingHashMessage => 'جارٍ حساب التجزئة…';
+
+  @override
+  String get tapCalculateToVerifyMessage => 'اضغط على «حساب» للتحقق';
+
+  @override
+  String get calculateButton => 'حساب';
+
+  @override
+  String get copyDiagnosticsButton => 'نسخ التشخيصات';
+
+  @override
+  String get closeButton => 'إغلاق';
+
+  @override
+  String get hwAcceleratedBadge => 'تسريع الأجهزة';
+
+  @override
+  String get swDecoderBadge => 'فك ترميز برمجي';
+
+  @override
+  String get videoDecoderHardwareSection => 'مُفكِّك ترميز الفيديو والأجهزة';
+
+  @override
+  String get decoderNameLabel => 'اسم مُفكِّك الترميز';
+
+  @override
+  String get accelerationLabel => 'التسريع';
+
+  @override
+  String get hardwareGpuDirect => 'أجهزة (GPU مباشر)';
+
+  @override
+  String get softwareCpuFallback => 'برمجي (احتياطي CPU)';
+
+  @override
+  String get unknownValue => 'غير معروف';
+
+  @override
+  String get framerateLabel => 'معدل الإطارات';
+
+  @override
+  String get variableOrUnknown => 'متغيّر / غير معروف';
+
+  @override
+  String get videoCodecLabel => 'ترميز الفيديو';
+
+  @override
+  String get autoDetected => 'اكتشاف تلقائي';
+
+  @override
+  String get colorFormatLabel => 'تنسيق اللون';
+
+  @override
+  String get initLatencyLabel => 'زمن التهيئة';
+
+  @override
+  String get audioEngineSection => 'محرك الصوت';
+
+  @override
+  String get audioDecoderLabel => 'مُفكِّك ترميز الصوت';
+
+  @override
+  String get audioCodecLabel => 'ترميز الصوت';
+
+  @override
+  String get pipelineHealthSection => 'مسار المعالجة والحالة';
+
+  @override
+  String get playbackStateLabel => 'حالة التشغيل';
+
+  @override
+  String get decryptedBufferLabel => 'المخزن المؤقت المفكوك التشفير';
+
+  @override
+  String secondsCached(String seconds) {
+    return '$seconds ثانية مخزَّنة مؤقتًا';
+  }
+
+  @override
+  String get droppedFramesLabel => 'الإطارات المُسقَطة';
+
+  @override
+  String nFrames(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count إطار',
+      many: '$count إطارًا',
+      few: '$count إطارات',
+      two: 'إطاران',
+      one: 'إطار واحد',
+      zero: '0 إطار',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sourceStorageLabel => 'مصدر التخزين';
+
+  @override
+  String directJniStreamSource(int volId) {
+    return 'دفق JNI مباشر بلغة C++‎ (volId=$volId)';
+  }
+
+  @override
+  String get archivesTabLabel => 'الأرشيفات';
+
+  @override
+  String get filesTabLabel => 'الملفات';
+
+  @override
+  String get filesPermissionMessage => 'اسمح بالوصول لتصفح الملفات على جهازك.';
+
+  @override
+  String get filesEmptyTitle => 'لا توجد ملفات هنا';
+
+  @override
+  String get filesEmptyMessage => 'هذا المجلد فارغ.';
+
+  @override
+  String get filesNewFolderTooltip => 'مجلد جديد';
+
+  @override
+  String get filesNewFolderDialogTitle => 'مجلد جديد';
+
+  @override
+  String get filesNameHint => 'الاسم';
+
+  @override
+  String get filesCreate => 'إنشاء';
+
+  @override
+  String get filesRename => 'إعادة تسمية';
+
+  @override
+  String get filesDelete => 'حذف';
+
+  @override
+  String get filesShare => 'مشاركة';
+
+  @override
+  String get filesCopy => 'نسخ';
+
+  @override
+  String get filesMove => 'نقل';
+
+  @override
+  String get filesDeleteConfirmTitle => 'حذف نهائي؟';
+
+  @override
+  String get filesChooseDestinationTitle => 'اختر مجلدًا';
+
+  @override
+  String get filesMoveHere => 'نقل إلى هنا';
+
+  @override
+  String get filesCopyHere => 'نسخ إلى هنا';
+
+  @override
+  String get filesSelectAllTooltip => 'تحديد الكل';
+
+  @override
+  String get filesCloseSelectionTooltip => 'إغلاق';
+
+  @override
+  String get filesFolderCreated => 'تم إنشاء المجلد';
+
+  @override
+  String get filesCreateFolderFailed => 'تعذّر إنشاء المجلد';
+
+  @override
+  String get filesRenamed => 'تمت إعادة التسمية';
+
+  @override
+  String get filesRenameFailed => 'تعذّرت إعادة التسمية';
+
+  @override
+  String get filesNameAlreadyExists => 'هذا الاسم مستخدم بالفعل';
+
+  @override
+  String get filesDeleted => 'تم الحذف';
+
+  @override
+  String get filesDeleteFailed => 'تعذّر الحذف';
+
+  @override
+  String get filesMoved => 'تم النقل';
+
+  @override
+  String get filesMoveFailed => 'تعذّر النقل';
+
+  @override
+  String get filesCopied => 'تم النسخ';
+
+  @override
+  String get filesCopyFailed => 'تعذّر النسخ';
+
+  @override
+  String get filesOpenFailed => 'تعذّر فتح هذا الملف';
+
+  @override
+  String get filesShareFailed => 'تعذّرت مشاركة هذا الملف';
+
+  @override
+  String get filesFilterTooltip => 'تصفية';
+
+  @override
+  String get filesFilterAll => 'جميع الملفات';
+
+  @override
+  String get filesFilterImages => 'الصور';
+
+  @override
+  String get filesFilterVideos => 'الفيديوهات';
+
+  @override
+  String get filesFilterAudio => 'الصوت';
+
+  @override
+  String get filesFilterDocuments => 'المستندات';
+
+  @override
+  String get filesTextTooLarge => 'هذا الملف كبير جدًا للمعاينة هنا.';
+
+  @override
+  String get filesTextSaved => 'تم الحفظ';
+
+  @override
+  String get filesTextSaveFailed => 'تعذّر الحفظ';
+
+  @override
+  String get toolHeaderBackupTitle => 'النسخ الاحتياطي للرأس';
+
+  @override
+  String get toolHeaderBackupSubtitle =>
+      'نسخ احتياطي أو استعادة لرؤوس الحاويات وتكوينات الخزنات';
+
+  @override
+  String get headerBackupModeExport => 'حفظ نسخة احتياطية';
+
+  @override
+  String get headerBackupModeRestore => 'استعادة نسخة احتياطية';
+
+  @override
+  String get headerBackupPickExportTarget => 'اختر ما تريد نسخه احتياطيًا.';
+
+  @override
+  String get headerBackupPickRestoreTarget =>
+      'اختر ما تريد استعادة النسخة الاحتياطية إليه.';
+
+  @override
+  String get headerBackupTargetContainerSubtitle =>
+      'VeraCrypt أو LUKS1 أو LUKS2';
+
+  @override
+  String get headerBackupTargetFolderSubtitle =>
+      'gocryptfs أو CryFS أو Cryptomator';
+
+  @override
+  String get headerBackupExportInfoBanner =>
+      'يحمل رأس الحاوية مادة المفتاح الخاصة بها — فقدانه (قطاعات تالفة، كتابة فاشلة) يجعل حتى منطقة البيانات السليمة غير قابلة للاسترداد. تحتفظ خزنة المجلد بنفس الشيء في ملف تكوين صغير عند جذرها. احتفظ بهذه النسخة الاحتياطية في مكان منفصل عن الحاوية نفسها.';
+
+  @override
+  String get headerBackupRestoreInfoBanner =>
+      'تؤدي الاستعادة إلى استبدال الرأس الحالي للهدف (أو ملف التكوين) بالنسخة الاحتياطية — يتم التحقق من أن النسخة الاحتياطية أصلية لهذا التنسيق أولاً، ولكن تأكد من اختيار الهدف الصحيح.';
+
+  @override
+  String headerBackupUnhealthyExportWarning(String diagnosis) {
+    return 'هذه الحاوية لم تعد بحالة سليمة ($diagnosis). نسخها احتياطيًا الآن يعني أن النسخة الاحتياطية ستحمل نفس المشكلة. قم بتشغيل الفحص والإصلاح أولاً إن أمكن — أو انسخها احتياطيًا على أي حال إذا كانت هذه فرصتك الوحيدة لالتقاطها.';
+  }
+
+  @override
+  String get headerBackupBackUpAnyway => 'نسخ احتياطي على أي حال';
+
+  @override
+  String get headerBackupExportHeader => 'تصدير الرأس';
+
+  @override
+  String get headerBackupSavedBanner =>
+      'تم حفظ النسخة الاحتياطية. احتفظ بها في مكان منفصل عن هذه الحاوية.';
+
+  @override
+  String get headerBackupSaveBackupFile => 'حفظ ملف النسخة الاحتياطية';
+
+  @override
+  String get headerBackupPickBackupFile => 'اختيار ملف النسخة الاحتياطية';
+
+  @override
+  String get headerBackupMismatchFolderVaultError =>
+      'هذه النسخة الاحتياطية مخصصة لخزنة مجلد، لكن الهدف المحدد هو ملف حاوية.';
+
+  @override
+  String get headerBackupMismatchContainerFileError =>
+      'هذه النسخة الاحتياطية مخصصة لملف حاوية، لكن الهدف المحدد هو خزنة مجلد.';
+
+  @override
+  String get headerBackupRestoredSuccess => 'تمت استعادة الرأس.';
+
+  @override
+  String get headerBackupRestore => 'استعادة';
+
+  @override
+  String headerBackupBackedUpAt(String date) {
+    return 'تم النسخ الاحتياطي في $date';
+  }
+
+  @override
+  String get headerBackupLogIdle => 'مخرجات سجل وحدة التحكم في وضع الخمول...';
+
+  @override
+  String get compositeCreateScreenTitle => 'إنشاء حاوية مركبة';
+
+  @override
+  String get compositeProcessingStatus => 'قيد المعالجة…';
+
+  @override
+  String compositeCarrierFilesCountHeader(int count) {
+    return 'ملفات الحامل ($count)';
+  }
+
+  @override
+  String get compositeAddCarrierFilesTitle => 'إضافة ملفات حاملة';
+
+  @override
+  String get compositeAddCarrierFilesSubtitle =>
+      'اختر صورًا، أو مقاطع فيديو، أو ملفات صوتية، أو مستندات';
+
+  @override
+  String get compositeBrowseButtonLabel => 'استعراض';
+
+  @override
+  String compositeCarrierAllocatableSubtitle(String format, String size) {
+    return '$format • قابل للتخصيص: $size';
+  }
+
+  @override
+  String get compositeCarrierAnalyzingStatus => 'جارٍ التحليل…';
+
+  @override
+  String get compositeTotalUsableCapacityHeader =>
+      'إجمالي السعة القابلة للاستخدام';
+
+  @override
+  String compositeCapacityDistributedSubtitle(int count) {
+    return 'موزعة عبر $count ملفات (بمحاذاة قطاعات 512 بايت)';
+  }
+
+  @override
+  String get compositePimFieldLabel => 'PIM (مضاعف التكرار الشخصي)';
+
+  @override
+  String get compositePimFieldHelper =>
+      'اتركه فارغًا أو 0 للتكرارات الافتراضية القياسية';
+
+  @override
+  String get compositeRememberContainerTitle => 'تذكر هذه الحاوية';
+
+  @override
+  String get compositeRememberContainerSubtitle =>
+      'تثبيتها في لوحة التحكم حتى لا تضطر إلى إعادة اختيار هذه الملفات في المرة القادمة. يخزن الملفات المرتبطة معًا مشفرة على هذا الجهاز.';
+
+  @override
+  String get compositeEncryptionAndFilesystemHeader => 'التشفير ونظام الملفات';
+
+  @override
+  String get compositeEncryptionAlgorithmLabel => 'خوارزمية التشفير';
+
+  @override
+  String get compositeHashAlgorithmLabel => 'خوارزمية التجزئة (KDF)';
+
+  @override
+  String get compositeFilesystemTypeLabel => 'نوع نظام الملفات';
+
+  @override
+  String get compositeQuickFormatTitle => 'تهيئة سريعة';
+
+  @override
+  String get compositeQuickFormatSubtitle =>
+      'تخطي ملء المساحة المخصصة في الحامل بالأصفار';
+
+  @override
+  String get compositeCreateContainerButton => 'إنشاء الحاوية';
+
+  @override
+  String get compositeCreateSuccessMessage => 'تم إنشاء الحاوية المركبة بنجاح!';
+
+  @override
+  String compositeDefaultContainerName(int count) {
+    return 'حاوية مركبة ($count ملفات)';
+  }
+
+  @override
+  String get compositeAlreadyHaveUnlockPrompt =>
+      'هل لديك حاوية مركبة بالفعل؟ فتح القفل والتحميل';
+
+  @override
+  String compositeBadgeMultipleCarriers(int count) {
+    return 'مركب ($count حامل)';
+  }
+
+  @override
+  String get compositeBadgeSingleCarrier => 'حامل مركب (تم تحديد 1)';
+
+  @override
+  String get compositeBadgeDefault => 'حاوية مركبة';
+
+  @override
+  String get compositeSingleCarrierWarningBanner =>
+      'تم اكتشاف حامل مركب. تتطلب الحاوية المركبة جميع ملفات الحامل الخاصة بها لفتح القفل.';
+
+  @override
+  String get compositeSelectAllCarriersButton => 'تحديد جميع الحوامل';
+
+  @override
+  String get compositeCarriersMissingTitle => 'ملفات الحامل المركب مفقودة';
+
+  @override
+  String get compositeCarriersMissingExplanation =>
+      'تعذر الوصول إلى ملف أو أكثر من ملفات الحامل أو تم نقلها.';
+
+  @override
+  String get compositeRelocateCarriersButton => 'إعادة تحديد موقع ملفات الحامل';
+
+  @override
+  String get passwordOptionalFieldLabel => 'كلمة المرور (اختياري)';
+
+  @override
+  String get plainDiskImagePasswordHint =>
+      'لا يلزم إدخال كلمة مرور — صورة القرص هذه غير مشفرة';
+
+  @override
+  String get compositePasswordHint => 'أدخل كلمة مرور الحاوية المركبة';
+
+  @override
+  String get generateStrongPasswordTooltip => 'إنشاء كلمة مرور قوية';
+
+  @override
+  String get cryfsBlockSizeDefaultLabel => '32 ك.بايت (افتراضي)';
+
+  @override
+  String get hiddenVolumeConfiguredInNextStepNotice =>
+      'سيتم ضبط إعدادات الحاوية المخفية في الخطوة التالية.';
+
+  @override
+  String get hiddenVolumeExplanationBanner =>
+      'توجد الحاوية المخفية داخل المساحة الحرة للحاوية الخارجية. يجب أن تختلف كلمة مرورها وملفات المفاتيح تمامًا عن الحاوية الخارجية.';
+
+  @override
+  String get hiddenVolumeCredentialsSectionHeader =>
+      'بيانات اعتماد الحاوية المخفية';
+
+  @override
+  String get hiddenVolumeSizeAndFormatSectionHeader =>
+      'حجم وتنسيق الحاوية المخفية';
+
+  @override
+  String get shareSheetIntegrationTitle => 'التكامل مع قائمة المشاركة';
+
+  @override
+  String get shareSheetIntegrationSubtitle =>
+      'السماح للتطبيقات الأخرى بمشاركة الملفات مباشرة إلى الحاوية عبر قائمة المشاركة في Android.';
+
+  @override
+  String get shareSheetIntegrationUpdateErrorMessage =>
+      'تعذر تحديث التكامل مع قائمة المشاركة.';
+
+  @override
+  String get autoLockOnShareImportTitle => 'قفل تلقائي بعد استيراد المشاركة';
+
+  @override
+  String get autoLockOnShareImportSubtitle =>
+      'إعادة قفل الخزينة تلقائيًا إذا تم إلغاء قفلها خصيصًا لاستيراد ملف تمت مشاركته';
+
+  @override
+  String get shareImportExpiredMessage =>
+      'لا يوجد شيء لاستيراده — انتهت صلاحية طلب المشاركة.';
+
+  @override
+  String get sharedFileDefaultDisplayName => 'ملف تمت مشاركته';
+
+  @override
+  String importingSharedFilesMessage(int count, String destination) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'جارٍ استيراد $count ملف إلى $destination',
+      many: 'جارٍ استيراد $count ملفًا إلى $destination',
+      few: 'جارٍ استيراد $count ملفات إلى $destination',
+      two: 'جارٍ استيراد ملفين إلى $destination',
+      one: 'جارٍ استيراد ملف واحد إلى $destination',
+      zero: 'جارٍ استيراد $count ملف إلى $destination',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sharedFileSavedMessage(int count, String destination) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم حفظ $count ملف في $destination',
+      many: 'تم حفظ $count ملفًا في $destination',
+      few: 'تم حفظ $count ملفات في $destination',
+      two: 'تم حفظ ملفين في $destination',
+      one: 'تم حفظ ملف واحد في $destination',
+      zero: 'تم حفظ $count ملف في $destination',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedFileSaveFailedMessage => 'تعذّر حفظ الملف الذي تمت مشاركته.';
+
+  @override
+  String get saveToVaultTitle => 'حفظ في الخزنة';
+
+  @override
+  String get noVaultsAvailableAddFromDashboardPrompt =>
+      'لا توجد خزائن بعد. أضف خزنة من لوحة التحكم أولاً.';
+
+  @override
+  String get vaultStatusUnlocked => 'مفتوحة';
+
+  @override
+  String get vaultStatusLocked => 'مقفل';
+
+  @override
+  String get compositeCarrierGrowthSectionHeader => 'التخفي والسعة';
+
+  @override
+  String get compositeCarrierGrowthSliderTitle => 'زيادة حجم ملفات الحامل';
+
+  @override
+  String compositeCarrierGrowthPercentLabel(int percent) {
+    return '+$percent% لكل ملف';
+  }
+
+  @override
+  String get compositeCarrierGrowthUltraStealthDesc =>
+      'تخفٍّ فائق (~5%): تتسع الملفات بالكاد. لا يمكن تمييزها عن التباين الطبيعي لمستشعر الكاميرا.';
+
+  @override
+  String get compositeCarrierGrowthRecommendedDesc =>
+      'موصى به (~10%): توازن ممتاز بين التخفي وسعة الخزينة القابلة للاستخدام.';
+
+  @override
+  String get compositeCarrierGrowthHighCapacityDesc =>
+      'سعة عالية (~20%+): أقصى مساحة للخزينة، لكن ملفات الحامل تتسع بشكل ملحوظ.';
+
+  @override
+  String get emergencyPanicTitle => 'طوارئ الذعر والإكراه';
+
+  @override
+  String get emergencyPanicSubtitle =>
+      'مشغلات الذعر، مربّع الإعدادات السريعة، PanicKit، وفتح الإكراه';
+
+  @override
+  String get sectionPanicTiers => 'مستوى مسح الذعر';
+
+  @override
+  String get panicTierSessionLabel => 'المستوى 1: مسح الجلسة';
+
+  @override
+  String get panicTierSessionSubtitle =>
+      'إلغاء تحميل الخزائن، تصفير الذاكرة، ومسح كلمات المرور/بيانات الاعتماد المحفوظة للخزائن';
+
+  @override
+  String get panicTierCredentialLabel => 'المستوى 2: مسح بيانات الاعتماد';
+
+  @override
+  String get panicTierCredentialSubtitle =>
+      'مسح قائمة خزائن لوحة التحكم، وإعادة ضبط القفل الرئيسي وإعدادات التطبيق، ومسح Keystore';
+
+  @override
+  String get panicTierNuclearLabel => 'المستوى 3: المسح الشامل';
+
+  @override
+  String get panicTierNuclearSubtitle =>
+      'الكتابة بالأصفار وإتلاف جميع ملفات التطبيق على القرص، ثم طلب إلغاء تثبيت النظام';
+
+  @override
+  String get panicQuickTileTitle => 'مربّع الإعدادات السريعة';
+
+  @override
+  String get panicQuickTileSubtitle =>
+      'تجهيز مربّع الإعدادات السريعة لتشغيل مستوى الذعر المحدد فوراً';
+
+  @override
+  String get triggerPanicNowTitle => 'تشغيل الذعر الآن';
+
+  @override
+  String get triggerPanicNowSubtitle => 'تنفيذ مستوى مسح الذعر المكوّن فوراً';
+
+  @override
+  String get triggerPanicConfirmTitle => 'تشغيل طوارئ الذعر؟';
+
+  @override
+  String triggerPanicConfirmMessage(String tier) {
+    return 'سيؤدي هذا إلى تنفيذ $tier فوراً. سيتم مسح الحاويات المفتوحة وبيانات الاعتماد وفقاً لهذا المستوى.';
+  }
+
+  @override
+  String get triggerPanicButton => 'تشغيل الذعر';
+
+  @override
+  String get sectionPanicBootTrigger => 'Wipe on Reboot';
+
+  @override
+  String get panicBootTriggerLevelLabel =>
+      'المستوى الذي سيتم تشغيله عند إعادة التشغيل';
+
+  @override
+  String get panicBootTriggerArmTitle => 'التجهيز للتشغيل القادم';
+
+  @override
+  String panicBootTriggerArmedSubtitle(Object tier) {
+    return 'مجهز — سيتم تشغيل $tier تلقائياً في المرة القادمة التي يعمل فيها الجهاز، ثم سيتوقف المفعول';
+  }
+
+  @override
+  String get panicBootTriggerDisarmedSubtitle =>
+      'متوقف — إعادة تشغيل الجهاز ستتم بشكل طبيعي';
+
+  @override
+  String get panicBootTriggerConfirmTitle => 'تجهيز المسح عند إعادة التشغيل؟';
+
+  @override
+  String panicBootTriggerConfirmMessage(Object tier) {
+    return 'في المرة القادمة التي يعمل فيها الجهاز — بما في ذلك إعادة التشغيل العادية أو التحديث التلقائي — سيتم تشغيل $tier تلقائياً قبل فتح التطبيق. يتم هذا لمرة واحدة فقط ثم يتوقف.';
+  }
+
+  @override
+  String get panicBootTriggerArmButton => 'تجهيز';
+
+  @override
+  String get panicBootTriggerArmedSuccessMessage => 'تم تجهيز مشغل التشغيل';
+
+  @override
+  String get panicBootTriggerDisarmedSuccessMessage => 'تم إيقاف مشغل التشغيل';
+
+  @override
+  String get sectionPanicKit => 'مستجيب PanicKit';
+
+  @override
+  String get panicKitEnableTitle => 'مستجيب PanicKit';
+
+  @override
+  String get panicKitEnableSubtitle =>
+      'السماح لتطبيقات الذعر الخارجية المقترنة (مثل Ripple وWasted) بتشغيل الذعر';
+
+  @override
+  String get panicKitEnforcePairingTitle => 'فرض اقتران التطبيقات';
+
+  @override
+  String get panicKitEnforcePairingSubtitle =>
+      'التحقق من هوية الحزمة وخلاصة شهادة SHA-256 في كل بث تشغيل';
+
+  @override
+  String get panicKitPairedAppLabel => 'تطبيق التشغيل المقترن';
+
+  @override
+  String get panicKitNoAppPaired => 'لا يوجد تطبيق تشغيل مقترن';
+
+  @override
+  String get panicKitUnpairButton => 'إلغاء الاقتران';
+
+  @override
+  String get panicKitUnpairSuccess => 'تم إلغاء اقتران مشغل PanicKit';
+
+  @override
+  String get sectionDuressUnlock => 'فتح القفل الرئيسي تحت الإكراه';
+
+  @override
+  String get duressMasterPasswordRequired =>
+      'يجب تمكين كلمة المرور الرئيسية في أمان التطبيق قبل تكوين فتح الإكراه.';
+
+  @override
+  String get duressPasswordTitle => 'كلمة مرور الإكراه';
+
+  @override
+  String get duressPasswordConfiguredSubtitle =>
+      'نشط — يؤدي إدخال كلمة المرور هذه على شاشة القفل إلى تشغيل إجراء الإكراه';
+
+  @override
+  String get duressPasswordNotConfiguredSubtitle =>
+      'أدخل كلمة مرور مختلفة على شاشة القفل لتشغيل إجراءات الطوارئ';
+
+  @override
+  String get removeDuressPasswordButton => 'إزالة كلمة مرور الإكراه';
+
+  @override
+  String get duressPasswordSetSuccess => 'تم تكوين كلمة مرور الإكراه';
+
+  @override
+  String get duressPasswordRemovedSuccess => 'تمت إزالة كلمة مرور الإكراه';
+
+  @override
+  String get duressPinConfiguredTitle => 'رمز PIN للإكراه';
+
+  @override
+  String get duressPinConfiguredSubtitle =>
+      'نشط — يؤدي إدخال رمز PIN هذا على لوحة المفاتيح إلى تشغيل إجراء الإكراه';
+
+  @override
+  String get duressPinNotConfiguredSubtitle =>
+      'أدخل رمز PIN متميزاً على لوحة المفاتيح لتشغيل إجراءات الطوارئ';
+
+  @override
+  String get removeDuressPinButton => 'إزالة رمز PIN للإكراه';
+
+  @override
+  String get duressPinSetSuccess => 'تم تكوين رمز PIN للإكراه';
+
+  @override
+  String get duressPinRemovedSuccess => 'تمت إزالة رمز PIN للإكراه';
+
+  @override
+  String get duressPatternTitle => 'نمط الإكراه';
+
+  @override
+  String get duressPatternConfiguredSubtitle =>
+      'نشط — يؤدي رسم هذا النمط إلى تشغيل إجراء الإكراه';
+
+  @override
+  String get duressPatternNotConfiguredSubtitle =>
+      'ارسم نمطاً متميزاً على شاشة القفل لتشغيل إجراءات الطوارئ';
+
+  @override
+  String get removeDuressPatternButton => 'إزالة نمط الإكراه';
+
+  @override
+  String get duressPatternSetSuccess => 'تم تكوين نمط الإكراه';
+
+  @override
+  String get duressPatternRemovedSuccess => 'تمت إزالة نمط الإكراه';
+
+  @override
+  String get duressMatchesMasterPasswordError =>
+      'لا يمكن أن تتطابق كلمة مرور الإكراه مع كلمة المرور الرئيسية';
+
+  @override
+  String get duressMatchesMasterPinError => 'لا يمكن أن يطابق رمز PIN الرئيسي';
+
+  @override
+  String get duressMatchesMasterPatternError =>
+      'لا يمكن أن يطابق نمط القفل الرئيسي';
+
+  @override
+  String get masterMatchesDuressPasswordError =>
+      'لا يمكن أن تتطابق كلمة المرور الرئيسية مع كلمة مرور الإكراه';
+
+  @override
+  String get masterMatchesDuressPinError => 'لا يمكن أن يطابق رمز PIN للإكراه';
+
+  @override
+  String get masterMatchesDuressPatternError =>
+      'لا يمكن أن يطابق نمط القفل للإكراه';
+
+  @override
+  String get toolCompositeContainerTitle => 'حاوية مركبة';
+
+  @override
+  String get toolCompositeContainerSubtitle =>
+      'تضمين وتركيب خزينة مشفرة عبر ملفات وسائط متعددة';
+
+  @override
+  String get compositePasswordChangeNotSupportedMessage =>
+      'تغيير كلمة المرور غير مدعوم للحاويات المركبة';
+
+  @override
+  String get compositeNoCarrierFilesFoundError =>
+      'لم يتم العثور على ملفات حاملة للحاوية المركبة';
+
+  @override
+  String get compositeIncorrectCredentialsOrCarrierMismatchError =>
+      'بيانات اعتماد غير صحيحة أو عدم تطابق في مجموعة الملفات الحاملة';
+
+  @override
+  String get incorrectCredentialsOrInvalidContainer =>
+      'بيانات اعتماد غير صحيحة أو حاوية غير صالحة';
+
+  @override
+  String get repairTargetFolderVaultOption => 'خزينة مجلد';
+
+  @override
+  String get repairTargetFolderVaultSubtitle =>
+      'gocryptfs أو CryFS أو Cryptomator';
+
+  @override
+  String get repairFolderVaultHealthyDeepScan =>
+      'لم يتم العثور على مشاكل -- تم التحقق من محتويات كل ملف.';
+
+  @override
+  String get repairFolderVaultHealthyStructureOnly =>
+      'لم يتم العثور على مشاكل هيكلية. قم بإجراء فحص عميق باستخدام كلمة المرور للتحقق من محتويات الملفات.';
+
+  @override
+  String repairFolderVaultIssuesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم العثور على $count مشكلة',
+      many: 'تم العثور على $count مشكلة',
+      few: 'تم العثور على $count مشاكل',
+      two: 'تم العثور على مشكلتين',
+      one: 'تم العثور على مشكلة واحدة',
+      zero: 'لم يتم العثور على مشاكل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get repairFolderVaultStructureOnlySuffix =>
+      ' (الهيكل فقط -- قم بإجراء فحص عميق للتحقق الكامل من المحتوى)';
+
+  @override
+  String get repairDeepScanWithPasswordButton => 'فحص عميق بكلمة المرور';
+
+  @override
+  String repairFolderVaultSummary(
+    Object fixed,
+    Object recovered,
+    Object removed,
+  ) {
+    return 'ملخص الإصلاح: تم إصلاح $fixed، وتم استرداد $recovered إلى /LOST+FOUND، وتم تنظيف $removed.';
+  }
+
+  @override
+  String get repairAndRecoverVaultButton => 'إصلاح واسترداد الخزينة';
+
+  @override
+  String get repairScanAgainButton => 'إعادة الفحص';
+
+  @override
+  String panicPurgeCompletedMessage(Object count) {
+    return 'اكتمل التطهير الطارئ (تم قفل $count).';
+  }
+
+  @override
+  String get usbPermissionRequiredError => 'إذن USB مطلوب';
+
+  @override
+  String get logcatScrollToBottomTooltip => 'التمرير إلى الأسفل';
+
+  @override
+  String logcatLinesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count سطر',
+      many: '$count سطرًا',
+      few: '$count أسطر',
+      two: 'سطران',
+      one: 'سطر واحد',
+      zero: '0 سطر',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get compositeSpaceTooSmallError =>
+      'المساحة القابلة للتخصيص صغيرة جدًا (يلزم 300 كيلوبايت كحد أدنى)';
+
+  @override
+  String get compositeInitializingStatusMessage =>
+      'جارٍ تهيئة وحدة تخزين VeraCrypt المركبة…';
+
+  @override
+  String get compositeCreationFailedError => 'فشل إنشاء الحاوية المركبة';
+
+  @override
+  String get compositeSelectCarriersFirstError =>
+      'يرجى تحديد الملفات الحاملة أولاً';
+
+  @override
+  String get compositePasswordOrKeyfileRequiredError =>
+      'كلمة المرور أو ملف المفتاح مطلوب';
+
+  @override
+  String get compositeMountingStatusMessage =>
+      'جارٍ تركيب وحدة التخزين المركبة…';
+
+  @override
+  String get compositeAuthFailedOrCarrierMismatchError =>
+      'فشلت المصادقة أو عدم تطابق في مجموعة الملفات الحاملة';
+
+  @override
+  String get layoutModeColumnedList => 'قائمة بأعمدة';
+
+  @override
+  String get longFileNameDisplayLabel => 'أسماء الملفات الطويلة';
+
+  @override
+  String get longFileNameDisplayDesc =>
+      'اختر كيفية اختصار الأسماء عندما تتجاوز المساحة المتاحة';
+
+  @override
+  String get longFileNameEllipsizeStartLabel => 'اختصار من البداية';
+
+  @override
+  String get longFileNameEllipsizeStartDesc =>
+      'يقتطع بداية الأسماء الطويلة مع إبقاء النهاية وامتداد الملف ظاهرين.';
+
+  @override
+  String get longFileNameEllipsizeMiddleLabel => 'اختصار من المنتصف';
+
+  @override
+  String get longFileNameEllipsizeMiddleDesc =>
+      'يقتطع منتصف الأسماء الطويلة مع إبقاء البداية وامتداد الملف ظاهرين.';
+
+  @override
+  String get longFileNameEllipsizeEndLabel => 'اختصار من النهاية';
+
+  @override
+  String get longFileNameEllipsizeEndDesc =>
+      'يقتطع نهاية الأسماء الطويلة مع إبقاء البداية ظاهرة.';
+
+  @override
+  String get longFileNameMarqueeLabel => 'نص متحرك (تمرير)';
+
+  @override
+  String get longFileNameMarqueeDesc =>
+      'يحتفظ بالاسم كاملاً مع تمريره ببطء ذهاباً وإياباً ليظل قابلاً للقراءة.';
+
+  @override
+  String get showItemActionsMenuLabel => 'إظهار قائمة الإجراءات (3 نقاط)';
+
+  @override
+  String get showItemActionsMenuDesc =>
+      'عرض زر إجراءات ثلاثي النقاط على الملفات والمجلدات في عروض القائمة';
+
+  @override
+  String get gridAspectRatioLabel => 'نسبة أبعاد الشبكة';
+
+  @override
+  String get gridAspectSquareLabel => '1:1 (مربع)';
+
+  @override
+  String get gridAspectLandscapeLabel => '16:9 (أفقي)';
+
+  @override
+  String get gridAspectPortraitLabel => '9:16 (عمودي)';
+
+  @override
+  String get fileFolderDisplaySectionHeader => 'عرض الملفات والمجلدات';
+
+  @override
+  String get navigationBarsSectionHeader => 'التنقل والأشرطة';
+
+  @override
+  String get columnedListViewColumnsSectionHeader => 'أعمدة القائمة الجدولية';
+
+  @override
+  String get autoHideAppBarLabel => 'إخفاء شريط التطبيق تلقائيًا عند التمرير';
+
+  @override
+  String get autoHideAppBarDesc =>
+      'إخفاء الشريط العلوي عند التمرير لأسفل لزيادة مساحة العرض';
+
+  @override
+  String get useFabForToolbarLabel => 'استخدام زر عائم لشريط الأدوات';
+
+  @override
+  String get useFabForToolbarDesc =>
+      'استبدال الشريط السفلي بزر عائم لزيادة مساحة العرض إلى الحد الأقصى';
+
+  @override
+  String get bottomSelectionBarLabel => 'إظهار شريط التحديد في الأسفل';
+
+  @override
+  String get bottomSelectionBarDesc =>
+      'عرض شريط أدوات التحديد في الأسفل بدلاً من الأعلى';
+
+  @override
+  String get clipboardFabTapToPaste => 'انقر للصق، واضغط مطولاً للتفاصيل';
+
+  @override
+  String get storageLocationsTitle => 'مواقع التخزين';
+
+  @override
+  String get storageLocationsSubtitle =>
+      'التخزين الداخلي وبطاقات SD ومزودات المستندات';
+
+  @override
+  String get storageLocationsSelectPrompt => 'حدد التخزين النشط';
+
+  @override
+  String get addStorageLocationTitle => 'إضافة موقع تخزين';
+
+  @override
+  String get addStorageLocationSubtitle =>
+      'إضافة بطاقة SD خارجية أو محرك USB أو مجلد';
+
+  @override
+  String get documentProviderSafLabel => 'مزود المستندات (SAF)';
+
+  @override
+  String get externalStorageLabel => 'تخزين خارجي';
+
+  @override
+  String get renameStorageLocationTitle => 'إعادة تسمية الموقع';
+
+  @override
+  String get removeStorageLocationTitle => 'إزالة الموقع';
+
+  @override
+  String removeStorageLocationConfirm(String name) {
+    return 'هل تريد إزالة \"$name\" من مواقع التخزين؟ لن يتم حذف الملفات.';
+  }
+
+  @override
+  String get storageLocationAddedSnack => 'تمت إضافة موقع التخزين';
+
+  @override
+  String get storageLocationUnresolvedError =>
+      'تعذر الوصول إلى هذا الموقع مباشرة. تأكد من منح أذونات التخزين.';
+
+  @override
+  String get storageLocationSelfReferenceError =>
+      'هذا بالفعل تخزين خاص بخزنة هذا التطبيق نفسه، لذا لا يمكن إضافته مرة أخرى كموقع خارجي. افتحه بدلاً من ذلك من قائمة الخزنات لديك.';
+
+  @override
+  String get internalStorageSubtitle => 'وحدة التخزين الداخلية';
+
+  @override
+  String get mediaViewerActionPlayPause => 'تشغيل / إيقاف مؤقت';
+
+  @override
+  String get mediaViewerActionPlaybackMode => 'وضع التشغيل';
+
+  @override
+  String get mediaViewerActionBookmark => 'إشارة مرجعية';
+
+  @override
+  String get mediaViewerActionDiagnostics => 'التشخيصات';
+
+  @override
+  String get mediaViewerCustomizeControls => 'تخصيص عناصر التحكم...';
+
+  @override
+  String get mediaViewerControlsTitle => 'عناصر تحكم مشغل الوسائط';
+
+  @override
+  String get mediaViewerControlsReset => 'تمت إعادة ضبط عناصر التحكم';
+
+  @override
+  String get mediaViewerTransportDisplay => 'النقل والعرض';
+
+  @override
+  String get mediaViewerShowScrubberTitle => 'إظهار شريط التقدم';
+
+  @override
+  String get mediaViewerShowScrubberDesc => 'يعرض شريط تمرير الموقع والمدة';
+
+  @override
+  String get mediaViewerShowCenterTransportTitle =>
+      'إظهار عناصر التحكم المركزية';
+
+  @override
+  String get mediaViewerShowCenterTransportDesc =>
+      'يعرض زر تشغيل/إيقاف مؤقت دائري كبير في المنتصف';
+
+  @override
+  String get mediaViewerShowPrevNextTitle => 'إظهار زري التالي والسابق';
+
+  @override
+  String get mediaViewerShowPrevNextDesc =>
+      'إيقاف للحفاظ على زر تشغيل واحد فقط';
+
+  @override
+  String get mediaViewerShowStatusBadgeTitle => 'إظهار شارات الحالة';
+
+  @override
+  String get mediaViewerShowStatusBadgeDesc =>
+      'يعرض تأخير عرض الشرائح ومؤشرات الصور الثابتة';
+
+  @override
+  String get mediaViewerTopBarSection => 'الشريط العلوي';
+
+  @override
+  String get mediaViewerBottomBarSection => 'الشريط السفلي';
+
+  @override
+  String get mediaViewerUnpinnedSection => 'غير مثبتة (القائمة الإضافية)';
+
+  @override
+  String get mediaViewerAllControlsPinned => 'جميع عناصر التحكم مثبتة بالفعل.';
+
+  @override
+  String get mediaPlayerControlsTitle => 'عناصر تحكم مشغل الوسائط';
+
+  @override
+  String get resumePlaybackTitle => 'استئناف التشغيل';
+
+  @override
+  String get resumePlaybackAskEveryTime => 'السؤال في كل مرة';
+
+  @override
+  String get resumePlaybackNever => 'أبدًا';
+
+  @override
+  String get resumePlaybackAlways => 'دائمًا';
+
+  @override
+  String get resumePlaybackPromptTitle => 'استئناف التشغيل؟';
+
+  @override
+  String resumePlaybackPromptMessage(String position) {
+    return 'المتابعة من $position؟';
+  }
+
+  @override
+  String get resumePlaybackStartOver => 'البدء من جديد';
+
+  @override
+  String get resumePlaybackResume => 'استئناف';
+
+  @override
+  String get pictureInPictureTitle => 'صورة داخل صورة تلقائيًا';
+
+  @override
+  String get pictureInPictureSubtitle =>
+      'الدخول في وضع صورة داخل صورة عند مغادرة التطبيق أثناء تشغيل فيديو';
+
+  @override
+  String get pictureInPictureAction => 'صورة داخل صورة';
+
+  @override
+  String get mediaViewerActionLockControls => 'قفل عناصر التحكم';
+
+  @override
+  String get mediaViewerHoldToUnlock => 'اضغط مطولًا لإلغاء القفل';
+
+  @override
+  String get keepAudioPlayingTitle => 'متابعة تشغيل الصوت بعد الإغلاق';
+
+  @override
+  String get keepAudioPlayingSubtitle =>
+      'يستمر تشغيل الصوت في الخلفية عند مغادرة المشغّل، ويمكنك التحكم به من الإشعار';
+
+  @override
+  String get mediaControlsResetSuccess =>
+      'تمت إعادة ضبط عناصر تحكم الوسائط إلى الإعدادات الافتراضية';
+
+  @override
+  String get playbackAndDisplayHeader => 'التشغيل والعرض';
+
+  @override
+  String get showProgressBarTitle => 'إظهار شريط التقدم (الممرر)';
+
+  @override
+  String get showProgressBarSubtitle =>
+      'شريط التمرير الزمني لمقاطع الفيديو والصوت';
+
+  @override
+  String get scrubPreviewStyleTitle => 'نمط المعاينة أثناء السحب';
+
+  @override
+  String get scrubPreviewMiniBoxLabel => 'مربع مصغّر';
+
+  @override
+  String get scrubPreviewMiniBoxDesc => 'صورة مصغّرة صغيرة فوق شريط التقدم';
+
+  @override
+  String get scrubPreviewFullscreenLabel => 'ملء الشاشة';
+
+  @override
+  String get scrubPreviewFullscreenDesc =>
+      'إطار كبير يملأ الشاشة أثناء سحب شريط التقدم';
+
+  @override
+  String get showTransportControlsOnPhotosTitle =>
+      'إظهار عناصر التحكم في العرض على الصور';
+
+  @override
+  String get showTransportControlsOnPhotosSubtitle =>
+      'تمكين عناصر تحكم عرض الشرائح على الصور (عطله لمظهر بسيط)';
+
+  @override
+  String get statusBadgeTitle => 'شارة الحالة';
+
+  @override
+  String get statusBadgeSubtitle =>
+      'عرض مؤقت عرض الشرائح أو مؤشر الصورة الثابتة';
+
+  @override
+  String get topBarActionsHeader => 'إجراءات الشريط العلوي';
+
+  @override
+  String get topBarActionsEmptyHint =>
+      'اسحب الإجراءات إلى هنا لتثبيتها في الشريط العلوي';
+
+  @override
+  String get bottomDockActionsHeader => 'إجراءات الشريط السفلي';
+
+  @override
+  String get bottomDockActionsEmptyHint =>
+      'اسحب الإجراءات إلى هنا لتثبيتها في الشريط السفلي';
+
+  @override
+  String get moreMenuActionsHeader => 'إجراءات قائمة المزيد (•••)';
+
+  @override
+  String get moreMenuActionsEmptyHint =>
+      'اسحب الإجراءات إلى هنا للقائمة المنسدلة للشريط العلوي';
+
+  @override
+  String get advancedSettingsActionsHeader =>
+      'إجراءات الإعدادات المتقدمة (إضافي)';
+
+  @override
+  String get advancedSettingsActionsEmptyHint =>
+      'اسحب الإجراءات إلى هنا لصفحة الإعدادات المتقدمة';
+
+  @override
+  String get dropHereAtEnd => 'أفلت هنا في النهاية';
+
+  @override
+  String get dragItemsHereToAdd =>
+      '+ اسحب العناصر إلى هنا لإضافتها إلى هذا القسم';
+
+  @override
+  String get moveToAdvancedSettingsTooltip => 'نقل إلى الإعدادات المتقدمة';
+
+  @override
+  String get noVaultsMounted => 'لا توجد خزائن محملة';
+
+  @override
+  String get vaultsMountedSummary => 'خزائن محملة';
+
+  @override
+  String get dashboardNavLabel => 'لوحة التحكم';
+
+  @override
+  String get vaultsSectionTitle => 'الخزائن';
+
+  @override
+  String get vaultStatusMounted => 'محمل';
+
+  @override
+  String get lockVaultTooltip => 'قفل الخزنة';
+
+  @override
+  String get lockAllVaultsTitle => 'قفل الكل';
+
+  @override
+  String get safProviderLabel => 'مزود SAF';
+
+  @override
+  String get singleFileCryptoTitle => 'تشفير ملف فردي';
+
+  @override
+  String get singleFileCryptoSubtitle => 'تشفير أو فك تشفير خارج الخزائن';
+
+  @override
+  String get passwordGeneratorTitle => 'مولد كلمات المرور';
+
+  @override
+  String get contentsLabel => 'المحتويات';
+
+  @override
+  String get totalSizeLabel => 'الحجم الإجمالي';
+
+  @override
+  String folderItemCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر',
+      many: '$count عنصر',
+      few: '$count عناصر',
+      two: 'عنصران',
+      one: 'عنصر واحد',
+      zero: 'فارغ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calculatingFolderStats => 'جارٍ الحساب…';
+
+  @override
+  String get videoGesturesHeader => 'إيماءات الفيديو والتكبير';
+
+  @override
+  String get swipeToSeekTitle => 'السحب للتقديم والتأخير';
+
+  @override
+  String get swipeToSeekSubtitle =>
+      'اسحب أفقياً عبر الشاشة للتقديم والتأخير. في قوائم التشغيل، يجب استخدام أزرار التنقل بدلاً من السحب بين العناصر';
+
+  @override
+  String get swipeToDismissTitle => 'السحب للإغلاق';
+
+  @override
+  String get swipeToDismissSubtitle =>
+      'اسحب للأسفل لإغلاق العارض. في قائمة تشغيل تتمرر عموديًا، اسحب جانبيًا بدلًا من ذلك';
+
+  @override
+  String get edgeSwipeBrightnessTitle => 'إيماءة سحب السطوع';
+
+  @override
+  String get edgeSwipeBrightnessSubtitle =>
+      'اسحب بالقرب من الحافة اليسرى لضبط سطوع الشاشة';
+
+  @override
+  String get edgeSwipeVolumeTitle => 'إيماءة سحب مستوى الصوت';
+
+  @override
+  String get edgeSwipeVolumeSubtitle =>
+      'اسحب بالقرب من الحافة اليمنى لضبط مستوى الصوت';
+
+  @override
+  String get edgeSwipeHudTitle => 'إظهار مؤشر الإيماءة';
+
+  @override
+  String get edgeSwipeHudSubtitle => 'عرض النسبة المئوية أثناء السحب';
+
+  @override
+  String get edgeSwipeWidthTitle => 'عرض منطقة الحافة';
+
+  @override
+  String get pinchZoomOutTitle => 'السماح بالتصغير';
+
+  @override
+  String get pinchZoomOutSubtitle =>
+      'اضغط بإصبعين للتصغير إلى ما دون الحجم الطبيعي';
+
+  @override
+  String get minZoomTitle => 'الحد الأدنى لمستوى التكبير';
+
+  @override
+  String get holdSpeedMultiplierTitle => 'سرعة التقديم السريع مع الاستمرار';
+
+  @override
+  String get holdSpeedMultiplierSubtitle =>
+      'السرعة أثناء الضغط مطولاً على الفيديو';
+
+  @override
+  String get defaultAspectRatioTitle => 'نسبة العرض إلى الارتفاع الافتراضية';
+
+  @override
+  String get defaultAspectRatioSubtitle => 'تُطبق تلقائيًا عند فتح الفيديو';
+
+  @override
+  String get aspectRatioModeLabel => 'نسبة العرض إلى الارتفاع';
+
+  @override
+  String get aspectRatioBestFit => 'أفضل ملاءمة';
+
+  @override
+  String get aspectRatioFill => 'ملء';
+
+  @override
+  String get aspectRatio16x9 => '16:9';
+
+  @override
+  String get aspectRatio4x3 => '4:3';
+
+  @override
+  String get aspectRatioCentre => 'توسيط';
+
+  @override
+  String get autoSyncMenuAction => 'المزامنة التلقائية…';
+
+  @override
+  String get autoSyncSheetTitle => 'المزامنة التلقائية';
+
+  @override
+  String get autoSyncSheetIntro =>
+      'يُبقي هذا المجلد ومجلدًا آخر متطابقين تلقائيًا. إذا تغيّر الملف نفسه في الجانبين، يُحتفَظ بالنسختين ما لم تختر خلاف ذلك أدناه.';
+
+  @override
+  String get autoSyncTargetSection => 'المزامنة مع';
+
+  @override
+  String get autoSyncChooseFolder => 'اختر مجلدًا';
+
+  @override
+  String get autoSyncTargetNotSetHere =>
+      'أُعدّت هذه القاعدة على جهاز آخر. اختر المجلد الذي سيُستخدم على هذا الجهاز.';
+
+  @override
+  String get autoSyncPickerSideLabel => 'وجهة المزامنة';
+
+  @override
+  String get autoSyncDirectionSection => 'الاتجاه';
+
+  @override
+  String get autoSyncDirectionTwoWay => 'في الاتجاهين';
+
+  @override
+  String get autoSyncDirectionTwoWayHint =>
+      'تُنسخ التغييرات من أي جانب إلى الجانب الآخر.';
+
+  @override
+  String get autoSyncDirectionVaultToTarget => 'من الخزنة إلى المجلد';
+
+  @override
+  String get autoSyncDirectionVaultToTargetHint =>
+      'نسخ احتياطي: يتبع المجلد الخزنة. لا تُنسخ التغييرات التي تُجرى في المجلد إلى الخزنة.';
+
+  @override
+  String get autoSyncDirectionTargetToVault => 'من المجلد إلى الخزنة';
+
+  @override
+  String get autoSyncDirectionTargetToVaultHint =>
+      'استيراد: تتبع الخزنة المجلد. لا تُنسخ التغييرات التي تُجرى في الخزنة إلى المجلد.';
+
+  @override
+  String get autoSyncConflictSection => 'إذا تغيّر ملف في الجانبين';
+
+  @override
+  String get autoSyncConflictKeepBoth => 'الاحتفاظ بالنسختين';
+
+  @override
+  String get autoSyncConflictKeepBothHint =>
+      'يُحتفَظ بالنسخة الأخرى كنسخة مُعاد تسميتها في الجانبين.';
+
+  @override
+  String get autoSyncConflictKeepNewer => 'الاحتفاظ بالأحدث';
+
+  @override
+  String get autoSyncConflictKeepNewerHint =>
+      'يُحتفَظ بالنسختين إذا تعذّر معرفة الأحدث.';
+
+  @override
+  String get autoSyncConflictVaultWins => 'تُعتمد نسخة الخزنة';
+
+  @override
+  String get autoSyncConflictVaultWinsHint => 'تُستبدل نسخة المجلد.';
+
+  @override
+  String get autoSyncConflictTargetWins => 'تُعتمد نسخة المجلد';
+
+  @override
+  String get autoSyncConflictTargetWinsHint => 'تُستبدل نسخة الخزنة.';
+
+  @override
+  String get autoSyncOptionsSection => 'خيارات';
+
+  @override
+  String get autoSyncOnUnlockTitle => 'المزامنة عند فتح قفل الخزنة';
+
+  @override
+  String get autoSyncLiveTitle => 'إبقاء المزامنة أثناء فتح القفل';
+
+  @override
+  String get autoSyncLiveSubtitle =>
+      'يتحقق من التغييرات من حين لآخر أثناء فتح الخزنة. لا تُلاحَظ كل التغييرات فورًا.';
+
+  @override
+  String get autoSyncDeleteTitle => 'نسخ عمليات الحذف أيضًا';
+
+  @override
+  String get autoSyncDeleteSubtitle =>
+      'يُحذف الملف المحذوف في جانب من الجانب الآخر أيضًا. تُوقَف عمليات الحذف مؤقتًا إذا بدا مجلد فارغًا على نحو غير متوقع.';
+
+  @override
+  String get autoSyncDeleteSourceAfterImportTitle =>
+      'حذف الملفات المصدرية بعد الاستيراد';
+
+  @override
+  String get autoSyncDeleteSourceAfterImportSubtitle =>
+      'لمزامنة المجلد إلى الخزنة فقط. يُحذف الملف المصدر بعد حفظ نسخته في الخزنة والتحقق من تطابق بصمة SHA-256.';
+
+  @override
+  String get autoSyncIgnoreLabel => 'تخطي الملفات والمجلدات المطابقة لـ';
+
+  @override
+  String get autoSyncIgnoreHelper =>
+      'نمط واحد في كل سطر: يطابق *.tmp الأسماء في أي مكان؛ ويتخطى node_modules المجلد ومحتوياته أينما وُجد؛ ويتخطى Projects/old هذا المسار من جذر المزامنة وكل ما بداخله.';
+
+  @override
+  String get autoSyncNeverSynced => 'لم تتم المزامنة بعد';
+
+  @override
+  String autoSyncLastSynced(String time) {
+    return 'آخر مزامنة: $time';
+  }
+
+  @override
+  String autoSyncReportSummary(int copied, int deleted, int kept) {
+    return '$copied منسوخ · $deleted محذوف · $kept تعارضات محفوظة';
+  }
+
+  @override
+  String autoSyncReportFailed(int count) {
+    return 'ملفات تعذّرت مزامنتها: $count';
+  }
+
+  @override
+  String get autoSyncReportDeletionsPaused =>
+      'أُوقفت عمليات الحذف مؤقتًا لأن مجلدًا بدا فارغًا على نحو غير متوقع أو لأن عددًا كبيرًا من الملفات كان سيُحذف.';
+
+  @override
+  String get autoSyncReportIncomplete =>
+      'تعذّرت قراءة جزء من مجلد، لذا تُركت تلك الملفات دون تغيير.';
+
+  @override
+  String get autoSyncSyncNow => 'مزامنة الآن';
+
+  @override
+  String get autoSyncRemove => 'إزالة المزامنة التلقائية';
+
+  @override
+  String get autoSyncRemoveTitle => 'إزالة المزامنة التلقائية؟';
+
+  @override
+  String get autoSyncRemoveMessage =>
+      'تتوقف مزامنة هذا المجلد. تبقى الملفات في المجلدين كما هي.';
+
+  @override
+  String get autoSyncSaved => 'تم حفظ المزامنة التلقائية';
+
+  @override
+  String get autoSyncStarted => 'بدأت المزامنة';
+
+  @override
+  String get autoSyncRemoved => 'أُزيلت المزامنة التلقائية';
+
+  @override
+  String get autoSyncSaveFailed => 'تعذّر حفظ إعدادات المزامنة التلقائية';
+
+  @override
+  String get autoSyncUnavailable => 'المزامنة غير متاحة لهذه الخزنة حاليًا.';
+
+  @override
+  String get autoSyncProblemNoTarget => 'اختر مجلدًا للمزامنة معه.';
+
+  @override
+  String get autoSyncProblemOverlapsTarget =>
+      'لا يمكن أن يكون مجلد المزامنة داخل هذا المجلد أو أن يحتويه.';
+
+  @override
+  String get autoSyncProblemOverlapsOtherRule =>
+      'هذا المجلد، أو مجلد أعلى منه أو بداخله، لديه مزامنة تلقائية بالفعل.';
+
+  @override
+  String get autoSyncProblemTargetIsVault =>
+      'يحتوي هذا المجلد على البيانات المشفّرة لخزنة. افتح قفل الخزنة واخترها من قائمة الخزائن بدلًا من ذلك.';
+
+  @override
+  String get autoSyncReadOnlyNotice =>
+      'هذه الخزنة للقراءة فقط، لذا لا يمكن حفظ المزامنة التلقائية.';
+
+  @override
+  String get autoSyncConfigUnreadable =>
+      'تعذّرت قراءة إعدادات المزامنة التلقائية المحفوظة لهذه الخزنة.';
+
+  @override
+  String autoSyncBannerRunning(String target, int done, int total) {
+    return 'جارٍ المزامنة مع $target · $done من $total';
+  }
+
+  @override
+  String get autoSyncBannerAttention =>
+      'تعذّرت مزامنة بعض المجلدات بالكامل. افتح إعدادات المزامنة التلقائية لأحد المجلدات لمعرفة التفاصيل.';
+
+  @override
+  String get autoSyncNotificationTitle => 'جارٍ مزامنة المجلدات';
+
+  @override
+  String autoSyncNotificationProgress(int done, int total) {
+    return '$done من $total ملفات';
+  }
+
+  @override
+  String get sectionQuickCapture => 'التقاط سريع';
+
+  @override
+  String get quickCaptureSettingsTitle => 'التقاط سريع';
+
+  @override
+  String get quickCaptureSettingsSubtitle =>
+      'مربّع الإعدادات السريعة واختصار الشاشة الرئيسية للالتقاط مباشرة إلى خزنة';
+
+  @override
+  String get quickCaptureTileToggleTitle => 'مربّع الإعدادات السريعة';
+
+  @override
+  String get quickCaptureTileToggleSubtitle =>
+      'يفتح الكاميرا مباشرة من الإعدادات السريعة، دون طلب رمز PIN أو نمط. ستظل تختار وتفتح خزنة قبل حفظ أي شيء.';
+
+  @override
+  String get quickCaptureAddShortcutTitle => 'إضافة إلى الشاشة الرئيسية';
+
+  @override
+  String get quickCaptureAddShortcutSubtitle =>
+      'تثبيت أيقونة الالتقاط السريع في شاشتك الرئيسية، إذا كان مشغّل التطبيقات يدعم ذلك';
+
+  @override
+  String get quickCaptureShortcutRequestedMessage =>
+      'تم الطلب — تحقق من شاشتك الرئيسية';
+
+  @override
+  String get quickCaptureShortcutUnsupportedMessage =>
+      'مشغّل التطبيقات لديك لا يدعم تثبيت الاختصارات';
+
+  @override
+  String quickCaptureSavedToast(String name, String destination) {
+    return 'تم حفظ $name في $destination';
+  }
+
+  @override
+  String get cardSwipeActionsTitle => 'إيماءات سحب البطاقات';
+
+  @override
+  String get cardSwipeActionsSubtitle =>
+      'اسحب بطاقات الخزائن لإظهار إجراءات التعديل والحذف بسرعة';
+
+  @override
+  String get cameraQualitySd => '480p (دقة قياسية)';
+
+  @override
+  String get cameraQualityHd => '720p (عالية الدقة)';
+
+  @override
+  String get cameraQualityFhd => '1080p (عالية الدقة بالكامل)';
+
+  @override
+  String get cameraQualityUhd => '4K (فائقة الدقة)';
+
+  @override
+  String get cameraPhotoResMax => 'كاملة (أعلى دقة)';
+
+  @override
+  String get cameraPhotoResHigh => '5 ميجابكسل (عالية)';
+
+  @override
+  String get cameraPhotoResMedium => '2 ميجابكسل (متوسطة)';
+
+  @override
+  String get cameraPhotoResLow => '1.2 ميجابكسل (منخفضة)';
+
+  @override
+  String get cameraLensWide => 'عريضة';
+
+  @override
+  String get cameraLensInfrared => 'الأشعة تحت الحمراء';
+
+  @override
+  String get cameraLensFront => 'أمامية';
+
+  @override
+  String get appLockBehaviorTitle => 'سلوك قفل التطبيق';
+
+  @override
+  String get lockAppOnScreenOffTitle => 'قفل التطبيق عند إيقاف تشغيل الشاشة';
+
+  @override
+  String get lockAppOnScreenOffSubtitle =>
+      'إظهار شاشة القفل بمجرد إيقاف تشغيل الشاشة';
+
+  @override
+  String get settingsHubSecuritySubtitle =>
+      'القفل الرئيسي، القياسات الحيوية والقفل التلقائي';
+
+  @override
+  String get settingsHubStorageSubtitle =>
+      'الوصول إلى التخزين، الخدمة في الخلفية والمشاركة';
+
+  @override
+  String get settingsHubFileHandlingSubtitle =>
+      'الفتح التلقائي، المصغرات وارتباطات الملفات';
+
+  @override
+  String get settingsHubAppearanceSubtitle => 'السمات، أسود OLED النقي واللغة';
+
+  @override
+  String get settingsHubAdvancedSubtitle =>
+      'نسخ الإعدادات احتياطيًا، سجلات التصحيح وlogcat';
+
+  @override
+  String get toolPasswordInterchangeTitle => 'استيراد / تصدير كلمات المرور';
+
+  @override
+  String get toolPasswordInterchangeSubtitle =>
+      'نقل بيانات تسجيل الدخول والبطاقات والملاحظات من أو إلى KeePass وBitwarden ومديري كلمات المرور الآخرين';
+
+  @override
+  String get toolsSectionPasswordManager => 'مدير كلمات المرور';
+
+  @override
+  String get passwordInterchangeExportTab => 'تصدير';
+
+  @override
+  String get passwordInterchangeImportTab => 'استيراد';
+
+  @override
+  String get passwordInterchangeSourceHeader => 'من';
+
+  @override
+  String get passwordInterchangeChooseFolder => 'اختر مجلد خزينة';
+
+  @override
+  String get passwordInterchangeIncludeSubfolders => 'تضمين المجلدات الفرعية';
+
+  @override
+  String get passwordInterchangeFormatHeader => 'التنسيق';
+
+  @override
+  String get passwordInterchangeFormatLabel => 'تنسيق الملف';
+
+  @override
+  String get passwordInterchangeMasterPassword => 'كلمة المرور الرئيسية';
+
+  @override
+  String get passwordInterchangeConfirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get passwordInterchangePasswordsDontMatch =>
+      'كلمات المرور غير متطابقة';
+
+  @override
+  String get passwordInterchangeRunExport => 'تصدير';
+
+  @override
+  String passwordInterchangeExportReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count عنصر جاهزة للتصدير',
+      one: 'عنصر واحد جاهز للتصدير',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeSaveToDevice => 'حفظ على الجهاز…';
+
+  @override
+  String get passwordInterchangeSaved => 'تم الحفظ.';
+
+  @override
+  String get passwordInterchangeFileHeader => 'الملف';
+
+  @override
+  String get passwordInterchangeChooseFile => 'اختر ملفًا…';
+
+  @override
+  String get passwordInterchangeReadFile => 'قراءة الملف';
+
+  @override
+  String passwordInterchangeFoundItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم العثور على $count عنصر',
+      one: 'تم العثور على عنصر واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeSelectAll => 'تحديد الكل';
+
+  @override
+  String get passwordInterchangeSelectNone => 'إلغاء تحديد الكل';
+
+  @override
+  String passwordInterchangeWarningsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تعذر قراءة $count صف',
+      one: 'تعذر قراءة صف واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeDestinationHeader => 'حفظ في';
+
+  @override
+  String get passwordInterchangeMirrorFolders => 'إعادة إنشاء المجلدات';
+
+  @override
+  String passwordInterchangeRunImport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'استيراد $count عنصر',
+      one: 'استيراد عنصر واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String passwordInterchangeImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم استيراد $count عنصر',
+      one: 'تم استيراد عنصر واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String passwordInterchangeSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم تخطي $count عنصر',
+      one: 'تم تخطي عنصر واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String autoLockIndicatorLocksAfter(String duration) {
+    return 'قفل عند عدم النشاط: $duration';
+  }
+
+  @override
+  String get autoLockIndicatorLocksOnScreenOff => 'قفل عند إيقاف الشاشة';
+
+  @override
+  String get autoLockIndicatorNeverLocks => 'لن يُقفل تلقائيًا';
+
+  @override
+  String autoLockIndicatorLocksAfterTooltip(String duration) {
+    return 'يُقفل بعد $duration من عدم النشاط (يُعاد ضبطه أثناء الاستخدام)';
+  }
+
+  @override
+  String get badgeExperimental => 'تجريبي';
+
+  @override
+  String get createCompositeHintPrompt =>
+      'هل تريد إخفاء خزنة عن طريق إرفاق أجزائها بملفات عادية؟';
+
+  @override
+  String get createCompositeHintAction => 'فتح معالج وحدة التخزين المركبة';
+
+  @override
+  String get plainDiskImageNotice =>
+      'تم اكتشاف صورة قرص غير مشفرة. لا يلزم وجود كلمة مرور لفتح هذا المجلد.';
+
+  @override
+  String storageLocationUnavailable(String name) {
+    return 'موقع التخزين \"$name\" غير متوفر أو تم فصله.';
+  }
+
+  @override
+  String get cameraEditPhotoTooltip => 'تعديل الصورة';
+
+  @override
+  String get cameraTrimVideoTooltip => 'قص الفيديو';
+
+  @override
+  String get cameraDiscardMediaTooltip => 'تجاهل';
+
+  @override
+  String get cameraSaveMediaTooltip => 'حفظ في الخزنة';
+
+  @override
+  String get cameraContinueCaptureTooltip => 'التقاط صورة أخرى';
+
+  @override
+  String cameraBatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count صور',
+      one: 'صورة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cameraReviewPhotosTooltip => 'مراجعة الصور الملتقطة';
+
+  @override
+  String get vaultItemTypeAuthenticator => 'Authenticator';
+
+  @override
+  String get fieldIssuer => 'Issuer';
+
+  @override
+  String get fieldAuthenticatorAccount => 'Account';
+
+  @override
+  String get fieldSecretKey => 'Secret Key';
+
+  @override
+  String get fieldTotpAlgorithm => 'Algorithm (default: SHA1)';
+
+  @override
+  String get fieldTotpDigits => 'Digits (default: 6)';
+
+  @override
+  String get fieldTotpPeriod => 'Refresh Interval, seconds (default: 30)';
+
+  @override
+  String get authenticatorScreenTitle => 'Authenticator';
+
+  @override
+  String get authenticatorAppBarTooltip => 'Authenticator codes';
+
+  @override
+  String get authenticatorEmptyStateTitle => 'No authenticator codes yet';
+
+  @override
+  String get authenticatorEmptyStateMessage =>
+      'Add a TOTP secret to a password item, or create a standalone Authenticator item, in any unlocked vault to see live codes here.';
+
+  @override
+  String get authenticatorNoVaultsUnlockedMessage =>
+      'Unlock a vault to see its authenticator codes here.';
+
+  @override
+  String get authenticatorCodeLabel => 'Code';
+
+  @override
+  String get authenticatorInvalidSecretError => 'Invalid secret';
+
+  @override
+  String get authenticatorAddButtonTooltip => 'Add authenticator';
+
+  @override
+  String get authenticatorChooseVaultTitle => 'Choose a vault';
+
+  @override
+  String get authenticatorOpenItemTooltip => 'Open item';
+
+  @override
+  String get authenticatorNextCodeLabel => 'الرمز التالي';
+
+  @override
+  String get authenticatorNextCodePrefix => 'التالي';
+
+  @override
+  String get authenticatorCopyNextCodeTooltip => 'نسخ الرمز التالي';
+
+  @override
+  String get authenticatorSettingsTitle => 'إعدادات المصادقة';
+
+  @override
+  String get authenticatorEnableTitle => 'تفعيل المصادقة';
+
+  @override
+  String get authenticatorEnableSubtitle =>
+      'فحص الخزائن المفتوحة تلقائيًا بحثًا عن رموز التحقق';
+
+  @override
+  String get authenticatorShowCodesTitle => 'إظهار رموز التحقق';
+
+  @override
+  String get authenticatorShowCodesSubtitle =>
+      'عرض الأرقام بدلاً من إخفائها للخصوصية';
+
+  @override
+  String get authenticatorSearchPlacementLabel => 'موضع شريط البحث';
+
+  @override
+  String get authenticatorPlacementBottom => 'أسفل';
+
+  @override
+  String get authenticatorPlacementTop => 'أعلى';
+
+  @override
+  String get authenticatorInterchangeSection => 'الاستيراد والتصدير';
+
+  @override
+  String get scanQrCodeTooltip => 'مسح رمز الاستجابة السريعة';
+
+  @override
+  String get qrScannerTitle => 'مسح رمز الاستجابة السريعة';
+
+  @override
+  String get qrScannerHint => 'قم بمحاذاة الرمز داخل الإطار';
+
+  @override
+  String get qrCodeScannedSuccess => 'تم مسح الرمز بنجاح';
+
+  @override
+  String get invalidQrCodeError => 'رمز الاستجابة السريعة للمصادقة غير صالح';
+
+  @override
+  String get immediateAutoLockOptionSubtitle =>
+      'يتم القفل بمجرد إيقاف تشغيل الشاشة أو انتقال التطبيق إلى الخلفية';
+
+  @override
+  String get autoLockIndicatorLocksImmediately => 'قفل فوري';
+
+  @override
+  String get quickActionLockModeTitle => 'القفل بعد الإجراءات السريعة';
+
+  @override
+  String get quickActionLockModeSubtitle =>
+      'سلوك قفل الخزنة عند الحفظ عبر الالتقاط السريع أو قائمة المشاركة';
+
+  @override
+  String get quickActionLockModeLeaveAsFoundLabel =>
+      'الإبقاء على الحالة السابقة';
+
+  @override
+  String get quickActionLockModeLeaveAsFoundSubtitle =>
+      'القفل فقط إذا كانت الخزنة مقفلة قبل الحفظ';
+
+  @override
+  String get quickActionLockModeAlwaysLockLabel => 'قفل دائمًا';
+
+  @override
+  String get quickActionLockModeAlwaysLockSubtitle =>
+      'قفل الخزنة فورًا بعد الحفظ';
+
+  @override
+  String get quickActionLockModeLeaveOpenLabel => 'إبقاء القفل مفتوحًا';
+
+  @override
+  String get quickActionLockModeLeaveOpenSubtitle =>
+      'ترك الخزنة مفتوحة واتباع مؤقتات القفل التلقائي';
+
+  @override
+  String get textEditorThemeMenuItem => 'مظهر المحرر…';
+
+  @override
+  String get textEditorThemeSheetTitle => 'مظهر المحرر';
+
+  @override
+  String get textEditorBackgroundSectionTitle => 'الخلفية';
+
+  @override
+  String get textEditorSyntaxThemeSectionTitle => 'سمة بناء الجملة';
+
+  @override
+  String get textEditorBackgroundMatchTheme => 'مطابقة السمة';
+
+  @override
+  String get textEditorBackgroundAmoledBlack => 'أسود AMOLED';
+
+  @override
+  String get textEditorBackgroundDarkSlate => 'رمادي داكن';
+
+  @override
+  String get textEditorBackgroundClassicLight => 'فاتح كلاسيكي';
+
+  @override
+  String get textEditorBackgroundSepia => 'بني داكن (Sepia)';
+
+  @override
+  String get textEditorSyntaxThemeAuto => 'تلقائي';
+
+  @override
+  String get textEditorSyntaxThemeOneDark => 'One Dark';
+
+  @override
+  String get textEditorSyntaxThemeDracula => 'Dracula';
+
+  @override
+  String get textEditorSyntaxThemeGithubLight => 'GitHub Light';
+
+  @override
+  String get textEditorSyntaxThemeMonokai => 'Monokai';
+
+  @override
+  String get textEditorSyntaxThemeNord => 'Nord';
+
+  @override
+  String get textEditorRelativeLineNumbersLabel => 'أرقام الأسطر النسبية';
+
+  @override
+  String get textEditorRelativeLineNumbersDescription =>
+      'إظهار مسافة كل سطر من المؤشر بدلاً من رقمه المطلق';
+
+  @override
+  String get textEditorAutoSaveLabel => 'الحفظ التلقائي';
+
+  @override
+  String get textEditorAutoSaveDescription =>
+      'حفظ التغييرات تلقائيًا عند التوقف عن الكتابة';
+
+  @override
+  String get cutTooltip => 'قص';
+
+  @override
+  String get textEditorShowLineNumbersLabel => 'إظهار أرقام الأسطر';
+
+  @override
+  String get textEditorShowLineNumbersDescription =>
+      'عرض أرقام الأسطر على طول الحافة اليسرى';
+
+  @override
+  String get textEditorShowAccessoryBarLabel =>
+      'إظهار شريط اختصارات لوحة المفاتيح';
+
+  @override
+  String get textEditorShowAccessoryBarDescription =>
+      'عرض الرموز وأدوات التحرير فوق لوحة المفاتيح';
+
+  @override
+  String textEditorFontSizeLabel(int size) {
+    return 'حجم الخط: $size نقطة';
+  }
+
+  @override
+  String get textEditorCustomizeKeyBarLabel => 'تخصيص رموز الاختصارات';
+
+  @override
+  String get textEditorCustomizeKeyBarDescription =>
+      'تعديل وإعادة ترتيب الرموز المعروضة';
+
+  @override
+  String get textEditorCustomizeKeyBarTitle => 'تخصيص الرموز';
+
+  @override
+  String get textEditorCustomizeKeyBarHint => 'رموز مفصولة بمسافات';
+
+  @override
+  String get textEditorSaveAsMenuItem => 'حفظ باسم…';
+
+  @override
+  String get textEditorSaveAsDialogTitle => 'حفظ باسم';
+
+  @override
+  String get textEditorSaveAsFileNameLabel => 'اسم الملف';
+
+  @override
+  String get textEditorSaveAsButton => 'حفظ باسم';
+
+  @override
+  String get textEditorFileAlreadyExistsError =>
+      'يوجد ملف بهذا الاسم بالفعل هنا';
+
+  @override
+  String get textEditorProjectFilesTitle => 'ملفات المشروع';
+
+  @override
+  String get textEditorCloseTabTooltip => 'إغلاق علامة التبويب';
+
+  @override
+  String get textEditorResetToDefault =>
+      'إعادة التعيين إلى الإعدادات الافتراضية';
+
+  @override
+  String get textEditorLivePreviewTitle => 'معاينة حية';
+
+  @override
+  String get textEditorWordWrap => 'التفاف النص';
+
+  @override
+  String get textEditorReadOnly => 'للقراءة فقط';
+
+  @override
+  String get selectImageTitle => 'اختر صورة';
+
+  @override
+  String get noImagesFoundMessage => 'لم يتم العثور على صور في هذا المجلد.';
+
+  @override
+  String get textEditorShowSymbolsBarLabel => 'إظهار شريط الرموز';
+
+  @override
+  String get textEditorShowSymbolsBarDescription =>
+      'إظهار اختصارات الرموز وعلامات الترقيم';
+
+  @override
+  String get textEditorShowActionsBarLabel => 'إظهار شريط الإجراءات';
+
+  @override
+  String get textEditorShowActionsBarDescription =>
+      'إظهار أزرار الإجراءات السريعة في المحرر';
+
+  @override
+  String get textEditorCustomizeActionsLabel => 'تخصيص أزرار الإجراءات';
+
+  @override
+  String get textEditorCustomizeActionsDescription =>
+      'اختيار وترتيب إجراءات المحرر';
+
+  @override
+  String get textEditorCustomizeActionsTitle => 'تخصيص الإجراءات';
+
+  @override
+  String get actionUndo => 'تراجع';
+
+  @override
+  String get actionRedo => 'إعادة';
+
+  @override
+  String get actionCursorLeft => 'تحريك المؤشر يساراً';
+
+  @override
+  String get actionCursorRight => 'تحريك المؤشر يميناً';
+
+  @override
+  String get actionSelectWord => 'تحديد كلمة';
+
+  @override
+  String get actionCopy => 'نسخ';
+
+  @override
+  String get actionCut => 'قص';
+
+  @override
+  String get actionPaste => 'لصق';
+
+  @override
+  String get actionFind => 'بحث واستبدال';
+
+  @override
+  String get actionWordWrap => 'التفاف النص';
+
+  @override
+  String get actionGoToLine => 'الانتقال إلى سطر';
+
+  @override
+  String get actionGoToStart => 'الانتقال للبداية';
+
+  @override
+  String get actionGoToEnd => 'الانتقال للنهاية';
+
+  @override
+  String get actionIndent => 'زيادة المسافة البادئة';
+
+  @override
+  String get actionOutdent => 'إنقاص المسافة البادئة';
+
+  @override
+  String get actionFormat => 'تنسيق الكود';
+
+  @override
+  String get actionReadOnly => 'للقراءة فقط';
+
+  @override
+  String get screenLockOnlyAutoLockOption => 'قفل الشاشة فقط';
+
+  @override
+  String get screenLockOnlyAutoLockOptionSubtitle =>
+      'يُقفل فقط عند إيقاف تشغيل الشاشة — وليس عند نقل التطبيق إلى الخلفية';
+
+  @override
+  String get authenticatorScanQrSubtitle =>
+      'مسح رمز فردي أو رمز QR لنقل Google Authenticator';
+
+  @override
+  String get authenticatorImportBackupsSubtitle =>
+      'الاستيراد من نسخ Aegis أو 2FAS أو Bitwarden أو Ente أو Proton أو andOTP الاحتياطية';
+
+  @override
+  String authenticatorGoogleAuthImportSuccess(int count) {
+    return 'تم استيراد $count حساب(حسابات) من Google Authenticator';
+  }
+
+  @override
+  String get authenticatorMultiQrTitle => 'تم اكتشاف رموز QR إضافية';
+
+  @override
+  String get authenticatorMultiQrMessage =>
+      'قسّم Google Authenticator هذا التصدير على عدة رموز QR. هل تريد مسح الرمز التالي الآن؟';
+
+  @override
+  String get authenticatorScanNextQr => 'مسح التالي';
+
+  @override
+  String authenticatorGoogleAuthImportError(String error) {
+    return 'فشل استيراد رمز QR لـ Google Authenticator: $error';
+  }
+
+  @override
+  String get passwordInterchangeOptionalPasswordHelper =>
+      'مطلوب فقط إذا كانت هذه النسخة الاحتياطية محمية بكلمة مرور';
+
+  @override
+  String authenticatorSingleAccountImportedHint(String title) {
+    return 'تم ملء الحساب الأول ($title). لاستيراد جميع الحسابات، قم بالمسح في شاشة المصادقة.';
+  }
+
+  @override
+  String get authenticatorHotpReadOnlyError =>
+      'هذه الخزنة للقراءة فقط، لذا لا يمكن تقديم عداد HOTP.';
+
+  @override
+  String get authenticatorHotpSaveError => 'تعذر حفظ عداد HOTP الجديد.';
+
+  @override
+  String get authenticatorGenerateNextCode => 'إنشاء الرمز التالي';
+
+  @override
+  String get actionSelectAll => 'تحديد الكل';
+
+  @override
+  String get textEditorSelectAllMenuItem => 'تحديد الكل';
+
+  @override
+  String get textEditorShowCaretScrubberLabel => 'إظهار شريط تحريك المؤشر';
+
+  @override
+  String get textEditorShowCaretScrubberDescription =>
+      'شريط سحب لتحريك المؤشر بدقة';
+
+  @override
+  String get textEditorShowStatusBarLabel => 'إظهار شريط الحالة';
+
+  @override
+  String get textEditorShowStatusBarDescription =>
+      'عرض عدد الأسطر والأحرف في الأسفل';
+
+  @override
+  String textEditorCursorPosition(int line, int column) {
+    return 'السطر $line، العمود $column';
+  }
+
+  @override
+  String get textEditorNewFileTooltip => 'ملف جديد';
+
+  @override
+  String get textEditorCloseTab => 'إغلاق';
+
+  @override
+  String get textEditorCloseOtherTabs => 'إغلاق الباقي';
+
+  @override
+  String get textEditorCloseAllTabs => 'إغلاق الكل';
+
+  @override
+  String get textEditorRevertToSaved => 'العودة إلى المحفوظ';
+
+  @override
+  String get textEditorRevertDialogTitle => 'تجاهل التغييرات؟';
+
+  @override
+  String get textEditorRevertDialogMessage =>
+      'تجاهل كافة التعديلات غير المحفوظة وإعادة تحميل الملف من الخزينة؟';
+
+  @override
+  String get revertButton => 'استعادة';
+
+  @override
+  String get textEditorNewFolderTooltip => 'مجلد جديد';
+
+  @override
+  String get textEditorNewFolderDialogTitle => 'مجلد جديد';
+
+  @override
+  String get textEditorNewFolderFieldLabel => 'اسم المجلد';
+
+  @override
+  String get textEditorRenameMenuItem => 'إعادة تسمية';
+
+  @override
+  String get textEditorRenameDialogTitle => 'إعادة تسمية';
+
+  @override
+  String get textEditorMoveToMenuItem => 'نقل إلى...';
+
+  @override
+  String get textEditorMoveToDialogTitle => 'نقل إلى مجلد';
+
+  @override
+  String get textEditorMoveHereButton => 'انقل هنا';
+
+  @override
+  String get textEditorDeleteMenuItem => 'حذف';
+
+  @override
+  String textEditorDeleteConfirmTitle(String name) {
+    return 'حذف $name؟';
+  }
+
+  @override
+  String textEditorDeleteConfirmMessage(String name) {
+    return 'هل أنت متأكد من رغبتك في حذف \"$name\"؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  @override
+  String get videoEditorEditAction => 'Edit video';
+
+  @override
+  String get videoEditorExportAction => 'Export';
+
+  @override
+  String get videoEditorTimelineLabel => 'Video timeline';
+
+  @override
+  String get videoEditorSetStart => 'Set start';
+
+  @override
+  String get videoEditorSetEnd => 'Set end';
+
+  @override
+  String get videoEditorAddSegment => 'Add';
+
+  @override
+  String get videoEditorSplit => 'Split';
+
+  @override
+  String get videoEditorDeleteSegment => 'Delete';
+
+  @override
+  String get videoEditorModeKeep => 'Keep';
+
+  @override
+  String get videoEditorModeCutOut => 'Cut out';
+
+  @override
+  String get videoEditorNoSegments =>
+      'No segments yet. Move the playhead and tap Add.';
+
+  @override
+  String videoEditorOutputSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Output: $count clips · $duration',
+      one: 'Output: 1 clip · $duration',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String videoEditorSnapNote(String start, String end) {
+    return 'Lossless cut starts on a keyframe: $start – $end';
+  }
+
+  @override
+  String get videoEditorBoundaryInvalid =>
+      'That would leave the segment too short.';
+
+  @override
+  String get videoEditorNoRoom => 'There is no room for a segment here.';
+
+  @override
+  String get videoEditorNothingToExport => 'Nothing to export.';
+
+  @override
+  String get videoEditorReadOnly =>
+      'This vault is read-only, so the edited video can\'t be saved.';
+
+  @override
+  String videoEditorLoadFailed(String message) {
+    return 'Couldn\'t open this video: $message';
+  }
+
+  @override
+  String get videoEditorZoomIn => 'Zoom in';
+
+  @override
+  String get videoEditorZoomOut => 'Zoom out';
+
+  @override
+  String get videoEditorZoomFit => 'Fit to screen';
+
+  @override
+  String get videoEditorPrevFrame => 'الإطار السابق';
+
+  @override
+  String get videoEditorNextFrame => 'الإطار التالي';
+
+  @override
+  String get videoEditorPrevKeyframe => 'Previous keyframe';
+
+  @override
+  String get videoEditorNextKeyframe => 'Next keyframe';
+
+  @override
+  String get videoEditorExporting => 'Exporting video';
+
+  @override
+  String videoEditorCutting(int current, int total) {
+    return 'Cutting clip $current of $total';
+  }
+
+  @override
+  String get videoEditorCuttingOne => 'Cutting…';
+
+  @override
+  String get videoEditorSaving => 'Saving…';
+
+  @override
+  String videoEditorSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Saved $count videos',
+      one: 'Saved 1 video',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorAudioDropped =>
+      'Some audio tracks couldn\'t be copied.';
+
+  @override
+  String videoEditorExportFailed(String message) {
+    return 'Export failed: $message';
+  }
+
+  @override
+  String get videoEditorExportCancelled => 'Export cancelled';
+
+  @override
+  String get videoEditorExportTitle => 'Export';
+
+  @override
+  String videoEditorExportSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clips · $duration',
+      one: '1 clip · $duration',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorExportSingle => 'Save as new video';
+
+  @override
+  String get videoEditorExportSingleHint => 'The original stays untouched.';
+
+  @override
+  String get videoEditorExportMerge => 'Merge into one video';
+
+  @override
+  String get videoEditorExportMergeHint =>
+      'Clips are joined in timeline order.';
+
+  @override
+  String get videoEditorExportSeparate => 'Save as separate videos';
+
+  @override
+  String videoEditorExportSeparateHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new files',
+      one: 'One new file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorLosslessNote =>
+      'Cuts are lossless, so nothing is re-encoded. Each clip starts at the nearest keyframe before your start point and ends at the next keyframe after your end point. The thin bars under the timeline show exactly what will be saved.';
+
+  @override
+  String get videoEditorAnalyzing => 'جارٍ تحليل الفيديو…';
+
+  @override
+  String get videoEditorDiscardTitle => 'تجاهل التعديلات؟';
+
+  @override
+  String get videoEditorDiscardMessage =>
+      'لديك تغييرات غير محفوظة. هل أنت متأكد من رغبتك في تجاهلها؟';
+
+  @override
+  String get videoEditorDiscardAction => 'تجاهل';
+
+  @override
+  String get videoEditorPreviewCut => 'معاينة القص';
+
+  @override
+  String get videoEditorSegments => 'المقاطع';
+
+  @override
+  String get videoEditorReplaceOriginal => 'استبدال الفيديو الأصلي';
+
+  @override
+  String get videoEditorReplaceOriginalHint =>
+      'سيتم استبدال الفيديو الأصلي بالمقطع المُصدَّر.';
+
+  @override
+  String get videoEditorCustomFileName => 'اسم ملف الإخراج';
+
+  @override
+  String get videoEditorSubtitlesWarning =>
+      'ملاحظة: لا يمكن الاحتفاظ بمسارات الترجمة المضمنة أثناء التصدير بدون فقدان الجودة.';
+
+  @override
+  String get videoEditorRemoveSection => 'إزالة المقطع';
+
+  @override
+  String get fileSkinScreenTitle => 'مظهر مدير الملفات';
+
+  @override
+  String get fileSkinSectionHeader => 'المظهر';
+
+  @override
+  String get fileSkinEntryTitle => 'السمة';
+
+  @override
+  String get fileSkinPreviewHeader => 'معاينة';
+
+  @override
+  String get fileSkinPresetsHeader => 'السمات';
+
+  @override
+  String get fileSkinFoldersHeader => 'المجلدات';
+
+  @override
+  String get fileSkinFilesHeader => 'الملفات';
+
+  @override
+  String get fileSkinTextHeader => 'نص';
+
+  @override
+  String get fileSkinIconStyleLabel => 'نمط الأيقونة';
+
+  @override
+  String get fileSkinContainerLabel => 'خلفية الأيقونة';
+
+  @override
+  String get fileSkinIconColorLabel => 'لون الأيقونة';
+
+  @override
+  String get fileSkinCustomIconColorLabel => 'لون أيقونة مخصص';
+
+  @override
+  String get fileSkinNameColorLabel => 'لون الاسم';
+
+  @override
+  String get fileSkinDetailsColorLabel => 'لون التفاصيل';
+
+  @override
+  String get fileSkinMonospaceLabel => 'أسماء بخط أحادي المسافة';
+
+  @override
+  String get fileSkinMonospaceDesc =>
+      'استخدام خط ثابت العرض لأسماء الملفات والمجلدات';
+
+  @override
+  String get fileSkinIconFamilyDefault => 'افتراضي';
+
+  @override
+  String get fileSkinIconFamilyFilled => 'ممتلئ';
+
+  @override
+  String get fileSkinIconFamilyRounded => 'مستدير';
+
+  @override
+  String get fileSkinIconFamilyOutlined => 'مخطط';
+
+  @override
+  String get fileSkinIconFamilySharp => 'حاد';
+
+  @override
+  String get fileSkinContainerFilled => 'ممتلئ';
+
+  @override
+  String get fileSkinContainerOutlined => 'مخطط';
+
+  @override
+  String get fileSkinContainerNone => 'لا شيء';
+
+  @override
+  String get fileSkinColorAuto => 'تلقائي';
+
+  @override
+  String get fileSkinColorAccent => 'لون التمييز للسمة';
+
+  @override
+  String get fileSkinColorNeutral => 'محايد';
+
+  @override
+  String get fileSkinColorCustom => 'مخصص';
+
+  @override
+  String get fileSkinColorDefault => 'افتراضي';
+
+  @override
+  String get fileSkinColorHexLabel => 'لون سداسي عشري';
+
+  @override
+  String get fileSkinPresetClassic => 'كلاسيكي';
+
+  @override
+  String get fileSkinPresetMinimalOutline => 'مخطط بسيط';
+
+  @override
+  String get fileSkinPresetFrames => 'إطارات';
+
+  @override
+  String get fileSkinPresetVivid => 'نابض بالحياة';
+
+  @override
+  String get fileSkinPresetTerminal => 'طرفية';
+
+  @override
+  String get fileSkinPresetCustom => 'مخصص';
+
+  @override
+  String get compositeArchiveCarrierBlockingWarning =>
+      'أزل الأرشيف من هذا التحديد للمتابعة. لا يمكن استخدام الأرشيفات كملفات حاملة للحاوية المركبة، لأن إضافة خزنة إليها قد تتلفها.';
+
+  @override
+  String get compositeArchiveCarrierRowWarning =>
+      'أرشيف غير مدعوم — أزله من التحديد.';
+
+  @override
+  String videoEditorSelectedSegmentSummary(
+    int current,
+    int total,
+    String start,
+    String end,
+    String duration,
+  ) {
+    return 'المقطع $current من $total: $start – $end ($duration)';
+  }
+
+  @override
+  String get videoEditorKeepModeDescription =>
+      'صدّر المقاطع المحددة واحذف كل ما عداها.';
+
+  @override
+  String get videoEditorCutOutModeDescription =>
+      'أزل المقاطع المحددة وصدّر بقية الفيديو.';
+
+  @override
+  String get tapEdgesToNavigateTitle => 'انقر على الحواف للتنقل';
+
+  @override
+  String get tapEdgesToNavigateSubtitle =>
+      'انقر على الحافة اليسرى أو اليمنى لعرض العنصر السابق أو التالي.';
+
+  @override
+  String get doubleTapPlayPauseTitle => 'النقر المزدوج للتشغيل/الإيقاف المؤقت';
+
+  @override
+  String get doubleTapPlayPauseSubtitle =>
+      'انقر نقرًا مزدوجًا في منتصف شاشة الفيديو أو الصوت للتشغيل أو الإيقاف المؤقت بدلًا من التكبير. اضغط على مستوى التكبير المعروض أثناء التكبير لإعادة ضبط العرض.';
+
+  @override
+  String get doubleTapSkipTitle => 'النقر المزدوج للتخطي';
+
+  @override
+  String get doubleTapSkipSubtitle =>
+      'انقر مرتين على الجانب الأيسر أو الأيمن من الفيديو للقفز للخلف أو للأمام. واصل النقر للتخطي أكثر.';
+
+  @override
+  String get doubleTapSkipDurationTitle => 'مدة التخطي';
+
+  @override
+  String get loopPlaylistTitle => 'تكرار قائمة التشغيل';
+
+  @override
+  String get loopPlaylistSubtitle =>
+      'انتقل إلى العنصر الأول بعد الأخير أثناء التنقل أو تشغيل القائمة.';
+
+  @override
+  String get showFileNamesInMediaNotificationTitle =>
+      'إظهار أسماء الملفات في إشعارات الوسائط';
+
+  @override
+  String get showFileNamesInMediaNotificationSubtitle =>
+      'يعرض أسماء الملفات التي تم فك تشفيرها في الإشعار وشاشة القفل والأجهزة المتصلة.';
+
+  @override
+  String get textEditorEncodingTooltip => 'ترميز النص';
+
+  @override
+  String get textEditorEncodingEncodeError =>
+      'يتعذر حفظ بعض الأحرف باستخدام هذا الترميز.';
+
+  @override
+  String get textEditorShowTabBarLabel => 'إظهار علامات تبويب المحرر';
+
+  @override
+  String get textEditorShowTabBarDescription =>
+      'إظهار أو إخفاء علامات تبويب الملفات المفتوحة. يمكنك التبديل بين الملفات من الشريط الجانبي.';
+
+  @override
+  String get textEditorAutoHideTabBarLabel =>
+      'إخفاء علامات التبويب عند التمرير';
+
+  @override
+  String get textEditorAutoHideTabBarDescription =>
+      'إخفاء شريط علامات التبويب عند التمرير لأسفل، والتمرير لأعلى لإظهاره.';
+
+  @override
+  String get lockWaitingForOperationsMessage =>
+      'جارٍ انتظار انتهاء العمليات الحالية قبل القفل…';
+
+  @override
+  String get mirrorSyncActivityLabel =>
+      'جارٍ حفظ تغييرات الخزنة إلى وحدة التخزين';
+
+  @override
+  String get seekGestureSensitivityTitle => 'حساسية إيماءة التقديم أو الترجيع';
+
+  @override
+  String get volumeGestureSensitivityTitle => 'حساسية إيماءة مستوى الصوت';
+
+  @override
+  String get brightnessGestureSensitivityTitle => 'حساسية إيماءة السطوع';
+
+  @override
+  String get thumbnailSettingsHeader => 'إنشاء الصور المصغّرة';
+
+  @override
+  String get thumbnailGenerationStrategyTitle =>
+      'طريقة اختيار إطار الصورة المصغّرة';
+
+  @override
+  String get thumbnailFirstFrameOption => 'الإطار الأول';
+
+  @override
+  String get thumbnailPercentageFrameOption => 'إطار عند موضع محدد';
+
+  @override
+  String get thumbnailHybridOption => 'مختلط (تجاوز البداية الفارغة)';
+
+  @override
+  String get thumbnailFramePositionTitle => 'موضع الإطار المفضّل';
+
+  @override
+  String get volumeBoostHeader => 'تعزيز الصوت';
+
+  @override
+  String get volumeBoostTitle => 'تفعيل تعزيز الصوت';
+
+  @override
+  String get volumeBoostSubtitle =>
+      'ارفع مستوى صوت الفيديوهات الخافتة فوق مستوى المشغّل المعتاد.';
+
+  @override
+  String get volumeBoostGainTitle => 'مقدار التعزيز';
+
+  @override
+  String get decoderSelectionHeader => 'اختيار وحدة فك الترميز';
+
+  @override
+  String get videoDecoderTitle => 'وحدة فك ترميز الفيديو';
+
+  @override
+  String get audioDecoderTitle => 'وحدة فك ترميز الصوت';
+
+  @override
+  String get decoderAutoOption => 'تلقائي';
+
+  @override
+  String get decoderHardwareOption => 'الأجهزة';
+
+  @override
+  String get decoderSoftwareOption => 'البرمجيات';
+
+  @override
+  String get decoderFfmpegOption => 'FFmpeg';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningTitle =>
+      'حذف الملفات من جذر التخزين المحلي؟';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningMessage =>
+      'ستفحص هذه المزامنة أحادية الاتجاه جذر التخزين المحلي بالكامل. عند تفعيل حذف الملفات المصدرية بعد الاستيراد، يمكن حذف الملفات المنسوخة إلى الخزنة بعد التحقق من تطابق SHA-256. تابع فقط إذا كنت تقصد حذف هذه الملفات الأصلية من جهازك.';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningConfirm => 'أفهم';
+
+  @override
+  String get autoSyncScheduledTitle => 'التشغيل يوميًا أثناء قفل الخزنة';
+
+  @override
+  String get autoSyncScheduledSubtitle =>
+      'يعمل في الخلفية عند إغلاق التطبيق. قد يؤخر Android التشغيل أو يوقف المهام الطويلة. تُقفل الخزنة مجددًا بعد انتهاء المزامنة.';
+
+  @override
+  String get autoSyncScheduledSetupRequired =>
+      'يتطلب تفعيل الأتمتة الكاملة وحفظ كلمة مرور الخزنة.';
+
+  @override
+  String get autoSyncScheduledConfigure => 'إعداد الوصول في الخلفية';
+
+  @override
+  String get autoSyncScheduleWarningTitle => 'تفعيل المزامنة المجدولة؟';
+
+  @override
+  String get autoSyncScheduleWarningMessage =>
+      'سيفتح التطبيق هذه الخزنة في الخلفية مرة يوميًا ويقفلها بعد المزامنة. قد يؤخر Android التشغيل. عند تفعيل الحذف بعد الاستيراد، لن يُحذف الملف المصدر إلا بعد حفظ نسخته في الخزنة والتحقق من تطابق الحجم وبصمة SHA-256.';
+
+  @override
+  String get autoSyncScheduleEnable => 'تفعيل الجدولة';
+
+  @override
+  String get autoSyncScheduleNotificationRequired =>
+      'اسمح بالإشعارات ليعرض Android «جارٍ مزامنة الخزنة...» أثناء المزامنة في الخلفية.';
+
+  @override
+  String get autoSyncScheduleFailed =>
+      'حُفظت القاعدة، لكن تعذّر تفعيل المزامنة المجدولة.';
+
+  @override
+  String get autoSyncSavedScheduled => 'حُفظت القاعدة والجدولة اليومية.';
+
+  @override
+  String get autoSyncScheduledTimeTitle => 'Daily run time';
+
+  @override
+  String get autoSyncScheduledTimeSubtitle =>
+      'Device local time. For a quick test, choose a time a minute or two from now; Android may run it later.';
+
+  @override
+  String get autoSyncExactAlarmAccessTitle =>
+      'السماح بالتنبيهات الدقيقة للمزامنة اليومية؟';
+
+  @override
+  String get autoSyncExactAlarmAccessMessage =>
+      'يتطلب Android إذن «المنبّهات والتذكيرات» لكي يبدأ Vault Explorer المزامنة اليومية في الوقت الذي تختاره والتطبيق مغلق. اسمح بذلك في الشاشة التالية، ثم عُد إلى هنا وفعّل المزامنة المجدولة مرة أخرى.';
+
+  @override
+  String get autoSyncExactAlarmAccessOpen => 'فتح الإعدادات';
+
+  @override
+  String get autoSyncExactAlarmAccessUnavailable =>
+      'تعذّر فتح إعدادات التنبيهات في Android. فعّل «المنبّهات والتذكيرات» لـ Vault Explorer من إعدادات النظام ثم حاول مرة أخرى.';
+
+  @override
+  String get localStoragePermissionTitle => 'السماح بالوصول إلى التخزين المحلي';
+
+  @override
+  String get localStorageGrantAccess => 'منح الإذن';
+
+  @override
+  String get hideStorageLocationsTitle => 'إخفاء مواقع التخزين؟';
+
+  @override
+  String get hideStorageLocationsPrompt =>
+      'لم يتم منح إذن الوصول إلى جميع الملفات. هل تريد إخفاء التخزين المحلي والمواقع المضافة من الشريط الجانبي؟ يمكنك إظهارها مجددًا من الإعدادات.';
+
+  @override
+  String get hide => 'إخفاء';
+
+  @override
+  String get mediaViewerActionAdjustments => 'تعديلات';
+
+  @override
+  String get adjustmentsSheetTitle => 'تعديلات';
+
+  @override
+  String get adjustmentBrightness => 'السطوع';
+
+  @override
+  String get adjustmentContrast => 'التباين';
+
+  @override
+  String get adjustmentSaturation => 'التشبع';
+
+  @override
+  String get adjustmentHue => 'تدرج اللون';
+
+  @override
+  String get adjustmentGamma => 'جاما';
+
+  @override
+  String get adjustmentsApplyToAll => 'تطبيق على كل الملفات';
+
+  @override
+  String get adjustmentsCompareHold => 'اضغط مطولاً للمقارنة';
+
+  @override
+  String get adjustmentPresetVivid => 'حيوي';
+
+  @override
+  String get adjustmentPresetBlackAndWhite => 'أبيض وأسود';
+
+  @override
+  String get adjustmentPresetWarm => 'دافئ';
+
+  @override
+  String get adjustmentPresetCool => 'بارد';
+
+  @override
+  String get videoFilePropertiesSectionHeader => 'فيديو وصوت';
+
+  @override
+  String get durationLabel => 'المدة';
+
+  @override
+  String get rotationLabel => 'التدوير';
+
+  @override
+  String get videoBitrateLabel => 'معدل بت الفيديو';
+
+  @override
+  String get audioBitrateLabel => 'معدل بت الصوت';
+
+  @override
+  String get sampleRateLabel => 'معدل العينة';
+
+  @override
+  String get audioChannelsLabel => 'قنوات الصوت';
+
+  @override
+  String get subtitleTracksLabel => 'مسارات الترجمة';
+
+  @override
+  String get skinActionAccent => 'لون تمييز الإجراءات';
+
+  @override
+  String get skinEmphasisForActionIconsActiveControlsProgressAndLinks =>
+      'التمييز لأيقونات الإجراءات وعناصر التحكم النشطة والتقدم والروابط.';
+
+  @override
+  String get skinTextAndIconsOnAccentButtons =>
+      'النص والأيقونات على أزرار التمييز';
+
+  @override
+  String get skinForegroundForButtonsFilledWithTheActionAccentColor =>
+      'اللون الأمامي للأزرار المملوءة بلون تمييز الإجراءات.';
+
+  @override
+  String get skinSelectionAndIconTileBackground =>
+      'خلفية التحديد ومربعات الأيقونات';
+
+  @override
+  String get skinSelectedFilesAndVaultFormat076e52 =>
+      'تستخدم الملفات المحددة ومربعات صيغة الخزينة هذا اللون. تعبئة الزر العائم لها إعداد خاص بها.';
+
+  @override
+  String get skinTextAndIconsOnSelectionColors =>
+      'النص والأيقونات على ألوان التحديد';
+
+  @override
+  String get skinForegroundForIconTilesAndOtherPrimaryContainerSurfaces =>
+      'اللون الأمامي لمربعات الأيقونات وأسطح الحاويات الأساسية الأخرى.';
+
+  @override
+  String get skinSteadyMainAccent => 'لون تمييز رئيسي ثابت';
+
+  @override
+  String get skinAPrimaryAccentThatStaysTheSameInLightAndDarkSurfaces =>
+      'لون تمييز أساسي يظل كما هو على الأسطح الفاتحة والداكنة.';
+
+  @override
+  String get skinMutedSteadyMainAccent => 'لون تمييز رئيسي ثابت خافت';
+
+  @override
+  String get skinASofterVersionOfTheSteadyPrimaryAccent =>
+      'نسخة أكثر هدوءاً من لون التمييز الأساسي الثابت.';
+
+  @override
+  String get skinTextOnSteadyMainAccent =>
+      'النص على لون التمييز الرئيسي الثابت';
+
+  @override
+  String get skinForegroundForPrimaryFixedColors =>
+      'اللون الأمامي للألوان الأساسية الثابتة.';
+
+  @override
+  String get skinMutedTextOnSteadyMainAccent =>
+      'نص خافت على لون التمييز الرئيسي الثابت';
+
+  @override
+  String get skinSecondaryForegroundForPrimaryFixedColors =>
+      'اللون الأمامي الثانوي للألوان الأساسية الثابتة.';
+
+  @override
+  String get skinSecondaryAccent => 'لون تمييز ثانوي';
+
+  @override
+  String get skinSupportingActionsAndLessProminentHighlights =>
+      'إجراءات مساعدة وإبرازات أقل وضوحاً.';
+
+  @override
+  String get skinTextOnSecondaryAccent => 'النص على لون التمييز الثانوي';
+
+  @override
+  String get skinLabelsAndIconsOnSecondaryColoredAreas =>
+      'التسميات والأيقونات في المناطق الملونة الثانوية.';
+
+  @override
+  String get skinSecondaryBackground => 'خلفية ثانوية';
+
+  @override
+  String get skinSoftFillForSupportingContent => 'تعبئة هادئة للمحتوى الداعم.';
+
+  @override
+  String get skinTextOnSecondaryBackgrounds => 'النص على الخلفيات الثانوية';
+
+  @override
+  String get skinForegroundForSecondaryContainers =>
+      'اللون الأمامي للحاويات الثانوية.';
+
+  @override
+  String get skinSteadySecondaryAccent => 'لون تمييز ثانوي ثابت';
+
+  @override
+  String get skinASecondaryAccentThatStaysTheSameAcrossSurfaces =>
+      'لون تمييز ثانوي يظل كما هو عبر مختلف الأسطح.';
+
+  @override
+  String get skinMutedSteadySecondaryAccent => 'لون تمييز ثانوي ثابت خافت';
+
+  @override
+  String get skinASofterVersionOfTheSteadySecondaryAccent =>
+      'نسخة أكثر هدوءاً من لون التمييز الثانوي الثابت.';
+
+  @override
+  String get skinTextOnSteadySecondaryAccent =>
+      'النص على لون التمييز الثانوي الثابت';
+
+  @override
+  String get skinForegroundForSecondaryFixedColors =>
+      'اللون الأمامي للألوان الثانوية الثابتة.';
+
+  @override
+  String get skinMutedTextOnSteadySecondaryAccent =>
+      'نص خافت على لون التمييز الثانوي الثابت';
+
+  @override
+  String get skinSecondaryForegroundForSecondaryFixedColors =>
+      'اللون الأمامي الثانوي للألوان الثانوية الثابتة.';
+
+  @override
+  String get skinExtraAccentColor => 'لون تمييز إضافي';
+
+  @override
+  String get skinDecorativeHighlightsAndContrastingAccents =>
+      'إبرازات تزيينية ولمسات تمييز متباينة.';
+
+  @override
+  String get skinTextOnExtraAccent => 'النص على لون التمييز الإضافي';
+
+  @override
+  String get skinLabelsAndIconsOnTertiaryColoredAreas =>
+      'التسميات والأيقونات في المناطق الملونة الثلاثية.';
+
+  @override
+  String get skinExtraAccentBackground => 'خلفية التمييز الإضافي';
+
+  @override
+  String get skinSoftFillForTertiaryContent => 'تعبئة هادئة للمحتوى الثلاثي.';
+
+  @override
+  String get skinTextOnExtraAccentBackgrounds =>
+      'النص على خلفيات التمييز الإضافية';
+
+  @override
+  String get skinForegroundForTertiaryContainers =>
+      'اللون الأمامي للحاويات الثلاثية.';
+
+  @override
+  String get skinSteadyExtraAccent => 'لون تمييز إضافي ثابت';
+
+  @override
+  String get skinATertiaryAccentThatStaysTheSameAcrossSurfaces =>
+      'لون تمييز ثلاثي يظل كما هو عبر مختلف الأسطح.';
+
+  @override
+  String get skinMutedSteadyExtraAccent => 'لون تمييز إضافي ثابت خافت';
+
+  @override
+  String get skinASofterVersionOfTheSteadyTertiaryAccent =>
+      'نسخة أكثر هدوءاً من لون التمييز الثلاثي الثابت.';
+
+  @override
+  String get skinTextOnSteadyExtraAccent =>
+      'النص على لون التمييز الإضافي الثابت';
+
+  @override
+  String get skinForegroundForTertiaryFixedColors =>
+      'اللون الأمامي للألوان الثلاثية الثابتة.';
+
+  @override
+  String get skinMutedTextOnSteadyExtraAccent =>
+      'نص خافت على لون التمييز الإضافي الثابت';
+
+  @override
+  String get skinSecondaryForegroundForTertiaryFixedColors =>
+      'اللون الأمامي الثانوي للألوان الثلاثية الثابتة.';
+
+  @override
+  String get skinErrorColor => 'لون الخطأ';
+
+  @override
+  String get skinErrorsDestructiveActionsAndInvalidInput =>
+      'الأخطاء والإجراءات الإتلافية والمدخلات غير الصالحة.';
+
+  @override
+  String get skinTextOnErrorColor => 'النص على لون الخطأ';
+
+  @override
+  String get skinLabelsAndIconsOnErrorColoredAreas =>
+      'التسميات والأيقونات في المناطق الملونة بلون الخطأ.';
+
+  @override
+  String get skinErrorBackground => 'خلفية الخطأ';
+
+  @override
+  String get skinSoftFillBehindErrorMessages => 'تعبئة هادئة خلف رسائل الخطأ.';
+
+  @override
+  String get skinTextOnErrorBackgrounds => 'النص على خلفيات الخطأ';
+
+  @override
+  String get skinForegroundForErrorContainers => 'اللون الأمامي لحاويات الخطأ.';
+
+  @override
+  String get skinPageBackground => 'خلفية الصفحة';
+
+  @override
+  String get skinTheMainBackgroundBehindAppContent =>
+      'الخلفية الرئيسية خلف محتوى التطبيق.';
+
+  @override
+  String get skinMainTextAndIcons => 'النص والأيقونات الرئيسية';
+
+  @override
+  String get skinPrimaryContentDrawnOnPageAndCardBackgrounds =>
+      'المحتوى الأساسي المعروض على خلفيات الصفحات والبطاقات.';
+
+  @override
+  String get skinDimmedBackground => 'خلفية خافتة';
+
+  @override
+  String get skinTheDarkestNeutralSurfaceLayer =>
+      'طبقة السطح المحايدة الأكثر قتامة.';
+
+  @override
+  String get skinBrightBackground => 'خلفية ساطعة';
+
+  @override
+  String get skinTheLightestNeutralSurfaceLayer =>
+      'طبقة السطح المحايدة الأكثر إشراقاً.';
+
+  @override
+  String get skinDeepestCardLayer => 'أعمق طبقة للبطاقات';
+
+  @override
+  String get skinTheLowestAndQuietestSurfaceContainer =>
+      'حاوية السطح الأدنى والأكثر هدوءاً.';
+
+  @override
+  String get skinLowCardLayer => 'طبقة بطاقات منخفضة';
+
+  @override
+  String get skinSubtleCardsAndRecessedAreas => 'بطاقات رقيقة ومناطق غائرة.';
+
+  @override
+  String get skinStandardCardLayer => 'طبقة بطاقات قياسية';
+
+  @override
+  String get skinCommonCardsAndGroupedContent => 'بطاقات شائعة ومحتوى مجمع.';
+
+  @override
+  String get skinRaisedCardLayer => 'طبقة بطاقات مرتفعة';
+
+  @override
+  String get skinRaisedCardsMenusAndAppBars =>
+      'بطاقات مرتفعة وقوائم وأشرطة التطبيق.';
+
+  @override
+  String get skinTopCardLayer => 'طبقة البطاقات العلوية';
+
+  @override
+  String get skinProminentPanelsAndSelectedSurfaces =>
+      'لوحات بارزة وأسطح محددة.';
+
+  @override
+  String get skinSecondaryTextAndIcons => 'نص وأيقونات ثانوية';
+
+  @override
+  String get skinDetailsHintsAndSupportingLabels =>
+      'تفاصيل وتلميحات وتسميات مساعدة.';
+
+  @override
+  String get skinStrongBorder => 'إطار بارز';
+
+  @override
+  String get skinVisibleBordersAndSeparators => 'إطارات وفواصل مرئية.';
+
+  @override
+  String get skinSubtleBorder => 'إطار رقيق';
+
+  @override
+  String get skinQuietOutlinesAndLowEmphasisSeparators =>
+      'خطوط خارجية هادئة وفواصل منخفضة التمييز.';
+
+  @override
+  String get skinShadowTint => 'صبغة الظل';
+
+  @override
+  String get skinTintUsedByElevatedSurfaces =>
+      'الصبغة المستخدمة للأسطح المرتفعة.';
+
+  @override
+  String get skinModalBackdrop => 'خلفية النمط المشروط';
+
+  @override
+  String get skinTintBehindDialogsAndModalSheets =>
+      'الصبغة خلف مربعات الحوار واللوحات المشروطة.';
+
+  @override
+  String get skinInvertedSurface => 'سطح معكوس';
+
+  @override
+  String get skinAContrastingSurfaceForInverseElements =>
+      'سطح متباين للعناصر المعكوسة.';
+
+  @override
+  String get skinTextOnInvertedSurfaces => 'النص على الأسطح المعكوسة';
+
+  @override
+  String get skinForegroundUsedOverInverseSurfaces =>
+      'اللون الأمامي المستخدم فوق الأسطح المعكوسة.';
+
+  @override
+  String get skinInvertedMainAccent => 'لون تمييز رئيسي معكوس';
+
+  @override
+  String get skinPrimaryAccentUsedOnInverseSurfaces =>
+      'لون التمييز الأساسي المستخدم على الأسطح المعكوسة.';
+
+  @override
+  String get skinElevationTint => 'صبغة الارتفاع';
+
+  @override
+  String get skinTintAppliedToElevatedSurfaces =>
+      'الصبغة المطبقة على الأسطح المرتفعة.';
+
+  @override
+  String get skinSuccessColor => 'لون النجاح';
+
+  @override
+  String get skinCompletedActionsAndPositiveStatus =>
+      'الإجراءات المكتملة والحالة الإيجابية.';
+
+  @override
+  String get skinTextOnSuccessColor => 'النص على لون النجاح';
+
+  @override
+  String get skinForegroundForSuccessColoredContent =>
+      'اللون الأمامي للمحتوى الملون بلون النجاح.';
+
+  @override
+  String get skinSuccessBackground => 'خلفية النجاح';
+
+  @override
+  String get skinSoftFillBehindPositiveStatusMessages =>
+      'تعبئة هادئة خلف رسائل الحالة الإيجابية.';
+
+  @override
+  String get skinTextOnSuccessBackgrounds => 'النص على خلفيات النجاح';
+
+  @override
+  String get skinForegroundForSuccessContainers =>
+      'اللون الأمامي لحاويات النجاح.';
+
+  @override
+  String get skinWarningColor => 'لون التحذير';
+
+  @override
+  String get skinCautionAttentionAndPendingStatus =>
+      'تنبيه وانتباه وحالة قيد الانتظار.';
+
+  @override
+  String get skinTextOnWarningColor => 'النص على لون التحذير';
+
+  @override
+  String get skinForegroundForWarningColoredContent =>
+      'اللون الأمامي للمحتوى الملون بلون التحذير.';
+
+  @override
+  String get skinWarningBackground => 'خلفية التحذير';
+
+  @override
+  String get skinSoftFillBehindWarningMessages =>
+      'تعبئة هادئة خلف رسائل التحذير.';
+
+  @override
+  String get skinTextOnWarningBackgrounds => 'النص على خلفيات التحذير';
+
+  @override
+  String get skinForegroundForWarningContainers =>
+      'اللون الأمامي لحاويات التحذير.';
+
+  @override
+  String get skinBookmarkColor => 'لون الإشارة المرجعية';
+
+  @override
+  String get skinSavedAndBookmarkedItems =>
+      'العناصر المحفوظة والمشار إليها مرجعياً.';
+
+  @override
+  String get skinMainActions => 'الإجراءات الرئيسية';
+
+  @override
+  String get skinPrimaryButtonsSelectionsAndFixedPrimaryAccents =>
+      'الأزرار الأساسية والتحديدات ولمسات التمييز الأساسية الثابتة.';
+
+  @override
+  String get skinSupportingAccents => 'لمسات تمييز مساعدة';
+
+  @override
+  String get skinSecondaryAndTertiaryHighlightsAndTheirTextColors =>
+      'إبرازات ثانوية وثلاثية وألوان نصوصها.';
+
+  @override
+  String get skinErrorMessagesAndDestructiveOrInvalidStates =>
+      'رسائل الخطأ والحالات الإتلافية أو غير الصالحة.';
+
+  @override
+  String get skinPagesCardsAndText => 'الصفحات والبطاقات والنص';
+
+  @override
+  String get skinAppBackgroundsCardsMenusAndForegroundText =>
+      'خلفيات التطبيق والبطاقات والقوائم والنص الأمامي.';
+
+  @override
+  String get skinBordersAndOverlays => 'الإطارات والطبقات المتراكبة';
+
+  @override
+  String get skinOutlinesShadowsAndModalBackdrops =>
+      'الخطوط الخارجية والظلال وخلفيات النمط المشروط.';
+
+  @override
+  String get skinTapAnyPreviewElement => 'اضغط على أي عنصر معاينة';
+
+  @override
+  String get skinChooseAnAppFileOrEditorColorToSeeWhatItControls =>
+      'اختر لوناً للتطبيق أو الملفات أو المحرر لمعرفة ما يتحكم فيه.';
+
+  @override
+  String get skinCustomizeSkin => 'تخصيص المظهر';
+
+  @override
+  String get skinLight => 'فاتح';
+
+  @override
+  String get skinDark => 'داكن';
+
+  @override
+  String get skinApp => 'التطبيق';
+
+  @override
+  String get skinEditor => 'المحرر';
+
+  @override
+  String get skinSkinDetails => 'تفاصيل المظهر';
+
+  @override
+  String get skinNameYourSkinAndChooseWhichPaletteToEdit =>
+      'قم بتسمية مظهرك واختر لوحة الألوان المراد تعديلها.';
+
+  @override
+  String get skinSkinName => 'اسم المظهر';
+
+  @override
+  String get skinMyCustomSkin => 'مظهري المخصص';
+
+  @override
+  String get skinLightColors => 'ألوان فاتحة';
+
+  @override
+  String get skinDarkColors => 'ألوان داكنة';
+
+  @override
+  String get skinPageAndActions => 'الصفحة والإجراءات';
+
+  @override
+  String get skinTheMainBackgroundTextAndActionColors =>
+      'الخلفية الرئيسية والنص وألوان الإجراءات.';
+
+  @override
+  String get skinAppBar => 'شريط التطبيق';
+
+  @override
+  String get skinTheTopNavigationBarIsIndependentFromCardsAndPages =>
+      'شريط التنقل العلوي مستقل عن البطاقات والصفحات.';
+
+  @override
+  String get skinTopBarFillColor => 'لون تعبئة الشريط العلوي.';
+
+  @override
+  String get skinTitleAndIcons => 'العنوان والأيقونات';
+
+  @override
+  String get skinTopBarTextAndIconColor =>
+      'لون النص والأيقونات في الشريط العلوي.';
+
+  @override
+  String get skinFloatingActionButton => 'زر الإجراء العائم';
+
+  @override
+  String get skinItsFillAndIconColorAreSeparateFromSelectionColors =>
+      'تعبئته ولون أيقونته منفصلان عن ألوان التحديد.';
+
+  @override
+  String get skinButtonFill => 'تعبئة الزر';
+
+  @override
+  String get skinBackgroundOfTheRoundButton => 'خلفية الزر الدائري +.';
+
+  @override
+  String get skinButtonIcon => 'أيقونة الزر';
+
+  @override
+  String get skinIconColorOnTheRoundButton =>
+      'لون الأيقونة على الزر الدائري +.';
+
+  @override
+  String get skinDashboardVaultCards => 'بطاقات الخزائن في لوحة التحكم';
+
+  @override
+  String get skinSetTheBackgroundForLockedAndMountedVaultCards =>
+      'تعيين خلفية بطاقات الخزائن المقفلة والمثبتة.';
+
+  @override
+  String get skinLockedVaultCard => 'بطاقة الخزينة المقفلة';
+
+  @override
+  String get skinNeutralVaultCardFill => 'تعبئة بطاقة الخزينة المحايدة.';
+
+  @override
+  String get skinMountedVaultCard => 'بطاقة الخزينة المثبتة';
+
+  @override
+  String get skinSeparateFillForAnUnlockedMountedVault =>
+      'تعبئة منفصلة لخزينة غير مقفلة ومثبتة.';
+
+  @override
+  String get skinFineTuneAppColors => 'ضبط دقيق لألوان التطبيق';
+
+  @override
+  String get skinAdvancedMaterialColorsForLessCommonElements =>
+      'ألوان Material متقدمة للعناصر الأقل شيوعاً.';
+
+  @override
+  String get skinStatusAndBookmarkColors => 'ألوان الحالة والإشارات المرجعية';
+
+  @override
+  String get skinColorsForSuccessWarningsErrorsAndBookmarks =>
+      'ألوان للنجاح والتحذيرات والأخطاء والإشارات المرجعية.';
+
+  @override
+  String get skinTheCustomSkinIsActive971ce3 =>
+      'يصبح المظهر المخصص نشطاً على الفور بينما تم تعيين مدير الملفات والمحرر لاتباع مظهر التطبيق.';
+
+  @override
+  String get skinCustomColorTapToChangeOrReset =>
+      'لون مخصص — انقر للتغيير أو لإعادة التعيين إلى الافتراضي.';
+
+  @override
+  String get skinTapTheColorCircleToChooseAColor =>
+      'اضغط على دائرة اللون لاختيار لون.';
+
+  @override
+  String get skinAppBarBackground => 'خلفية شريط التطبيق';
+
+  @override
+  String get skinTheDashboardAndOtherAppBarsUseThisIndependentColor =>
+      'تستخدم لوحة التحكم وأشرطة التطبيق الأخرى هذا اللون المستقل.';
+
+  @override
+  String get skinDashboardMenuIcon => 'أيقونة قائمة لوحة التحكم';
+
+  @override
+  String get skinTheHamburgerButtonUsesTheAppBarIconColor =>
+      'يستخدم زر القائمة لون أيقونات شريط التطبيق.';
+
+  @override
+  String get skinDashboardTitle => 'عنوان لوحة التحكم';
+
+  @override
+  String get skinTheDashboardTitleUsesTheAppBarForegroundColor =>
+      'يستخدم عنوان لوحة التحكم اللون الأمامي لشريط التطبيق.';
+
+  @override
+  String get skinActionLabelAndIcon => 'تسمية وأيقونة الإجراء';
+
+  @override
+  String get skinTheActionAccentColorsLabelsb08a63 =>
+      'يلون تمييز الإجراءات التسميات مثل إضافة خزينة وأيقوناتها.';
+
+  @override
+  String get skinDashboardAddButton => 'زر الإضافة في لوحة التحكم';
+
+  @override
+  String get skinTheButtonFillAndPlusIconHaveSeparateSkinColors =>
+      'تعبئة الزر وأيقونة الزائد لهما ألوان مظهر منفصلة.';
+
+  @override
+  String get skinVaultCardAndIconBackground => 'خلفية بطاقة الخزينة والأيقونة';
+
+  @override
+  String get skinTheIconTileUsesPrimary5c2f93 =>
+      'يستخدم مربع الأيقونة الحاوية الأساسية. تدمج بطاقة الخزينة المثبتة ذلك اللون مع السطح المرتفع.';
+
+  @override
+  String get skinVaultFormatIconColor => 'لون أيقونة صيغة الخزينة';
+
+  @override
+  String get skinVaultFormatInitialsUseOnPrimaryContainer =>
+      'تستخدم الأحرف الأولى لصيغة الخزينة اللون فوق الحاوية الأساسية.';
+
+  @override
+  String get skinVaultStorageDetails => 'تفاصيل سعة تخزين الخزينة';
+
+  @override
+  String get skinFreeSpaceAndCapacityUseTheSupportingTextColor =>
+      'تستخدم المساحة الحرة والسعة لون النص المساعد.';
+
+  @override
+  String get skin17GBFree5GB => '1.7 جيجابايت متاح / 5 جيجابايت';
+
+  @override
+  String get skinVaultStorageProgress => 'مستوى امتلاء سعة الخزينة';
+
+  @override
+  String get skinTheProgressBarUsesTheba7c98 =>
+      'يستخدم شريط التقدم تمييز التطبيق، ثم ينتقل إلى الألوان الثلاثية وألوان الخطأ مع امتلاء التخزين.';
+
+  @override
+  String get skinLockActionBackground => 'خلفية إجراء القفل';
+
+  @override
+  String get skinTheMountedVaultLockButtonUsesPrimaryContainer =>
+      'يستخدم زر قفل الخزينة المثبتة الحاوية الأساسية.';
+
+  @override
+  String get skinVaultActionsIconColor => 'لون أيقونات إجراءات الخزينة';
+
+  @override
+  String get skinTheOverflowMenuUsesTheSupportingIconColor =>
+      'تستخدم قائمة المزيد لون الأيقونات المساعد.';
+
+  @override
+  String get skinMountedVaultCardBackground => 'خلفية بطاقة الخزينة المثبتة';
+
+  @override
+  String get skinThisIsTheBackgroundOfa8d0d3 =>
+      'هذه خلفية بطاقة الخزينة المثبتة. لا يزال مربع الأيقونة الخاص بها يستخدم لون الإجراء الرئيسي.';
+
+  @override
+  String get skinLockedVaultCardBackground => 'خلفية بطاقة الخزينة المقفلة';
+
+  @override
+  String get skinThisColorIsIndependentFromTheAppBarAndMountedVaultCard =>
+      'هذا اللون مستقل عن شريط التطبيق وبطاقة الخزينة المثبتة.';
+
+  @override
+  String get skinLockedVaultFormatIcon => 'أيقونة صيغة الخزينة المقفلة';
+
+  @override
+  String get skinLockedVaultIconsUseTheSupportingTextAndIconColor =>
+      'تستخدم أيقونات الخزينة المقفلة لون النص والأيقونات المساعد.';
+
+  @override
+  String get skinSharedArchive => 'أرشيف مشترك';
+
+  @override
+  String get skinLockedVaultStatusText => 'نص حالة الخزينة المقفلة';
+
+  @override
+  String get skinTheLockedStatusLabelUsesTheSupportingTextColor =>
+      'تستخدم تسمية حالة القفل لون النص المساعد.';
+
+  @override
+  String get skinLockedVaultActionsIcon => 'أيقونة إجراءات الخزينة المقفلة';
+
+  @override
+  String get skinVaultActionsMenuBackground => 'خلفية قائمة إجراءات الخزينة';
+
+  @override
+  String get skinTheEditAndRemovePopupUsesTheMenuSurfaceColor =>
+      'تستخدم النافذة المنبثقة للتعديل والإزالة لون سطح القائمة.';
+
+  @override
+  String get skinEditMenuItem => 'عنصر قائمة التعديل';
+
+  @override
+  String get skinTheEditActionUsesTheRegularForegroundColor =>
+      'يستخدم إجراء التعديل اللون الأمامي المعتاد.';
+
+  @override
+  String get skinRemoveMenuItem => 'عنصر قائمة الإزالة';
+
+  @override
+  String get skinDestructiveActionsUseTheErrorColor =>
+      'تستخدم الإجراءات الإتلافية لون الخطأ.';
+
+  @override
+  String get skinFileManagerAppBar => 'شريط مدير الملفات';
+
+  @override
+  String get skinFileBrowserToolbarsUseTheSameAppBarBackground =>
+      'تستخدم أشرطة أدوات متصفح الملفات نفس خلفية شريط التطبيق.';
+
+  @override
+  String get skinFileManagerBackButton => 'زر الرجوع في مدير الملفات';
+
+  @override
+  String get skinToolbarNavigationIconsUseThisColor =>
+      'تستخدم أيقونات التنقل في شريط الأدوات هذا اللون.';
+
+  @override
+  String get skinFileManagerTitle => 'عنوان مدير الملفات';
+
+  @override
+  String get skinTheCurrentFolderNameUsesTheAppBarForeground =>
+      'يستخدم اسم المجلد الحالي اللون الأمامي لشريط التطبيق.';
+
+  @override
+  String get skinFileManagerAppBarActions => 'إجراءات شريط مدير الملفات';
+
+  @override
+  String get skinToolbarActionsUseThisIconColor =>
+      'تستخدم إجراءات شريط الأدوات لون الأيقونة هذا.';
+
+  @override
+  String get skinProjects => 'المشاريع';
+
+  @override
+  String get skinFolder12Items => 'مجلد · 12 عنصراً';
+
+  @override
+  String get skinTextFile4KB => 'ملف نصي · 4 ك.ب';
+
+  @override
+  String get skinCompressedFile28MB => 'ملف مضغوط · 28 م.ب';
+
+  @override
+  String get skin3Items => '3 عناصر';
+
+  @override
+  String get skinFileManagerAddButton => 'زر الإضافة في مدير الملفات';
+
+  @override
+  String get skinAddButtonIconColor => 'لون أيقونة زر الإضافة';
+
+  @override
+  String get skinThePlusIconUsesTheButtonForegroundColor =>
+      'تستخدم أيقونة الزائد اللون الأمامي للزر.';
+
+  @override
+  String get skinEditorFileName => 'اسم الملف في المحرر';
+
+  @override
+  String get skinTheEditorToolbarUsesTheAppForegroundColor =>
+      'يستخدم شريط أدوات المحرر اللون الأمامي للتطبيق.';
+
+  @override
+  String get skinDartUTF8Ln3Col12 => ' سطر 3، عمود 12';
+
+  @override
+  String get skinTheMainBackgroundBehindThisScreen =>
+      'الخلفية الرئيسية خلف هذه الشاشة.';
+
+  @override
+  String get skinFolderIconColor => 'لون أيقونة المجلد';
+
+  @override
+  String get skinFileIconColor => 'لون أيقونة الملف';
+
+  @override
+  String get skinText => ' : ';
+
+  @override
+  String get skinFolderNameColor => 'لون اسم المجلد';
+
+  @override
+  String get skinFileNameColor => 'لون اسم الملف';
+
+  @override
+  String get skinFileDetailsColor => 'لون تفاصيل الملف';
+
+  @override
+  String get skinTheSmallerDateSizeAndTypeLabelsUseThisColor =>
+      'تستخدم التسميات الأصغر للتاريخ والحجم والنوع هذا اللون.';
+
+  @override
+  String get skinFileOverflowButton => 'زر خيارات إضافية للملف';
+
+  @override
+  String get skinEachRowSThreeDotButtonUsesTheSupportingIconColor =>
+      'يستخدم زر النقاط الثلاث في كل صف لون الأيقونات المساعد.';
+
+  @override
+  String get skinSelectedFileRow => 'صف الملف المحدد';
+
+  @override
+  String get skinSelectedRowsUseATranslucente0ff21 =>
+      'تستخدم الصفوف المحددة تمييزاً شبه شفاف للحاوية الأساسية؛ وتظل قائمة الملفات نفسها على خلفية الصفحة.';
+
+  @override
+  String get skinFileActionsMenuBackground => 'خلفية قائمة إجراءات الملف';
+
+  @override
+  String get skinTheFileActionsPopupUsesTheMenuSurfaceColor =>
+      'تستخدم النافذة المنبثقة لإجراءات الملف لون سطح القائمة.';
+
+  @override
+  String get skinOpenFileMenuItem => 'عنصر قائمة فتح الملف';
+
+  @override
+  String get skinRegularFileActionsUseTheMainTextColor =>
+      'تستخدم إجراءات الملفات العادية لون النص الرئيسي.';
+
+  @override
+  String get skinOpen => 'فتح';
+
+  @override
+  String get skinDeleteFileMenuItem => 'عنصر قائمة حذف الملف';
+
+  @override
+  String get skinEditorBackground => 'خلفية المحرر';
+
+  @override
+  String get skinTheCanvasColorBehindTheCode =>
+      'لون اللوحة خلف التعليمات البرمجية.';
+
+  @override
+  String get skinEditorLineNumbers => 'أرقام أسطر المحرر';
+
+  @override
+  String get skinTheGutterAndLineNumbersBesideTheCode =>
+      'الهامش وأرقام الأسطر بجوار التعليمات البرمجية.';
+
+  @override
+  String get skinEditorTextColor => 'لون نص الشيفرة';
+
+  @override
+  String get skinTheDefaultCodeAndEditorTextColor =>
+      'اللون الافتراضي للنص العادي في الشيفرة؛ أما النصوص المظللة حسب الصياغة فلها ألوانها الخاصة.';
+
+  @override
+  String get skinEditorCursor => 'مؤشر المحرر';
+
+  @override
+  String get skinTheInsertionCaretColor => 'لون علامة الإدراج.';
+
+  @override
+  String get skinEditorSelectionHighlight => 'تمييز التحديد في المحرر';
+
+  @override
+  String get skinTheBackgroundUsedToHighlightSelectedCode =>
+      'الخلفية المستخدمة لتمييز التعليمات البرمجية المحددة.';
+
+  @override
+  String get skinEditorKeywords => 'الكلمات المفتاحية';
+
+  @override
+  String get skinEditorKeywordsExplanation =>
+      'الكلمات المفتاحية للغة مثل class وvoid وreturn وif.';
+
+  @override
+  String get skinEditorTypes => 'الأنواع والفئات';
+
+  @override
+  String get skinEditorTypesExplanation => 'أسماء الفئات والأنواع والواجهات.';
+
+  @override
+  String get skinEditorStrings => 'السلاسل النصية';
+
+  @override
+  String get skinEditorStringsExplanation =>
+      'النصوص بين علامات اقتباس والعبارات النصية الحرفية.';
+
+  @override
+  String get skinEditorNumbers => 'الأرقام والقيم';
+
+  @override
+  String get skinEditorNumbersExplanation =>
+      'القيم الرقمية الحرفية والقيم المنطقية والثوابت.';
+
+  @override
+  String get skinEditorFunctions => 'الدوال والأساليب';
+
+  @override
+  String get skinEditorFunctionsExplanation =>
+      'أسماء الدوال واستدعاءات الأساليب والعناصر المدمجة.';
+
+  @override
+  String get skinEditorComments => 'التعليقات';
+
+  @override
+  String get skinEditorCommentsExplanation =>
+      'تعليقات التعليمات البرمجية وكتل التوثيق.';
+
+  @override
+  String get textEditorColorsSectionTitle => 'ألوان وخط المحرر';
+
+  @override
+  String get textEditorSyntaxColorsSectionTitle => 'ألوان عناصر بناء الجملة';
+
+  @override
+  String get textEditorColorsCustomized => 'الألوان المخصصة نشطة';
+
+  @override
+  String get textEditorResetColors => 'إعادة ضبط الألوان إلى الافتراضية';
+
+  @override
+  String get textEditorFollowAppSkinNotice =>
+      'تتبع ألوان المحرر مظهر التطبيق النشط.';
+
+  @override
+  String get textEditorCustomizeColorsIndependently =>
+      'تخصيص الألوان بشكل مستقل';
+
+  @override
+  String get textEditorDefaultFromTheme => 'افتراضي (من السمة)';
+
+  @override
+  String get skinFileManager => 'مدير الملفات';
+
+  @override
+  String get skinFolderAndFileGlyphsTilesAndLabelColors =>
+      'رموز ومربعات وألوان تسميات المجلدات والملفات.';
+
+  @override
+  String get skinDetailsTextColor => 'لون نص التفاصيل';
+
+  @override
+  String get skinUseTheAppSSupportingTextColor =>
+      'استخدام لون النص المساعد للتطبيق';
+
+  @override
+  String get skinCustomColor => 'لون مخصص';
+
+  @override
+  String get skinMonospaceFileNames => 'أسماء الملفات بخط أحادي المسافة';
+
+  @override
+  String get skinBackgroundBehindTheIcon => 'الخلفية خلف الأيقونة';
+
+  @override
+  String get skinIconColorSource => 'مصدر لون الأيقونة';
+
+  @override
+  String get skinUseTheAppSMainTextColor => 'استخدام لون النص الرئيسي للتطبيق';
+
+  @override
+  String get skinTextEditor => 'محرر النصوص';
+
+  @override
+  String get skinCanvasGutterCursorSelectionBackgroundAndSyntaxTemplate =>
+      'اللوحة والهامش والمؤشر والتحديد والخلفية وقالب بناء الجملة.';
+
+  @override
+  String get skinGutterAndLineNumbers => 'الهامش وأرقام الأسطر';
+
+  @override
+  String get skinCursor => 'المؤشر';
+
+  @override
+  String get skinSelection => 'التحديد';
+
+  @override
+  String get skinEditorBackgroundTemplate => 'قالب خلفية المحرر';
+
+  @override
+  String get skinSyntaxTemplate => 'قالب بناء الجملة';
+
+  @override
+  String get skinTapTheColorCircleToChooseAColor246981 =>
+      'اضغط على دائرة اللون لاختيار لون';
+
+  @override
+  String get skinDefaultVaultExplorerIcons =>
+      'أيقونات Vault Explorer الافتراضية';
+
+  @override
+  String get skinSolidIcons => 'أيقونات مصمتة';
+
+  @override
+  String get skinRoundedIcons => 'أيقونات مستديرة';
+
+  @override
+  String get skinOutlineIcons => 'أيقونات مخططة';
+
+  @override
+  String get skinSquareCornerIcons => 'أيقونات بزوايا مربعة';
+
+  @override
+  String get skinTintedTileBehindTheIcon => 'مربع ملون خلف الأيقونة';
+
+  @override
+  String get skinOutlinedTileBehindTheIcon => 'مربع محدد خلف الأيقونة';
+
+  @override
+  String get skinNoTile => 'بلا مربع';
+
+  @override
+  String get skinAutomaticFileTypeOrFolderColor =>
+      'تلقائي (نوع الملف أو لون المجلد)';
+
+  @override
+  String get skinUseTheMainAppAccent => 'استخدام لون التمييز الرئيسي للتطبيق';
+
+  @override
+  String get skinUseAMutedNeutralColor => 'استخدام لون محايد خافت';
+
+  @override
+  String get skinChooseAColorBelow => 'اختر لوناً أدناه';
+
+  @override
+  String get skinUseTheSyntaxThemeBackground => 'استخدام خلفية سمة بناء الجملة';
+
+  @override
+  String get skinPureBlack => 'أسود نقي';
+
+  @override
+  String get skinDarkSlate => 'أردوازي داكن';
+
+  @override
+  String get skinCleanWhite => 'أبيض ناصع';
+
+  @override
+  String get skinWarmSepia => 'بني داكن دافئ';
+
+  @override
+  String get skinAutomaticMatchLightOrDarkMode =>
+      'تلقائي (مطابقة الوضع الفاتح أو الداكن)';
+
+  @override
+  String get skinSkinExported => 'تم تصدير المظهر.';
+
+  @override
+  String get skinSkinsExported => 'تم تصدير المظاهر.';
+
+  @override
+  String get skinRemoveSkin => 'إزالة المظهر؟';
+
+  @override
+  String get skinAppSkin => 'مظهر التطبيق';
+
+  @override
+  String get skinImportSkins => 'استيراد المظاهر';
+
+  @override
+  String get skinExportSkins => 'تصدير المظاهر';
+
+  @override
+  String get skinChooseACoordinatedLookForTheAppFileManagerAndEditor =>
+      'اختر مظهراً متناسقاً للتطبيق ومدير الملفات والمحرر. ';
+
+  @override
+  String get skinLightAndDarkSystemThemesUseMatchingPaletteVariants =>
+      'تستخدم سمات النظام الفاتحة والداكنة متغيرات متناسقة من لوحة الألوان.';
+
+  @override
+  String get skinEditCurrentSkin => 'تعديل المظهر الحالي';
+
+  @override
+  String get skinCreateASkinFromThisLook => 'إنشاء مظهر من هذا النمط';
+
+  @override
+  String get skinYourSkins => 'مظاهرك';
+
+  @override
+  String get skinCustomAppFileManagerAndEditorColors =>
+      'ألوان مخصصة للتطبيق ومدير الملفات والمحرر';
+
+  @override
+  String get skinMaterialColorsWithLightAndDarkVariants =>
+      'ألوان Material مع خيارات فاتحة وداكنة';
+
+  @override
+  String get skinTrueBlackEditorAndDarkf97e8f =>
+      'محرر أسود حقيقي وأسطح تطبيق داكنة مع لوحة تمييز OLED';
+
+  @override
+  String get skinYourEditableAppFileManagerAndEditorColors =>
+      'ألوانك القابلة للتعديل للتطبيق ومدير الملفات والمحرر';
+
+  @override
+  String get skinSkinActions => 'إجراءات المظهر';
+
+  @override
+  String get skinEditSkin => 'تعديل المظهر';
+
+  @override
+  String get skinExportSkin => 'تصدير المظهر';
+
+  @override
+  String get skinRemoveSkinf09101 => 'إزالة المظهر';
+
+  @override
+  String get skinDragAroundTheRingTo868d62 =>
+      'اسحب حول الحلقة لاختيار تدرج اللون، ثم تحرك للداخل لضبط الظل.';
+
+  @override
+  String get skinQuickColors => 'ألوان سريعة';
+
+  @override
+  String get skinEnterAnExactColor => 'أدخل لوناً دقيقاً';
+
+  @override
+  String get skinOptionalRGBOrARGBValue => 'قيمة RGB أو ARGB اختيارية';
+
+  @override
+  String get skinRGBARGB => 'RGB / ARGB';
+
+  @override
+  String get skinUseThisValue => 'استخدام هذه القيمة';
+
+  @override
+  String get skinDefaultLightDark => 'الافتراضي فاتح / داكن';
+
+  @override
+  String get skinOLEDPureBlack => 'OLED أسود نقي';
+
+  @override
+  String get skinCustomSkin => 'مظهر مخصص';
+
+  @override
+  String skinImportSucceeded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم استيراد # مظاهر.',
+      one: 'تم استيراد مظهر واحد.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String skinImportFailed(String error) {
+    return 'تعذر استيراد المظهر: $error';
+  }
+
+  @override
+  String skinExportFailed(String error) {
+    return 'تعذر تصدير المظهر: $error';
+  }
+
+  @override
+  String skinRemoveConfirmation(String skin) {
+    return 'سيتم حذف \"$skin\" من مظاهرك المحفوظة.';
+  }
+
+  @override
+  String skinSelectPreviewElement(String title) {
+    return 'تحديد $title';
+  }
+
+  @override
+  String skinIconColorForItem(String item) {
+    return 'لون أيقونة $item';
+  }
+
+  @override
+  String skinNameColorForItem(String item) {
+    return 'لون اسم $item';
+  }
+
+  @override
+  String get skinFileIconColorSettingDescription =>
+      'يتم التحكم في هذا اللون بواسطة إعداد لون الأيقونة في قسم مدير الملفات.';
+
+  @override
+  String get skinFileNameColorSettingDescription =>
+      'يتم التحكم في هذا اللون بواسطة إعداد لون الاسم في قسم مدير الملفات.';
+
+  @override
+  String get skinExportedSingle => 'تم تصدير المظهر.';
+
+  @override
+  String get skinExportedMultiple => 'تم تصدير المظاهر.';
+
+  @override
+  String get skinExportSkinsOnly => 'المظاهر فقط';
+
+  @override
+  String get skinExportSkinsOnlySubtitle =>
+      'الألوان وأنماط الأيقونات. آمنة للمشاركة.';
+
+  @override
+  String get skinExportSkinsAndInterface => 'المظاهر والواجهة';
+
+  @override
+  String get skinExportSkinsAndInterfaceSubtitle =>
+      'يحفظ أيضًا وضع السمة وتخطيط شريط الأدوات والشبكة ومظهر المحرر وتخطيط عارض الوسائط. لنسخك الاحتياطية الخاصة.';
+
+  @override
+  String get skinAppearanceExported => 'تم تصدير المظاهر والواجهة.';
+
+  @override
+  String get skinImportInterfaceTitle => 'تطبيق إعدادات الواجهة؟';
+
+  @override
+  String get skinImportInterfaceMessage =>
+      'يحتوي هذا الملف أيضًا على إعدادات الواجهة. سيؤدي تطبيقها إلى استبدال وضع السمة الحالي وتخطيط شريط الأدوات والشبكة ومظهر المحرر وتخطيط عارض الوسائط.';
+
+  @override
+  String get skinImportInterfaceApply => 'تطبيق';
+
+  @override
+  String get skinImportInterfaceSkip => 'المظاهر فقط';
+
+  @override
+  String get skinInterfaceApplied => 'تم تطبيق إعدادات الواجهة.';
+
+  @override
+  String get automationBatteryHintTitle => 'السماح بالبدء في الخلفية';
+
+  @override
+  String get automationBatteryHintMessage =>
+      'عند إغلاق VaultExplorer تمامًا، قد يمنع Android الأتمتة من إلغاء قفل هذه الخزينة. اضبط استخدام بطارية VaultExplorer على \"غير مقيّد\" حتى يتمكن Tasker وMacroDroid والتطبيقات الأخرى من إلغاء قفلها في الخلفية.';
+
+  @override
+  String get automationBatteryHintButton => 'فتح إعدادات التطبيق';
+
+  @override
+  String get automationBatterySettingsOpenFailedMessage =>
+      'تعذر فتح إعدادات التطبيق. افتح الإعدادات > التطبيقات > VaultExplorer > البطارية واختر \"غير مقيّد\".';
+
+  @override
+  String get skinPreviewMountedVaultName => 'خزينة شخصية';
+
+  @override
+  String get skinPreviewVaultName => 'عنوان الخزينة';
+
+  @override
+  String get skinMainTextColorAlsoColorsRegularMenuItems =>
+      'تشترك عناوين الخزينة وإجراءات القائمة العادية في لون النص الرئيسي للتطبيق.';
+
+  @override
+  String get skinStatusBannerExamples => 'لافتات الحالة';
+
+  @override
+  String get skinSuccessBanner => 'لافتة النجاح';
+
+  @override
+  String get skinWarningBanner => 'لافتة التحذير';
+
+  @override
+  String get skinErrorBanner => 'لافتة الخطأ';
+
+  @override
+  String get skinSuccessBannerUsesSuccessContainer =>
+      'يستخدم ملء اللافتة والرسالة ألوان النجاح.';
+
+  @override
+  String get skinWarningBannerUsesWarningContainer =>
+      'يستخدم ملء اللافتة والرسالة ألوان التحذير.';
+
+  @override
+  String get skinErrorBannerUsesErrorContainer =>
+      'يستخدم ملء اللافتة والرسالة ألوان الخطأ.';
+
+  @override
+  String get skinPreviewChangesSaved => 'تم حفظ التغييرات';
+
+  @override
+  String get skinPreviewStorageAlmostFull => 'مساحة التخزين ممتلئة تقريبًا';
+
+  @override
+  String get skinPreviewCouldNotUnlockVault => 'تعذر فتح قفل الخزينة';
+
+  @override
+  String get skinSurfaceAndBorderExamples => 'الأسطح والحدود';
+
+  @override
+  String get skinFileRowDetailsColor => 'لون تفاصيل صف الملف';
+
+  @override
+  String get skinFileActionOverflowIconColor => 'لون رمز إجراء صف الملف';
+
+  @override
+  String get skinMatchingElementsHighlightTogether =>
+      'يتم أيضًا تمييز عناصر المعاينة الأخرى التي لها نفس اللون.';
+
+  @override
+  String get skinStatusBannerTextColor => 'يستخدم نص اللافتة هذا اللون.';
+
+  @override
+  String get apkOpenPackageInstaller => 'مُثبّت الحزم';
+
+  @override
+  String get apkOpenPackageInstallerSubtitle => 'ثبّت هذا التطبيق على جهازك';
+
+  @override
+  String get apkOpenAsZip => 'فتح كملف ZIP';
+
+  @override
+  String get apkOpenAsZipSubtitle => 'تصفّح الملفات بداخله واستخراجها';
+
+  @override
+  String get audioEditorEditAction => 'تحرير الصوت';
+
+  @override
+  String get audioEditorTimelineLabel => 'المخطط الزمني للصوت';
+
+  @override
+  String get audioEditorAnalyzing => 'جارٍ قراءة الصوت…';
+
+  @override
+  String audioEditorLoadFailed(String message) {
+    return 'تعذّر فتح ملف الصوت هذا: $message';
+  }
+
+  @override
+  String get audioEditorReadOnly =>
+      'هذا المخزن للقراءة فقط، لذا لا يمكن حفظ الصوت المعدَّل.';
+
+  @override
+  String get audioEditorExporting => 'جارٍ تصدير الصوت';
+
+  @override
+  String audioEditorSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تم حفظ $count ملفات صوتية',
+      one: 'تم حفظ ملف صوتي واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get audioEditorExportMerge => 'دمج في ملف واحد';
+
+  @override
+  String get audioEditorExportSeparate => 'حفظ كملفات منفصلة';
+
+  @override
+  String get audioEditorReplaceOriginal => 'استبدال الصوت الأصلي';
+
+  @override
+  String get audioEditorReplaceOriginalHint =>
+      'سيتم استبدال الملف الأصلي بالمقطع المُصدَّر.';
+
+  @override
+  String get audioEditorLosslessNote =>
+      'القص بلا فقدان: يُنسخ الصوت دون إعادة ترميز، فلا تتغير الجودة. يقع القص عند أقرب إطار صوتي، على بعد أجزاء من الثانية من النقطة التي حددتها. لا تُنقل الوسوم وصورة الغلاف.';
+
+  @override
+  String get audioEditorCutOutModeDescription =>
+      'أزل المقاطع المحددة وصدّر ما تبقّى.';
+
+  @override
+  String audioEditorUnsupportedFormat(String format) {
+    return 'لا يمكن تحرير ملفات $format على هذا الجهاز، لذا يمكن تشغيل هذا الملف هنا ولكن لا يمكن تصديره.';
+  }
+
+  @override
+  String get audioEditorPrevCutPoint => 'نقطة القص السابقة';
+
+  @override
+  String get audioEditorNextCutPoint => 'نقطة القص التالية';
+
+  @override
+  String audioEditorReencodeBanner(String format) {
+    return 'لا يمكن نسخ صوت $format كما هو، لذا ستتم إعادة ترميزه إلى AAC (.m4a) عند التصدير.';
+  }
+
+  @override
+  String get audioEditorReencodeNote =>
+      'لا يمكن نسخ هذا التنسيق كما هو، لذا يُعاد ترميز الصوت المُصدَّر إلى AAC. تبقى الجودة عالية لكنها ليست مطابقة تمامًا للأصل. يقع القص عند النقطة التي حددتها بالضبط. لا تُنقل الوسوم وصورة الغلاف.';
+
+  @override
+  String get mediaViewerActionAbLoop => 'تكرار A-B';
+
+  @override
+  String abLoopStartMarkedMessage(String time) {
+    return 'تم تعيين A عند $time. اضغط مرة أخرى لتعيين B.';
+  }
+
+  @override
+  String abLoopStartedMessage(String start, String end) {
+    return 'تكرار $start – $end';
+  }
+
+  @override
+  String get abLoopEndTooCloseMessage =>
+      'يجب أن تكون النقطة B بعد النقطة A. تقدم للأمام واضغط مرة أخرى.';
+
+  @override
+  String get abLoopClearedMessage => 'تم إيقاف تكرار A-B';
+
+  @override
+  String get skinEditorPanelBackground => 'خلفية لوحات المحرر';
+
+  @override
+  String get skinEditorPanelBackgroundDescription =>
+      'خلفية مشتركة للشريط الجانبي وقوائم المزيد من الإجراءات في المحرر.';
+
+  @override
+  String get skinFollowAppSkin => 'اتباع مظهر التطبيق';
+
+  @override
+  String get fileSkinFollowAppSkinDescription =>
+      'يتبع تنسيق الملفات والمجلدات مظهر التطبيق المحدد.';
+
+  @override
+  String get fileSkinUseIndependentStylesDescription =>
+      'تضبط هذه الخيارات مظهر مدير الملفات الخاص به. إذا كان يتبع مظهر التطبيق، فسيؤدي تغيير إعداد مسبق أو نمط أدناه إلى إيقاف اتباعه.';
+
+  @override
+  String get fileSkinManagedByAppSkinTitle => 'مدير الملفات يتبع مظهر التطبيق';
+
+  @override
+  String get fileSkinManagedByAppSkinDescription =>
+      'تعرض المعاينة مظهر التطبيق النشط. سيؤدي تغيير إعداد مسبق أو أي نمط أدناه إلى حفظ مظهر مستقل لمدير الملفات وإيقاف اتباع مظهر التطبيق.';
+
+  @override
+  String get skinFileManagerIndependentTitle =>
+      'يستخدم مدير الملفات مظهرًا مستقلًا';
+
+  @override
+  String get skinFileManagerIndependentDescription =>
+      'لن تظهر تغييرات أنماط الملفات والمجلدات في مظهر التطبيق هذا في مدير الملفات ما دام يستخدم مظهرًا خاصًا به. فعّل اتباع مظهر التطبيق لتطبيق هذا المظهر عليه.';
+
+  @override
+  String get skinChooseOrCreateSkin => 'اختر مظهرًا أو أنشئه';
+
+  @override
+  String get skinSkinShortcutCustomDescription =>
+      'عدّل ألوان التطبيق ورموزه المشتركة. تبقى تخصيصات المكوّنات في هذه الصفحة.';
+
+  @override
+  String get skinSkinShortcutPresetDescription =>
+      'تصفّح المظاهر المضمنة أو أنشئ مظهرًا مخصصًا من هذا التصميم.';
+
+  @override
+  String get textEditorUseIndependentAppearanceDescription =>
+      'اختر خلفية مستقلة للمحرر وقالب تمييز الصياغة أدناه.';
+
+  @override
+  String get fileSkinComponentStyling => 'تنسيق المكوّنات';
+
+  @override
+  String get textEditorStyling => 'تنسيق المحرر';
+
+  @override
+  String get audioFilePropertiesSectionHeader => 'الصوت';
+
+  @override
+  String get audioTagsSectionHeader => 'معلومات المقطع';
+
+  @override
+  String get artistLabel => 'الفنان';
+
+  @override
+  String get albumLabel => 'الألبوم';
+
+  @override
+  String get yearLabel => 'السنة';
+
+  @override
+  String get genreLabel => 'النوع';
+
+  @override
+  String get audioTrackLabel => 'المقطع';
+
+  @override
+  String get bitDepthLabel => 'عمق البت';
+
+  @override
+  String get colorModeLabel => 'وضع اللون';
+
+  @override
+  String get transparencyLabel => 'الشفافية';
+
+  @override
+  String get animationLabel => 'الرسوم المتحركة';
+
+  @override
+  String get orientationLabel => 'الاتجاه';
+
+  @override
+  String get densityLabel => 'كثافة البكسل';
+
+  @override
+  String get encodingLabel => 'الترميز';
+
+  @override
+  String get skinEditorCodeTextColorDescription =>
+      'لون النص الافتراضي للشيفرة العادية. تحتفظ النصوص المظللة حسب الصياغة بألوانها الخاصة.';
+
+  @override
+  String get skinEditorInterfaceText => 'نص واجهة المحرر';
+
+  @override
+  String get skinEditorInterfaceTextDescription =>
+      'النصوص والأيقونات في شريط أدوات المحرر والشريط الجانبي والقوائم وشريط الحالة.';
+
+  @override
+  String get equalizerTitle => 'المعادل الصوتي';
+
+  @override
+  String get equalizerPresetCustom => 'مخصص';
+
+  @override
+  String get equalizerPreampLabel => 'التضخيم المسبق';
+
+  @override
+  String get equalizerPreventClippingTitle => 'منع التشوّه';
+
+  @override
+  String get equalizerPreventClippingSubtitle =>
+      'يخفض مستوى الصوت العام بالقدر اللازم فقط حتى لا تتشوّه النطاقات المعزَّزة';
+
+  @override
+  String get equalizerPresetFlat => 'مسطّح';
+
+  @override
+  String get equalizerPresetBassBoost => 'تعزيز الجهير';
+
+  @override
+  String get equalizerPresetTrebleBoost => 'تعزيز الطبقات العالية';
+
+  @override
+  String get equalizerPresetVoice => 'الكلام';
+
+  @override
+  String get equalizerPresetRock => 'روك';
+
+  @override
+  String get equalizerPresetPop => 'بوب';
+
+  @override
+  String get equalizerPresetJazz => 'جاز';
+
+  @override
+  String get equalizerPresetClassical => 'كلاسيكي';
+
+  @override
+  String get equalizerPresetElectronic => 'إلكتروني';
+
+  @override
+  String get equalizerPresetLoudness => 'الجهارة';
+
+  @override
+  String get audioRecorder => 'مسجّل الصوت';
+
+  @override
+  String get audioCapturedEncrypted => 'تم حفظ التسجيل الصوتي';
+
+  @override
+  String get audioMicPermissionRequiredMessage =>
+      'يلزم إذن الميكروفون لتسجيل الصوت.';
+
+  @override
+  String get audioRecordingAllowMicrophone => 'السماح بالميكروفون';
+
+  @override
+  String get audioRecordingStartTooltip => 'بدء التسجيل';
+
+  @override
+  String get audioRecordingStopTooltip => 'إيقاف التسجيل';
+
+  @override
+  String get audioRecordingPauseTooltip => 'إيقاف مؤقت';
+
+  @override
+  String get audioRecordingResumeTooltip => 'استئناف';
+
+  @override
+  String get audioRecordingPausedLabel => 'متوقف مؤقتًا';
+
+  @override
+  String get audioRecordingDiscardTitle => 'تجاهل التسجيل؟';
+
+  @override
+  String get audioRecordingDiscardMessage =>
+      'لم يتم حفظ هذا التسجيل وسيتم حذفه نهائيًا.';
+
+  @override
+  String get skinAreaDashboard => 'لوحة التحكم';
+
+  @override
+  String get skinAreaDashboardDescription =>
+      'قائمة الخزائن الرئيسية التي تظهر لك، مع بطاقات الخزائن الخاصة بها.';
+
+  @override
+  String get skinAreaDrawer => 'القائمة الجانبية';
+
+  @override
+  String get skinAreaDrawerDescription =>
+      'القائمة المنزلقة التي تحتوي على خزائنك واختصاراتك.';
+
+  @override
+  String get skinAreaFilesDescription => 'متصفح الملفات داخل الخزينة المفتوحة.';
+
+  @override
+  String get skinAreaEditorDescription =>
+      'شريط أدوات محرر النصوص والبرمجة. يتم ضبط ألوان الخلفية وبناء الجملة في سمة المحرر أدناه.';
+
+  @override
+  String get skinAreaToolsDescription =>
+      'علامة تبويب الأدوات وجميع الأدوات المفتوحة منها.';
+
+  @override
+  String get skinAreaSettingsDescription =>
+      'علامة تبويب الإعدادات وصفحاتها الفرعية.';
+
+  @override
+  String get skinSharedPaletteTitle => 'اللوحة المشتركة';
+
+  @override
+  String get skinSharedPaletteShort => 'مشتركة';
+
+  @override
+  String get skinSharedPaletteDescription =>
+      'الألوان التي ترثها كل صفحة ما لم تحدد ألوانها الخاصة. تستخدمها الشاشات التي ليس لها قسم خاص مثل إلغاء القفل والكاميرا مباشرة.';
+
+  @override
+  String get skinSharedBarDescription =>
+      'الشريط العلوي لكل صفحة لا تحدد شريطها الخاص.';
+
+  @override
+  String get skinSharedFabDescription =>
+      'زر الإضافة الدائري لكل صفحة لا تحدد زرها الخاص.';
+
+  @override
+  String get skinPagesTitle => 'ألوان الصفحات';
+
+  @override
+  String get skinPagesDescription =>
+      'تحتفظ كل صفحة بألوانها الخاصة. لا يؤثر تغيير صفحة واحدة على أي صفحة أخرى مطلقاً.';
+
+  @override
+  String get skinResetPageColors => 'إعادة ضبط ألوان الصفحة';
+
+  @override
+  String get skinTokenBackground => 'خلفية الصفحة';
+
+  @override
+  String get skinTokenBackgroundHint =>
+      'المساحة الخلفية لكل العناصر في هذه الصفحة.';
+
+  @override
+  String get skinTokenText => 'النص الرئيسي';
+
+  @override
+  String get skinTokenTextHint =>
+      'العناوين والأسماء والنصوص الأساسية في هذه الصفحة.';
+
+  @override
+  String get skinTokenTextSecondary => 'النص الثانوي والأيقونات';
+
+  @override
+  String get skinTokenTextSecondaryHint =>
+      'العناوين الفرعية والتفاصيل والتلميحات والأيقونات الهادئة.';
+
+  @override
+  String get skinTokenAppBar => 'الشريط العلوي';
+
+  @override
+  String get skinTokenAppBarHint => 'تعبئة الشريط العلوي في هذه الصفحة.';
+
+  @override
+  String get skinTokenOnAppBar => 'نص وأيقونات الشريط العلوي';
+
+  @override
+  String get skinTokenOnAppBarHint =>
+      'لون العنوان والأيقونات في الشريط العلوي.';
+
+  @override
+  String get skinTokenCard => 'البطاقات والصفوف';
+
+  @override
+  String get skinTokenCardHint => 'البطاقات وصفوف القوائم واللوحات المجمعة.';
+
+  @override
+  String get skinTokenCardActive => 'البطاقة النشطة';
+
+  @override
+  String get skinTokenCardActiveHint =>
+      'البطاقة المميزة، مثل الخزينة المفتوحة.';
+
+  @override
+  String get skinTokenRaised => 'العناصر وعناصر التحكم';
+
+  @override
+  String get skinTokenRaisedHint =>
+      'حقول البحث والشرائح والمصغرات ومربعات الأيقونات.';
+
+  @override
+  String get skinTokenOverlay => 'القوائم ومربعات الحوار والصفائح';
+
+  @override
+  String get skinTokenOverlayHint =>
+      'القوائم المنبثقة ومربعات الحوار والصفائح السفلية المفتوحة من هذه الصفحة.';
+
+  @override
+  String get skinTokenAccent => 'اللون المميز';
+
+  @override
+  String get skinTokenAccentHint =>
+      'الأزرار والروابط وأشرطة التقدم والأيقونات النشطة.';
+
+  @override
+  String get skinTokenOnAccent => 'النص فوق اللون المميز';
+
+  @override
+  String get skinTokenOnAccentHint =>
+      'التسميات والأيقونات المعروضة على الأزرار المعبأة باللون المميز.';
+
+  @override
+  String get skinTokenSelection => 'التحديد';
+
+  @override
+  String get skinTokenSelectionHint =>
+      'الصفوف المحددة ومربعات الأيقونات البارزة.';
+
+  @override
+  String get skinTokenOnSelection => 'النص فوق التحديد';
+
+  @override
+  String get skinTokenOnSelectionHint =>
+      'الأيقونات والنصوص المعروضة على العناصر المحددة.';
+
+  @override
+  String get skinTokenDivider => 'الفواصل';
+
+  @override
+  String get skinTokenDividerHint => 'خطوط الفصل الرفيعة والحدود الدقيقة.';
+
+  @override
+  String get skinTokenOutline => 'الإطارات';
+
+  @override
+  String get skinTokenOutlineHint =>
+      'حدود أكثر وضوحاً على الأزرار والحقول المحددة بإطار.';
+
+  @override
+  String get skinTokenFab => 'زر الإضافة الدائري';
+
+  @override
+  String get skinTokenFabHint => 'تعبئة زر الإضافة الدائري.';
+
+  @override
+  String get skinTokenOnFab => 'أيقونة زر الإضافة الدائري';
+
+  @override
+  String get skinTokenOnFabHint => 'أيقونة الزائد على زر الإضافة الدائري.';
+
+  @override
+  String get skinPreviewConfirm => 'تأكيد';
+
+  @override
+  String get skinPreviewCancelButton => 'إلغاء';
+
+  @override
+  String get skinPreviewSaveButton => 'حفظ';
+
+  @override
+  String get skinPreviewRunButton => 'تشغيل';
+
+  @override
+  String get skinPreviewPasteButton => 'لصق هنا';
+
+  @override
+  String get skinPreviewUnlockButton => 'إلغاء القفل';
+
+  @override
+  String get skinPreviewSortChip => 'ترتيب: الاسم';
+
+  @override
+  String get skinPreviewSearchChip => 'بحث في الملفات';
+
+  @override
+  String get skinPreviewPinnedBadge => 'مثبت';
+
+  @override
+  String get skinPreviewVaultsHeader => 'الخزائن';
+
+  @override
+  String get skinPreviewToolsSection => 'تشفير الملفات';
+
+  @override
+  String get skinPreviewToolOne => 'مولد ملفات المفاتيح وعبارات المرور';
+
+  @override
+  String get skinPreviewToolOneHint => 'توليد كلمات المرور وملفات المفاتيح';
+
+  @override
+  String get skinPreviewToolTwo => 'مدقق المجموع الاختباري والتجزئة';
+
+  @override
+  String get skinPreviewToolTwoHint => 'التحقق من عدم تلف الملفات الكبيرة';
+
+  @override
+  String get skinPreviewSettingsSection => 'الأمان';
+
+  @override
+  String get skinPreviewSettingOne => 'قفل التطبيق';
+
+  @override
+  String get skinPreviewSettingOneHint => 'القياسات الحيوية والقفل التلقائي';
+
+  @override
+  String get skinPreviewSettingTwo => 'التخزين';
+
+  @override
+  String get skinPreviewSettingTwoHint => 'التخزين الخارجي والجسور السحابية';
+
+  @override
+  String get inPlaceEditDone => 'تم';
+
+  @override
+  String get inPlaceEditTitle => 'ترتيب عناصر التحكم';
+
+  @override
+  String get inPlaceEditHint => 'اسحب الإجراءات بين الأشرطة أو اضغط للترتيب';
+
+  @override
+  String get inPlaceEditAvailable => 'الإجراءات المتاحة';
+
+  @override
+  String get inPlaceEditTopDock => 'الشريط العلوي';
+
+  @override
+  String get inPlaceEditBottomDock => 'الشريط السفلي';
+
+  @override
+  String get inPlaceEditDragToRemove => 'اسحب هنا للإزالة';
+
+  @override
+  String get inPlaceEditAddToTop => 'إضافة إلى الشريط العلوي';
+
+  @override
+  String get inPlaceEditAddToBottom => 'إضافة إلى الشريط السفلي';
+
+  @override
+  String get inPlaceEditEmptyDock => 'أفلت الإجراءات هنا';
+
+  @override
+  String get inPlaceEditPlayerSettings => 'إعدادات المشغل';
+
+  @override
+  String get inPlaceEditMoveToMore => 'نقل إلى قائمة المزيد';
+
+  @override
+  String get inPlaceEditMoveToAdvanced => 'نقل إلى الإعدادات المتقدمة';
+
+  @override
+  String get inPlaceEditHideAction => 'إخفاء الإجراء';
+
+  @override
+  String get inPlaceEditHidden => 'مخفي';
+
+  @override
+  String get textEditorAutoHideAppBarLabel => 'إخفاء شريط التطبيق تلقائيًا';
+
+  @override
+  String get textEditorAutoHideAppBarDescription =>
+      'إخفاء الشريط العلوي أثناء التحرير لزيادة المساحة الرأسية';
+
+  @override
+  String get textEditorCopyToMenuItem => 'نسخ إلى...';
+
+  @override
+  String get textEditorCopyToDialogTitle => 'نسخ إلى مجلد';
+
+  @override
+  String get textEditorCopyHereButton => 'نسخ هنا';
+
+  @override
+  String get textEditorDuplicateMenuItem => 'إنشاء نسخة';
+
+  @override
+  String get textEditorCopiedSuccessfully => 'تم النسخ بنجاح';
+
+  @override
+  String get textEditorSearchFilesHint => 'تصفية الملفات…';
+
+  @override
+  String get audioRecordingQualityLabel => 'جودة تسجيل الصوت';
+
+  @override
+  String get audioRecordingQualityVoice => 'كلام';
+
+  @override
+  String get audioRecordingQualityStandard => 'قياسية';
+
+  @override
+  String get audioRecordingQualityHigh => 'عالية';
+
+  @override
+  String audioRecordingQualityDetails(String bitrate, String sampleRate) {
+    return 'AAC · $bitrate kbps · $sampleRate kHz · أحادي';
+  }
+
+  @override
+  String get audioEditorCompressTitle => 'حجم الملف';
+
+  @override
+  String get audioEditorCompressOriginal => 'الأصلي';
+
+  @override
+  String audioEditorCompressEstimate(String size) {
+    return 'الحجم المقدّر: حوالي $size';
+  }
+
+  @override
+  String get audioEditorCompressNote =>
+      'يُعاد ترميز الصوت إلى AAC بمعدل بت أقل، فيصغر حجم الملف لكن تقل الجودة. يقع القص عند النقطة التي حددتها بالضبط. لا تُنقل الوسوم وصورة الغلاف.';
+
+  @override
+  String get entropyStepTitle => 'إضافة العشوائية';
+
+  @override
+  String get entropyIntro =>
+      'حرّك إصبعك على اللوحة بحركات متنوعة وغير متوقعة. تُدمج حركاتك في مفاتيح التشفير وقيم الملح (salt) إضافةً إلى مولّد الأرقام العشوائية الآمن في الجهاز، وليس بدلاً منه.';
+
+  @override
+  String get entropyPadHint => 'ارسم هنا بإصبعك';
+
+  @override
+  String get entropyPadSemantics =>
+      'لوحة العشوائية. مرّر إصبعك عليها لجمع حركات عشوائية.';
+
+  @override
+  String entropyProgress(int percent) {
+    return 'جارٍ جمع العشوائية… $percent%';
+  }
+
+  @override
+  String get entropyComplete =>
+      'تم جمع عشوائية كافية. تابع التحريك لإضافة المزيد أو واصل.';
+
+  @override
+  String get entropySkippedStatus =>
+      'تم التخطي. سيُستخدم مولّد الأرقام العشوائية الآمن في الجهاز فقط. ارسم على اللوحة لإضافة العشوائية مجددًا.';
+
+  @override
+  String get entropyPoolLabel => 'مجمّع العشوائية';
+
+  @override
+  String get entropySkip => 'تخطَّ واستخدم مولّد الجهاز فقط';
+
+  @override
+  String get entropyReviewLabel => 'العشوائية';
+
+  @override
+  String get entropyReviewUserAdded => 'حركة اللمس + مولّد الجهاز';
+
+  @override
+  String get entropyReviewDeviceOnly => 'مولّد الجهاز فقط';
+
+  @override
+  String get automationCaptureSectionHeader => 'الكاميرا والميكروفون';
+
+  @override
+  String get automationAllowCaptureTitle =>
+      'السماح بالالتقاط عبر الكاميرا والميكروفون';
+
+  @override
+  String get automationAllowCaptureSubtitle => 'تسجيل الصور والفيديو والصوت';
+
+  @override
+  String get automationPermissionsSectionHeader => 'الأذونات';
+
+  @override
+  String get automationPermissionsIntro =>
+      'هذه أذونات خاصة بنظام Android، لذا تنطبق على التطبيق بأكمله وليس على هذه الخزينة فقط. يتم عرض الأذونات التي يمكن لإعداد هذه الخزينة استخدامها فقط، مع بيان حالتها الحالية.';
+
+  @override
+  String get automationPermSetupNeededTitle => 'يلزم الإعداد';
+
+  @override
+  String get automationPermAlmostReadyTitle => 'أوشكت على الانتهاء';
+
+  @override
+  String get automationPermReadyTitle => 'جاهز';
+
+  @override
+  String get automationPermReadyMessage =>
+      'كل ما تحتاجه أتمتة هذه الخزينة جاهز ومكتمل.';
+
+  @override
+  String get automationPermGrantButton => 'منح';
+
+  @override
+  String get automationPermGranted => 'تم المنح';
+
+  @override
+  String get automationPermTagRequired => 'مطلوب';
+
+  @override
+  String get automationPermTagRecommended => 'موصى به';
+
+  @override
+  String get automationPermTagOptional => 'اختياري';
+
+  @override
+  String get automationPermDeniedMessage =>
+      'لم يتم منح الإذن. إذا لم يطلب Android ذلك مرة أخرى، فقم بتفعيله من إعدادات التطبيق.';
+
+  @override
+  String get automationPermSettingsOpenFailedMessage =>
+      'تعذر فتح إعدادات التطبيق. انتقل إلى الإعدادات > التطبيقات > VaultExplorer > الأذونات.';
+
+  @override
+  String get automationPermBatteryTitle => 'استخدام البطارية غير المقيد';
+
+  @override
+  String get automationPermBatteryDescription =>
+      'يتيح للأتمتة إلغاء قفل هذه الخزينة أثناء إغلاق VaultExplorer تمامًا. بدون ذلك، قد يحظر Android هذا الإجراء.';
+
+  @override
+  String get automationPermNotificationsTitle => 'الإشعارات';
+
+  @override
+  String get automationPermNotificationsDescription =>
+      'يعرض تقدم عمليات الاستيراد والتصدير والمزامنة، والمؤشر أثناء تشغيل التسجيل.';
+
+  @override
+  String get automationPermAllFilesTitle => 'الوصول إلى جميع الملفات';
+
+  @override
+  String get automationPermAllFilesDescription =>
+      'يتيح لإجراءات الاستيراد والتصدير استخدام مسارات الملفات العادية مثل /storage/emulated/0/…. لا يلزم لروابط content://.';
+
+  @override
+  String get automationPermCameraTitle => 'الكاميرا';
+
+  @override
+  String get automationPermCameraDescription =>
+      'الصور ومقاطع الفيديو الملتقطة بواسطة الأتمتة.';
+
+  @override
+  String get automationPermMicrophoneTitle => 'الميكروفون';
+
+  @override
+  String get automationPermMicrophoneDescription =>
+      'التسجيلات الصوتية وصوت الفيديو. ويتم التحقق منه أيضًا عند التقاط الصور والفيديو.';
+
+  @override
+  String get automationPermOverlayDescription =>
+      'مطلوب فقط إذا كان تطبيق الأتمتة يبدأ التقاط الصور أو الفيديو عبر Broadcast على Android 14 وما بعده. غير مطلوب عند استهداف نشاط الالتقاط مباشرة.';
+
+  @override
+  String automationPermSetupNeededMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count إذن مطلوب مفقود. ستفشل بعض إجراءات الأتمتة حتى يتم منحها.',
+      many:
+          '$count إذنًا مطلوبًا مفقودًا. ستفشل بعض إجراءات الأتمتة حتى يتم منحها.',
+      few:
+          '$count أذونات مطلوبة مفقودة. ستفشل بعض إجراءات الأتمتة حتى يتم منحها.',
+      two: 'إذنان مطلوبان مفقودان. ستفشل بعض إجراءات الأتمتة حتى يتم منحهما.',
+      one: 'إذن مطلوب واحد مفقود. ستفشل بعض إجراءات الأتمتة حتى يتم منحه.',
+      zero: 'لا توجد أذونات مطلوبة مفقودة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String automationPermAlmostReadyMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count إعداد موصى به ما زال معطلاً. تعمل الأتمتة، لكنها قد تكون أقل موثوقية.',
+      many:
+          '$count إعدادًا موصى به ما زال معطلاً. تعمل الأتمتة، لكنها قد تكون أقل موثوقية.',
+      few:
+          '$count إعدادات موصى بها ما زالت معطلة. تعمل الأتمتة، لكنها قد تكون أقل موثوقية.',
+      two:
+          'إعدادان موصى بهما ما زالا معطلين. تعمل الأتمتة، لكنهما قد يجعلانها أقل موثوقية.',
+      one:
+          'إعداد موصى به واحد ما زال معطلاً. تعمل الأتمتة، لكنها قد تكون أقل موثوقية.',
+      zero: 'لا توجد إعدادات موصى بها معطلة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resetSizeOnLayoutChangeLabel =>
+      'إعادة ضبط الحجم عند تغيير التخطيط';
+
+  @override
+  String get resetSizeOnLayoutChangeDesc =>
+      'إعادة تكبير القائمة وعدد أعمدة الشبكة والشبكة المتدرّجة إلى الإعدادات الافتراضية عند تبديل التخطيط';
+
+  @override
+  String get thumbnailUseGlobalDefaultDesc =>
+      'يتبع الإعدادات الافتراضية للصور المصغّرة في إعدادات التطبيق، لذا تنطبق التغييرات التي تُجرى هناك على هذه الخزنة أيضًا.';
+
+  @override
+  String get resetVaultThumbnailsTitle =>
+      'إعادة جميع الخزنات إلى الإعداد الافتراضي';
+
+  @override
+  String get resetVaultThumbnailsSubtitle =>
+      'يجعل كل خزنة تتبع الإعدادات الافتراضية للصور المصغّرة أعلاه، بما في ذلك الخزنات ذات الإعدادات الخاصة.';
+
+  @override
+  String resetVaultThumbnailsConfirmMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'لدى $count خزنة إعدادات صور مصغّرة خاصة بها. هل تريد جعلها تتبع الإعداد الافتراضي بدلًا من ذلك؟',
+      many:
+          'لدى $count خزنة إعدادات صور مصغّرة خاصة بها. هل تريد جعلها تتبع الإعداد الافتراضي بدلًا من ذلك؟',
+      few:
+          'لدى $count خزنات إعدادات صور مصغّرة خاصة بها. هل تريد جعلها تتبع الإعداد الافتراضي بدلًا من ذلك؟',
+      two:
+          'لدى خزنتين إعدادات صور مصغّرة خاصة بهما. هل تريد جعلهما تتبعان الإعداد الافتراضي بدلًا من ذلك؟',
+      one:
+          'لدى خزنة واحدة إعدادات صور مصغّرة خاصة بها. هل تريد جعلها تتبع الإعداد الافتراضي بدلًا من ذلك؟',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resetVaultThumbnailsDone(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count خزنة تتبع الإعداد الافتراضي الآن',
+      many: '$count خزنة تتبع الإعداد الافتراضي الآن',
+      few: '$count خزنات تتبع الإعداد الافتراضي الآن',
+      two: 'خزنتان تتبعان الإعداد الافتراضي الآن',
+      one: 'خزنة واحدة تتبع الإعداد الافتراضي الآن',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String thumbnailGlobalInContainerConfirmMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count خزنة تتبع هذا الإعداد الافتراضي وستبدأ بحفظ الصور المصغّرة داخل الخزنة. هذا أبطأ ولا يمكن استخدامه مع الخزنات للقراءة فقط.',
+      many:
+          '$count خزنة تتبع هذا الإعداد الافتراضي وستبدأ بحفظ الصور المصغّرة داخل الخزنة. هذا أبطأ ولا يمكن استخدامه مع الخزنات للقراءة فقط.',
+      few:
+          '$count خزنات تتبع هذا الإعداد الافتراضي وستبدأ بحفظ الصور المصغّرة داخل الخزنة. هذا أبطأ ولا يمكن استخدامه مع الخزنات للقراءة فقط.',
+      two:
+          'خزنتان تتبعان هذا الإعداد الافتراضي وستبدآن بحفظ الصور المصغّرة داخل الخزنة. هذا أبطأ ولا يمكن استخدامه مع الخزنات للقراءة فقط.',
+      one:
+          'خزنة واحدة تتبع هذا الإعداد الافتراضي وستبدأ بحفظ الصور المصغّرة داخل الخزنة. هذا أبطأ ولا يمكن استخدامه مع الخزنات للقراءة فقط.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanAdjustCornersTitle => 'ضبط الزوايا';
+
+  @override
+  String get scanResultTitle => 'الصفحة الممسوحة';
+
+  @override
+  String get scanAutoDetectButton => 'اكتشاف تلقائي';
+
+  @override
+  String get scanFullImageButton => 'الصورة كاملة';
+
+  @override
+  String get scanFilterColor => 'ملوّن';
+
+  @override
+  String get scanFilterGrayscale => 'تدرّج رمادي';
+
+  @override
+  String get scanHintSearching => 'وجّه الكاميرا نحو مستند';
+
+  @override
+  String get scanHintFound => 'تم اكتشاف مستند';
+
+  @override
+  String get scanNoDocumentFound =>
+      'لم يتم اكتشاف مستند. اسحب الزوايا لتطابق الصفحة.';
+
+  @override
+  String get scanProcessingFailed => 'تعذّرت معالجة هذه الصفحة';
+
+  @override
+  String get scanDetectingEdges => 'جارٍ اكتشاف الحواف…';
+
+  @override
+  String get scanOutputPdf => 'PDF';
+
+  @override
+  String get scanOutputImages => 'صور';
+
+  @override
+  String get scanPdfFailed => 'تعذّر إنشاء ملف PDF';
+
+  @override
+  String get settingsSearchHint => 'البحث في الإعدادات';
+
+  @override
+  String get settingsSearchClear => 'مسح البحث';
+
+  @override
+  String get settingsSearchNoResults => 'لا توجد إعدادات مطابقة';
+
+  @override
+  String get settingsSearchNoResultsHint =>
+      'جرّب كلمة أخرى أو تحقق من الإملاء.';
+
+  @override
+  String get settingsSearchUnavailable =>
+      'يظهر هذا الخيار فقط عند تفعيل إعداد ذي صلة.';
+
+  @override
+  String createArchiveCompressingSubtitle(String count, String size) {
+    return 'ضغط $count ($size)';
+  }
+
+  @override
+  String createArchiveInsufficientSpace(String required, String available) {
+    return 'لا توجد مساحة كافية — المطلوب $required، المتوفر $available فقط.';
+  }
+
+  @override
+  String get createArchiveMediaRecommendation =>
+      'تم اكتشاف ملفات وسائط مضغوطة مسبقًا. تم اختيار ضغط \"تخزين\" تلقائيًا لتوفير المعالج والبطارية.';
+
+  @override
+  String get createArchiveNameLabel => 'اسم الأرشيف';
+
+  @override
+  String get createArchiveNameHint => 'أرشيف';
+
+  @override
+  String get createArchiveSelectFormatTooltip => 'تحديد التنسيق';
+
+  @override
+  String get createArchiveSecuritySection => 'الأمان';
+
+  @override
+  String get createArchivePasswordLabel => 'كلمة المرور (اختياري)';
+
+  @override
+  String get createArchivePasswordHintText => 'أدخل كلمة المرور';
+
+  @override
+  String get createArchiveConfirmPasswordLabel => 'تأكيد كلمة المرور';
+
+  @override
+  String get createArchiveConfirmPasswordHint => 'كرر كلمة المرور';
+
+  @override
+  String get passphraseStrengthFair => 'مقبول';
+
+  @override
+  String get createArchiveEncryptFilenamesNeedsPassword =>
+      'يتطلب كلمة مرور لمعاينة الملفات';
+
+  @override
+  String get createArchiveEncryptFilenamesActive =>
+      'يخفي قائمة الملفات حتى يتم إلغاء القفل';
+
+  @override
+  String get createArchiveAdvancedOptions => 'خيارات متقدمة';
+
+  @override
+  String get createArchiveCompressionLevel => 'مستوى الضغط';
+
+  @override
+  String get createArchiveSplitHintZip =>
+      'يُحفظ بالصيغة .z01 و.z02 … مع ملف .zip أخير. احتفظ بكل الأجزاء معًا في مجلد واحد.';
+
+  @override
+  String get createArchiveSplitHintSevenZip =>
+      'يُحفظ بالصيغة .7z.001 و.7z.002 … احتفظ بكل الأجزاء معًا في مجلد واحد.';
+
+  @override
+  String get createArchiveSplitVolumes => 'تقسيم إلى أجزاء';
+
+  @override
+  String get createArchiveSplitVolumeNone => 'بلا';
+
+  @override
+  String get createArchiveCustomVolumeSizeLabel =>
+      'حجم الجزء المخصص (ميجابايت)';
+
+  @override
+  String get createArchiveCustomVolumeSizeHint => 'مثال: 50';
+
+  @override
+  String get archiveCompressionStoreTitle => 'تخزين (0) — بدون ضغط';
+
+  @override
+  String get archiveCompressionStoreDesc =>
+      'تجميع فوري، الأفضل لمقاطع الفيديو والموسيقى والأرشيفات';
+
+  @override
+  String get archiveCompressionFastTitle => 'سريع (1–3) — سريع';
+
+  @override
+  String get archiveCompressionFastDesc => 'ضغط سريع للمشاركة اليومية';
+
+  @override
+  String get archiveCompressionNormalTitle => 'عادي (5) — متوازن';
+
+  @override
+  String get archiveCompressionNormalDesc => 'توازن بين الضغط والسرعة';
+
+  @override
+  String get archiveCompressionUltraTitle => 'فائق (9) — أصغر حجم';
+
+  @override
+  String get archiveCompressionUltraDesc => 'أصغر حجم، ضغط أبطأ';
+
+  @override
+  String get officeViewerErrorTitle => 'تعذّر معاينة هذا المستند';
+
+  @override
+  String get officeViewerEncrypted =>
+      'هذا المستند محمي بكلمة مرور، ولا يمكن معاينة ملفات Office المشفّرة.';
+
+  @override
+  String get officeViewerUnsupported =>
+      'تعذّرت قراءة هذا الملف. قد يكون تالفًا أو بصيغة غير مدعومة في العارض.';
+
+  @override
+  String get officeViewerTooLarge =>
+      'هذا المستند كبير جدًا بحيث لا يمكن معاينته داخل التطبيق.';
+
+  @override
+  String get officeViewerSpeakerNotes => 'ملاحظات المتحدث';
+
+  @override
+  String get fileAssocDocumentViewer => 'عارض المستندات المدمج';
+
+  @override
+  String get viewOfficeDocumentsInApp =>
+      'معاينة ملفات Word وExcel وPowerPoint وOpenDocument داخل التطبيق';
+
+  @override
+  String get archiveCompressionMethodLabel => 'طريقة الضغط';
+
+  @override
+  String get archiveMethodLzma2Desc =>
+      'أفضل خيار شامل. يُستخدم أيضًا في .tar.xz.';
+
+  @override
+  String get archiveMethodLzmaDesc =>
+      'طريقة 7-Zip الأقدم. تُستخدم أيضًا في .tar.lzma.';
+
+  @override
+  String get archiveMethodDeflateDesc =>
+      'الأسرع، لكن بحجم ملفات أكبر وأوسع دعم. يُستخدم أيضًا في ZIP و.tar.gz.';
+
+  @override
+  String archiveMethodFixedInfo(String format, String method) {
+    return '$format يضغط دائمًا باستخدام $method.';
+  }
+
+  @override
+  String get archiveMethodMoreInSevenZip =>
+      'LZMA2 وLZMA متاحان في أرشيفات 7-Zip.';
+
+  @override
+  String get archiveMethodStoreNote =>
+      'وضع التخزين لا يضغط، لذا لا توجد طريقة للاختيار.';
+
+  @override
+  String get browserTabsEnabledTitle => 'استخدام علامات تبويب مدير الملفات';
+
+  @override
+  String get browserTabsEnabledSubtitle =>
+      'أبقِ مواقع متعددة مفتوحة وانتقل بينها.';
+
+  @override
+  String get browserTabNew => 'علامة تبويب جديدة';
+
+  @override
+  String get browserTabClose => 'إغلاق علامة التبويب';
+
+  @override
+  String get browserTabCloseOthers => 'إغلاق علامات التبويب الأخرى';
+
+  @override
+  String get browserTabDuplicate => 'تكرار علامة التبويب';
+
+  @override
+  String get browserTabMoveToOtherPane => 'نقل إلى اللوحة الأخرى';
+
+  @override
+  String get browserTabSwitchPrevious => 'التبديل إلى علامة التبويب السابقة';
+
+  @override
+  String get browserTabOpenInNewTab => 'فتح في علامة تبويب جديدة';
+
+  @override
+  String browserTabLimitReached(int max) {
+    return 'تم بلوغ حد علامات التبويب ($max)';
+  }
+
+  @override
+  String get browserTabCloseToLeft => 'إغلاق علامات التبويب إلى اليسار';
+
+  @override
+  String get browserTabCloseToRight => 'إغلاق علامات التبويب إلى اليمين';
+
+  @override
+  String get browserTabCloseAll => 'إغلاق الكل';
+
+  @override
+  String get dualPaneEnabledTitle => 'استخدام لوحتين';
+
+  @override
+  String get dualPaneEnabledSubtitle =>
+      'اعرض علامتي تبويب مفتوحتين جنبًا إلى جنب عندما تكون الشاشة واسعة بما يكفي. يتطلب تفعيل علامات تبويب مدير الملفات.';
+
+  @override
+  String get pressBackAgainToExit => 'اضغط رجوع مرة أخرى للخروج';
+
+  @override
+  String get tabEdgeSwipeLabel => 'إيماءة السحب بين علامات التبويب';
+
+  @override
+  String get tabSwipeBetweenTabsTitle => 'السحب بين علامات التبويب';
+
+  @override
+  String get tabSwipeBetweenTabsOnDesc =>
+      'اسحب جانبيًا على مجلد للانتقال إلى علامة التبويب التالية أو السابقة.';
+
+  @override
+  String get tabSwipeBetweenTabsOffDesc =>
+      'تتغير علامات التبويب من شريط علامات التبويب فقط. وتعمل الإيماءتان أدناه في أي مكان على الشاشة.';
+
+  @override
+  String get tabSwipeRightOnFirstTab => 'السحب لليمين على أول علامة تبويب';
+
+  @override
+  String get tabSwipeRightAnywhere => 'السحب لليمين في أي مكان';
+
+  @override
+  String get tabSwipeLeftOnLastTab => 'السحب لليسار على آخر علامة تبويب';
+
+  @override
+  String get tabSwipeLeftAnywhere => 'السحب لليسار في أي مكان';
+
+  @override
+  String get tabSwipeActionNewTab => 'فتح علامة تبويب جديدة';
+
+  @override
+  String get tabSwipeActionOpenDrawer => 'فتح القائمة الجانبية';
+
+  @override
+  String get tabSwipeActionLoopFirst => 'الانتقال دائريًا إلى أول علامة تبويب';
+
+  @override
+  String get tabSwipeActionLoopLast => 'الانتقال دائريًا إلى آخر علامة تبويب';
+
+  @override
+  String get tabSwipeActionNothing => 'عدم فعل شيء';
+
+  @override
+  String get tabSwipeRightNothingDesc =>
+      'ما زالت القائمة الجانبية تُفتح من حافة الشاشة اليسرى ومن زر القائمة.';
+
+  @override
+  String get tabSwipeRightLoopDesc =>
+      'تُفتح القائمة الجانبية من حافة الشاشة اليسرى أو من زر القائمة. عند وجود علامة تبويب واحدة فقط، تفتحها هذه الإيماءة بدلًا من ذلك.';
+
+  @override
+  String get tabSwipeNewTabsFromStripDesc =>
+      'ما زالت علامات التبويب الجديدة تُفتح من شريط علامات التبويب.';
+
+  @override
+  String get tabSwipePreviewFirstTab => 'أول علامة تبويب';
+
+  @override
+  String get tabSwipePreviewLastTab => 'آخر علامة تبويب';
+
+  @override
+  String get appBarAtBottomLabel => 'عرض شريط التطبيق في الأسفل';
+
+  @override
+  String get appBarAtBottomDesc =>
+      'ينقل شريط التطبيق من أعلى الشاشة إلى أسفلها ليسهل الوصول إليه بالإبهام.';
+
+  @override
+  String get selectByIconLabel => 'التحديد بالنقر على الأيقونة';
+
+  @override
+  String get selectByIconDesc =>
+      'في عرض القائمة، يؤدي النقر على أيقونة ملف أو مجلد إلى تحديده. عند الإيقاف، لا يحدث شيء عند النقر على الأيقونة.';
+
+  @override
+  String get showFileExtensionsLabel => 'إظهار امتدادات الملفات';
+
+  @override
+  String get showFileExtensionsDesc =>
+      'يعرض الامتداد في نهاية أسماء الملفات. تظهر الامتدادات دائمًا أثناء البحث.';
+
+  @override
+  String get itemActionsMenuTitle => 'إجراءات العنصر';
+
+  @override
+  String get itemActionsMenuDesc =>
+      'اختر الإجراءات التي تظهر في قائمة العنصر وقائمة التحديد، وترتيب ظهورها.';
+
+  @override
+  String get itemActionsQuickRowHeader => 'صف الإجراءات السريعة';
+
+  @override
+  String get itemActionsMenuListHeader => 'قائمة الخيارات';
+
+  @override
+  String get itemActionsMoveToQuickRow => 'نقل إلى صف الإجراءات السريعة';
+
+  @override
+  String get itemActionsMoveToMenuList => 'نقل إلى قائمة الخيارات';
+
+  @override
+  String get skinEditStarted =>
+      'محرر المظهر قيد التشغيل. استخدم الأزرار العائمة في أي شاشة لاختيار لون وتغييره.';
+
+  @override
+  String get skinEditSaved => 'تم حفظ المظهر';
+
+  @override
+  String get skinEditPickTooltip => 'اختيار عنصر لتغيير لونه';
+
+  @override
+  String get skinEditPickStopTooltip =>
+      'إيقاف الاختيار واستخدام التطبيق بشكل عادي';
+
+  @override
+  String get skinEditDoneTooltip => 'حفظ وإغلاق محرر المظهر';
+
+  @override
+  String get skinEditHint =>
+      'المس أي عنصر لتغيير لونه. المس القطارة مرة أخرى لاستخدام التطبيق بشكل عادي.';
+
+  @override
+  String get skinEditLayersTitle => 'الألوان في هذا الموضع';
+
+  @override
+  String get skinEditAlsoUsedBy => 'اللون نفسه مستخدم أيضًا في';
+
+  @override
+  String get skinEditClosest =>
+      'لا يوجد تطابق تام لهذا اللون، وهذا أقرب لون في المظهر.';
+
+  @override
+  String get skinEditNoMatch =>
+      'هذا الموضع لا يستخدم لون المظهر مباشرة. اختر لونًا من القائمة.';
+
+  @override
+  String get skinEditAllColors => 'كل الألوان';
+
+  @override
+  String get skinEditBackToEditor => 'العودة إلى محرر الألوان';
+
+  @override
+  String get skinEditStatusInherited => 'موروث';
+
+  @override
+  String get skinEditReset => 'إعادة تعيين';
+
+  @override
+  String get skinEditMoreOptions => 'كل الألوان والخيارات';
+
+  @override
+  String get skinEditCollapse => 'طي اللوحة';
+
+  @override
+  String get skinEditExpand => 'توسيع اللوحة';
+
+  @override
+  String skinEditPageColors(String page) {
+    return 'ألوان $page';
+  }
+
+  @override
+  String get skinEditDockTop => 'نقل اللوحة إلى الأعلى';
+
+  @override
+  String get skinEditDockBottom => 'نقل اللوحة إلى الأسفل';
+
+  @override
+  String get skinEditEditorIndependent =>
+      'يستخدم محرر النصوص ألوانه الخاصة، لذا لن تظهر التغييرات هنا فيه حتى يتبع المظهر التطبيق.';
+
+  @override
+  String get cameraKeepShootingTooltip => 'متابعة التصوير بعد كل لقطة';
+
+  @override
+  String get cameraSegmentLengthOff => 'إيقاف';
+
+  @override
+  String cameraSegmentLengthMinutes(int minutes) {
+    return '$minutes دقيقة';
+  }
+
+  @override
+  String get cameraSegmentLengthTooltip =>
+      'تقسيم التسجيل إلى أجزاء تُحفظ أثناء التسجيل';
+
+  @override
+  String get cameraSegmentSpaceMessage =>
+      'المساحة الخالية في الخزنة غير كافية. تم إيقاف التسجيل؛ تم الاحتفاظ بالجزء الذي تعذر حفظه للمراجعة.';
+
+  @override
+  String get audioSegmentedStopTitle => 'إيقاف التسجيل؟';
+
+  @override
+  String get audioSegmentedStopMessage =>
+      'الأجزاء المسجلة حتى الآن محفوظة بالفعل في الخزنة. هل تريد التوقف الآن وحفظ الباقي؟';
+
+  @override
+  String get audioSegmentedStopAction => 'إيقاف وحفظ';
+
+  @override
+  String get audioUnsavedPartsTitle => 'لم يتم حفظ بعض الأجزاء';
+
+  @override
+  String audioUnsavedPartsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تعذر حفظ $count جزء مسجل.',
+      many: 'تعذر حفظ $count جزءًا مسجلًا.',
+      few: 'تعذر حفظ $count أجزاء مسجلة.',
+      two: 'تعذر حفظ جزءين مسجلين.',
+      one: 'تعذر حفظ جزء مسجل واحد.',
+      zero: 'تعذر حفظ أي جزء مسجل.',
+    );
+    return '$_temp0 وفّر مساحة وحاول مجددًا، أو تجاهلها.';
+  }
+
+  @override
+  String get segmentRetrySave => 'إعادة المحاولة';
+
+  @override
+  String get imageEditorActionAuto => 'تلقائي';
+
+  @override
+  String get imageEditorActionFlip => 'قلب';
+
+  @override
+  String get imageEditorActionRotate => 'تدوير';
+
+  @override
+  String get imageEditorActionColor => 'اللون';
+
+  @override
+  String get imageEditorActionSize => 'الحجم';
+
+  @override
+  String get imageEditorActionOpacity => 'الشفافية';
+
+  @override
+  String get imageEditorActionStyle => 'النمط';
+
+  @override
+  String get imageEditorExportSave => 'تصدير / حفظ';
+
+  @override
+  String get imageEditorRevertOriginal => 'الرجوع إلى الأصل';
+
+  @override
+  String get imageEditorTuneImageToolLabel => 'ضبط الصورة';
+
+  @override
+  String get imageEditorLooksToolLabel => 'المظاهر';
+
+  @override
+  String get imageEditorLookCurrent => 'الحالي';
+
+  @override
+  String get imageEditorLookPortrait => 'بورتريه';
+
+  @override
+  String get imageEditorLookDramatic => 'درامي';
+
+  @override
+  String get imageEditorLookVintage => 'عتيق';
+
+  @override
+  String get imageEditorTuneAmbiance => 'الأجواء';
+
+  @override
+  String get imageEditorTuneWarmth => 'الدفء';
+
+  @override
+  String get imageEditorTuneShadows => 'الظلال';
+
+  @override
+  String get imageEditorCropAspectDin => 'DIN';
+
+  @override
+  String get imageEditorAngle => 'الزاوية';
+
+  @override
+  String get fontSizeSmall => 'صغير';
+
+  @override
+  String get fontSizeMedium => 'متوسط';
+
+  @override
+  String get fontSizeLarge => 'كبير';
+
+  @override
+  String get fontSizeExtraLarge => 'كبير جداً';
+
+  @override
+  String get imageEditorTextPlaceholder => 'اضغط مرتين هنا لتغيير النص';
+
+  @override
+  String get imageEditorFontSizePreview => 'معاينة نموذجية أبج 123';
+
+  @override
+  String imageEditorPhotoLabel(int index) {
+    return 'صورة $index';
+  }
+
+  @override
+  String get cameraPauseRecordingTooltip => 'إيقاف التسجيل مؤقتًا';
+
+  @override
+  String get cameraResumeRecordingTooltip => 'استئناف التسجيل';
+
+  @override
+  String get cameraSnapshotTooltip => 'التقاط صورة أثناء التسجيل';
+
+  @override
+  String get cameraPauseFailedMessage =>
+      'تعذر إيقاف التسجيل مؤقتًا أو استئنافه';
+
+  @override
+  String get floatingPlayerTitle => 'مشغّل فيديو عائم';
+
+  @override
+  String get floatingPlayerSubtitle =>
+      'عند إغلاق المشغّل أثناء تشغيل فيديو، يستمر التشغيل في نافذة صغيرة يمكنك تحريكها. وعند مغادرة التطبيق يتحول إلى صورة داخل صورة مع زر للصوت فقط';
+
+  @override
+  String get floatingPlayerExpandTooltip => 'توسيع';
+
+  @override
+  String get floatingPlayerAudioOnly => 'الصوت فقط';
+
+  @override
+  String get floatingPlayerShowVideo => 'إظهار الفيديو';
+
+  @override
+  String get masterLockTitle => 'القفل الرئيسي';
+
+  @override
+  String get masterLockInactiveSubtitle =>
+      'طلب كلمة مرور أو رمز PIN أو نمط لفتح التطبيق';
+
+  @override
+  String get masterLockChooseTitle => 'اختر طريقة قفل التطبيق';
+
+  @override
+  String get masterLockBackupTitle => 'أضف طريقة فتح احتياطية';
+
+  @override
+  String get masterLockBackupMessage =>
+      'يحتاج الفتح بالبصمة الحيوية إلى كلمة مرور أو رمز PIN أو نمط كخيار احتياطي. اختر واحدًا لإعداده أيضًا.';
+
+  @override
+  String get masterCredentialPassword => 'كلمة المرور';
+
+  @override
+  String get masterCredentialPin => 'PIN';
+
+  @override
+  String get masterCredentialPattern => 'النمط';
+
+  @override
+  String get masterCredentialSet => 'تم التعيين';
+
+  @override
+  String get masterCredentialNotSet => 'غير معيّن';
+
+  @override
+  String get duressMasterLockRequired =>
+      'يجب تمكين القفل الرئيسي في أمان التطبيق قبل تكوين فتح الإكراه.';
+
+  @override
+  String get skinTokenGroupSurface => 'الأسطح';
+
+  @override
+  String get skinTokenGroupContent => 'النصوص والأيقونات';
+
+  @override
+  String get skinTokenGroupBorder => 'الحدود';
+
+  @override
+  String get skinTokenGroupChrome => 'الشريط العلوي';
+
+  @override
+  String get skinTokenGroupAction => 'الأزرار';
+
+  @override
+  String get skinTokenGroupControl => 'المفاتيح وأشرطة التمرير';
+
+  @override
+  String get skinTokenGroupChoice => 'الشرائح والأقسام';
+
+  @override
+  String get skinTokenGroupSelection => 'العناصر المحددة';
+
+  @override
+  String get skinTokenGroupOverlay => 'القوائم والحوارات والصفائح';
+
+  @override
+  String get skinTokenGroupFloating => 'العناصر العائمة';
+
+  @override
+  String get skinTokenSurfacePage => 'خلفية الصفحة';
+
+  @override
+  String get skinTokenSurfacePageHint =>
+      'المساحة الخلفية لجميع العناصر في هذه الصفحة.';
+
+  @override
+  String get skinTokenSurfaceCard => 'البطاقات والصفوف';
+
+  @override
+  String get skinTokenSurfaceCardHint =>
+      'البطاقات، وصفوف القوائم، واللوحات المجمعة.';
+
+  @override
+  String get skinTokenSurfaceCardActive => 'البطاقة النشطة';
+
+  @override
+  String get skinTokenSurfaceCardActiveHint =>
+      'البطاقة المميزة، مثل الخزينة غير المقفلة.';
+
+  @override
+  String get skinTokenSurfaceTile => 'المربعات والصور المصغرة';
+
+  @override
+  String get skinTokenSurfaceTileHint =>
+      'عناصر الصور المصغرة المؤقتة، ومربعات الأيقونات، وكتل البرمجة.';
+
+  @override
+  String get skinTokenSurfaceField => 'حقول الإدخال';
+
+  @override
+  String get skinTokenSurfaceFieldHint => 'تعبئة حقول النصوص وأشرطة البحث.';
+
+  @override
+  String get skinTokenContentPrimary => 'النص الأساسي';
+
+  @override
+  String get skinTokenContentPrimaryHint =>
+      'العناوين، والأسماء، والنص الرئيسي.';
+
+  @override
+  String get skinTokenContentSecondary => 'النص الثانوي';
+
+  @override
+  String get skinTokenContentSecondaryHint =>
+      'العناوين الفرعية، والتفاصيل، والتلميحات.';
+
+  @override
+  String get skinTokenContentIcon => 'الأيقونات';
+
+  @override
+  String get skinTokenContentIconHint =>
+      'الأيقونات العادية غير الموجودة على زر أو شريط.';
+
+  @override
+  String get skinTokenBorderDivider => 'الفواصل';
+
+  @override
+  String get skinTokenBorderDividerHint => 'خطوط رفيعة بين الصفوف والأقسام.';
+
+  @override
+  String get skinTokenBorderOutline => 'الخطوط الخارجية';
+
+  @override
+  String get skinTokenBorderOutlineHint =>
+      'حدود الأزرار المحددة ومربعات الخيارات غير المحددة.';
+
+  @override
+  String get skinTokenBorderFocus => 'حلقة التركيز';
+
+  @override
+  String get skinTokenBorderFocusHint => 'إطار حقل النص قيد التعديل.';
+
+  @override
+  String get skinTokenChromeTopBar => 'الشريط العلوي';
+
+  @override
+  String get skinTokenChromeTopBarHint => 'تعبئة الشريط العلوي.';
+
+  @override
+  String get skinTokenChromeOnTopBar => 'نص وأيقونات الشريط العلوي';
+
+  @override
+  String get skinTokenChromeOnTopBarHint =>
+      'لون العنوان والأيقونات في الشريط العلوي.';
+
+  @override
+  String get skinTokenActionPrimary => 'الأزرار الممتلئة';
+
+  @override
+  String get skinTokenActionPrimaryHint => 'تعبئة الأزرار الممتلئة.';
+
+  @override
+  String get skinTokenActionOnPrimary => 'تسمية الزر الممتلئ';
+
+  @override
+  String get skinTokenActionOnPrimaryHint =>
+      'التسمية والأيقونة على الزر الممتلئ.';
+
+  @override
+  String get skinTokenActionTonal => 'الأزرار البارزة';
+
+  @override
+  String get skinTokenActionTonalHint =>
+      'تعبئة الأزرار البارزة والمتناسقة لونياً.';
+
+  @override
+  String get skinTokenActionOnTonal => 'تسمية الزر البارز';
+
+  @override
+  String get skinTokenActionOnTonalHint => 'التسمية والأيقونة على الزر البارز.';
+
+  @override
+  String get skinTokenActionText => 'الأزرار النصية والمحددة';
+
+  @override
+  String get skinTokenActionTextHint =>
+      'لون تسمية الأزرار النصية والمحددة والروابط.';
+
+  @override
+  String get skinTokenControlActive => 'حالة تشغيل عنصر التحكم';
+
+  @override
+  String get skinTokenControlActiveHint =>
+      'مسار المفتاح عند التشغيل، ومربع الاختيار والزر الدائري المحدد، وتعبئة شريط التمرير والتقدم.';
+
+  @override
+  String get skinTokenControlOnActive => 'مقبض المفتاح وعلامة الاختيار';
+
+  @override
+  String get skinTokenControlOnActiveHint =>
+      'مقبض المفتاح قيد التشغيل وعلامة الصح داخل مربع الاختيار.';
+
+  @override
+  String get skinTokenControlTrack => 'مسار عنصر التحكم';
+
+  @override
+  String get skinTokenControlTrackHint =>
+      'مسار المفتاح عند الإيقاف والجزء الفارغ من أشرطة التمرير والتقدم.';
+
+  @override
+  String get skinTokenControlInactive => 'حالة إيقاف عنصر التحكم';
+
+  @override
+  String get skinTokenControlInactiveHint =>
+      'مقبض المفتاح عند إيقافه وحدود المربعات غير المحددة.';
+
+  @override
+  String get skinTokenChoiceBackground => 'الشريحة';
+
+  @override
+  String get skinTokenChoiceBackgroundHint =>
+      'تعبئة الشرائح والأقسام غير المحددة.';
+
+  @override
+  String get skinTokenChoiceSelected => 'الشريحة المحددة';
+
+  @override
+  String get skinTokenChoiceSelectedHint => 'تعبئة الشريحة أو القسم المحدد.';
+
+  @override
+  String get skinTokenChoiceOnSelected => 'تسمية الشريحة المحددة';
+
+  @override
+  String get skinTokenChoiceOnSelectedHint =>
+      'التسمية والأيقونة على الشريحة أو القسم المحدد.';
+
+  @override
+  String get skinTokenChoiceBorder => 'إطار الشريحة';
+
+  @override
+  String get skinTokenChoiceBorderHint =>
+      'الخط الخارجي للشرائح والأزرار المقسمة.';
+
+  @override
+  String get skinTokenSelectionFill => 'الصف المحدد';
+
+  @override
+  String get skinTokenSelectionFillHint =>
+      'الملفات والصفوف المحددة ومربعات الأيقونات البارزة.';
+
+  @override
+  String get skinTokenSelectionOn => 'نص وأيقونات الصف المحدد';
+
+  @override
+  String get skinTokenSelectionOnHint =>
+      'النص والأيقونات المرسومة على صف محدد.';
+
+  @override
+  String get skinTokenOverlayMenu => 'القوائم';
+
+  @override
+  String get skinTokenOverlayMenuHint =>
+      'القوائم المنبثقة، والمنسدلة، وقوائم السياق.';
+
+  @override
+  String get skinTokenOverlayOnMenu => 'نص القائمة';
+
+  @override
+  String get skinTokenOverlayOnMenuHint => 'النص والأيقونات في القوائم.';
+
+  @override
+  String get skinTokenOverlayDialog => 'مربعات الحوار';
+
+  @override
+  String get skinTokenOverlayDialogHint => 'تعبئة مربعات الحوار.';
+
+  @override
+  String get skinTokenOverlayOnDialog => 'عنوان مربع الحوار';
+
+  @override
+  String get skinTokenOverlayOnDialogHint => 'نص عنوان مربعات الحوار.';
+
+  @override
+  String get skinTokenOverlaySheet => 'الصفائح السفلية';
+
+  @override
+  String get skinTokenOverlaySheetHint => 'تعبئة الصفائح السفلية.';
+
+  @override
+  String get skinTokenOverlayOnSheet => 'نص الصفيحة السفلية';
+
+  @override
+  String get skinTokenOverlayOnSheetHint =>
+      'النص والأيقونات في الصفائح السفلية.';
+
+  @override
+  String get skinTokenOverlayScrim => 'تعتيم خلفية الحوارات';
+
+  @override
+  String get skinTokenOverlayScrimHint =>
+      'التعتيم خلف مربعات الحوار والصفائح السفلية.';
+
+  @override
+  String get skinTokenFloatingFab => 'زر الإضافة الدائري';
+
+  @override
+  String get skinTokenFloatingFabHint => 'تعبئة زر الإضافة الدائري.';
+
+  @override
+  String get skinTokenFloatingOnFab => 'أيقونة زر الإضافة الدائري';
+
+  @override
+  String get skinTokenFloatingOnFabHint => 'الأيقونة على زر الإضافة الدائري.';
+
+  @override
+  String get skinTokenFloatingToast => 'كبسولة الرسائل';
+
+  @override
+  String get skinTokenFloatingToastHint =>
+      'تعبئة رسالة المعلومات المنبثقة في الأسفل.';
+
+  @override
+  String get skinTokenFloatingOnToast => 'نص كبسولة الرسائل';
+
+  @override
+  String get skinTokenFloatingOnToastHint =>
+      'النص والأيقونة في رسالة المعلومات.';
+
+  @override
+  String get skinTokenFloatingTooltip => 'تلميحات الأدوات';
+
+  @override
+  String get skinTokenFloatingTooltipHint => 'تعبئة تلميحات الأدوات.';
+
+  @override
+  String get skinTokenFloatingOnTooltip => 'نص تلميح الأداة';
+
+  @override
+  String get skinTokenFloatingOnTooltipHint => 'النص في تلميحات الأدوات.';
+
+  @override
+  String get skinTokenGroupAccent => 'ألوان التمييز';
+
+  @override
+  String get skinTokenGroupStatus => 'الحالة والأخطاء';
+
+  @override
+  String get skinTokenSurfacePanel => 'اللوحات';
+
+  @override
+  String get skinTokenSurfacePanelHint =>
+      'البطاقات المكونة من عنصر البطاقة القياسي، وشريط الإشارات المرجعية، وخلايا الشبكة، وصفائح المعلومات.';
+
+  @override
+  String get skinTokenChromeBar => 'الأشرطة وشرائط علامات التبويب';
+
+  @override
+  String get skinTokenChromeBarHint =>
+      'أشرطة الإجراءات، وشرائط التبويب، وشريط التحديد، والأشرطة السفلية.';
+
+  @override
+  String get skinTokenAccentPrimary => 'لون التمييز';
+
+  @override
+  String get skinTokenAccentPrimaryHint =>
+      'العناصر المميزة، والروابط داخل النصوص، وأيقونات التمييز الصغيرة، والشارات.';
+
+  @override
+  String get skinTokenAccentSecondary => 'لون التمييز الثانوي';
+
+  @override
+  String get skinTokenAccentSecondaryHint =>
+      'العناصر المميزة الثانوية والوسوم.';
+
+  @override
+  String get skinTokenAccentTertiary => 'لون التمييز الثالثي';
+
+  @override
+  String get skinTokenAccentTertiaryHint => 'العناصر المميزة والوسوم الثالثية.';
+
+  @override
+  String get skinTokenAccentTertiaryContainer => 'تعبئة التمييز الثالثي';
+
+  @override
+  String get skinTokenAccentTertiaryContainerHint =>
+      'التعبئة خلف عناصر التمييز الثالثية.';
+
+  @override
+  String get skinTokenAccentOnTertiaryContainer => 'نص تعبئة التمييز الثالثي';
+
+  @override
+  String get skinTokenAccentOnTertiaryContainerHint =>
+      'النص والأيقونات على تعبئة التمييز الثالثي.';
+
+  @override
+  String get skinTokenStatusDanger => 'الأخطاء والحذف';
+
+  @override
+  String get skinTokenStatusDangerHint =>
+      'نصوص الأخطاء، وإجراءات الحذف، وحدود الأخطاء.';
+
+  @override
+  String get skinTokenStatusOnDanger => 'النص على لون الخطأ';
+
+  @override
+  String get skinTokenStatusOnDangerHint =>
+      'النص والأيقونات المعروضة على لون الخطأ.';
+
+  @override
+  String get skinTokenStatusDangerContainer => 'تعبئة رسالة الخطأ';
+
+  @override
+  String get skinTokenStatusDangerContainerHint =>
+      'تعبئة رسائل الأخطاء واللافتات.';
+
+  @override
+  String get skinTokenStatusOnDangerContainer => 'نص رسالة الخطأ';
+
+  @override
+  String get skinTokenStatusOnDangerContainerHint =>
+      'النص والأيقونات في رسائل الأخطاء.';
+
+  @override
+  String get skinTokenStatusInfo => 'تعبئة رسالة المعلومات';
+
+  @override
+  String get skinTokenStatusInfoHint => 'تعبئة لافتات المعلومات.';
+
+  @override
+  String get skinTokenStatusOnInfo => 'نص رسالة المعلومات';
+
+  @override
+  String get skinTokenStatusOnInfoHint =>
+      'النص والأيقونات في لافتات المعلومات.';
+}

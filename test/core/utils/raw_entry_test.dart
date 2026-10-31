@@ -1,0 +1,282 @@
+import 'package:test/test.dart';
+import 'package:vaultexplorer/core/utils/raw_entry.dart';
+
+void main() {
+  group('RawEntry.parse — files', () {
+    test('parses a well-formed file entry', () {
+      final entry = RawEntry.parse('F|1234|1690000000|photo.png');
+      expect(entry.name, 'photo.png');
+      expect(entry.isDir, isFalse);
+      expect(entry.sizeBytes, 1234);
+      expect(entry.modifiedSecs, 1690000000);
+    });
+
+    test('an unrecognized type tag is treated as not-a-directory (file)',
+        () {
+      // Only 'D' means directory; anything else is a file, per isDir:
+      // typeTag == 'D'.
+      final entry = RawEntry.parse('X|1|1|weird.tag');
+      expect(entry.isDir, isFalse);
+    });
+  });
+
+  group('RawEntry.parse — directories', () {
+    test('parses a well-formed directory entry, always with sizeBytes 0',
+        () {
+      final entry = RawEntry.parse('D|0|1690000000|MyFolder');
+      expect(entry.name, 'MyFolder');
+      expect(entry.isDir, isTrue);
+      expect(entry.modifiedSecs, 1690000000);
+    });
+  });
+
+  group('RawEntry.parse — name field', () {
+    test('the name is everything after the third "|", including further '
+        '"|" characters, so a legal ext filename containing "|" round-'
+        'trips exactly', () {
+      final entry = RawEntry.parse('F|10|100|weird|name|with|pipes');
+      expect(entry.name, 'weird|name|with|pipes');
+    });
+
+    test('an empty name is preserved as an empty string', () {
+      final entry = RawEntry.parse('F|10|100|');
+      expect(entry.name, '');
+    });
+  });
+
+  group('RawEntry.parse — malformed input', () {
+    test('fewer than three separators throws FormatException', () {
+      expect(() => RawEntry.parse('F|10|100'), throwsFormatException);
+      expect(() => RawEntry.parse('F|10'), throwsFormatException);
+      expect(() => RawEntry.parse('F'), throwsFormatException);
+      expect(() => RawEntry.parse(''), throwsFormatException);
+    });
+
+    test('a non-numeric size or mtime falls back to 0 rather than '
+        'throwing', () {
+      final entry = RawEntry.parse('F|not-a-number|also-bad|name.txt');
+      expect(entry.sizeBytes, 0);
+      expect(entry.modifiedSecs, 0);
+    });
+
+    test('a negative size or mtime parses through as-is rather than being '
+        'clamped or falling back to 0 -- int.tryParse accepts "-5" as a '
+        'valid integer, so a corrupted or adversarial wire string with a '
+        'negative field is NOT caught by the non-numeric fallback above; '
+        'this documents that callers of sizeBytes/modifiedSecs must treat '
+        'a negative value as a possible corruption signal themselves', () {
+      final entry = RawEntry.parse('F|-5|-100|name.txt');
+      expect(entry.sizeBytes, -5);
+      expect(entry.modifiedSecs, -100);
+    });
+
+    test('a size or mtime far beyond any real file/timestamp parses '
+        'without throwing (int.tryParse has no upper bound of its own on '
+        'a 64-bit platform)', () {
+      final entry = RawEntry.parse('F|99999999999999999999|1|name.txt');
+      // 20 nines overflows even a 64-bit int; int.tryParse rejects it as
+      // non-numeric on overflow, so this falls back to 0 -- same fallback
+      // path as the non-numeric case above, not a crash or a wrapped value.
+      expect(entry.sizeBytes, 0);
+    });
+  });
+
+  group('RawEntry.parseAll', () {
+    test('parses every entry and skips "System:*" sentinel lines', () {
+      final entries = RawEntry.parseAll([
+        'F|10|100|a.txt',
+        'System:TRUNCATED',
+        'D|0|200|folder',
+      ]);
+
+      expect(entries, hasLength(2));
+      expect(entries[0].name, 'a.txt');
+      expect(entries[1].name, 'folder');
+    });
+
+    test('an empty list produces an empty result', () {
+      expect(RawEntry.parseAll(const []), isEmpty);
+    });
+
+    test('a list of only sentinel lines produces an empty result without '
+        'attempting to parse them', () {
+      expect(
+        RawEntry.parseAll(const ['System:TRUNCATED', 'System:OTHER']),
+        isEmpty,
+      );
+    });
+  });
+
+  group('raw (round-trip)', () {
+    test('reconstructs the canonical wire string for a file', () {
+      const entry = RawEntry(
+        name: 'photo.png',
+        isDir: false,
+        sizeBytes: 1234,
+        modifiedSecs: 1690000000,
+      );
+      expect(entry.raw, 'F|1234|1690000000|photo.png');
+    });
+
+    test('reconstructs the canonical wire string for a directory', () {
+      const entry = RawEntry(
+        name: 'MyFolder',
+        isDir: true,
+        sizeBytes: 0,
+        modifiedSecs: 1690000000,
+      );
+      expect(entry.raw, 'D|0|1690000000|MyFolder');
+    });
+
+    test('parse(entry.raw) round-trips back to an equal entry', () {
+      const entry = RawEntry(
+        name: 'a|weird|name.txt',
+        isDir: false,
+        sizeBytes: 42,
+        modifiedSecs: 99,
+      );
+      expect(RawEntry.parse(entry.raw), entry);
+    });
+  });
+
+  group('modifiedAt', () {
+    test('0 means unknown and maps to null', () {
+      const entry = RawEntry(
+        name: 'a',
+        isDir: false,
+        sizeBytes: 0,
+        modifiedSecs: 0,
+      );
+      expect(entry.modifiedAt, isNull);
+    });
+
+    test('a positive value maps to the corresponding UTC-seconds instant',
+        () {
+      const entry = RawEntry(
+        name: 'a',
+        isDir: false,
+        sizeBytes: 0,
+        modifiedSecs: 1690000000,
+      );
+      expect(
+        entry.modifiedAt,
+        DateTime.fromMillisecondsSinceEpoch(1690000000 * 1000),
+      );
+    });
+  });
+
+  group('equality and hashCode', () {
+    test('two entries with identical fields are equal', () {
+      const a = RawEntry(name: 'x', isDir: false, sizeBytes: 1, modifiedSecs: 2);
+      const b = RawEntry(name: 'x', isDir: false, sizeBytes: 1, modifiedSecs: 2);
+      expect(a, b);
+      expect(a.hashCode, b.hashCode);
+    });
+
+    test('entries differing in any single field are not equal', () {
+      const base = RawEntry(name: 'x', isDir: false, sizeBytes: 1, modifiedSecs: 2);
+      expect(base, isNot(const RawEntry(name: 'y', isDir: false, sizeBytes: 1, modifiedSecs: 2)));
+      expect(base, isNot(const RawEntry(name: 'x', isDir: true, sizeBytes: 1, modifiedSecs: 2)));
+      expect(base, isNot(const RawEntry(name: 'x', isDir: false, sizeBytes: 9, modifiedSecs: 2)));
+      expect(base, isNot(const RawEntry(name: 'x', isDir: false, sizeBytes: 1, modifiedSecs: 9)));
+    });
+
+    test('a RawEntry can be used as a Set element for de-duplication', () {
+      const a = RawEntry(name: 'x', isDir: false, sizeBytes: 1, modifiedSecs: 2);
+      const b = RawEntry(name: 'x', isDir: false, sizeBytes: 1, modifiedSecs: 2);
+      // ignore: equal_elements_in_set
+      expect({a, b}, hasLength(1));
+    });
+  });
+
+  group('toString', () {
+    test('mentions the type, name, size, and timestamp', () {
+      const entry = RawEntry(
+        name: 'photo.png',
+        isDir: false,
+        sizeBytes: 1234,
+        modifiedSecs: 99,
+      );
+      final str = entry.toString();
+      expect(str, contains('FILE'));
+      expect(str, contains('photo.png'));
+      expect(str, contains('1234'));
+    });
+
+    test('directories are labeled DIR', () {
+      const entry = RawEntry(
+        name: 'folder',
+        isDir: true,
+        sizeBytes: 0,
+        modifiedSecs: 0,
+      );
+      expect(entry.toString(), contains('DIR'));
+    });
+  });
+
+  group('lowercaseName and extension', () {
+    test('parsed file entries precompute lowercaseName and extension', () {
+      final entry = RawEntry.parse('F|100|1000|Document.PDF');
+      expect(entry.lowercaseName, 'document.pdf');
+      expect(entry.extension, 'pdf');
+    });
+
+    test('parsed files without extension have empty extension', () {
+      final entry = RawEntry.parse('F|100|1000|README');
+      expect(entry.lowercaseName, 'readme');
+      expect(entry.extension, '');
+    });
+
+    test('const constructed entries compute lowercaseName and extension correctly', () {
+      const entry = RawEntry(
+        name: 'My_Archive.TAR.GZ',
+        isDir: false,
+        sizeBytes: 10,
+        modifiedSecs: 1,
+      );
+      expect(entry.lowercaseName, 'my_archive.tar.gz');
+      expect(entry.extension, 'gz');
+    });
+  });
+
+  group('RawEntry.withName', () {
+    test('keeps every field except the name', () {
+      const original = RawEntry(
+        name: 'a.txt',
+        isDir: false,
+        sizeBytes: 12,
+        modifiedSecs: 34,
+        isPlaceholder: true,
+      );
+      final renamed = original.withName('dir/a.txt');
+      expect(renamed.name, 'dir/a.txt');
+      expect(renamed.isDir, isFalse);
+      expect(renamed.sizeBytes, 12);
+      expect(renamed.modifiedSecs, 34);
+      expect(renamed.isPlaceholder, isTrue);
+    });
+
+    test('lowercase name and extension match what a plain entry computes', () {
+      for (final name in [
+        'IMG_001.JPG',
+        'Photos/Trip.1/Day 2/IMG.Png',
+        'noextension',
+        'Photos/v1.2/readme',
+        'archive.tar.GZ',
+        '.hidden',
+        'trailingdot.',
+      ]) {
+        final plain = RawEntry(
+          name: name,
+          isDir: false,
+          sizeBytes: 0,
+          modifiedSecs: 0,
+        );
+        final renamed = plain.withName(name);
+        expect(renamed.lowercaseName, plain.lowercaseName, reason: name);
+        expect(renamed.extension, plain.extension, reason: name);
+        expect(renamed, plain, reason: name);
+      }
+    });
+  });
+}

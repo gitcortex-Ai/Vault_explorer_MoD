@@ -1,0 +1,13243 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Ukrainian (`uk`).
+class AppLocalizationsUk extends AppLocalizations {
+  AppLocalizationsUk([String locale = 'uk']) : super(locale);
+
+  @override
+  String get usbAttachPromptTitle => 'Показувати запит під час підключення USB';
+
+  @override
+  String get usbAttachPromptSubtitle =>
+      'Якщо ввімкнено, Android пропонує VaultExplorer після підключення USB-накопичувача. Вимкніть, щоб прибрати цей запит; накопичувачі й надалі можна відкривати через «Підключити USB-накопичувач».';
+
+  @override
+  String get usbAttachPromptUpdateErrorMessage =>
+      'Не вдалося змінити налаштування підключення USB.';
+
+  @override
+  String get cancel => 'Скасувати';
+
+  @override
+  String get close => 'Закрити';
+
+  @override
+  String get search => 'Пошук';
+
+  @override
+  String get goBack => 'Назад';
+
+  @override
+  String xOfYCounter(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String get pdfViewerGoToPageTitle => 'Перейти до сторінки';
+
+  @override
+  String pdfViewerPageNumberHint(int pageCount) {
+    return 'Номер сторінки (1 - $pageCount)';
+  }
+
+  @override
+  String get pdfViewerPageLabel => 'Сторінка';
+
+  @override
+  String get pdfViewerGoButton => 'Перейти';
+
+  @override
+  String get pdfViewerSearchHint => 'Пошук у документі';
+
+  @override
+  String get pdfViewerNoMatches => 'Збігів не знайдено';
+
+  @override
+  String get pdfViewerPreviousMatch => 'Попередній збіг';
+
+  @override
+  String get pdfViewerNextMatch => 'Наступний збіг';
+
+  @override
+  String get pdfViewerCloseSearch => 'Закрити пошук';
+
+  @override
+  String get pdfViewerPrintTooltip => 'Друкувати документ';
+
+  @override
+  String get pdfViewerLoadingDocument => 'Завантаження документа…';
+
+  @override
+  String get pdfViewerCannotOpenTitle => 'Не вдалося відкрити PDF';
+
+  @override
+  String get pdfViewerFailedToLoad => 'Помилка завантаження PDF';
+
+  @override
+  String get pdfViewerEditTooltip => 'Редагувати';
+
+  @override
+  String get pdfViewerDoneEditingTooltip => 'Завершити редагування';
+
+  @override
+  String get pdfViewerSaveFailed => 'Не вдалося зберегти зміни до цього PDF';
+
+  @override
+  String get pdfViewerEditUnavailable =>
+      'Редагування недоступне для цього документа';
+
+  @override
+  String get paste => 'Вставити';
+
+  @override
+  String get clear => 'Очистити';
+
+  @override
+  String get clipboardVerbMove => 'Перемістити';
+
+  @override
+  String get clipboardVerbCopy => 'Копіювати';
+
+  @override
+  String clipboardTooltipInteractive(String verb, int count) {
+    return '$verb ($count) — торкніться для деталей, затисніть для вставки';
+  }
+
+  @override
+  String clipboardTooltipViewOnly(String verb, int count) {
+    return '$verb ($count) — деталі буфера обміну';
+  }
+
+  @override
+  String clipboardSourceLabel(String source) {
+    return 'Джерело: $source';
+  }
+
+  @override
+  String get clipboardDefaultSourceName => 'Сховище';
+
+  @override
+  String clipboardHeaderCount(String verb, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів',
+      many: '$count елементів',
+      few: '$count елементи',
+      one: '1 елемент',
+    );
+    return '$verb $_temp0';
+  }
+
+  @override
+  String clipboardMoreItems(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+ще $count елементів',
+      many: '+ще $count елементів',
+      few: '+ще $count елементи',
+      one: '+1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get advancedParametersTitle => 'Розширені параметри';
+
+  @override
+  String get pimFieldLabel => 'PIM (залиште порожнім за замовчуванням)';
+
+  @override
+  String get encryptionAlgorithmLabel => 'Алгоритм шифрування';
+
+  @override
+  String get hashAlgorithmLabel => 'Хеш-алгоритм';
+
+  @override
+  String get clipboardVerbMoving => 'Переміщення';
+
+  @override
+  String get clipboardVerbCopying => 'Копіювання';
+
+  @override
+  String clipboardPillTitle(String verb, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів',
+      many: '$count елементів',
+      few: '$count елементи',
+      one: '1 елемент',
+    );
+    return '$verb $_temp0';
+  }
+
+  @override
+  String clipboardFromSourceSuffix(String source) {
+    return ' із \"$source\"';
+  }
+
+  @override
+  String get clipboardOpenContainerToPaste => 'Відкрийте сховище для вставки';
+
+  @override
+  String get keyfilesOptionalLabel => 'Ключ. файли (необов\'язково)';
+
+  @override
+  String get addFile => 'Додати';
+
+  @override
+  String get noKeyfilesAttached => 'Ключ. файли не прикріплено';
+
+  @override
+  String get completed => 'Завершено';
+
+  @override
+  String get dismiss => 'Закрити';
+
+  @override
+  String byteProgressText(String transferred, String total, int pct) {
+    return '$transferred / $total ($pct%)';
+  }
+
+  @override
+  String countProgressText(int done, int total, int pct) {
+    return '$done / $total ($pct%)';
+  }
+
+  @override
+  String multiOpLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count операцій',
+      many: '$count операцій',
+      few: '$count операції',
+      one: '1 операція',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String multiOpSublabel(String summary) {
+    return '$summary · торкніться для перегляду';
+  }
+
+  @override
+  String get thumbnailSizeResolutionLabel => 'Розмір мініатюри (Роздільність)';
+
+  @override
+  String get jpegCompressionQualityLabel => 'Якість стиснення JPEG';
+
+  @override
+  String get done => 'Готово';
+
+  @override
+  String get confirm => 'Підтвердити';
+
+  @override
+  String get couldNotPickKeyfiles => 'Не вдалося вибрати ключові файли';
+
+  @override
+  String get filesystemLabelEncryptedVault => 'цьому зашифрованому сховищі';
+
+  @override
+  String get filesystemLabelThisContainer => 'цьому контейнері';
+
+  @override
+  String get nounFile => 'файл';
+
+  @override
+  String get nounFolder => 'папку';
+
+  @override
+  String get nounFileCapitalized => 'Файл';
+
+  @override
+  String get nounFolderCapitalized => 'Папка';
+
+  @override
+  String get unitBytes => 'байт';
+
+  @override
+  String get unitCharacters => 'символів';
+
+  @override
+  String get validationEmptyName => 'Назва не може бути порожньою.';
+
+  @override
+  String validationReservedNavName(String name, String noun) {
+    return '\"$name\" є зарезервованим системним ім\'ям і не може бути назвою $noun.';
+  }
+
+  @override
+  String validationIllegalChar(String char, int position, String fsLabel) {
+    return '\"$char\" на позиції $position є неприпустимим символом для $fsLabel.';
+  }
+
+  @override
+  String validationControlChar(int position, String code, String fsLabel) {
+    return 'Позиція $position містить недрукований символ керування (код $code), заборонений у $fsLabel.';
+  }
+
+  @override
+  String validationReservedDeviceName(String name, String fsLabel) {
+    return '\"$name\" є зарезервованим ім\'ям пристрою у $fsLabel (CON, PRN, AUX, NUL тощо) і не може використовуватися.';
+  }
+
+  @override
+  String validationTrailingSpace(String noun, String fsLabel) {
+    return 'Назва $noun не може закінчуватися пробілом у $fsLabel';
+  }
+
+  @override
+  String validationTrailingDot(String noun, String fsLabel) {
+    return 'Назва $noun не може закінчуватися крапкою у $fsLabel';
+  }
+
+  @override
+  String validationNameTooLong(
+    int length,
+    String unit,
+    String fsLabel,
+    int maxLength,
+    String noun,
+  ) {
+    return 'Довжина цієї назви $length $unit; $fsLabel дозволяє щонайбільше $maxLength $unit для назви $noun.';
+  }
+
+  @override
+  String validationPathTooLong(int length, String fsLabel, int maxLength) {
+    return 'Повний шлях містить $length символів; $fsLabel дозволяє щонайбільше $maxLength.';
+  }
+
+  @override
+  String conflictSameType(String noun, String name) {
+    return '$noun з назвою \"$name\" вже існує тут.';
+  }
+
+  @override
+  String conflictCrossType(
+    String existingNoun,
+    String name,
+    String candidateNoun,
+  ) {
+    return '$existingNoun з назвою \"$name\" вже існує тут — не може мати однакову назву з $candidateNoun.';
+  }
+
+  @override
+  String get readOnlyContainerWarning =>
+      'Цей контейнер змонтовано лише для читання.';
+
+  @override
+  String get hiddenVolumeProtectionTriggeredWarning =>
+      'Запис у цей том міг пошкодити прихований том і був заблокований. Сховище переведено в режим лише для читання.';
+
+  @override
+  String get protectHiddenVolumeToggleTitle => 'Захистити прихований том';
+
+  @override
+  String get protectHiddenVolumeToggleSubtitle =>
+      'Запобігати пошкодженню при записі в зовнішній том';
+
+  @override
+  String get protectHiddenVolumeCredentialsRequired =>
+      'Для захисту потрібен пароль або ключовий файл прихованого тома';
+
+  @override
+  String deleteItemsTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Видалити $count елементів?',
+      many: 'Видалити $count елементів?',
+      few: 'Видалити $count елементи?',
+      one: 'Видалити 1 елемент?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteFoldersWarning =>
+      'Ці елементи буде безповоротно видалено разом з усім вмістом вибраних папок.';
+
+  @override
+  String get deleteFilesWarning =>
+      'Ці елементи буде безповоротно видалено з вашого зашифрованого тома.';
+
+  @override
+  String get delete => 'Видалити';
+
+  @override
+  String get remove => 'Вилучити';
+
+  @override
+  String get create => 'Створити';
+
+  @override
+  String get rename => 'Перейменувати';
+
+  @override
+  String renameMultipleTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Перейменувати $count елементів',
+      many: 'Перейменувати $count елементів',
+      few: 'Перейменувати $count елементи',
+      one: 'Перейменувати 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newFolderTitle => 'Нова папка';
+
+  @override
+  String get newTextFileTitle => 'Новий текстовий файл';
+
+  @override
+  String get folderNameHint => 'Назва папки';
+
+  @override
+  String get filenameHint => 'назва_файлу.txt';
+
+  @override
+  String get newNameHint => 'Нова назва';
+
+  @override
+  String get baseNameHint => 'Базова назва';
+
+  @override
+  String couldntCreateItem(String name) {
+    return 'Не вдалося створити \"$name\" — перевірте, чи контейнер змонтовано';
+  }
+
+  @override
+  String couldntRenameSingle(String name) {
+    return 'Не вдалося перейменувати \"$name\" — можливо, елемент із такою назвою вже існує';
+  }
+
+  @override
+  String couldntRenameMultiWithReason(num count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не вдалося перейменувати $count елементів: $reason',
+      many: 'Не вдалося перейменувати $count елементів: $reason',
+      few: 'Не вдалося перейменувати $count елементи: $reason',
+      one: 'Не вдалося перейменувати 1 елемент: $reason',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String couldntRenameMultiNoReason(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не вдалося перейменувати $count елементів',
+      many: 'Не вдалося перейменувати $count елементів',
+      few: 'Не вдалося перейменувати $count елементи',
+      one: 'Не вдалося перейменувати 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hiddenVolumeErrorInvalidSize =>
+      'Введіть коректний розмір прихованого тома більше 0';
+
+  @override
+  String get hiddenVolumeErrorTooLargeVsOuter =>
+      'Розмір прихованого тома має бути меншим за розмір зовнішнього тома';
+
+  @override
+  String get hiddenVolumeErrorTooLargeForContainer =>
+      'Розмір прихованого тома завеликий для цього контейнера';
+
+  @override
+  String get hiddenVolumeErrorCredentialsRequired =>
+      'Для створення прихованого тома потрібен пароль або ключовий файл';
+
+  @override
+  String get hiddenVolumeErrorCredentialsMustDiffer =>
+      'Облікові дані прихованого тома не можуть збігатися з обліковими даними зовнішнього тома.';
+
+  @override
+  String get vaultItemTypePassword => 'Пароль';
+
+  @override
+  String get vaultItemTypePaymentCard => 'Платіжна картка';
+
+  @override
+  String get vaultItemTypeIdentity => 'Особисті дані';
+
+  @override
+  String get vaultItemTypeSecureNote => 'Захищена нотатка';
+
+  @override
+  String get vaultItemTypeBankAccount => 'Банківський рахунок';
+
+  @override
+  String get vaultItemTypeSoftwareLicense => 'Ліцензія на ПЗ';
+
+  @override
+  String get fieldUsernameEmail => 'Ім\'я користувача / Email';
+
+  @override
+  String get fieldPassword => 'Пароль';
+
+  @override
+  String get fieldWebsiteUrl => 'Веб-сайт / URL';
+
+  @override
+  String get fieldTotpSecret => 'Секретний ключ TOTP';
+
+  @override
+  String get fieldNotes => 'Нотатки';
+
+  @override
+  String get fieldCardholderName => 'Власник картки';
+
+  @override
+  String get fieldCardNumber => 'Номер картки';
+
+  @override
+  String get fieldExpiryMMYY => 'Термін дії (ММ/РР)';
+
+  @override
+  String get fieldCvvCvc => 'CVV / CVC';
+
+  @override
+  String get fieldPin => 'PIN-код';
+
+  @override
+  String get fieldIssuingBank => 'Банк-емітент';
+
+  @override
+  String get fieldFullName => 'Повне ім\'я';
+
+  @override
+  String get fieldDateOfBirth => 'Дата народження';
+
+  @override
+  String get fieldNationality => 'Громадянство';
+
+  @override
+  String get fieldPassportNumber => 'Номер паспорта';
+
+  @override
+  String get fieldPassportExpiry => 'Термін дії паспорта';
+
+  @override
+  String get fieldNationalIdSsn => 'ІПН / Номер посвідчення';
+
+  @override
+  String get fieldDriversLicense => 'Водійське посвідчення';
+
+  @override
+  String get fieldAddress => 'Адреса';
+
+  @override
+  String get fieldPhone => 'Телефон';
+
+  @override
+  String get fieldEmail => 'Електронна пошта';
+
+  @override
+  String get fieldNote => 'Нотатка';
+
+  @override
+  String get fieldBankName => 'Назва банку';
+
+  @override
+  String get fieldAccountHolder => 'Власник рахунку';
+
+  @override
+  String get fieldAccountNumber => 'Номер рахунку';
+
+  @override
+  String get fieldRoutingSortCode => 'МФО / Код банку';
+
+  @override
+  String get fieldIban => 'IBAN';
+
+  @override
+  String get fieldSwiftBic => 'SWIFT / BIC';
+
+  @override
+  String get fieldAccountType => 'Тип рахунку';
+
+  @override
+  String get fieldProductName => 'Назва продукту';
+
+  @override
+  String get fieldLicenseKey => 'Ліцензійний ключ';
+
+  @override
+  String get fieldRegisteredTo => 'Зареєстровано на';
+
+  @override
+  String get fieldPurchaseDate => 'Дата придбання';
+
+  @override
+  String get fieldExpiryRenewalDate => 'Дата завершення / продовження';
+
+  @override
+  String get fieldDownloadUrl => 'Посилання для завантаження';
+
+  @override
+  String get fieldRegistrationEmail => 'Email реєстрації';
+
+  @override
+  String get titleRequired => 'Необхідно вказати заголовок';
+
+  @override
+  String newTypeTitle(String typeLabel) {
+    return 'Новий $typeLabel';
+  }
+
+  @override
+  String editItemTitle(String title) {
+    return 'Редагувати $title';
+  }
+
+  @override
+  String get save => 'Зберегти';
+
+  @override
+  String typeNameHint(String typeLabel) {
+    return 'Назва $typeLabel';
+  }
+
+  @override
+  String get titleSectionLabel => 'Заголовок';
+
+  @override
+  String get fieldsSectionLabel => 'Поля';
+
+  @override
+  String get encryptedStorageHint =>
+      'Зберігається в зашифрованому вигляді всередині сховища';
+
+  @override
+  String copiedSuffix(String fieldLabel) {
+    return '$fieldLabel скопійовано';
+  }
+
+  @override
+  String get copy => 'Копіювати';
+
+  @override
+  String get failedToSaveCheckMounted =>
+      'Не вдалося зберегти — перевірте, чи контейнер змонтовано';
+
+  @override
+  String get discardChangesTitle => 'Відкинути зміни?';
+
+  @override
+  String get discardChangesMessage => 'Усі незбережені зміни буде втрачено.';
+
+  @override
+  String get discard => 'Відкинути';
+
+  @override
+  String get keepEditing => 'Продовжити редагування';
+
+  @override
+  String get deleteItemTitle => 'Видалити запис?';
+
+  @override
+  String deleteItemMessage(String title) {
+    return '\"$title\" буде безповоротно видалено зі сховища.';
+  }
+
+  @override
+  String get removeFromBookmarks => 'Вилучити із закладок';
+
+  @override
+  String get addToBookmarks => 'Додати до закладок';
+
+  @override
+  String get edit => 'Редагувати';
+
+  @override
+  String labelCopiedToClipboard(String label) {
+    return '$label скопійовано в буфер';
+  }
+
+  @override
+  String get noFieldsFilledIn => 'Жодного поля не заповнено';
+
+  @override
+  String get sectionLabelDetails => 'Деталі';
+
+  @override
+  String get sectionLabelInfo => 'Інформація';
+
+  @override
+  String get metaLabelType => 'Тип';
+
+  @override
+  String get metaLabelCreated => 'Створено';
+
+  @override
+  String get metaLabelModified => 'Змінено';
+
+  @override
+  String copyFieldTooltip(String fieldLabel) {
+    return 'Скопіювати $fieldLabel';
+  }
+
+  @override
+  String get readOnlyCantAddItemsTooltip =>
+      'Лише читання — додавання неможливе';
+
+  @override
+  String get extractArchive => 'Видобути архів';
+
+  @override
+  String get verbArchive => 'Архівувати';
+
+  @override
+  String get verbExtract => 'Видобути';
+
+  @override
+  String get verbArchived => 'Заархівовано';
+
+  @override
+  String get verbExtracted => 'Видобуто';
+
+  @override
+  String get verbArchiving => 'Архівування';
+
+  @override
+  String get verbExtracting => 'Видобування';
+
+  @override
+  String get fileOpExtractingArchive => 'Видобування архіву…';
+
+  @override
+  String fileOpExtractingArchiveName(String name) {
+    return 'Видобування $name…';
+  }
+
+  @override
+  String fileOpArchivingBytes(String bytes) {
+    return 'Архівування… ($bytes)';
+  }
+
+  @override
+  String get newItemTooltip => 'Створити запис';
+
+  @override
+  String get camera => 'Камера';
+
+  @override
+  String get importFiles => 'Імпортувати файли';
+
+  @override
+  String get importFolder => 'Імпортувати папку';
+
+  @override
+  String get secureItem => 'Захищений запис';
+
+  @override
+  String get appNameVaultExplorer => 'Vault Explorer';
+
+  @override
+  String get appNameZipExplorer => 'Archive Explorer';
+
+  @override
+  String get archiveExplorerPermissionTitle => 'Потрібен доступ до файлів';
+
+  @override
+  String get archiveExplorerPermissionMessage =>
+      'Надайте доступ до пам\'яті для перегляду та видобування zip-архівів із папки Завантаження.';
+
+  @override
+  String get archiveExplorerGrantAccess => 'Надати доступ';
+
+  @override
+  String get archiveExplorerEmptyTitle => 'Архіви не знайдено';
+
+  @override
+  String get archiveExplorerEmptyMessage =>
+      'Завантажені zip-файли з\'являтимуться тут.';
+
+  @override
+  String get archiveExplorerRefreshTooltip => 'Оновити';
+
+  @override
+  String archiveExplorerEntryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів',
+      many: '$count елементів',
+      few: '$count елементи',
+      one: '1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get archiveExplorerExtractAll => 'Видобути все';
+
+  @override
+  String get archiveExplorerExtracting => 'Видобування...';
+
+  @override
+  String archiveExplorerExtractSuccess(int count, String name) {
+    return 'Видобуто $count файлів до Download/Extracted/$name';
+  }
+
+  @override
+  String get archiveExplorerExtractFailed => 'Не вдалося видобути цей архів.';
+
+  @override
+  String get archiveExplorerOpenFailed => 'Не вдалося відкрити цей архів.';
+
+  @override
+  String get archiveExplorerOpenArchive => 'Відкрити архів…';
+
+  @override
+  String get archiveExplorerUnresolvedPath =>
+      'Не вдалося отримати прямий доступ до файлу. Виберіть файл із папки Завантаження.';
+
+  @override
+  String get archiveExplorerExtractTo => 'Видобути до…';
+
+  @override
+  String get archiveExplorerPreview => 'Попередній перегляд';
+
+  @override
+  String get archiveExplorerChoosingDestination => 'Вибір місця призначення…';
+
+  @override
+  String get archiveExplorerNoDestinationChosen =>
+      'Місце призначення не вибрано.';
+
+  @override
+  String archiveExplorerExtractSuccessTo(int count, String path) {
+    return 'Видобуто $count файлів до $path';
+  }
+
+  @override
+  String get archiveBrowserEmptyTitle => 'Порожня папка';
+
+  @override
+  String get archiveBrowserEmptyMessage => 'Ця папка не містить файлів.';
+
+  @override
+  String get archiveBrowserRoot => 'Архів';
+
+  @override
+  String get archiveBrowserOpenFileFailed => 'Не вдалося відкрити цей файл.';
+
+  @override
+  String get fileAssocInAppTextEditor => 'Вбудований текстовий редактор';
+
+  @override
+  String get fileAssocInAppMediaViewer => 'Вбудований переглядач медіа';
+
+  @override
+  String fileAssocAppPrefix(String name) {
+    return 'Програма: $name';
+  }
+
+  @override
+  String get fileAssocExternalApp => 'Зовнішня програма';
+
+  @override
+  String get appSettingsTitle => 'Налаштування програми';
+
+  @override
+  String get sectionSecurityPrivacy => 'Безпека та конфіденційність';
+
+  @override
+  String get sectionAppearanceInterface => 'Вигляд та інтерфейс';
+
+  @override
+  String get sectionVaultFileHandling => 'Сховища та робота з файлами';
+
+  @override
+  String get masterPasswordTitle => 'Головний пароль';
+
+  @override
+  String get masterPasswordActiveSubtitle =>
+      'Активний · торкніться перемикача для видалення';
+
+  @override
+  String get masterPasswordInactiveSubtitle =>
+      'Вимагати пароль для відкриття програми';
+
+  @override
+  String get newPasswordLabel => 'Новий пароль';
+
+  @override
+  String get masterPasswordFieldLabel => 'Головний пароль';
+
+  @override
+  String get confirmPasswordLabel => 'Підтвердження пароля';
+
+  @override
+  String get update => 'Оновити';
+
+  @override
+  String get setPassword => 'Встановити пароль';
+
+  @override
+  String get biometricUnlockTitle => 'Біометричне розблокування';
+
+  @override
+  String get biometricUnlockSubtitle =>
+      'Підтвердьте особу для безпечного відкриття контейнера';
+
+  @override
+  String get changeMasterPasswordTitle => 'Змінити головний пароль';
+
+  @override
+  String get changeMasterPasswordSubtitle =>
+      'Оновити облікові дані головного пароля';
+
+  @override
+  String get autoLockContainersTitle => 'Автоматичне блокування сховища';
+
+  @override
+  String get autoLockContainersSubtitle =>
+      'Автоматично блокувати відкриті сховища після періоду бездіяльності';
+
+  @override
+  String get autoLockTimeoutLabel => 'Час автоблокування';
+
+  @override
+  String get immediately => 'Одразу';
+
+  @override
+  String nMinutes(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count хвилин',
+      many: '$count хвилин',
+      few: '$count хвилини',
+      one: '1 хвилина',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nHours(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count годин',
+      many: '$count годин',
+      few: '$count години',
+      one: '1 година',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get customDurationOption => 'Власна тривалість…';
+
+  @override
+  String get customDurationDialogTitle => 'Власна тривалість';
+
+  @override
+  String get blockScreenshotsTitle => 'Блокувати знімки екрана';
+
+  @override
+  String get blockScreenshotsSubtitle =>
+      'Забороняти створення скриншотів та приховувати програму в списку нещодавніх';
+
+  @override
+  String get keepVaultsRunningInBackgroundTitle =>
+      'Тримати сховища відкритими у фоні';
+
+  @override
+  String get keepVaultsRunningInBackgroundSubtitle =>
+      'Показувати сповіщення та залишати сховища відкритими після виходу з програми. Ключі сховищ залишаються в пам\'яті до блокування.';
+
+  @override
+  String get notificationPermissionDeniedMessage =>
+      'Дозвіл на сповіщення відхилено. Сховища все одно залишатимуться відкритими, але постійне сповіщення не відображатиметься.';
+
+  @override
+  String get discreteModeTitle => 'Режим маскування';
+
+  @override
+  String get discreteModeActiveSubtitle =>
+      'Активний · програма маскується під \"Archive Explorer\"';
+
+  @override
+  String get discreteModeInactiveSubtitle =>
+      'Маскувати цю програму під провідник zip-архівів на домашньому екрані';
+
+  @override
+  String get enableDiscreteModeTitle => 'Увімкнути режим маскування?';
+
+  @override
+  String get disableDiscreteModeTitle => 'Вимкнути режим маскування?';
+
+  @override
+  String get enableDiscreteModeMessage =>
+      'Іконка та назва програми зміняться на \"Archive Explorer\". Вона працюватиме як звичайний переглядач архівів.\n\nДля доступу до ваших сховищ відкрийте Archive Explorer і затисніть заголовок на 3 секунди.';
+
+  @override
+  String get disableDiscreteModeMessage =>
+      'Іконка та назва програми зміняться назад на \"Vault Explorer\".';
+
+  @override
+  String get enable => 'Увімкнути';
+
+  @override
+  String get disable => 'Вимкнути';
+
+  @override
+  String get discreteModeEnabledSnack =>
+      'Режим маскування увімкнено. Програма закриється — відкрийте її з нової іконки.';
+
+  @override
+  String get discreteModeDisabledSnack =>
+      'Режим маскування вимкнено. Програма закриється — відкрийте її з нової іконки.';
+
+  @override
+  String get failedToChangeDiscreteMode =>
+      'Не вдалося змінити режим маскування';
+
+  @override
+  String get cacheDerivedKeysTitle =>
+      'Використовувати кеш ключа для швидшого розблокування';
+
+  @override
+  String get cacheDerivedKeysSubtitle =>
+      'Зберігати ключ, отриманий із пароля, у Keystore для швидшого відкриття сховища';
+
+  @override
+  String get appThemeLabel => 'Тема програми';
+
+  @override
+  String get systemDefault => 'Системна';
+
+  @override
+  String get lightTheme => 'Світла';
+
+  @override
+  String get darkTheme => 'Темна';
+
+  @override
+  String get useMaterialYouTitle => 'Кольори Material You';
+
+  @override
+  String get useMaterialYouSubtitle =>
+      'Адаптувати кольори програми до шпалер (Android 12+)';
+
+  @override
+  String get pureBlackThemeTitle => 'Чистий чорний (OLED)';
+
+  @override
+  String get pureBlackThemeSubtitle =>
+      'Чисто чорний фон для економії заряду на OLED-екранах (лише темна тема)';
+
+  @override
+  String get sortContainersByLabel => 'Сортувати сховища за';
+
+  @override
+  String get swapCardSwipeActionsTitle =>
+      'Змінити порядок дій під час свайпу карток';
+
+  @override
+  String get swapCardSwipeActionsSubtitle =>
+      'Під час свайпу карток: \"Редагувати\" ліворуч, \"Видалити\" праворуч';
+
+  @override
+  String get swipeGestureHintTitle => 'Показувати підказку свайпу';
+
+  @override
+  String get swipeGestureHintSubtitle =>
+      'Показати анімацію-підказку свайпу для контейнера';
+
+  @override
+  String get autoOpenOnUnlockTitle => 'Автоматично переходити до файлів';
+
+  @override
+  String get autoOpenOnUnlockActiveSubtitle =>
+      'Одразу відкривати файловий менеджер після розблокування сховища';
+
+  @override
+  String get autoOpenOnUnlockInactiveSubtitle =>
+      'Лише розблокувати сховище і залишатися на головному екрані';
+
+  @override
+  String get enableJsHtmlTitle => 'Увімкнути JavaScript у переглядачі HTML';
+
+  @override
+  String get jsEnabledSubtitle =>
+      'JavaScript увімкнено для локальних HTML-файлів';
+
+  @override
+  String get jsDisabledSubtitle =>
+      'JavaScript вимкнено для локальних HTML-файлів';
+
+  @override
+  String get fastStorageAccessTitle => 'Швидкий доступ до сховища';
+
+  @override
+  String get fastStorageAccessGrantedSubtitle =>
+      'Надано доступ до всіх файлів (максимальна швидкість)';
+
+  @override
+  String get fastStorageAccessNotGrantedSubtitle =>
+      'Надайте доступ до всіх файлів у налаштуваннях для максимальної швидкості';
+
+  @override
+  String get showStorageLocationsTitle =>
+      'Показувати місця зберігання в бічній панелі';
+
+  @override
+  String get showStorageLocationsSubtitle =>
+      'Показує локальне сховище й додані розташування. Щоб відкрити локальне сховище, потрібен доступ до всіх файлів.';
+
+  @override
+  String get localStorageCardTitle => 'Локальне сховище';
+
+  @override
+  String get localStorageCardSubtitle =>
+      'Не зашифровано — для швидкого обміну зі сховищами';
+
+  @override
+  String get enableFastStorageAccessTitle => 'Увімкнути швидкий доступ';
+
+  @override
+  String get enableFastStorageAccessMessage =>
+      'Надання дозволу \"Доступ до всіх файлів\" дозволяє Vault Explorer виконувати прямі POSIX операції, прискорюючи роботу до 1000 разів.';
+
+  @override
+  String get disableStorageAccessTitle => 'Вимкнути доступ до сховища';
+
+  @override
+  String get disableStorageAccessMessage =>
+      'Вимкніть дозвіл \"Доступ до всіх файлів\" у системних налаштуваннях Android. Відкрити налаштування зараз?';
+
+  @override
+  String get enableStoragePermissionLegacyTitle =>
+      'Дозволити доступ до пам\'яті';
+
+  @override
+  String get enableStoragePermissionLegacyMessage =>
+      'Vault Explorer потрібен доступ до пам\'яті для виконання прямих файлових операцій, що значно прискорює роботу захищених папок. Зараз Android запитає підтвердження.';
+
+  @override
+  String get disableStoragePermissionLegacyMessage =>
+      'Вимкнути доступ до пам\'яті в Android можна лише в системних налаштуваннях. Відкрити налаштування зараз?';
+
+  @override
+  String get openSettings => 'Відкрити налаштування';
+
+  @override
+  String get useThisPasswordButton => 'Використати цей пароль';
+
+  @override
+  String get quickPasswordGeneratorSheetTitle => 'Генератор паролів';
+
+  @override
+  String get androidFileProviderTitle => 'Провайдер файлів Android';
+
+  @override
+  String get androidFileProviderSubtitle =>
+      'Відкривати доступ до нових сховищ через системний вибір файлів Android за замовчуванням';
+
+  @override
+  String get thumbnailCachingDefaultLabel =>
+      'Кешування мініатюр (за замовчуванням)';
+
+  @override
+  String get thumbnailQualityDefaultLabel =>
+      'Якість мініатюр (за замовчуванням)';
+
+  @override
+  String get fileAssociationsHeader => 'Асоціації файлів';
+
+  @override
+  String get noFileAssociationsYet =>
+      'Немає збережених асоціацій файлів. Програма запитуватиме, чим відкривати файли.';
+
+  @override
+  String get defaultActionsHeader =>
+      'Дії за замовчуванням для нестандартних файлів:';
+
+  @override
+  String get removeAssociationTooltip => 'Видалити асоціацію';
+
+  @override
+  String get sectionBackupRestore => 'Резервне копіювання';
+
+  @override
+  String get exportSettingsTitle => 'Експорт налаштувань';
+
+  @override
+  String get exportSettingsSubtitle =>
+      'Зберегти у файл налаштування програми, менеджера файлів, медіаплеєра та текстового редактора. Власні теми — за бажанням.';
+
+  @override
+  String get importSettingsTitle => 'Імпорт налаштувань';
+
+  @override
+  String get importSettingsSubtitle =>
+      'Відновити з файлу налаштування програми, менеджера файлів, медіаплеєра та текстового редактора';
+
+  @override
+  String get importSettingsConfirmTitle => 'Імпортувати налаштування?';
+
+  @override
+  String get importSettingsConfirmMessage =>
+      'Це замінить ваші поточні налаштування програми. Ваші теми оформлення та розташування інтерфейсу не зміняться. Дію не можна скасувати.';
+
+  @override
+  String get exportSettingsOnlyTitle => 'Лише налаштування';
+
+  @override
+  String get exportSettingsOnlySubtitle =>
+      'Налаштування програми, менеджера файлів, медіаплеєра та текстового редактора';
+
+  @override
+  String get exportSettingsWithSkinsTitle => 'Налаштування та теми';
+
+  @override
+  String get exportSettingsWithSkinsSubtitle =>
+      'Також зберігає ваші власні теми оформлення програми';
+
+  @override
+  String get importSettingsConfirmFullMessage =>
+      'Це замінить ваші поточні налаштування програми, менеджера файлів, медіаплеєра та текстового редактора, зокрема їхнє розташування. Ваші теми не зміняться. Дію не можна скасувати.';
+
+  @override
+  String get importSettingsConfirmFullSkinsMessage =>
+      'Це замінить ваші поточні налаштування програми, менеджера файлів, медіаплеєра та текстового редактора, зокрема їхнє розташування, і додасть теми з цього файлу. Тему, яка у вас уже є, буде замінено версією з файлу. Дію не можна скасувати.';
+
+  @override
+  String get exportSettingsSuccessMessage => 'Налаштування експортовано';
+
+  @override
+  String get importSettingsSuccessMessage => 'Налаштування імпортовано';
+
+  @override
+  String get exportSettingsErrorMessage =>
+      'Не вдалося експортувати налаштування';
+
+  @override
+  String get importSettingsInvalidFileMessage =>
+      'Цей файл не є коректним файлом налаштувань';
+
+  @override
+  String get sectionDebug => 'Налагодження';
+
+  @override
+  String get debugLoggingTitle => 'Журнал налагодження';
+
+  @override
+  String get debugLoggingSubtitle =>
+      'Записувати детальні діагностичні логи операцій із контейнерами';
+
+  @override
+  String get logcatTitle => 'Системний журнал (Logcat)';
+
+  @override
+  String get logcatSubtitle =>
+      'Перегляд та збереження системних логів пристрою';
+
+  @override
+  String logcatSavedMessage(String path) {
+    return 'Журнал збережено до $path';
+  }
+
+  @override
+  String get logcatSaveErrorMessage => 'Не вдалося зберегти журнал';
+
+  @override
+  String get logcatCopiedMessage => 'Журнал скопійовано в буфер обміну';
+
+  @override
+  String get logcatUnavailableMessage => 'Logcat недоступний на цьому пристрої';
+
+  @override
+  String get logcatEmptyMessage => 'Очікування записів журналу…';
+
+  @override
+  String get logcatClearTooltip => 'Очистити журнал';
+
+  @override
+  String get logcatSaveTooltip => 'Зберегти журнал';
+
+  @override
+  String get logcatFilterAppOnly => 'Лише програма';
+
+  @override
+  String get logcatFilterAll => 'Усі логи';
+
+  @override
+  String get logcatSearchHint => 'Пошук у журналі…';
+
+  @override
+  String get logcatClearedMessage => 'Журнал очищено';
+
+  @override
+  String get logcatCopyTooltip => 'Скопіювати журнал';
+
+  @override
+  String get retryButton => 'Повторити';
+
+  @override
+  String get aboutAppTitle => 'Про VaultExplorer';
+
+  @override
+  String versionInfoSubtitle(String version) {
+    return 'Версія $version · Ліцензії відкритого коду та деталі';
+  }
+
+  @override
+  String get failedToSaveSettings => 'Не вдалося зберегти налаштування';
+
+  @override
+  String get masterPasswordSetSnack => 'Головний пароль встановлено';
+
+  @override
+  String get passwordCannotBeEmpty => 'Пароль не може бути порожнім';
+
+  @override
+  String get atLeast4CharsRequired => 'Потрібно щонайменше 4 символи';
+
+  @override
+  String get passwordsDoNotMatch => 'Паролі не збігаються';
+
+  @override
+  String get failedToHashPassword =>
+      'Не вдалося створити хеш пароля — спробуйте знову';
+
+  @override
+  String get languageLabel => 'Мова';
+
+  @override
+  String get biometricNotAvailable => 'Біометрія недоступна на цьому пристрої';
+
+  @override
+  String get biometricsChangedFallbackMessage =>
+      'Біометричні дані пристрою змінилися, тому біометричне розблокування вимкнено. Використайте пароль.';
+
+  @override
+  String get unlockVaultExplorerReason => 'Розблокувати VaultExplorer';
+
+  @override
+  String biometricErrorWithCode(String code) {
+    return 'Помилка біометрії: $code';
+  }
+
+  @override
+  String tooManyFailedAttempts(num seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds секунд',
+      many: '$seconds секунд',
+      few: '$seconds секунди',
+      one: '1 секунду',
+    );
+    return 'Забагато невдалих спроб. Спробуйте знову через $_temp0.';
+  }
+
+  @override
+  String get enterMasterPasswordPrompt => 'Введіть ваш головний пароль';
+
+  @override
+  String incorrectPasswordLockedFor(int seconds, num attempts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '$attempts невдалих спроб',
+      many: '$attempts невдалих спроб',
+      few: '$attempts невдалі спроби',
+      one: '1 невдалу спробу',
+    );
+    return 'Неправильний пароль. Заблоковано на $seconds с через $_temp0.';
+  }
+
+  @override
+  String incorrectPasswordAttempts(num attempts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '$attempts невдалих спроб',
+      many: '$attempts невдалих спроб',
+      few: '$attempts невдалі спроби',
+      one: '1 невдала спроба',
+    );
+    return 'Неправильний пароль ($_temp0).';
+  }
+
+  @override
+  String get brandNameNoSpace => 'VaultExplorer';
+
+  @override
+  String get enterPasswordSubtitle =>
+      'Введіть ваш головний пароль для продовження';
+
+  @override
+  String get masterPasswordFieldLabelTitleCase => 'Головний пароль';
+
+  @override
+  String get unlock => 'Розблокувати';
+
+  @override
+  String get useBiometric => 'Біометрія';
+
+  @override
+  String get connectAtLeast4Dots => 'З\'єднайте щонайменше 4 точки';
+
+  @override
+  String get patternsDontMatch =>
+      'Графічні ключі не збігаються — спробуйте знову';
+
+  @override
+  String get drawUnlockPatternTitle => 'Намалюйте графічний ключ';
+
+  @override
+  String get confirmPatternTitle => 'Підтвердьте ваш ключ';
+
+  @override
+  String get drawSamePatternAgain => 'Намалюйте той самий ключ знову';
+
+  @override
+  String get enterAtLeast4Digits => 'Введіть щонайменше 4 цифри';
+
+  @override
+  String get pinsDontMatch => 'PIN-коди не збігаються — спробуйте знову';
+
+  @override
+  String get createUnlockPinTitle => 'Створіть PIN-код розблокування';
+
+  @override
+  String get confirmPinTitle => 'Підтвердьте ваш PIN-код';
+
+  @override
+  String get enterSamePinAgain => 'Введіть той самий PIN-код знову';
+
+  @override
+  String get enterUnlockPinTitle => 'Введіть PIN-код розблокування';
+
+  @override
+  String get wrongPinTryAgain => 'Неправильний PIN-код — спробуйте ще раз';
+
+  @override
+  String get enterYourPinSequence => 'Введіть ваш PIN-код';
+
+  @override
+  String get enterPinToMount => 'Введіть PIN-код для відкриття';
+
+  @override
+  String get noPinConfiguredMessage =>
+      'PIN-код не налаштовано. Введіть пароль вручну.';
+
+  @override
+  String pinLockedForSeconds(int seconds) {
+    return 'Забагато невдалих спроб. Заблоковано на $seconds с.';
+  }
+
+  @override
+  String get initSecureCredsPinMessage =>
+      'Ініціалізація захищених даних. Розблокуйте вручну для авторизації доступу за PIN-кодом.';
+
+  @override
+  String get setPinButton => 'Встановити PIN-код';
+
+  @override
+  String get changePinButton => 'Змінити PIN-код';
+
+  @override
+  String get pinSetupRequiredBeforeSaving =>
+      'Налаштуйте PIN-код перед збереженням.';
+
+  @override
+  String get pinSetupRequiredAboveBeforeSaving =>
+      'Налаштуйте PIN-код вище перед збереженням.';
+
+  @override
+  String get verifyPinTitle => 'Перевірка PIN-коду';
+
+  @override
+  String get incorrectPinError => 'Неправильний PIN-код';
+
+  @override
+  String removedFromListSnack(String name) {
+    return 'Вилучено \"$name\" зі списку';
+  }
+
+  @override
+  String get clearRecentHistoryTitle => 'Очистити історію?';
+
+  @override
+  String get clearRecentHistoryMessage =>
+      'Це очистить список нещодавніх документів. Файли на вашому пристрої залишаться без змін.';
+
+  @override
+  String get clearAll => 'Очистити все';
+
+  @override
+  String get recentHistoryClearedSnack => 'Історію очищено';
+
+  @override
+  String get moreOptionsTooltip => 'Інші параметри';
+
+  @override
+  String get clearHistoryMenuItem => 'Очистити історію';
+
+  @override
+  String get openPdfFile => 'Відкрити файл PDF';
+
+  @override
+  String get noDocumentsYetTitle => 'Документів ще немає';
+
+  @override
+  String get openPdfToStartMessage =>
+      'Відкрийте PDF-документ із вашого пристрою, щоб почати читання.';
+
+  @override
+  String get removeFromListMenuItem => 'Видалити зі списку';
+
+  @override
+  String get justNow => 'Щойно';
+
+  @override
+  String minutesAgo(int count) {
+    return '$count хв тому';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count год тому';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count дн тому';
+  }
+
+  @override
+  String get usbDriveDisconnectedLocked =>
+      'USB-диск відключено — сховище заблоковано';
+
+  @override
+  String get containerAlreadyMounted => 'Цей контейнер уже змонтовано.';
+
+  @override
+  String get noVaultFolderFormatDetected =>
+      'У вибраній папці не знайдено masterkey.cryptomator, gocryptfs.conf або cryfs.config.';
+
+  @override
+  String get savedContainerSettingsNotFound =>
+      'Збережені налаштування для цього контейнера не знайдено.';
+
+  @override
+  String couldNotUpdateContainerLocation(String error) {
+    return 'Не вдалося оновити розташування контейнера: $error';
+  }
+
+  @override
+  String filePickerFailed(String error) {
+    return 'Помилка вибору файлу: $error';
+  }
+
+  @override
+  String get selectContainerFirst => 'Спочатку виберіть контейнер';
+
+  @override
+  String get passwordOrKeyfilesRequired => 'Потрібен пароль або ключові файли';
+
+  @override
+  String get slowPerformanceWarningTitle => 'Попередження про низьку швидкість';
+
+  @override
+  String get slowPerformanceWarningMessage =>
+      'Прямий доступ до сховища наразі вимкнено.\n\nCryFS зберігає файли у вигляді тисяч дрібних блоків. Відкриття таких сховищ через системний Android SAF буде повільним.\n\nБажаєте відкрити Налаштування та надати дозвіл \"Доступ до всіх файлів\" для максимальної швидкості?';
+
+  @override
+  String get unlockAnyway => 'Все одно розблокувати';
+
+  @override
+  String get defaultVaultName => 'Сховище';
+
+  @override
+  String get defaultContainerName => 'Контейнер';
+
+  @override
+  String get incorrectPasswordOrInvalidVault =>
+      'Неправильний пароль або пошкоджене сховище';
+
+  @override
+  String get incorrectPasswordOrInvalidContainer =>
+      'Неправильний пароль або пошкоджений контейнер';
+
+  @override
+  String get genericUnknownError => 'Невідома помилка';
+
+  @override
+  String get decryptingLabel => 'Розшифрування…';
+
+  @override
+  String get loadingContainerFromStorage =>
+      'Завантаження контейнера зі сховища… Великі контейнери або файли в хмарі можуть завантажуватися довше.';
+
+  @override
+  String luksKeyslotProgress(int attempted, int total) {
+    return 'Перевірка ключового слота $attempted з $total…';
+  }
+
+  @override
+  String get luksKeyslotProgressUnknown => 'Перевірка ключового слота…';
+
+  @override
+  String bitlockerCredentialProgress(int attempted, int total) {
+    return 'Перевірка облікових даних $attempted з $total…';
+  }
+
+  @override
+  String get bitlockerCredentialProgressUnknown => 'Перевірка облікових даних…';
+
+  @override
+  String veracryptAlgoProgress(String algo, String slotName) {
+    return 'Спроба $algo ($slotName)…';
+  }
+
+  @override
+  String get unlockContainerLabel => 'Розблокувати контейнер';
+
+  @override
+  String get mountContainerTitle => 'Змонтувати контейнер';
+
+  @override
+  String get containerFileSegmentLabel => 'Файл контейнера';
+
+  @override
+  String get folderVaultSegmentLabel => 'Захищена папка';
+
+  @override
+  String formatContainerLabel(String format) {
+    return 'Контейнер $format';
+  }
+
+  @override
+  String formatVaultLabel(String format) {
+    return 'Сховище $format';
+  }
+
+  @override
+  String formatDriveLabel(String format) {
+    return 'Диск $format';
+  }
+
+  @override
+  String get encryptedContainerLabel => 'Зашифрований контейнер';
+
+  @override
+  String get tapToSelectVaultFolder => 'Торкніться, щоб вибрати папку сховища…';
+
+  @override
+  String get tapToSelectContainerFile =>
+      'Торкніться, щоб вибрати файл контейнера…';
+
+  @override
+  String get containerMissingTitle => 'Контейнер відсутній';
+
+  @override
+  String get filePathCouldNotBeResolved => 'Не вдалося знайти шлях до файлу';
+
+  @override
+  String get containerMissingExplanation =>
+      'Файл контейнера міг бути переміщений, видалений, або носій наразі відключено.';
+
+  @override
+  String get retryButtonLabel => 'Повторити';
+
+  @override
+  String get locateFileButtonLabel => 'Знайти файл';
+
+  @override
+  String get authenticateToMountSubtitle =>
+      'Підтвердьте особу для безпечного відкриття контейнера';
+
+  @override
+  String get usePasswordButtonLabel => 'Використати пароль';
+
+  @override
+  String get authenticateButtonLabel => 'Підтвердити';
+
+  @override
+  String get drawUnlockPatternCardTitle => 'Намалюйте ключ розблокування';
+
+  @override
+  String get wrongPatternTryAgain => 'Неправильний ключ — спробуйте ще раз';
+
+  @override
+  String get connectYourPatternSequence => 'З\'єднайте точки графічного ключа';
+
+  @override
+  String get usePasswordInsteadButtonLabel => 'Використати пароль';
+
+  @override
+  String get passwordHintFolderVault => 'Введіть пароль до сховища';
+
+  @override
+  String get passwordHintBitlocker => 'Введіть пароль або ключ відновлення';
+
+  @override
+  String get passwordHintContainer => 'Введіть пароль до контейнера';
+
+  @override
+  String get usingSavedPasswordTooltip => 'Використовується збережений пароль';
+
+  @override
+  String get luksKeyfileReplacesPasswordNote =>
+      'Для контейнерів LUKS ключовий файл замінює пароль.';
+
+  @override
+  String get readOnlyModeUsbSubtitle =>
+      'Відкрити без можливості внесення змін до диска';
+
+  @override
+  String get readOnlyModeContainerSubtitle =>
+      'Відкрити без можливості внесення змін до контейнера';
+
+  @override
+  String get rememberContainerLabel => 'Запам\'ятати контейнер';
+
+  @override
+  String get rememberContainerSubtitle =>
+      'Закріпити на головному екрані для швидкого доступу';
+
+  @override
+  String get cancelUnlockButtonLabel => 'Скасувати відкриття';
+
+  @override
+  String get biometricSubjectContainer => 'контейнера';
+
+  @override
+  String get biometricSubjectUsbDrive => 'USB-накопичувача';
+
+  @override
+  String get usbNoSavedCredentialsMessage =>
+      'Збережений пароль не знайдено. Введіть його вручну.';
+
+  @override
+  String get decryptingDriveLabel => 'Розшифрування диска…';
+
+  @override
+  String get usbDeviceAlreadyActiveMounted =>
+      'Цей USB-пристрій уже підключено та змонтовано.';
+
+  @override
+  String reconnectUsbDriveTitle(String label) {
+    return 'Перепідключити \"$label\"';
+  }
+
+  @override
+  String get unlockUsbDriveTitle => 'Розблокувати USB-диск';
+
+  @override
+  String get noUsbStorageDetectedTitle => 'USB-накопичувачів не виявлено';
+
+  @override
+  String authenticateToUnlockPrompt(String subject) {
+    return 'Підтвердьте особу для розблокування ($subject)';
+  }
+
+  @override
+  String get noPatternConfiguredMessage =>
+      'Графічний ключ не налаштовано. Введіть пароль вручну.';
+
+  @override
+  String patternLockedForSeconds(int seconds) {
+    return 'Забагато спроб. Заблоковано на $seconds с.';
+  }
+
+  @override
+  String get initSecureCredsBiometricMessage =>
+      'Ініціалізація захищених даних. Розблокуйте вручну для надання біометричного доступу.';
+
+  @override
+  String get initSecureCredsPatternMessage =>
+      'Ініціалізація захищених даних. Розблокуйте вручну для налаштування графічного ключа.';
+
+  @override
+  String get mountExistingContainerTitle => 'Змонтувати наявний контейнер';
+
+  @override
+  String get mountExistingContainerSubtitle =>
+      'Відкрити створений раніше файл контейнера';
+
+  @override
+  String get mountSplitContainerTitle => 'Змонтувати розділений контейнер';
+
+  @override
+  String get mountSplitContainerSubtitle =>
+      'Відкрити контейнер, розділений на частини, без попереднього об\'єднання';
+
+  @override
+  String get mountUsbDriveTitle => 'Змонтувати USB-диск';
+
+  @override
+  String get mountUsbDriveSubtitle =>
+      'Відкрити контейнер на флеш-накопичувачі OTG';
+
+  @override
+  String get formatUsbDriveTitle => 'Форматувати USB-диск';
+
+  @override
+  String get formatUsbDriveSubtitle =>
+      'Стерти диск і створити на ньому новий зашифрований том';
+
+  @override
+  String get createNewContainerTitle => 'Створити новий контейнер';
+
+  @override
+  String get createNewContainerSubtitle =>
+      'Створити абсолютно нове зашифроване сховище';
+
+  @override
+  String get lockBeforeRemovingWarning =>
+      'Заблокуйте контейнер перед його видаленням.';
+
+  @override
+  String get settingsTooltip => 'Налаштування';
+
+  @override
+  String get addVaultFabLabel => 'Додати сховище';
+
+  @override
+  String removedLabelUndo(String label) {
+    return 'Вилучено \"$label\"';
+  }
+
+  @override
+  String get undo => 'Скасувати';
+
+  @override
+  String get pdfViewerNoSourceProvided => 'Джерело PDF не вказано.';
+
+  @override
+  String get pdfViewerFileEmpty => 'Файл PDF порожній або пошкоджений.';
+
+  @override
+  String pdfViewerFailedToInspectSize(String error) {
+    return 'Не вдалося визначити розмір PDF: $error';
+  }
+
+  @override
+  String get pdfViewerErrorLoadingTitle => 'Помилка завантаження PDF';
+
+  @override
+  String get pdfViewerNoDocumentLoaded => 'Документ PDF не завантажено.';
+
+  @override
+  String get add => 'Додати';
+
+  @override
+  String get reset => 'Скинути';
+
+  @override
+  String couldNotExpose(String name) {
+    return 'Не вдалося надати доступ до \"$name\".';
+  }
+
+  @override
+  String nowAvailableToOtherApps(String name) {
+    return '\"$name\" тепер доступний іншим програмам.';
+  }
+
+  @override
+  String couldNotUnmount(String name) {
+    return 'Не вдалося розмонтувати \"$name\".';
+  }
+
+  @override
+  String pinnedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Закріплено $count елементів',
+      many: 'Закріплено $count елементів',
+      few: 'Закріплено $count елементи',
+      one: 'Закріплено 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unpinnedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Відкріплено $count елементів',
+      many: 'Відкріплено $count елементів',
+      few: 'Відкріплено $count елементи',
+      one: 'Відкріплено 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get readOnlyThumbnailWarning =>
+      'Монтування лише для читання — мініатюри не зберігатимуться всередині сховища в цій сесії.';
+
+  @override
+  String failedLoadingFolder(String type) {
+    return 'Не вдалося завантажити папку: $type';
+  }
+
+  @override
+  String failedToReadArchive(String type) {
+    return 'Не вдалося прочитати архів: $type';
+  }
+
+  @override
+  String archiveFormatNotSupported(String ext) {
+    return 'Формат архіву .$ext поки що не підтримується';
+  }
+
+  @override
+  String get archivePasswordPromptTitle => 'Захищено паролем';
+
+  @override
+  String get archivePasswordPromptMessage =>
+      'Цей архів захищено паролем. Введіть пароль для перегляду його вмісту.';
+
+  @override
+  String get archiveSolidWarning =>
+      'Це безперервний (solid) архів — відкриття файлів може бути повільнішим, особливо ближче до кінця.';
+
+  @override
+  String get failedToReadFileFromArchive =>
+      'Не вдалося прочитати файл з архіву';
+
+  @override
+  String failedToExtractFile(String type) {
+    return 'Не вдалося видобути файл: $type';
+  }
+
+  @override
+  String get failedToReadSecureItem => 'Не вдалося прочитати захищений запис';
+
+  @override
+  String get openFileDialogTitle => 'Відкрити файл';
+
+  @override
+  String chooseHowToOpen(String name) {
+    return 'Виберіть спосіб відкриття \"$name\":';
+  }
+
+  @override
+  String get playVideoAudioViewImageInApp =>
+      'Переглянути медіа або зображення в програмі';
+
+  @override
+  String get viewEditTextMarkdownCode => 'Переглянути або редагувати текст/код';
+
+  @override
+  String get sendFileToThirdPartyApp => 'Надіслати файл в іншу програму';
+
+  @override
+  String get openAsEllipsis => 'Відкрити як…';
+
+  @override
+  String get chooseFileTypeToOpenAs => 'Виберіть тип файлу для відкриття';
+
+  @override
+  String alwaysRememberChoiceExt(String ext) {
+    return 'Завжди вибирати для файлів .$ext';
+  }
+
+  @override
+  String get alwaysRememberChoiceNoExt =>
+      'Завжди вибирати для файлів без розширення';
+
+  @override
+  String get openAsDialogTitle => 'Відкрити як';
+
+  @override
+  String get mimeTypeText => 'Текст';
+
+  @override
+  String get mimeTypeImage => 'Зображення';
+
+  @override
+  String get mimeTypeVideo => 'Відео';
+
+  @override
+  String get mimeTypeAudio => 'Аудіо';
+
+  @override
+  String get mimeTypeArchive => 'Архів';
+
+  @override
+  String get mimeTypeOther => 'Інше';
+
+  @override
+  String get scanningSubfoldersForMedia =>
+      'Сканування папок на наявність медіа…';
+
+  @override
+  String get noMediaFilesFoundRecursive =>
+      'Медіафайлів у цій папці та підпапках не знайдено';
+
+  @override
+  String failedToScanSubfolders(String error) {
+    return 'Не вдалося просканувати підпапки: $error';
+  }
+
+  @override
+  String scanningSubfoldersForMediaProgress(int count) {
+    return 'Сканування підпапок на наявність медіа… перевірено: $count';
+  }
+
+  @override
+  String get mediaScanCancelled => 'Сканування медіа скасовано';
+
+  @override
+  String get mediaScanLimitReached =>
+      'Сканування зупинено після перевірки великої кількості папок. Медіафайлів не знайдено.';
+
+  @override
+  String get noAppFoundForFileType =>
+      'Не знайдено програми для цього типу файлу';
+
+  @override
+  String couldNotOpenFile(String name) {
+    return 'Не вдалося відкрити \"$name\"';
+  }
+
+  @override
+  String get couldNotShareFiles => 'Не вдалося поділитися вибраними файлами';
+
+  @override
+  String get readOnlyCantMove =>
+      'Контейнер змонтовано лише для читання — переміщення неможливе.';
+
+  @override
+  String get readOnlyCantPaste =>
+      'Контейнер змонтовано лише для читання — вставка неможлива.';
+
+  @override
+  String get clipboardSourceInvalid => 'Джерело буфера обміну недійсне';
+
+  @override
+  String get crossContainerPasteNotConfigured =>
+      'Вставка між різними сховищами не налаштована.';
+
+  @override
+  String get crossContainerPasteRequiresBothMounted =>
+      'Вставка між сховищами вимагає, щоб обидва контейнери були відкриті.';
+
+  @override
+  String get readOnlyCantDelete =>
+      'Контейнер змонтовано лише для читання — видалення неможливе.';
+
+  @override
+  String deletedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Видалено $count елементів',
+      many: 'Видалено $count елементів',
+      few: 'Видалено $count елементи',
+      one: 'Видалено 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deletedWithFailures(int deleted, int failed) {
+    return 'Видалено: $deleted · Помилок: $failed';
+  }
+
+  @override
+  String exportedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Експортовано $count файлів',
+      many: 'Експортовано $count файлів',
+      few: 'Експортовано $count файли',
+      one: 'Експортовано 1 файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportCancelledOrFailed =>
+      'Експорт скасовано або завершено з помилкою';
+
+  @override
+  String exportError(String type) {
+    return 'Помилка експорту: $type';
+  }
+
+  @override
+  String get deleteOriginalTitle => 'Видалити оригінал?';
+
+  @override
+  String get deleteOriginalFolderMessage =>
+      'Видалити оригінальну папку з пам\'яті пристрою після імпорту?';
+
+  @override
+  String get deleteOriginalFilesMessage =>
+      'Видалити оригінальні файли з пам\'яті пристрою після імпорту?';
+
+  @override
+  String get keepOriginal => 'Залишити оригінал';
+
+  @override
+  String get deleteOriginalButton => 'Видалити оригінал';
+
+  @override
+  String deletedOriginalCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Видалено $count оригінальних елементів',
+      many: 'Видалено $count оригінальних елементів',
+      few: 'Видалено $count оригінальні елементи',
+      one: 'Видалено 1 оригінальний елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get couldNotDeleteOriginals => 'Не вдалося видалити оригінал(и)';
+
+  @override
+  String get videoCapturedEncrypted => 'Відео збережено';
+
+  @override
+  String get photoCapturedEncrypted => 'Фото збережено';
+
+  @override
+  String cameraCaptureFailed(String type) {
+    return 'Помилка камери: $type';
+  }
+
+  @override
+  String extractAllFilesToFolder(String folder) {
+    return 'Видобути всі файли до папки \"$folder\"?';
+  }
+
+  @override
+  String get extract => 'Видобути';
+
+  @override
+  String extractedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Видобуто $count файлів',
+      many: 'Видобуто $count файлів',
+      few: 'Видобуто $count файли',
+      one: 'Видобуто 1 файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToExtractGeneric(String type) {
+    return 'Помилка видобування: $type';
+  }
+
+  @override
+  String get archiveSelectionAction => 'Архівувати';
+
+  @override
+  String get createArchiveTitle => 'Створити архів';
+
+  @override
+  String get archiveNameHint => 'архів.zip';
+
+  @override
+  String archivedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Заархівовано $count файлів',
+      many: 'Заархівовано $count файлів',
+      few: 'Заархівовано $count файли',
+      one: 'Заархівовано 1 файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToArchiveGeneric(String type) {
+    return 'Не вдалося створити архів: $type';
+  }
+
+  @override
+  String get createArchivePasswordHint => 'Необов\'язковий пароль (AES-256)';
+
+  @override
+  String get createArchivePasswordUnavailableForFormat =>
+      'Захист паролем доступний лише для ZIP та 7-Zip';
+
+  @override
+  String get createArchiveEncryptFilenames => 'Шифрувати імена файлів';
+
+  @override
+  String get createArchiveEncryptFilenamesHint =>
+      'Потрібен пароль. Тоді пароль потрібен навіть для перегляду вмісту.';
+
+  @override
+  String get closeSearchTooltip => 'Закрити пошук';
+
+  @override
+  String get searchInThisFolderTooltip => 'Шукати в цій папці';
+
+  @override
+  String get playMediaHereTooltip => 'Відтворити медіа тут';
+
+  @override
+  String get rootFolderLabel => 'Корінь';
+
+  @override
+  String folderPickerFailed(String error) {
+    return 'Помилка вибору папки: $error';
+  }
+
+  @override
+  String get addAVaultTitle => 'Додати сховище';
+
+  @override
+  String get selectEmptyDestinationFolderFirst =>
+      'Спочатку виберіть порожню папку призначення';
+
+  @override
+  String get passwordRequired => 'Необхідно ввести пароль';
+
+  @override
+  String get vaultCreatedSuccessfully => 'Сховище успішно створено.';
+
+  @override
+  String get vaultCreationFailedEmptyFolder =>
+      'Помилка створення сховища — переконайтеся, що вибрана папка порожня.';
+
+  @override
+  String get unknownErrorOccurred => 'Виникла невідома помилка';
+
+  @override
+  String get containerNameRequired => 'Необхідно вказати назву контейнера';
+
+  @override
+  String get enterValidSizeGreaterThanZero => 'Введіть розмір більше 0';
+
+  @override
+  String get passwordOrKeyfileRequired =>
+      'Потрібен пароль або принаймні один ключовий файл';
+
+  @override
+  String get standardVolumePasswordsDoNotMatch =>
+      'Паролі стандартного тома не збігаються';
+
+  @override
+  String get hiddenVolumePasswordsDoNotMatch =>
+      'Паролі прихованого тома не збігаються';
+
+  @override
+  String get containerFileCreatedSuccessfully =>
+      'Файл контейнера успішно створено.';
+
+  @override
+  String get containerCreationCancelledOrFailed =>
+      'Створення контейнера скасовано або завершилося помилкою.';
+
+  @override
+  String insufficientSpaceForContainer(String needed, String available) {
+    return 'Недостатньо вільного місця у місці призначення. Потрібно $needed, доступно лише $available.';
+  }
+
+  @override
+  String get vaultKindContainerFile => 'Файл контейнера';
+
+  @override
+  String get vaultKindFolderVault => 'Захищена папка';
+
+  @override
+  String get formatFileSystemLabel => 'Файлова система тома';
+
+  @override
+  String get standardVolumeHeader => 'Стандартний том';
+
+  @override
+  String get containerFormatLabel => 'Формат контейнера';
+
+  @override
+  String get fileNameLabel => 'Ім\'я файлу';
+
+  @override
+  String get containerSizeLabel => 'Розмір контейнера';
+
+  @override
+  String get unitLabel => 'Одиниця';
+
+  @override
+  String get passwordFieldLabel => 'Пароль';
+
+  @override
+  String get confirmPasswordFieldLabelTitleCase => 'Підтвердження пароля';
+
+  @override
+  String get hiddenVolumeHeader => 'Прихований том';
+
+  @override
+  String get createHiddenVolumeToggleTitle => 'Створити прихований том';
+
+  @override
+  String get createInvisibleSecondaryVolume =>
+      'Створити невидимий вторинний том';
+
+  @override
+  String get setOuterPasswordFirstToEnable =>
+      'Спочатку вкажіть пароль зовнішнього тома';
+
+  @override
+  String get hiddenPasswordLabel => 'Пароль прихованого тома';
+
+  @override
+  String get confirmHiddenPasswordLabel =>
+      'Підтвердження пароля прихованого тома';
+
+  @override
+  String get hiddenSizeLabel => 'Розмір прихованого тома';
+
+  @override
+  String get unitMbMegabytes => 'МБ (Мегабайти)';
+
+  @override
+  String get unitGbGigabytes => 'ГБ (Гігабайти)';
+
+  @override
+  String get hiddenFileSystemLabel => 'Файлова система прихованого тома';
+
+  @override
+  String get vaultFormatLabel => 'Формат сховища';
+
+  @override
+  String get gocryptfsCipherLabel => 'Шифр вмісту';
+
+  @override
+  String get cryfsCipherLabel => 'Шифр вмісту';
+
+  @override
+  String get cryfsBlockSizeLabel => 'Розмір блоку';
+
+  @override
+  String get destinationFolderLabel => 'Папка призначення';
+
+  @override
+  String get selectEmptyFolderLabel => 'Виберіть порожню папку';
+
+  @override
+  String get tapToChooseVaultLocation =>
+      'Торкніться для вибору місця створення сховища…';
+
+  @override
+  String get folderVaultLimitationsNote =>
+      'Сховища папок не підтримують ключові файли, PIM, приховані томи та вибір алгоритмів шифрування VeraCrypt/LUKS.';
+
+  @override
+  String get createVaultButton => 'Створити сховище';
+
+  @override
+  String get createContainerButton => 'Створити контейнер';
+
+  @override
+  String get vaultCreationInProgressWait =>
+      'Триває створення сховища. Зачекайте, будь ласка.';
+
+  @override
+  String get containerCreationInProgressWait =>
+      'Триває створення контейнера. Зачекайте, будь ласка.';
+
+  @override
+  String get createEncryptedVaultTitle => 'Створити зашифроване сховище';
+
+  @override
+  String get createEncryptedContainerTitle => 'Створити зашифрований контейнер';
+
+  @override
+  String get unitMbShort => 'МБ';
+
+  @override
+  String get unitGbShort => 'ГБ';
+
+  @override
+  String failedToListUsbDevices(String error) {
+    return 'Не вдалося отримати список USB-пристроїв: $error';
+  }
+
+  @override
+  String get usbPermissionDenied => 'Доступ до USB заборонено';
+
+  @override
+  String get couldNotReadDriveCapacity =>
+      'Не вдалося визначити розмір накопичувача — введіть вручну.';
+
+  @override
+  String get selectUsbDriveFirst => 'Спочатку виберіть USB-накопичувач';
+
+  @override
+  String eraseDeviceTitle(String name) {
+    return 'Стерти \"$name\"?';
+  }
+
+  @override
+  String get eraseDeviceMessage =>
+      'Це безповоротно видалить усі дані на цьому USB-накопичувачі та створить новий зашифрований контейнер. Дію не можна скасувати.';
+
+  @override
+  String get eraseAndCreateButton => 'Стерти та створити';
+
+  @override
+  String get usbPermissionRequiredToContinue =>
+      'Для продовження потрібен дозвіл на доступ до USB';
+
+  @override
+  String get usbContainerCreatedSnack =>
+      'USB-контейнер створено. Використовуйте \"Змонтувати USB-диск\" для відкриття.';
+
+  @override
+  String get usbContainerCreationFailed => 'Не вдалося створити USB-контейнер.';
+
+  @override
+  String get usbStandardVolumeSectionHeader => 'USB-диск і стандартний том';
+
+  @override
+  String get formattingErasesEverythingWarning =>
+      'Форматування повністю видалить усі дані на вибраному диску.';
+
+  @override
+  String get selectUsbDriveLabel => 'Виберіть USB-диск';
+
+  @override
+  String get noUsbStorageDetected => 'USB-накопичувачів не виявлено';
+
+  @override
+  String get connectOtgDriveToFormat =>
+      'Підключіть OTG-накопичувач для форматування';
+
+  @override
+  String get refreshListButton => 'Оновити список';
+
+  @override
+  String get readyToFormat => 'Готовий до форматування';
+
+  @override
+  String get permissionRequired => 'Потрібен дозвіл';
+
+  @override
+  String get readingDriveCapacity => 'Визначення місткості диска…';
+
+  @override
+  String get mustNotExceedDriveCapacity =>
+      'Не повинен перевищувати реальну місткість накопичувача.';
+
+  @override
+  String get quickFormatTitle => 'Швидке форматування';
+
+  @override
+  String get quickFormatDescription =>
+      'Пропускає заповнення нулями. Швидше, але не видаляє старі дані безповоротно.';
+
+  @override
+  String get eraseAndCreateContainerButton => 'Стерти та створити контейнер';
+
+  @override
+  String get usbContainerCreationInProgressWait =>
+      'Створення контейнера триває. Зачекайте, будь ласка.';
+
+  @override
+  String get formatUsbDriveScreenTitle => 'Форматувати USB-диск';
+
+  @override
+  String get playlistTransitionAnimationLabel => 'Анімація переходів списку';
+
+  @override
+  String get playlistTransitionSlideLabel => 'Зсув (за замовчуванням)';
+
+  @override
+  String get playlistTransitionFadeLabel => 'Згасання';
+
+  @override
+  String get playlistTransitionZoomLabel => 'Масштабування';
+
+  @override
+  String get playlistTransitionDepthLabel => 'Глибина';
+
+  @override
+  String get playlistTransitionCubeLabel => '3D Куб';
+
+  @override
+  String get playlistTransitionFlipLabel => '3D Перегортання';
+
+  @override
+  String get unlockVaultTitle => 'Розблокувати сховище';
+
+  @override
+  String get openContainerTitle => 'Відкрити контейнер';
+
+  @override
+  String get selectContainerFileOrFolder => 'Виберіть файл або папку';
+
+  @override
+  String get readOnlyModeLabel => 'Режим лише для читання';
+
+  @override
+  String get readOnlyModeSubtitle =>
+      'Забороняє будь-які операції запису або зміни у сховищі';
+
+  @override
+  String get alwaysOpenReadOnlyLabel => 'Завжди лише для читання';
+
+  @override
+  String get alwaysOpenReadOnlySubtitle =>
+      'Нові сеанси починаються в режимі лише для читання.';
+
+  @override
+  String get selectUsbDeviceLabel => 'Виберіть USB-пристрій';
+
+  @override
+  String get noUsbDevicesFound => 'Сумісних USB-накопичувачів не знайдено';
+
+  @override
+  String get containerConfigTitle => 'Конфігурація сховища';
+
+  @override
+  String get changePasswordTitle => 'Змінити пароль';
+
+  @override
+  String get confirmNewPasswordLabel => 'Підтвердьте новий пароль';
+
+  @override
+  String get cameraCaptureTitle => 'Камера сховища';
+
+  @override
+  String get takingPhoto => 'Знімання фото…';
+
+  @override
+  String get noVaultSelected => 'Сховище не вибрано';
+
+  @override
+  String get mediaDiagnosticsTitle => 'Діагностика медіа';
+
+  @override
+  String get advancedViewerSettingsTitle => 'Налаштування переглядача';
+
+  @override
+  String get textEditorSwitchToReadModeTooltip =>
+      'Перемкнути в режим лише для читання';
+
+  @override
+  String get textEditorSwitchToEditModeTooltip =>
+      'Перемкнути в режим редагування';
+
+  @override
+  String get textEditorReadOnlyIndicatorLabel => 'Лише читання';
+
+  @override
+  String get textEditorMoveCursorLeftTooltip => 'Перемістити курсор ліворуч';
+
+  @override
+  String get textEditorMoveCursorRightTooltip => 'Перемістити курсор праворуч';
+
+  @override
+  String get textEditorSelectWordTooltip => 'Виділити слово';
+
+  @override
+  String get textEditorSwitchToHorizontalScrollTooltip =>
+      'Перемкнути на горизонтальне прокручування';
+
+  @override
+  String get textEditorSwitchToSoftWrapTooltip =>
+      'Перемкнути на перенесення рядків';
+
+  @override
+  String get textEditorCaretScrubberLabel =>
+      'Перетягніть ліворуч або праворуч, щоб перемістити курсор';
+
+  @override
+  String get textEditorFindTooltip => 'Знайти у файлі';
+
+  @override
+  String get textEditorFindHint => 'Знайти';
+
+  @override
+  String get textEditorReplaceHint => 'Замінити';
+
+  @override
+  String get textEditorToggleReplaceTooltip => 'Перемкнути заміну';
+
+  @override
+  String get textEditorPreviousMatchTooltip => 'Попередній збіг';
+
+  @override
+  String get textEditorNextMatchTooltip => 'Наступний збіг';
+
+  @override
+  String get textEditorCaseSensitiveTooltip => 'Враховувати регістр';
+
+  @override
+  String get textEditorRegexTooltip => 'Використовувати регулярний вираз';
+
+  @override
+  String get textEditorCloseFindTooltip => 'Закрити пошук';
+
+  @override
+  String get textEditorNoMatches => 'Немає результатів';
+
+  @override
+  String get textEditorReplaceButton => 'Замінити';
+
+  @override
+  String get textEditorReplaceAllButton => 'Замінити все';
+
+  @override
+  String get textEditorMoreActionsTooltip => 'Більше дій';
+
+  @override
+  String get textEditorGoToLineMenuItem => 'Перейти до рядка…';
+
+  @override
+  String get textEditorGoToStartMenuItem => 'Перейти на початок';
+
+  @override
+  String get textEditorGoToEndMenuItem => 'Перейти в кінець';
+
+  @override
+  String get textEditorFormatDocumentMenuItem => 'Форматувати документ';
+
+  @override
+  String get textEditorMinifyJsonMenuItem => 'Мініфікувати JSON';
+
+  @override
+  String get textEditorFormatFailedMessage =>
+      'Не вдалося відформатувати цей файл — спочатку перевірте його коректність';
+
+  @override
+  String get textEditorGoToLineDialogTitle => 'Перейти до рядка';
+
+  @override
+  String get textEditorGoToLineFieldLabel => 'Номер рядка';
+
+  @override
+  String textEditorGoToLineHelperText(int maxLine) {
+    return '1–$maxLine';
+  }
+
+  @override
+  String textEditorGoToLineInvalidNumber(int maxLine) {
+    return 'Введіть номер рядка від 1 до $maxLine';
+  }
+
+  @override
+  String get goToLineButton => 'Перейти';
+
+  @override
+  String get textEditorSaveConfirmTitle => 'Незбережені зміни';
+
+  @override
+  String get textEditorSaveConfirmMessage =>
+      'Бажаєте зберегти зміни перед закриттям?';
+
+  @override
+  String get saveAndClose => 'Зберегти і закрити';
+
+  @override
+  String get discardChanges => 'Відкинути зміни';
+
+  @override
+  String selectionBarSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Вибрано $count елементів',
+      many: 'Вибрано $count елементів',
+      few: 'Вибрано $count елементи',
+      one: 'Вибрано 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectAll => 'Вибрати все';
+
+  @override
+  String get deselectAll => 'Зняти виділення';
+
+  @override
+  String get sortOptionsTitle => 'Сортування файлів';
+
+  @override
+  String get layoutModeList => 'Список';
+
+  @override
+  String get layoutModeGrid => 'Сітка';
+
+  @override
+  String get layoutModeMasonry => 'Мозаїка';
+
+  @override
+  String get fileOperationsTitle => 'Операції з файлами';
+
+  @override
+  String get conflictResolutionTitle => 'Конфлікт імен файлів';
+
+  @override
+  String get replaceExistingFile => 'Замінити наявний файл';
+
+  @override
+  String get keepBothFiles => 'Зберегти обидва (перейменувати)';
+
+  @override
+  String get skipFile => 'Пропустити цей файл';
+
+  @override
+  String get noVaultsFoundTitle => 'Сховищ не знайдено';
+
+  @override
+  String get noVaultsFoundSubtitle =>
+      'Створіть новий контейнер або додайте наявне сховище для початку роботи.';
+
+  @override
+  String get addExistingVaultButton => 'Додати наявне сховище';
+
+  @override
+  String get sortContainersModeManual => 'Вручну (перетягування)';
+
+  @override
+  String get sortContainersModeUnlockStatus => 'За станом розблокування';
+
+  @override
+  String get sortContainersModeNameAZ => 'За назвою (А–Я)';
+
+  @override
+  String get sortContainersModeNameZA => 'За назвою (Я–А)';
+
+  @override
+  String get sortContainersModeNewest => 'Спочатку нові';
+
+  @override
+  String get sortContainersModeOldest => 'Спочатку старі';
+
+  @override
+  String get thumbnailCacheAppCacheLabel => 'Кеш програми';
+
+  @override
+  String get thumbnailCacheAppCacheDesc =>
+      'Зберігається в кеші програми. Швидко; очищається системою при нестачі пам\'яті.';
+
+  @override
+  String get thumbnailCacheInContainerLabel => 'Всередині контейнера';
+
+  @override
+  String get thumbnailCacheInContainerDesc =>
+      'Зберігається всередині контейнера. Захищено шифруванням, але запис повільніший.';
+
+  @override
+  String get thumbnailCacheHiddenFolderLabel => 'Прихована папка';
+
+  @override
+  String get thumbnailCacheHiddenFolderDesc =>
+      'Зберігається у прихованій папці .thumbcache у кореневому каталозі. На відміну від кешу програми, вона не очищається автоматично.';
+
+  @override
+  String get thumbnailCacheDisabledLabel => 'Вимкнено';
+
+  @override
+  String get thumbnailCacheDisabledDesc =>
+      'Без дискового кешу. Мініатюри генеруються щоразу наново.';
+
+  @override
+  String get unlockContainerTitle => 'Розблокувати контейнер';
+
+  @override
+  String get containerFileSegment => 'Файл контейнера';
+
+  @override
+  String get folderVaultSegment => 'Захищена папка';
+
+  @override
+  String get enableButtonLabel => 'Увімкнути';
+
+  @override
+  String get retryButtonLabelShort => 'Повторити';
+
+  @override
+  String get locateFileButton => 'Знайти файл';
+
+  @override
+  String get authenticateButton => 'Підтвердити';
+
+  @override
+  String get cancelUnlockButton => 'Скасувати';
+
+  @override
+  String tryingKeyslotProgress(int attempted, int total) {
+    return 'Перевірка ключового слота $attempted з $total…';
+  }
+
+  @override
+  String get tryingKeyslotSingle => 'Перевірка ключового слота…';
+
+  @override
+  String verifyingCredentialProgress(int attempted, int total) {
+    return 'Перевірка облікових даних $attempted з $total…';
+  }
+
+  @override
+  String get verifyingCredentialSingle => 'Перевірка облікових даних…';
+
+  @override
+  String tryingAlgoSlot(String algo, String slotName) {
+    return 'Спроба $algo ($slotName)…';
+  }
+
+  @override
+  String get hiddenVolumeSlotName => 'Прихований том';
+
+  @override
+  String get standardVolumeSlotName => 'Стандартний том';
+
+  @override
+  String get containerMissingSubtitle => 'Не вдалося знайти шлях до файлу';
+
+  @override
+  String get containerMissingBody =>
+      'Файл контейнера міг бути переміщений або видалений.';
+
+  @override
+  String get connectPatternSequence => 'З\'єднайте точки графічного ключа';
+
+  @override
+  String get passwordLabel => 'Пароль';
+
+  @override
+  String get enterVaultPasswordHint => 'Введіть пароль до сховища';
+
+  @override
+  String get enterBitlockerPasswordHint =>
+      'Введіть пароль або ключ відновлення';
+
+  @override
+  String get enterContainerPasswordHint => 'Введіть пароль до контейнера';
+
+  @override
+  String get readOnlyModeUsbSubtitleDrive =>
+      'Відкрити без можливості внесення змін до цього диска';
+
+  @override
+  String get rememberDriveLabel => 'Запам\'ятати диск';
+
+  @override
+  String get rememberDriveSubtitle => 'Закріпити диск на головному екрані';
+
+  @override
+  String get unlockVaultButtonLabel => 'Розблокувати сховище';
+
+  @override
+  String get cryfsStorageAccessWarning =>
+      'Сховища CryFS використовують тисячі блокових файлів. Без прямого доступу швидкість буде значно нижчою.';
+
+  @override
+  String get folderVaultStorageAccessWarning =>
+      'Прямий доступ до сховища вимкнено. Читання файлів у папкових сховищах може бути повільнішим.';
+
+  @override
+  String get requestingPermission => 'Запит дозволу…';
+
+  @override
+  String get unlockAndMountButton => 'Розблокувати та змонтувати';
+
+  @override
+  String get unlockDriveButton => 'Розблокувати диск';
+
+  @override
+  String couldntFindDevice(String deviceName) {
+    return 'Не вдалося знайти \"$deviceName\"';
+  }
+
+  @override
+  String get plugDriveBackInRetry =>
+      'Підключіть накопичувач знову та натисніть \"Повторити\", або виберіть його нижче, якщо він відображається під іншою назвою.';
+
+  @override
+  String get retryConnectionButton => 'Повторити підключення';
+
+  @override
+  String get refreshDevicesButton => 'Оновити пристрої';
+
+  @override
+  String get connectOtgDriveToMount =>
+      'Підключіть флеш-диск OTG для монтування';
+
+  @override
+  String get alreadyActive => 'Вже активний';
+
+  @override
+  String get active => 'Активний';
+
+  @override
+  String get readyToUnlock => 'Готовий до розблокування';
+
+  @override
+  String get enterUsbPartitionPassword => 'Введіть пароль розділу USB';
+
+  @override
+  String get biometricAuthenticationTitle => 'Біометрична автентифікація';
+
+  @override
+  String get biometricAuthUsbSubtitle =>
+      'Підтвердьте особу для відкриття цього USB-пристрою';
+
+  @override
+  String get connectPatternSequenceToMount =>
+      'Намалюйте графічний ключ для відкриття';
+
+  @override
+  String get selectAllAction => 'Вибрати все';
+
+  @override
+  String get clearSelectionAction => 'Зняти виділення';
+
+  @override
+  String get clearSelectionTooltip => 'Зняти виділення';
+
+  @override
+  String get selectionOptionsTooltip => 'Параметри виділення';
+
+  @override
+  String get readOnlyContainerTooltip => 'Сховище лише для читання';
+
+  @override
+  String get copyAction => 'Копіювати';
+
+  @override
+  String get moveAction => 'Перемістити';
+
+  @override
+  String get renameAction => 'Перейменувати';
+
+  @override
+  String get exportToDeviceAction => 'Експортувати на пристрій';
+
+  @override
+  String get openWithAppAction => 'Відкрити через…';
+
+  @override
+  String get shareAction => 'Поділитися';
+
+  @override
+  String get pinAction => 'Закріпити';
+
+  @override
+  String get pinSelectedAction => 'Закріпити вибране';
+
+  @override
+  String get unpinAction => 'Відкріпити';
+
+  @override
+  String get unpinSelectedAction => 'Відкріпити вибране';
+
+  @override
+  String get documentProviderSettingsMenu => 'Налаштування Document Provider';
+
+  @override
+  String get exposeAsDocumentProviderMenu => 'Надати доступ до папки';
+
+  @override
+  String get moreOptionsTooltipShort => 'Інші параметри';
+
+  @override
+  String get copyTooltip => 'Копіювати';
+
+  @override
+  String get searchInThisFolderHint => 'Пошук у цій папці…';
+
+  @override
+  String get clearTooltip => 'Очистити';
+
+  @override
+  String get backToDashboardTooltip => 'Повернутися до сховищ';
+
+  @override
+  String get cancelPasteButton => 'Скасувати вставку';
+
+  @override
+  String get cancelImportButton => 'Скасувати імпорт';
+
+  @override
+  String get continueButton => 'Продовжити';
+
+  @override
+  String get skipButton => 'Пропустити';
+
+  @override
+  String get keepBothButton => 'Зберегти обидва';
+
+  @override
+  String get clearAllButton => 'Очистити все';
+
+  @override
+  String get autoMountWhenUnlocksTitle =>
+      'Автомонтування під час відкриття сховища';
+
+  @override
+  String get autoMountWhenUnlocksSubtitle =>
+      'Автоматично відкривати доступ до цієї папки наступного разу';
+
+  @override
+  String get unmountButton => 'Розмонтувати';
+
+  @override
+  String get filtersMenuItem => 'Фільтри';
+
+  @override
+  String get settingsMenuItem => 'Налаштування';
+
+  @override
+  String get sortOptionsTooltip => 'Параметри сортування';
+
+  @override
+  String get layoutOptionsTooltip => 'Параметри вигляду';
+
+  @override
+  String get lockContainerTooltip => 'Заблокувати сховище';
+
+  @override
+  String get renameTooltip => 'Перейменувати';
+
+  @override
+  String get cancelUpdatingPasswordTooltip => 'Скасувати зміну пароля';
+
+  @override
+  String get unlockSettingsButton => 'Розблокувати налаштування';
+
+  @override
+  String get updateSavedCredentialsButton => 'Оновити збережені дані';
+
+  @override
+  String get verifyCredentialsTitle => 'Перевірка облікових даних';
+
+  @override
+  String get verifyButton => 'Перевірити';
+
+  @override
+  String get displayNameTitle => 'Назва для відображення';
+
+  @override
+  String get containerNameHint => 'Назва контейнера';
+
+  @override
+  String get deleteFileDialogTitle => 'Видалити файл?';
+
+  @override
+  String get deleteFilePermanentWarning =>
+      'Ця дія є остаточною і не може бути скасована.';
+
+  @override
+  String get unsavedChangesTitle => 'Незбережені зміни';
+
+  @override
+  String get unsavedChangesMessage =>
+      'Ви маєте незбережені зміни. Бажаєте зберегти їх перед закриттям?';
+
+  @override
+  String get discardButton => 'Відкинути';
+
+  @override
+  String get decryptingFileContent => 'Розшифрування вмісту файлу...';
+
+  @override
+  String get cannotOpenFile => 'Не вдалося відкрити файл';
+
+  @override
+  String get changesSavedSuccessfully => 'Зміни успішно збережено';
+
+  @override
+  String saveFailedWithError(String error) {
+    return 'Помилка збереження: $error';
+  }
+
+  @override
+  String linesCount(int count) {
+    return 'Рядків: $count';
+  }
+
+  @override
+  String charsCount(int count) {
+    return 'Символів: $count';
+  }
+
+  @override
+  String get unsavedChangesLabel => 'Незбережені зміни';
+
+  @override
+  String get savedToVault => 'Збережено у сховище';
+
+  @override
+  String get saveChangesTooltip => 'Зберегти зміни';
+
+  @override
+  String get textEditorDecryptFailedMessage =>
+      'Не вдалося розшифрувати файл зі сховища.';
+
+  @override
+  String get textEditorInvalidTextFileMessage =>
+      'Цей файл не є коректним текстовим документом.';
+
+  @override
+  String get textEditorWriteBackFailedMessage =>
+      'Не вдалося записати файл назад у сховище.';
+
+  @override
+  String get markdownViewerEditTooltip => 'Редагувати';
+
+  @override
+  String get markdownViewerPreviewTooltip => 'Попередній перегляд';
+
+  @override
+  String get markdownEmptyPreviewMessage =>
+      'Поки що немає вмісту для попереднього перегляду.';
+
+  @override
+  String get backTooltip => 'Назад';
+
+  @override
+  String get forwardTooltip => 'Вперед';
+
+  @override
+  String get reloadTooltip => 'Перезавантажити';
+
+  @override
+  String get optionsTooltip => 'Опції';
+
+  @override
+  String get htmlViewerErrorTitle => 'Неможливо відобразити сторінку';
+
+  @override
+  String get htmlViewerLoadFailedMessage => 'Не вдалося завантажити файл';
+
+  @override
+  String get enableJavaScriptDialogTitle => 'Увімкнути JavaScript?';
+
+  @override
+  String get enableJavaScriptDialogMessage =>
+      'Сторінка зможе виконувати локальні скрипти. Вона все одно не матиме доступу до інтернету — жодні дані не можуть бути передані назовні.';
+
+  @override
+  String get disableJavaScriptMenu => 'Вимкнути JavaScript';
+
+  @override
+  String get enableJavaScriptMenu => 'Увімкнути JavaScript';
+
+  @override
+  String get enterFullscreenMenu => 'На весь екран';
+
+  @override
+  String failedToOpenExternalApp(String error) {
+    return 'Не вдалося відкрити у зовнішній програмі: $error';
+  }
+
+  @override
+  String get thisFolderMenu => 'Ця папка';
+
+  @override
+  String get allInclSubfoldersMenu => 'Усе (разом із підпапками)';
+
+  @override
+  String get disableShuffleMenu => 'Вимкнути перемішування';
+
+  @override
+  String get shufflePlaylistMenu => 'Перемішати список';
+
+  @override
+  String get playlistOptionsTooltip => 'Параметри списку';
+
+  @override
+  String get enablePlaylistTooltip => 'Увімкнути список відтворення';
+
+  @override
+  String get moreActionsTooltip => 'Додаткові дії';
+
+  @override
+  String get forcePortraitMenu => 'Портретна орієнтація';
+
+  @override
+  String get forceLandscapeMenu => 'Альбомна орієнтація';
+
+  @override
+  String get autoRotateSensorMenu => 'Автоповорот (за датчиком)';
+
+  @override
+  String get screenOrientationMenu => 'Орієнтація екрана';
+
+  @override
+  String get playlistTransitionMenu => 'Перехід списку';
+
+  @override
+  String get renameFileMenu => 'Перейменувати файл';
+
+  @override
+  String get deleteFileMenu => 'Видалити файл';
+
+  @override
+  String get thumbnailCarouselTooltip => 'Карусель мініатюр';
+
+  @override
+  String get advancedSettingsTooltip => 'Розширені налаштування';
+
+  @override
+  String get previousTooltip => 'Попередній';
+
+  @override
+  String get nextTooltip => 'Наступний';
+
+  @override
+  String get diagnosticsCopiedToClipboard => 'Діагностику скопійовано в буфер';
+
+  @override
+  String get diagnosticsTitle => 'Діагностика';
+
+  @override
+  String get copyDiagnosticsTooltip => 'Скопіювати діагностику';
+
+  @override
+  String get closeTooltip => 'Закрити';
+
+  @override
+  String get diagnosticsPlaybackSection => 'Відтворення';
+
+  @override
+  String get diagnosticsEngineSection => 'Рушій';
+
+  @override
+  String get diagnosticsStateLabel => 'Стан';
+
+  @override
+  String get diagnosticsResolutionLabel => 'Роздільність';
+
+  @override
+  String get diagnosticsAspectRatioLabel => 'Співвідношення сторін';
+
+  @override
+  String get diagnosticsPositionLabel => 'Позиція';
+
+  @override
+  String get diagnosticsDurationLabel => 'Тривалість';
+
+  @override
+  String get diagnosticsErrorLabel => 'Помилка';
+
+  @override
+  String get diagnosticsPlayerLabel => 'Програвач';
+
+  @override
+  String get diagnosticsDecodingLabel => 'Декодування';
+
+  @override
+  String get diagnosticsExoPlayerValue => 'ExoPlayer (Android)';
+
+  @override
+  String get diagnosticsHardwareAcceleratedValue => 'Апаратне прискорення';
+
+  @override
+  String get diagnosticsUnknownValue => 'Невідомо';
+
+  @override
+  String get diagnosticsStateBuffering => 'Буферизація';
+
+  @override
+  String get diagnosticsStatePlaying => 'Відтворення';
+
+  @override
+  String get diagnosticsStatePaused => 'Пауза';
+
+  @override
+  String get diagnosticsDurationUnavailable => '--:--';
+
+  @override
+  String get rotate90Label => 'Повернути на 90°';
+
+  @override
+  String get imageFitModeLabel => 'Режим масштабування';
+
+  @override
+  String get slideshowDelayLabel => 'Затримка слайд-шоу';
+
+  @override
+  String get playbackSpeedLabel => 'Швидкість відтворення';
+
+  @override
+  String get subtitlesLabel => 'Субтитри';
+
+  @override
+  String get imageSettingsTitle => 'Налаштування зображень';
+
+  @override
+  String get playbackSettingsTitle => 'Налаштування відтворення';
+
+  @override
+  String get imageFitContain => 'Вписати';
+
+  @override
+  String get imageFitWidth => 'За шириною';
+
+  @override
+  String get imageFitHeight => 'За висотою';
+
+  @override
+  String nSecondsDelay(int n) {
+    return '$n секунд';
+  }
+
+  @override
+  String playbackSpeedNormal(String speed) {
+    return '${speed}x (Звичайна)';
+  }
+
+  @override
+  String playbackSpeedValue(String speed) {
+    return '${speed}x';
+  }
+
+  @override
+  String slideshowDelaySecondsValue(int seconds) {
+    return '$seconds с';
+  }
+
+  @override
+  String rotationDegreesValue(int degrees) {
+    return '$degrees°';
+  }
+
+  @override
+  String get settingsTooltipShort => 'Налаштування';
+
+  @override
+  String get sourceCodeTooltip => 'Вихідний код';
+
+  @override
+  String get donateTooltip => 'Підтримати проект';
+
+  @override
+  String get shareAppTooltip => 'Поділитися програмою';
+
+  @override
+  String get resetToDefaultsTooltip => 'Скинути до початкових';
+
+  @override
+  String get usbUnlockContainerTitle => 'Розблокувати USB-контейнер';
+
+  @override
+  String get usbMountContainerTitle => 'Змонтувати USB-диск';
+
+  @override
+  String get staticLabel => 'Статично';
+
+  @override
+  String get unmuteTooltip => 'Увімкнути звук';
+
+  @override
+  String get muteTooltip => 'Вимкнути звук';
+
+  @override
+  String get playOnceDisabledTooltip => 'Один раз (автоперехід вимкнено)';
+
+  @override
+  String get playAndAdvanceTooltip => 'Грати і перейти далі';
+
+  @override
+  String get loopCurrentVideoTooltip => 'Повторювати це відео';
+
+  @override
+  String get clearThumbnailCacheDialogTitle => 'Очистити кеш мініатюр?';
+
+  @override
+  String get clearThumbnailCacheDialogMessage =>
+      'Це видалить кешовані мініатюри для цього сховища. Вони створяться повторно під час перегляду медіа.';
+
+  @override
+  String get clearCacheButton => 'Очистити кеш';
+
+  @override
+  String get appCacheClearedUnlockMessage =>
+      'Кеш програми очищено. Відкрийте контейнер для очищення внутрішнього кешу.';
+
+  @override
+  String get allThumbnailCachesClearedMessage =>
+      'Усі кеші мініатюр успішно очищено.';
+
+  @override
+  String get appCacheClearedContainerFailedMessage =>
+      'Кеш програми очищено, але не вдалося очистити кеш усередині контейнера.';
+
+  @override
+  String get failedToClearThumbnailCachesMessage =>
+      'Не вдалося очистити кеші мініатюр.';
+
+  @override
+  String get authenticateToModifySettingsPrompt =>
+      'Підтвердьте особу для зміни налаштувань';
+
+  @override
+  String get usbVaultSettingsTitle => 'Налаштування USB-сховища';
+
+  @override
+  String get vaultSettingsTitle => 'Налаштування сховища';
+
+  @override
+  String get generalSectionHeader => 'Загальні';
+
+  @override
+  String get securityCredentialsSectionHeader => 'Безпека та облікові дані';
+
+  @override
+  String get securityOptionsLockedTitle => 'Параметри безпеки заблоковано';
+
+  @override
+  String get authenticateOriginalCredentialsMessage =>
+      'Підтвердьте початкові облікові дані контейнера для зміни параметрів безпеки.';
+
+  @override
+  String get unlockCredentialsLabel => 'Спосіб розблокування';
+
+  @override
+  String get unavailableSuffixLabel => '(Недоступно)';
+
+  @override
+  String get patternSetupRequiredBeforeSaving =>
+      'Встановіть графічний ключ перед збереженням.';
+
+  @override
+  String get passwordKeystoreEncryptedHelperText =>
+      'Пароль шифрується за допомогою Android Keystore. Залиште порожнім, якщо використовуються лише ключові файли.';
+
+  @override
+  String get changePatternButton => 'Змінити ключ';
+
+  @override
+  String get setPatternButton => 'Встановити ключ';
+
+  @override
+  String get cacheDerivedKeyLabel => 'Кешувати похідний ключ';
+
+  @override
+  String get cryfsSkipScryptKdfSubtitle =>
+      'Пропускати scrypt KDF наступного разу (ключ у Keystore)';
+
+  @override
+  String get reuseKeyMaterialKeystoreSubtitle =>
+      'Повторно використовувати ключ із Android Keystore';
+
+  @override
+  String nDays(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count днів',
+      many: '$count днів',
+      few: '$count дні',
+      one: '1 день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cacheDerivedKeyLifetimeTitle =>
+      'Тривалість зберігання ключа в кеші';
+
+  @override
+  String get cacheDerivedKeyLifetimeNever => 'До вимкнення вручну';
+
+  @override
+  String cacheDerivedKeyLifetimeExpiresOn(String date) {
+    return 'Буде автоматично видалено $date';
+  }
+
+  @override
+  String get pinAlgorithmSkipAutoDetectSubtitle =>
+      'Закріпити алгоритм для пропуску автовизначення під час відкриття.';
+
+  @override
+  String get changeContainerPasswordTitle => 'Змінити пароль контейнера';
+
+  @override
+  String get bitlockerCredentialsChangeNotSupportedMessage =>
+      'Зміна пароля BitLocker не підтримується у програмі. Використовуйте засоби Windows.';
+
+  @override
+  String get systemIntegrationSectionHeader => 'Система та інтеграція';
+
+  @override
+  String get autoLockDurationLabel => 'Час автоблокування';
+
+  @override
+  String get neverAutoLockOption => 'Ніколи';
+
+  @override
+  String get neverAutoLockOptionSubtitle =>
+      'Залишається відкритим, навіть коли програма блокується або вимикається екран';
+
+  @override
+  String get defaultAutoLockOptionSubtitle =>
+      'Використовує налаштування автоблокування програми та блокування екрана';
+
+  @override
+  String get exposeContentToFilePickerSubtitle =>
+      'Надавати доступ системному провіднику під час розблокування';
+
+  @override
+  String get thumbnailStorageSectionHeader => 'Зберігання мініатюр';
+
+  @override
+  String get cacheModeLabel => 'Режим кешування';
+
+  @override
+  String get useGlobalDefaultSubtitle =>
+      'Використовувати загальне налаштування';
+
+  @override
+  String get thumbnailQualityLabel => 'Якість мініатюр';
+
+  @override
+  String get clearThumbnailCacheTitle => 'Очистити кеш мініатюр';
+
+  @override
+  String get removeCachedThumbnailsSubtitle =>
+      'Видалити кешовані мініатюри зображень та відео';
+
+  @override
+  String get vaultInformationSectionHeader => 'Інформація про сховище';
+
+  @override
+  String get vaultInformationTileTitle => 'Відомості про сховище';
+
+  @override
+  String get vaultInformationTileSubtitle =>
+      'Шифр, формат та інші технічні параметри';
+
+  @override
+  String get vaultInfoLocationLabel => 'Розташування';
+
+  @override
+  String get vaultInfoRequiresUnlockTitle => 'Потрібне розблокування';
+
+  @override
+  String get vaultInfoRequiresUnlockMessage =>
+      'Розблокуйте це сховище, щоб переглянути технічні відомості.';
+
+  @override
+  String get vaultInfoLoadFailedTitle =>
+      'Не вдалося завантажити інформацію про сховище';
+
+  @override
+  String get vaultInfoLoadFailedMessage =>
+      'Сталася помилка під час зчитування відомостей сховища.';
+
+  @override
+  String get vaultInfoVolumeSizeLabel => 'Розмір тому';
+
+  @override
+  String get vaultInfoFileSystemLabel => 'Файлова система';
+
+  @override
+  String get vaultInfoHiddenVolumeLabel => 'Прихований том';
+
+  @override
+  String get vaultInfoReadOnlyLabel => 'Лише для читання';
+
+  @override
+  String get vaultInfoLuksVersionLabel => 'Версія LUKS';
+
+  @override
+  String get vaultInfoSectorSizeLabel => 'Розмір сектора';
+
+  @override
+  String get vaultInfoVaultFormatLabel => 'Формат сховища';
+
+  @override
+  String get vaultInfoCipherComboLabel => 'Комбінація шифрів';
+
+  @override
+  String get vaultInfoShorteningThresholdLabel =>
+      'Поріг скорочення імен файлів';
+
+  @override
+  String get vaultInfoFormatVersionLabel => 'Версія формату';
+
+  @override
+  String get vaultInfoContentCipherLabel => 'Шифр вмісту';
+
+  @override
+  String get vaultInfoFilenameEncryptionLabel => 'Імена файлів';
+
+  @override
+  String get vaultInfoPlaintextNamesValue => 'Відкритий текст';
+
+  @override
+  String get vaultInfoEncryptedNamesValue => 'Зашифровані';
+
+  @override
+  String get vaultInfoBlockCipherLabel => 'Блочний шифр';
+
+  @override
+  String get vaultInfoBlockSizeLabel => 'Розмір блоку';
+
+  @override
+  String get vaultInfoCreatedWithVersionLabel => 'Створено у версії';
+
+  @override
+  String get vaultInfoLastOpenedWithVersionLabel =>
+      'Востаннє відкрито у версії';
+
+  @override
+  String get vaultInfoYesValue => 'Так';
+
+  @override
+  String get vaultInfoNoValue => 'Ні';
+
+  @override
+  String get vaultInfoBitlockerNote =>
+      'Ця програма не зчитує метадані заголовка BitLocker, тому деталі шифрування та версії тут недоступні.';
+
+  @override
+  String get patternSetupRequiredAboveBeforeSaving =>
+      'Налаштуйте графічний ключ вище перед збереженням.';
+
+  @override
+  String get passwordOrCacheDerivedKeyRequiredMessage =>
+      'Для цього методу потрібен пароль або кешований ключ із ключовими файлами.';
+
+  @override
+  String get saveConfigurationButton => 'Зберегти конфігурацію';
+
+  @override
+  String get incorrectPatternError => 'Неправильний графічний ключ';
+
+  @override
+  String get verifyPatternTitle => 'Перевірка графічного ключа';
+
+  @override
+  String get incorrectPasswordError => 'Неправильний пароль';
+
+  @override
+  String get verificationFailedError => 'Помилка перевірки';
+
+  @override
+  String get incorrectCredentialsError => 'Неправильні облікові дані';
+
+  @override
+  String get containerPasswordOptionalLabel =>
+      'Пароль контейнера (необов\'язково при наявності keyfile)';
+
+  @override
+  String get pimOptionalLabel => 'PIM (необов\'язково)';
+
+  @override
+  String get usbDriveLockedLabel => 'USB-диск · Заблоковано';
+
+  @override
+  String get lockedContainerLabel => 'Заблокований контейнер';
+
+  @override
+  String get operationInProgressWaitMessage =>
+      'Операція триває. Будь ласка, зачекайте перед блокуванням.';
+
+  @override
+  String get reconnectUsbTooltip => 'Перепідключити USB';
+
+  @override
+  String get unlockContainerTooltip => 'Розблокувати контейнер';
+
+  @override
+  String lockFailedMessage(String errorType) {
+    return 'Помилка блокування: $errorType';
+  }
+
+  @override
+  String get newPasswordOrKeyfilesRequired =>
+      'Потрібен новий пароль або ключ. файли.';
+
+  @override
+  String get newPasswordsDoNotMatch => 'Нові паролі не збігаються.';
+
+  @override
+  String get passwordChangedSuccessfullyMessage => 'Пароль успішно змінено.';
+
+  @override
+  String get failedToChangePasswordMessage =>
+      'Не вдалося змінити пароль. Перевірте старі дані.';
+
+  @override
+  String get currentCredentialsSectionHeader => 'Поточні облікові дані';
+
+  @override
+  String get oldPasswordLabel => 'Старий пароль';
+
+  @override
+  String get oldPimOptionalLabel => 'Старий PIM (необов\'язково)';
+
+  @override
+  String get newCredentialsSectionHeader => 'Нові облікові дані';
+
+  @override
+  String get newPimOptionalLabel => 'Новий PIM (необов\'язково)';
+
+  @override
+  String get noContainersYetTitle => 'Сховищ ще немає';
+
+  @override
+  String get dashboardEmptyStateMessage =>
+      'Змонтуйте контейнер VeraCrypt, підключіть USB-диск або створіть нове зашифроване сховище.';
+
+  @override
+  String get sortFieldName => 'Назва';
+
+  @override
+  String get sortFieldSize => 'Розмір';
+
+  @override
+  String get sortFieldType => 'Тип';
+
+  @override
+  String get sortFieldDate => 'Дата';
+
+  @override
+  String get layoutModeDetailedList => 'Детальний список';
+
+  @override
+  String get layoutModeCompactList => 'Компактний список';
+
+  @override
+  String get layoutModeGalleryGrid => 'Галерея (сітка)';
+
+  @override
+  String get readOnlyCantDeleteTooltip => 'Лише читання — видалення неможливе';
+
+  @override
+  String get readOnlyCantMoveTooltip => 'Лише читання — переміщення неможливе';
+
+  @override
+  String get readOnlyCantRenameTooltip =>
+      'Лише читання — перейменування неможливе';
+
+  @override
+  String sizeCalculatingWithBytesLabel(String bytes) {
+    return '$bytes (обчислення…)';
+  }
+
+  @override
+  String get sizeCalculatingLabel => 'обчислення…';
+
+  @override
+  String get editSecureItemsToRenameMessage =>
+      'Редагуйте захищені записи для їх перейменування';
+
+  @override
+  String get vaultItemsCannotBeOpenedExternallyMessage =>
+      'Елементи сховища не можна відкривати у сторонніх програмах';
+
+  @override
+  String get itemsCannotBeSharedMessage =>
+      'Цими елементами не можна поділитися з іншими програмами';
+
+  @override
+  String get mountedReadOnlyTooltip => 'Змонтовано лише для читання';
+
+  @override
+  String get readOnlyBadgeAbbreviation => 'RO';
+
+  @override
+  String freeSpaceLabel(String bytes) {
+    return 'вільно $bytes';
+  }
+
+  @override
+  String get filteredLabel => 'відфільтровано';
+
+  @override
+  String get statsStorageSectionHeader => 'ПАМ\'ЯТЬ';
+
+  @override
+  String statsFolderCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count папок',
+      many: '$count папок',
+      few: '$count папки',
+      one: '1 папка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsFileCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count файлів',
+      many: '$count файлів',
+      few: '$count файли',
+      one: '1 файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filterAllFilesOption => 'Усі файли';
+
+  @override
+  String get filterImagesOption => 'Зображення';
+
+  @override
+  String get filterVideosOption => 'Відео';
+
+  @override
+  String get filterAudioOption => 'Аудіо';
+
+  @override
+  String get filterDocumentsOption => 'Документи';
+
+  @override
+  String get folderExposedAsStorageExplanation =>
+      'Ця папка відкрита як окреме сховище, тому інші програми можуть відкривати її файли напряму.';
+
+  @override
+  String conflictItemsAlreadyExistTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів уже існують',
+      many: '$count елементів уже існують',
+      few: '$count елементи вже існують',
+      one: '1 елемент уже існує',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get conflictResolutionSubtitle =>
+      'Виберіть дію для кожного елемента або застосуйте одну дію до всіх.';
+
+  @override
+  String get skipAllChipLabel => 'Пропустити всі';
+
+  @override
+  String get overwriteAllChipLabel => 'Перезаписати всі';
+
+  @override
+  String get overwriteItemDropdownLabel => 'Перезаписати';
+
+  @override
+  String get overwriteFolderDropdownLabel => 'Перезаписати папку';
+
+  @override
+  String get fileOpsTransfersInProgressTitle => 'Операції передачі';
+
+  @override
+  String get fileOpsRecentTransfersTitle => 'Останні передачі';
+
+  @override
+  String get fileOpsNoRecentTransfersMessage => 'Немає недавніх передач';
+
+  @override
+  String get fileOpsNoRecentTransfersSubtitle =>
+      'Операції копіювання, переміщення та видалення відображатимуться тут під час виконання.';
+
+  @override
+  String fileOpsShowDetailsLabel(num count) {
+    return 'Показати деталі';
+  }
+
+  @override
+  String get fileOpsCancelTooltip => 'Скасувати';
+
+  @override
+  String get fileOpsDismissTooltip => 'Закрити';
+
+  @override
+  String get fileOpsRootDestinationLabel => 'Корінь';
+
+  @override
+  String get fileOpsCancelledStatusLabel => 'Скасовано';
+
+  @override
+  String fileOpsItemsFailedLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не вдалося обробити $count елементів:',
+      many: 'Не вдалося обробити $count елементів:',
+      few: 'Не вдалося обробити $count елементи:',
+      one: 'Не вдалося обробити 1 елемент:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpsMoreItemsLabel(num count) {
+    return '+ ще $count';
+  }
+
+  @override
+  String get transferActivityTooltip => 'Передавання файлів';
+
+  @override
+  String fileOpsSpeedLabel(String speed) {
+    return '$speed/с';
+  }
+
+  @override
+  String fileOpsEtaLabel(String time) {
+    return 'Залишилося ~$time';
+  }
+
+  @override
+  String archiveErrorReadingFile(String error) {
+    return 'Помилка читання файлу: $error';
+  }
+
+  @override
+  String get archivePreviewNotAvailableMessage =>
+      'Попередній перегляд недоступний для цього типу файлу.';
+
+  @override
+  String get avifFailedToRenderMessage => 'Не вдалося відтворити AVIF';
+
+  @override
+  String get encryptedImageLoadFailedMessage =>
+      'Не вдалося завантажити зашифроване зображення';
+
+  @override
+  String encryptedImageLoadFailedWithReasonMessage(String error) {
+    return 'Не вдалося завантажити зображення: $error';
+  }
+
+  @override
+  String get imagePreviewTooLargeMessage =>
+      'Це зображення завелике для попереднього перегляду';
+
+  @override
+  String get imagePreviewOutOfMemoryMessage =>
+      'Недостатньо вільної пам\'яті для попереднього перегляду цього зображення. Закрийте інші програми та спробуйте знову.';
+
+  @override
+  String get invalidOrCorruptedImageMessage =>
+      'Недійсний або пошкоджений формат зображення.';
+
+  @override
+  String mediaViewerPlaylistPositionLabel(num current, num total) {
+    return '$current з $total';
+  }
+
+  @override
+  String mediaViewerPlaylistPositionScanningLabel(num current, num total) {
+    return '$current з $total · сканування…';
+  }
+
+  @override
+  String get mediaViewerScanningLabel => 'Сканування…';
+
+  @override
+  String get mediaFileDeletedMessage => 'Файл успішно видалено';
+
+  @override
+  String get mediaFileDeleteFailedMessage => 'Не вдалося видалити файл';
+
+  @override
+  String get mediaFileRenamedMessage => 'Файл успішно перейменовано';
+
+  @override
+  String get aboutScreenTitle => 'Про програму';
+
+  @override
+  String get couldNotOpenLinkMessage => 'Не вдалося відкрити посилання';
+
+  @override
+  String get fileManagerSettingsTitle => 'Налаштування файлового менеджера';
+
+  @override
+  String get showMediaThumbnailsLabel => 'Показувати мініатюри медіа';
+
+  @override
+  String get showMediaThumbnailsDesc =>
+      'Відображати попередній перегляд зображень та відео у списку';
+
+  @override
+  String get showFileNamesLabel => 'Показувати назви файлів';
+
+  @override
+  String get showFileNamesDesc =>
+      'Відображати текстові підписи під елементами в сітці';
+
+  @override
+  String get showBreadcrumbBarLabel => 'Показувати рядок шляху';
+
+  @override
+  String get showBreadcrumbBarDesc => 'Панель навігації по папках угорі';
+
+  @override
+  String get showStatsBarLabel => 'Показувати рядок статистики';
+
+  @override
+  String get showStatsBarDesc =>
+      'Інформація про кількість файлів та вільне місце';
+
+  @override
+  String get autoStartPlaylistModeLabel => 'Автозапуск режиму списку';
+
+  @override
+  String get autoStartPlaylistModeDesc =>
+      'Автоматично відкривати список під час перегляду медіа';
+
+  @override
+  String get showPlaylistCarouselLabel => 'Показувати карусель списку';
+
+  @override
+  String get showPlaylistCarouselDesc =>
+      'Кнопка каруселі мініатюр під час перегляду списку медіа';
+
+  @override
+  String get videoPlaybackSliderLabel => 'Повзунок позиції відео';
+
+  @override
+  String get longPressPlaybackDiagnosticsHint =>
+      'Затисніть для діагностики відтворення';
+
+  @override
+  String get staticImageModeLabel => 'Режим статичного зображення';
+
+  @override
+  String slideshowModeActiveLabel(int seconds) {
+    return 'Активне слайд-шоу із затримкою $seconds с';
+  }
+
+  @override
+  String videoPlaybackModeLabel(String mode) {
+    return 'Режим відтворення відео: $mode';
+  }
+
+  @override
+  String get pauseLabel => 'Пауза';
+
+  @override
+  String get playLabel => 'Відтворити';
+
+  @override
+  String get emptyFolderTitle => 'Порожня папка';
+
+  @override
+  String get emptyFolderMessage =>
+      'Використовуйте дію \"Додати\" для створення файлів або імпорту з пристрою.';
+
+  @override
+  String get noResultsTitle => 'Нічого не знайдено';
+
+  @override
+  String noResultsForQueryMessage(String query) {
+    return 'У цій папці немає збігів за запитом \"$query\".';
+  }
+
+  @override
+  String get closeCarouselTooltip => 'Закрити карусель';
+
+  @override
+  String get playlistScrollModeMenu => 'Режим прокручування списку';
+
+  @override
+  String get playlistScrollHorizontalLabel => 'Горизонтальний';
+
+  @override
+  String get playlistScrollVerticalPageLabel => 'Вертикальний (посторінково)';
+
+  @override
+  String get playlistScrollVerticalContinuousLabel =>
+      'Вертикальний (безперервно)';
+
+  @override
+  String get undoTooltip => 'Скасувати';
+
+  @override
+  String get redoTooltip => 'Повторити';
+
+  @override
+  String get autosavingLabel => 'Автозбереження…';
+
+  @override
+  String get savingLabel => 'Збереження…';
+
+  @override
+  String autosavedAtLabel(String time) {
+    return 'Автозбережено о $time';
+  }
+
+  @override
+  String cameraDisconnectedError(String message) {
+    return 'Камеру відключено: $message';
+  }
+
+  @override
+  String get unknownErrorFallback => 'невідома помилка';
+
+  @override
+  String get cameraPermissionsRequiredMessage =>
+      'Для використання камери потрібні дозволи на камеру та мікрофон.';
+
+  @override
+  String cameraErrorMessage(String error) {
+    return 'Помилка камери: $error';
+  }
+
+  @override
+  String get cameraPhotoCaptureFailedMessage => 'Не вдалося зробити фото';
+
+  @override
+  String get cameraRecordingFailedMessage => 'Помилка запису відео';
+
+  @override
+  String cameraRecordingFailedWithReasonMessage(String error) {
+    return 'Помилка запису: $error';
+  }
+
+  @override
+  String get cameraRecordingTooShortMessage =>
+      'Запис занадто короткий для збереження';
+
+  @override
+  String get cameraCouldNotSaveRecordingMessage => 'Не вдалося зберегти запис';
+
+  @override
+  String get cameraCouldNotSaveCaptureMessage =>
+      'Не вдалося зберегти знімок. Він залишився доступним для повторної спроби.';
+
+  @override
+  String get cameraNotEnoughVaultSpaceMessage =>
+      'У сховищі недостатньо вільного місця. Звільніть місце й повторіть спробу.';
+
+  @override
+  String cameraCouldNotSaveRecordingWithReasonMessage(String error) {
+    return 'Не вдалося зберегти запис: $error';
+  }
+
+  @override
+  String get cameraCouldNotSwitchLensMessage =>
+      'Не вдалося перемкнути об\'єктив';
+
+  @override
+  String get cameraEncryptingPhotoLabel => 'Шифрування фото…';
+
+  @override
+  String get cameraEncryptingVideoLabel => 'Шифрування відео…';
+
+  @override
+  String get aboutApplicationSectionHeader => 'Програма';
+
+  @override
+  String get aboutTagline =>
+      'Вільне · Відкрите · Автономне зашифроване сховище';
+
+  @override
+  String get aboutVersionTitle => 'Версія';
+
+  @override
+  String aboutVersionSubtitle(String version) {
+    return 'v$version · Торкніться, щоб скопіювати версію для звіту';
+  }
+
+  @override
+  String get aboutWhatsNewTitle => 'Що нового';
+
+  @override
+  String get aboutWhatsNewSubtitle => 'Останні зміни та примітки до випуску';
+
+  @override
+  String get aboutPrivacySecurityTitle => 'Конфіденційність і безпека';
+
+  @override
+  String get aboutPrivacySecuritySubtitle =>
+      'Без доступу до мережі, дешифрування відбувається в пам\'яті';
+
+  @override
+  String get aboutSupportedFormatsSectionHeader => 'Підтримувані формати';
+
+  @override
+  String get aboutVeraCryptLuksTitle => 'VeraCrypt та LUKS1/2';
+
+  @override
+  String get aboutVeraCryptLuksSubtitle =>
+      'Стандартні та приховані томи, власний PIM, keyfiles, xts-plain64, Argon2id/i';
+
+  @override
+  String get aboutBitLockerTitle => 'BitLocker та BitLocker To Go';
+
+  @override
+  String get aboutBitLockerSubtitle =>
+      'Паролі користувача та 48-значні цифрові ключі відновлення';
+
+  @override
+  String get aboutDirectoryVaultsTitle => 'Сховища папок';
+
+  @override
+  String get aboutDirectoryVaultsSubtitle =>
+      'Cryptomator (v7/v8 SIV_GCM & SIV_CTRMAC), gocryptfs (v2 AES-GCM & XChaCha20), CryFS (v0.10+ XChaCha20 & AES)';
+
+  @override
+  String get aboutVhdTitle => 'Віртуальні диски (VHD / VHDX)';
+
+  @override
+  String get aboutVhdSubtitle =>
+      'Трансляція BAT для фіксованих та динамічних образів дисків';
+
+  @override
+  String get aboutNativeCoreEngineSectionHeader => 'Вбудований рушій (C++)';
+
+  @override
+  String get aboutCompiledLibrariesTitle => 'Скомпільовані бібліотеки C++';
+
+  @override
+  String get aboutCompiledLibrariesBody =>
+      '• mbedTLS v3.6.7 (Апаратне шифрування ARMv8 та SHA-2)\n• libavif & libgav1 (Нативний декодер AVIF)\n• libarchive v3.8.9 (Рушій архівів ZIP, 7-Zip, RAR та TAR)\n• ChaN FatFs v4.0.4 (FAT12/16/32 та exFAT)\n• Tuxera NTFS-3G & вбудований mkntfs\n• e2fsprogs v1.47.4 libext2fs (ext2/ext3/ext4)\n• Dislocker Virtual I/O (BitLocker FVE / To Go)\n• VeraCrypt 1.26.29 (Twofish, Serpent, Camellia, Kuznyechik, Whirlpool, Streebog, BLAKE2s, Argon2id/i)\n• cJSON v1.7.18 (метадані LUKS2 та Cryptomator)';
+
+  @override
+  String get aboutCommunitySectionHeader => 'Спільнота та відкритий код';
+
+  @override
+  String get aboutReportIssueTitle => 'Повідомити про помилку';
+
+  @override
+  String get aboutReportIssueSubtitle =>
+      'Знайшли баг? Створіть issue на GitHub';
+
+  @override
+  String get reportIssueSheetTitle => 'Повідомити про проблему';
+
+  @override
+  String get reportIssueSheetSubtitle =>
+      'Виберіть категорію вашої проблеми — це відкриє попередньо заповнену форму на GitHub';
+
+  @override
+  String get reportIssueBugTitle => 'Повідомлення про помилку';
+
+  @override
+  String get reportIssueBugSubtitle =>
+      'Щось аварійно завершилося або працює некоректно';
+
+  @override
+  String get reportIssueContainerTitle => 'Проблема зі сховищем / контейнером';
+
+  @override
+  String get reportIssueContainerSubtitle =>
+      'Помилка розблокування, монтування або специфіка формату';
+
+  @override
+  String get reportIssueFeatureTitle => 'Пропозиція функції';
+
+  @override
+  String get reportIssueFeatureSubtitle => 'Запропонувати ідею чи покращення';
+
+  @override
+  String get reportIssueOtherTitle => 'Інше';
+
+  @override
+  String get reportIssueOtherSubtitle => 'Переглянути всі шаблони на GitHub';
+
+  @override
+  String get aboutContributorsTitle => 'Співавтори';
+
+  @override
+  String get aboutContributorsSubtitle =>
+      'Люди, які допомагали у створенні VaultExplorer';
+
+  @override
+  String get aboutLicensesTitle => 'Ліцензії відкритого коду';
+
+  @override
+  String get aboutLicensesSubtitle =>
+      'Сторонні бібліотеки, використані у програмі';
+
+  @override
+  String get aboutFooterMadeWithLove => 'Створено з ❤ для приватності.';
+
+  @override
+  String get aboutVersionCopiedMessage => 'Інформацію про версію скопійовано';
+
+  @override
+  String aboutVersionClipboardText(String version) {
+    return 'VaultExplorer v$version (Android)';
+  }
+
+  @override
+  String aboutShareText(String url) {
+    return 'VaultExplorer — безкоштовне, відкрите та автономне зашифроване сховище для Android.\n\nЗберігайте паролі, нотатки та файли всередині зашифрованих контейнерів (VeraCrypt, LUKS, BitLocker, Cryptomator, Gocryptfs, CryFS).\n\n$url';
+  }
+
+  @override
+  String get aboutShareLinkCopiedMessage =>
+      'Посилання для поширення скопійовано в буфер';
+
+  @override
+  String get aboutPrivacySheetTitle => 'Конфіденційність і безпека даних';
+
+  @override
+  String get aboutPrivacySheetSubtitle =>
+      '100% офлайн, безпечна архітектура без доступу до мережі';
+
+  @override
+  String get privacyPointNoNetworkTitle => 'Доступ до інтернету не потрібен';
+
+  @override
+  String get privacyPointNoNetworkBody =>
+      'VaultExplorer взагалі не запитує дозвіл android.permission.INTERNET на Android і фізично не може надсилати чи отримувати дані мережею.';
+
+  @override
+  String get privacyPointNoDiskLeaksTitle => 'Дешифрування в пам\'яті';
+
+  @override
+  String get privacyPointNoDiskLeaksBody =>
+      'Дешифрування та повторне шифрування відбуваються в оперативній пам\'яті. Кілька операцій, яким потрібен тимчасовий файл, наприклад запис відео чи експорт, зберігають його у приватному сховищі програми та перезаписують нулями після завершення.';
+
+  @override
+  String get privacyPointNoAnalyticsTitle => 'Без аналітики та телеметрії';
+
+  @override
+  String get privacyPointNoAnalyticsBody =>
+      'У програмі повністю відсутні збір помилок, трекери активності чи сторонні SDK, що збирають інформацію про вас чи ваш пристрій.';
+
+  @override
+  String get privacyPointKeystoreTitle => 'Секрети захищені в Android Keystore';
+
+  @override
+  String get privacyPointKeystoreBody =>
+      'Збережені паролі, графічні ключі та кешовані похідні ключі шифруються за допомогою AES-GCM із ключем, що зберігається в Android Keystore (апаратно захищеному, де це підтримується).';
+
+  @override
+  String get privacyPointPosixTitle => 'Прискорення POSIX та прямий доступ';
+
+  @override
+  String get privacyPointPosixBody =>
+      'Файли всередині контейнерів обробляються локально. При наявності прямого доступу операції відбуваються в обхід повільного SAF, прискорюючи введення/виведення до 1000 разів.';
+
+  @override
+  String get privacyPointScreenClipboardTitle =>
+      'Захист екрана та буфера обміну';
+
+  @override
+  String get privacyPointScreenClipboardBody =>
+      'Блокування мініатюр у списку нещодавніх програм, необов\'язкове блокування знімків екрана (FLAG_SECURE), а також автоматичне очищення пошкодженого буфера обміну під час фокусування вікна. Паролі, скопійовані з елементів сховища, позначаються як конфіденційні в Android 13+ і автоматично очищаються через 30 секунд, якщо ними не скористалися.';
+
+  @override
+  String get privacyPointMaskModeTitle => 'Режим маскування';
+
+  @override
+  String get privacyPointMaskModeBody =>
+      'За бажанням маскує програму під повноцінний локальний файловий менеджер із іншою назвою та значком. Затисніть заголовок на 2 секунди, щоб відкрити справжнє сховище.';
+
+  @override
+  String get privacyPointExternalLinksTitle =>
+      'Зовнішні посилання відкриваються у браузері';
+
+  @override
+  String get privacyPointExternalLinksBody =>
+      'Натискання на зовнішні посилання відкриває ваш стандартний системний браузер.';
+
+  @override
+  String get truncatedListingWarning =>
+      'Показано перші 50 000 елементів — у цій папці більше файлів.';
+
+  @override
+  String get gridCornerStyleLabel => 'Кути мініатюр';
+
+  @override
+  String get gridCornerRoundedLabel => 'Заокруглені';
+
+  @override
+  String get gridCornerSquareLabel => 'Прямі';
+
+  @override
+  String get gridSpacingLabel => 'Відстань між мініатюрами';
+
+  @override
+  String get gridSpacingNone => 'Немає';
+
+  @override
+  String gridSpacingValue(int value) {
+    return '$value dp';
+  }
+
+  @override
+  String get thumbnailAutoSizeLabel => 'Підлаштовувати під розмір клітинки';
+
+  @override
+  String get thumbnailAutoSizeDescription =>
+      'Мініатюри для сітки та мозаїки створюються за екранним розміром кожної клітинки, тому менша кількість стовпців забезпечує чіткіші мініатюри. Розмір, указаний нижче, використовується скрізь в інших місцях.';
+
+  @override
+  String thumbnailQualityAutoSummary(int quality) {
+    return 'Авторозмір · якість $quality%';
+  }
+
+  @override
+  String thumbnailQualitySummary(int size, int quality) {
+    return '$size пкс · $quality% якості';
+  }
+
+  @override
+  String holdToSpeedIndicatorLabel(String speed) {
+    return '$speed× швидкість';
+  }
+
+  @override
+  String get toolbarLayoutSectionHeader => 'Панель інструментів';
+
+  @override
+  String get listViewOptionsSectionHeader => 'Параметри списку';
+
+  @override
+  String get detailedListViewColumnsSectionHeader =>
+      'Стовпці детального списку';
+
+  @override
+  String get galleryGridViewSectionHeader => 'Сітка галереї';
+
+  @override
+  String get browserLayoutSectionHeader => 'Макет файлового браузера';
+
+  @override
+  String get mediaViewerSectionHeader => 'Переглядач медіа';
+
+  @override
+  String get viewModeAction => 'Вигляд';
+
+  @override
+  String get sortAction => 'Сортування';
+
+  @override
+  String get playMediaAction => 'Відтворити';
+
+  @override
+  String containerSpaceSummary(String free, String total) {
+    return '$free вільно / $total';
+  }
+
+  @override
+  String volMountedSummary(int volId) {
+    return 'Том $volId · Змонтовано';
+  }
+
+  @override
+  String vaultOccupiedSpaceSummary(String used) {
+    return 'Використано $used';
+  }
+
+  @override
+  String get incorrectPasswordOrKeyfilesDriveError =>
+      'Неправильний пароль / ключ. файл або непідтримуваний диск';
+
+  @override
+  String driveUsableCapacity(int mb) {
+    return 'Корисна місткість диска: $mb МБ. Розмір не повинен перевищувати це значення.';
+  }
+
+  @override
+  String get unlockMethodManualPassword => 'Пароль вручну';
+
+  @override
+  String get unlockMethodRememberPassword => 'Збережений пароль';
+
+  @override
+  String get unlockMethodBiometrics => 'Біометричне розблокування';
+
+  @override
+  String get unlockMethodPattern => 'Графічний ключ';
+
+  @override
+  String get unlockMethodPin => 'Розблокування PIN-кодом';
+
+  @override
+  String get unlockMethodSubtitlePassword => 'Вводити пароль щоразу';
+
+  @override
+  String get unlockMethodSubtitleRememberPassword =>
+      'Надійно збережено в Android Keystore';
+
+  @override
+  String get unlockMethodSubtitleBiometrics =>
+      'Використовувати відбиток пальця або обличчя';
+
+  @override
+  String get unlockMethodSubtitlePattern => 'Намалювати графічний ключ';
+
+  @override
+  String get unlockMethodSubtitlePin => 'Введіть PIN-код для розблокування';
+
+  @override
+  String selectionSummaryCombined(String filePart, String folderPart) {
+    return '$filePart + $folderPart';
+  }
+
+  @override
+  String get videoDecoderUnavailableError =>
+      'Відеодекодер недоступний — конфлікт апаратних кодеків';
+
+  @override
+  String get mediaStreamInitFailedError => 'Помилка ініціалізації медіапотоку';
+
+  @override
+  String get invalidAvifImage => 'Недійсне або пошкоджене зображення AVIF';
+
+  @override
+  String get verbImport => 'Імпортувати';
+
+  @override
+  String get verbExport => 'Експортувати';
+
+  @override
+  String get verbMove => 'Перемістити';
+
+  @override
+  String get verbCopy => 'Копіювати';
+
+  @override
+  String get verbDelete => 'Видалити';
+
+  @override
+  String get verbImported => 'Імпортовано';
+
+  @override
+  String get verbExported => 'Експортовано';
+
+  @override
+  String get verbMoved => 'Переміщено';
+
+  @override
+  String get verbCopied => 'Скопійовано';
+
+  @override
+  String get verbDeleted => 'Видалено';
+
+  @override
+  String get verbImporting => 'Імпортування';
+
+  @override
+  String get verbExporting => 'Експортування';
+
+  @override
+  String get verbMoving => 'Переміщення';
+
+  @override
+  String get verbCopying => 'Копіювання';
+
+  @override
+  String get verbDeleting => 'Видалення';
+
+  @override
+  String fileOpItemsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів',
+      many: '$count елементів',
+      few: '$count елементи',
+      one: '1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpSummaryCount(num count, String verb) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів $verb',
+      many: '$count елементів $verb',
+      few: '$count елементи $verb',
+      one: '1 елемент $verb',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpSummarySkipped(num count) {
+    return 'пропущено: $count';
+  }
+
+  @override
+  String fileOpSummaryFailed(num count) {
+    return 'помилок: $count';
+  }
+
+  @override
+  String get statusCancelled => 'Скасовано';
+
+  @override
+  String get statusFailed => 'Помилка';
+
+  @override
+  String get statusCompleted => 'Завершено';
+
+  @override
+  String get fileOpCheckingSpace => 'Перевірка вільного місця…';
+
+  @override
+  String get fileOpResolvingConflicts => 'Вирішення конфліктів…';
+
+  @override
+  String fileOpNotEnoughSpace(String required, String free) {
+    return 'Недостатньо місця — потрібно $required, вільно лише $free';
+  }
+
+  @override
+  String get fileOpDiskFullPartialRemoved =>
+      'Диск заповнено — часткові файли видалено';
+
+  @override
+  String get fileOpMoveFailed => 'Помилка переміщення';
+
+  @override
+  String get fileOpCopyFailed => 'Помилка копіювання';
+
+  @override
+  String get fileOpDeleteFailed => 'Не вдалося видалити';
+
+  @override
+  String get fileOpDiskFull => 'Диск заповнено';
+
+  @override
+  String get fileOpImporting => 'Імпортування…';
+
+  @override
+  String get fileOpExporting => 'Експортування…';
+
+  @override
+  String fileOpImportingName(String name) {
+    return 'Імпортування $name…';
+  }
+
+  @override
+  String fileOpExportingName(String name) {
+    return 'Експортування $name…';
+  }
+
+  @override
+  String fileOpMovingName(String name) {
+    return 'Переміщення $name…';
+  }
+
+  @override
+  String fileOpCopyingName(String name) {
+    return 'Копіювання $name…';
+  }
+
+  @override
+  String get fileOpDeleting => 'Видалення…';
+
+  @override
+  String fileOpDeletingName(String name) {
+    return 'Видалення $name…';
+  }
+
+  @override
+  String fileOpDeletedSoFar(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Видалено $count елементів',
+      many: 'Видалено $count елементів',
+      few: 'Видалено $count елементи',
+      one: 'Видалено 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchInSubfoldersHint => 'Шукати в усіх підпапках…';
+
+  @override
+  String get deepSearchEnabledTooltip =>
+      'Пошук у підпапках — торкніться для пошуку лише в поточній папці';
+
+  @override
+  String get deepSearchDisabledTooltip =>
+      'Пошук у поточній папці — торкніться для пошуку у підпапках';
+
+  @override
+  String get filterAction => 'Фільтр';
+
+  @override
+  String get bookmarkAction => 'Додати до закладок';
+
+  @override
+  String get unbookmarkAction => 'Вилучити із закладок';
+
+  @override
+  String get bookmarkSelectedAction => 'Додати вибране до закладок';
+
+  @override
+  String get unbookmarkSelectedAction => 'Вилучити вибране із закладок';
+
+  @override
+  String bookmarkedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Додано до закладок $count елементів',
+      many: 'Додано до закладок $count елементів',
+      few: 'Додано до закладок $count елементи',
+      one: 'Додано до закладок 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unbookmarkedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Вилучено із закладок $count елементів',
+      many: 'Вилучено із закладок $count елементів',
+      few: 'Вилучено із закладок $count елементи',
+      one: 'Вилучено із закладок 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get showBookmarkBarLabel => 'Показувати панель закладок';
+
+  @override
+  String get showBookmarkBarDesc =>
+      'Відображати обрані папки на панелі закладок';
+
+  @override
+  String get bookmarkBarSectionHeader => 'Панель закладок та обране';
+
+  @override
+  String get noBookmarksYet => 'Обраних папок ще немає';
+
+  @override
+  String get reorderBookmarksTitle => 'Впорядкувати закладки';
+
+  @override
+  String get reorderBookmarksDesc =>
+      'Перетягуйте елементи для зміни їхнього порядку';
+
+  @override
+  String get drawerBookmarksSectionTitle => 'Закладки';
+
+  @override
+  String get openAction => 'Відкрити';
+
+  @override
+  String get bookmarkTargetMissing => 'Елемент із закладки більше не існує';
+
+  @override
+  String get navBarVaultsLabel => 'Сховища';
+
+  @override
+  String get navBarToolsLabel => 'Інструменти';
+
+  @override
+  String get toolsScreenTitle => 'Інструменти';
+
+  @override
+  String get toolsSectionContainerUtilities => 'Утиліти контейнерів';
+
+  @override
+  String get toolsSectionFileCryptography => 'Криптографія файлів';
+
+  @override
+  String get toolsSectionStorageDiagnostics => 'Пам\'ять та діагностика';
+
+  @override
+  String get toolContainerSplitterTitle => 'Розділення та об\'єднання';
+
+  @override
+  String get toolContainerSplitterSubtitle =>
+      'Розділити контейнер на частини або з\'єднати їх знову';
+
+  @override
+  String get toolContainerRepairTitle => 'Перевірка та відновлення';
+
+  @override
+  String get toolContainerRepairSubtitle =>
+      'Діагностика заголовка або файлової системи';
+
+  @override
+  String get toolSingleFileCryptoTitle => 'Шифрування файлів';
+
+  @override
+  String get toolSingleFileCryptoSubtitle =>
+      'Захист окремих файлів без створення повного сховища';
+
+  @override
+  String get toolStorageAnalyzerTitle => 'Аналізатор пам\'яті';
+
+  @override
+  String get toolStorageAnalyzerSubtitle =>
+      'Візуалізація зайнятого простору у відкритому сховищі';
+
+  @override
+  String get toolDuplicateFinderTitle => 'Пошук дублікатів файлів';
+
+  @override
+  String get toolDuplicateFinderSubtitle =>
+      'Пошук та видалення байт-у-байт однакових файлів для звільнення місця';
+
+  @override
+  String get toolHashVerifierTitle => 'Перевірка контрольних сум і хешів';
+
+  @override
+  String get toolHashVerifierSubtitle =>
+      'Перевірка цілісності великих файлів за допомогою контрольних сум MD5/SHA';
+
+  @override
+  String get hashVerifierModeCompute => 'Обчислення';
+
+  @override
+  String get hashVerifierModeVerify => 'Перевірка';
+
+  @override
+  String get hashVerifierSelectSourceTitle => 'Вибір джерела файлів';
+
+  @override
+  String get hashVerifierAlgorithmsLabel => 'Алгоритми';
+
+  @override
+  String get hashVerifierNoAlgorithmSelected =>
+      'Виберіть щонайменше один алгоритм';
+
+  @override
+  String get hashVerifierFilesLabel => 'Файли для хешування';
+
+  @override
+  String hashVerifierFilesQueuedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Вибрано $count файлів',
+      many: 'Вибрано $count файлів',
+      few: 'Вибрано $count файли',
+      one: 'Вибрано 1 файл',
+      zero: 'Файли не вибрано',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierComputeButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Обчислити $count хешів',
+      many: 'Обчислити $count хешів',
+      few: 'Обчислити $count хеші',
+      one: 'Обчислити хеш',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierCancelButton => 'Скасувати';
+
+  @override
+  String hashVerifierBatchProgressLabel(Object current, Object total) {
+    return 'Файл $current із $total';
+  }
+
+  @override
+  String get hashVerifierCancelledMessage => 'Скасовано.';
+
+  @override
+  String hashVerifierComputeErrorsMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не вдалося обчислити хеш для $count файлів',
+      many: 'Не вдалося обчислити хеш для $count файлів',
+      few: 'Не вдалося обчислити хеш для $count файлів',
+      one: 'Не вдалося обчислити хеш для 1 файлу',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierCopiedMessage => 'Скопійовано в буфер обміну';
+
+  @override
+  String get hashVerifierExportManifestButton => 'Експортувати як маніфест';
+
+  @override
+  String get hashVerifierExportAlgorithmLabel => 'Алгоритм маніфесту';
+
+  @override
+  String hashVerifierExportSuccessMessage(Object path) {
+    return 'Збережено до $path';
+  }
+
+  @override
+  String hashVerifierExportFailedMessage(Object error) {
+    return 'Помилка експорту: $error';
+  }
+
+  @override
+  String get hashVerifierLoadManifestButton => 'Завантажити маніфест';
+
+  @override
+  String get hashVerifierChangeManifestButton => 'Змінити';
+
+  @override
+  String get hashVerifierManifestLabel => 'Файл маніфесту';
+
+  @override
+  String hashVerifierManifestEntryCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count записів',
+      many: '$count записів',
+      few: '$count записи',
+      one: '1 запис',
+      zero: 'Немає записів',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierAutoAddFolderButton => 'Додати всі файли з цієї папки';
+
+  @override
+  String get hashVerifierAddFilesToVerifyButton => 'Додати файли для перевірки';
+
+  @override
+  String get hashVerifierVerifyAllButton => 'Перевірити все';
+
+  @override
+  String hashVerifierVerifyProgressLabel(Object current, Object total) {
+    return 'Перевірка файлу $current із $total';
+  }
+
+  @override
+  String hashVerifierSummaryMessage(
+    Object ok,
+    Object mismatch,
+    Object missing,
+  ) {
+    return '$ok збігається, $mismatch не збігається, $missing відсутньо';
+  }
+
+  @override
+  String get hashVerifierStatusMatch => 'Збігається';
+
+  @override
+  String get hashVerifierStatusMismatch => 'Незбіг';
+
+  @override
+  String get hashVerifierStatusMissing => 'Файл не додано';
+
+  @override
+  String get hashVerifierStatusPending => 'Ще не перевірено';
+
+  @override
+  String get hashVerifierExpectedLabel => 'Очікуваний';
+
+  @override
+  String get hashVerifierActualLabel => 'Фактичний';
+
+  @override
+  String hashVerifierExtraFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count додаткових файлів, яких немає в маніфесті',
+      many: '$count додаткових файлів, яких немає в маніфесті',
+      few: '$count додаткові файли, яких немає в маніфесті',
+      one: '1 додатковий файл, якого немає в маніфесті',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierNoManifestLoadedMessage =>
+      'Завантажте файл маніфесту, щоб почати';
+
+  @override
+  String get hashVerifierManifestParseEmptyMessage =>
+      'У цьому файлі не знайдено записів контрольних сум';
+
+  @override
+  String hashVerifierLoadManifestFailedMessage(Object error) {
+    return 'Не вдалося прочитати маніфест: $error';
+  }
+
+  @override
+  String hashVerifierAutoAddedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Додано $count файлів із папки сховища',
+      many: 'Додано $count файлів із папки сховища',
+      few: 'Додано $count файли з папки сховища',
+      one: 'Додано 1 файл із папки сховища',
+      zero: 'Нових файлів не знайдено',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierModeVault => 'Сховище';
+
+  @override
+  String get hashVerifierVaultPickerLabel => 'Сховище';
+
+  @override
+  String get hashVerifierVaultNoVaultsMessage =>
+      'Наразі немає змонтованих сховищ';
+
+  @override
+  String get hashVerifierCheckEntireVaultButton => 'Перевірити все сховище';
+
+  @override
+  String get hashVerifierVaultScanningLabel => 'Сканування сховища…';
+
+  @override
+  String hashVerifierVaultFilesDiscoveredLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Виявлено $count файлів',
+      many: 'Виявлено $count файлів',
+      few: 'Виявлено $count файли',
+      one: 'Виявлено 1 файл',
+      zero: 'Файлів ще не виявлено',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierVaultConfirmTitle => 'Перевірити все сховище?';
+
+  @override
+  String hashVerifierVaultConfirmFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count файлів',
+      many: '$count файлів',
+      few: '$count файли',
+      one: '1 файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierVaultConfirmWarning =>
+      'Буде прочитано кожен файл у цьому сховищі.';
+
+  @override
+  String get hashVerifierVaultEmptyMessage =>
+      'У цьому сховищі немає файлів для перевірки';
+
+  @override
+  String get hashVerifierVaultStartButton => 'Почати перевірку';
+
+  @override
+  String hashVerifierVaultHashingProgressLabel(Object current, Object total) {
+    return 'Перевірка $current / $total';
+  }
+
+  @override
+  String get hashVerifierVaultCompleteTitle => 'Перевірку сховища завершено';
+
+  @override
+  String hashVerifierVaultCompleteFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Перевірено $count файлів',
+      many: 'Перевірено $count файлів',
+      few: 'Перевірено $count файли',
+      one: 'Перевірено 1 файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultCompleteBytesLabel(Object size) {
+    return 'Оброблено $size';
+  }
+
+  @override
+  String hashVerifierVaultCompleteSucceededLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count успішно',
+      many: '$count успішно',
+      few: '$count успішно',
+      one: '1 успішно',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultCompleteFailedLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count з помилками',
+      many: '$count з помилками',
+      few: '$count з помилками',
+      one: '1 з помилкою',
+      zero: '0 з помилкою',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultElapsedLabel(Object time) {
+    return 'Витрачено часу: $time';
+  }
+
+  @override
+  String get hashVerifierVaultCancelledMessage =>
+      'Перевірку сховища скасовано.';
+
+  @override
+  String hashVerifierVaultFailedMessage(Object error) {
+    return 'Помилка перевірки сховища: $error';
+  }
+
+  @override
+  String get hashVerifierVaultNewCheckButton => 'Нова перевірка';
+
+  @override
+  String get hashVerifierVaultActionComputeTitle =>
+      'Обчислити для всього сховища';
+
+  @override
+  String get hashVerifierVaultActionComputeSubtitle =>
+      'Обчислити хеш кожного файлу у сховищі';
+
+  @override
+  String get hashVerifierVaultActionVerifyTitle => 'Перевірити все сховище';
+
+  @override
+  String get hashVerifierVaultActionVerifySubtitle =>
+      'Перевірити всі файли сховища за завантаженим маніфестом';
+
+  @override
+  String get hashVerifierVaultChangeActionButton => 'Змінити';
+
+  @override
+  String get hashVerifierVaultVerifyButton => 'Перевірити все сховище';
+
+  @override
+  String get hashVerifierVaultVerifyRequiresVaultManifestMessage =>
+      'Для перевірки всього сховища потрібен маніфест, завантажений із середини сховища.';
+
+  @override
+  String get duplicateFinderTargetLabel => 'Цільове сховище';
+
+  @override
+  String get duplicateFinderTargetAllVaults => 'Усі відкриті сховища';
+
+  @override
+  String get duplicateFinderStartScan => 'Почати сканування';
+
+  @override
+  String get duplicateFinderCancelScan => 'Скасувати';
+
+  @override
+  String get duplicateFinderRescan => 'Повторити';
+
+  @override
+  String get duplicateFinderScanningStage1 =>
+      'Етап 1: Індексація та групування за розміром...';
+
+  @override
+  String get duplicateFinderScanningStage2 =>
+      'Етап 2: Перевірка заголовків файлів...';
+
+  @override
+  String get duplicateFinderScanningStage3 =>
+      'Етап 3: Повна перевірка хешів SHA-256...';
+
+  @override
+  String get duplicateFinderScanComplete => 'Сканування завершено';
+
+  @override
+  String get duplicateFinderNoDuplicatesTitle => 'Дублікатів не знайдено';
+
+  @override
+  String get duplicateFinderNoDuplicatesMessage =>
+      'Усі файли у вибраних сховищах мають унікальний вміст.';
+
+  @override
+  String get duplicateFinderSelectRedundant => 'Вибрати зайві копії';
+
+  @override
+  String get duplicateFinderSelectAll => 'Вибрати все';
+
+  @override
+  String get duplicateFinderDeselectAll => 'Зняти виділення';
+
+  @override
+  String get duplicateFinderOriginalLabel => 'Оригінал';
+
+  @override
+  String get duplicateFinderDuplicateLabel => 'Дублікат';
+
+  @override
+  String get duplicateFinderConfirmDeleteTitle => 'Видалити дублікати файлів?';
+
+  @override
+  String get duplicateFinderSearchHint =>
+      'Пошук дублікатів за назвою або шляхом...';
+
+  @override
+  String get toolNotImplementedYetMessage =>
+      'Цей інструмент буде підключено у наступному оновленні.';
+
+  @override
+  String get splitJoinModeSplit => 'Розділити';
+
+  @override
+  String get splitJoinModeJoin => 'Об\'єднати';
+
+  @override
+  String get splitSourceFileLabel => 'Вхідний файл';
+
+  @override
+  String get splitDestinationFolderLabel => 'Папка призначення';
+
+  @override
+  String get splitChunkSizeLabel => 'Розмір частини';
+
+  @override
+  String get splitChunkSizeCustomLabel => 'Власний розмір (МБ)';
+
+  @override
+  String get splitChunkSizeFourMb => '4 МБ';
+
+  @override
+  String get splitChunkSizeCloud8mb => '8 МБ';
+
+  @override
+  String get splitChunkSizeCloud32mb => '32 МБ';
+
+  @override
+  String get splitChunkSizeCloud => '100 МБ';
+
+  @override
+  String get splitChunkSizeFat32 => '2 ГБ';
+
+  @override
+  String get splitChunkSizeFourGb => '4 ГБ';
+
+  @override
+  String get splitChunkSizeCustom => 'Власний розмір';
+
+  @override
+  String get splitContainerButton => 'Розділити контейнер';
+
+  @override
+  String get joinFirstPartLabel => 'Перша частина (.001)';
+
+  @override
+  String get joinOutputFileNameLabel => 'Назва вихідного файлу';
+
+  @override
+  String get joinContainerButton => 'Об\'єднати файли';
+
+  @override
+  String get chooseFileButton => 'Вибрати файл';
+
+  @override
+  String get chooseFolderButton => 'Вибрати папку';
+
+  @override
+  String get noFileSelectedLabel => 'Файл не вибрано';
+
+  @override
+  String get noFolderSelectedLabel => 'Папку не вибрано';
+
+  @override
+  String splitJoinOperationProgress(String done, String total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get splitContainerSuccessMessage =>
+      'Контейнер успішно розділено на частини';
+
+  @override
+  String get joinContainerSuccessMessage => 'Файли успішно об\'єднано';
+
+  @override
+  String get cryptoDirectionEncrypt => 'Зашифрувати';
+
+  @override
+  String get cryptoDirectionDecrypt => 'Розшифрувати';
+
+  @override
+  String get singleFileCryptoInputFileLabel => 'Вхідні файли';
+
+  @override
+  String get singleFileCryptoCipherLabel => 'Шифр';
+
+  @override
+  String get singleFileCryptoDeleteOriginalLabel =>
+      'Видалити оригінальні файли після шифрування';
+
+  @override
+  String singleFileCryptoEncryptButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Зашифрувати $count файлів',
+      many: 'Зашифрувати $count файлів',
+      few: 'Зашифрувати $count файли',
+      one: 'Зашифрувати файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoDecryptButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Розшифрувати $count файлів',
+      many: 'Розшифрувати $count файлів',
+      few: 'Розшифрувати $count файли',
+      one: 'Розшифрувати файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoSuccessMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Готово — $count файлів оброблено',
+      many: 'Готово — $count файлів оброблено',
+      few: 'Готово — $count файли оброблено',
+      one: 'Готово',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoPartialFailureMessage(
+    Object succeeded,
+    Object total,
+    Object failed,
+  ) {
+    return 'Оброблено $succeeded з $total файлів — $failed з помилкою';
+  }
+
+  @override
+  String get singleFileCryptoAddFilesButton => 'Додати файли';
+
+  @override
+  String get singleFileCryptoClearFilesButton => 'Очистити';
+
+  @override
+  String singleFileCryptoFilesQueuedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Вибрано $count файлів',
+      many: 'Вибрано $count файлів',
+      few: 'Вибрано $count файли',
+      one: 'Вибрано 1 файл',
+      zero: 'Файли не вибрано',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoBatchProgressLabel(Object current, Object total) {
+    return 'Файл $current з $total';
+  }
+
+  @override
+  String get repairTargetStepTitle => 'Виберіть ціль';
+
+  @override
+  String get repairTargetUnmountedFileOption => 'Незмонтований файл контейнера';
+
+  @override
+  String get repairTargetUnmountedFileSubtitle =>
+      'Відновити заголовок з резервної копії для закритого контейнера';
+
+  @override
+  String get repairTargetMountedVolumeSubtitle =>
+      'Перевірити файлову систему відкритого сховища';
+
+  @override
+  String get repairNoMountedVolumes => 'Наразі немає відкритих сховищ';
+
+  @override
+  String get repairScanButton => 'Запустити діагностику';
+
+  @override
+  String get repairChangeTargetButton => 'Змінити ціль';
+
+  @override
+  String get repairDiagnosisHealthy => 'Проблем не виявлено';
+
+  @override
+  String get repairDiagnosisHeaderCorrupted => 'Заголовок пошкоджено';
+
+  @override
+  String get repairDiagnosisFilesystemDirty =>
+      'Файлова система містить помилки / некоректне закриття';
+
+  @override
+  String get repairRestoreBackupHeaderButton =>
+      'Відновити заголовок з резервної копії';
+
+  @override
+  String get repairRunFilesystemCheckButton =>
+      'Перевірити та виправити файлову систему';
+
+  @override
+  String get repairActionSucceededMessage => 'Відновлення успішно завершено';
+
+  @override
+  String get repairActionFailedMessage => 'Не вдалося виконати відновлення';
+
+  @override
+  String get storageAnalyzerTargetLabel => 'Том';
+
+  @override
+  String get storageAnalyzerNoTargetsTitle => 'Нічого аналізувати';
+
+  @override
+  String get storageAnalyzerNoTargetsMessage =>
+      'Спочатку відкрийте сховище, а потім поверніться сюди для перегляду аналітики.';
+
+  @override
+  String storageAnalyzerUsedOfTotal(String used, String total) {
+    return 'використано $used з $total';
+  }
+
+  @override
+  String get storageAnalyzerHeaviestFilesHeader => 'Найбільші файли';
+
+  @override
+  String get storageAnalyzerBreakdownHeader => 'За типами файлів';
+
+  @override
+  String get storageAnalyzerScanningMessage => 'Сканування тома…';
+
+  @override
+  String storageAnalyzerScanTruncatedNotice(String count) {
+    return 'Сканування зупинено після $count файлів — результати можуть бути неповними.';
+  }
+
+  @override
+  String get storageAnalyzerNoFilesFound => 'Файлів не знайдено';
+
+  @override
+  String get storageCategoryImages => 'Зображення';
+
+  @override
+  String get storageCategoryVideos => 'Відео';
+
+  @override
+  String get storageCategoryAudio => 'Аудіо';
+
+  @override
+  String get storageCategoryDocuments => 'Документи';
+
+  @override
+  String get storageCategoryArchives => 'Архіви';
+
+  @override
+  String get storageCategoryOther => 'Інше';
+
+  @override
+  String get keyfilePassphraseGeneratorTitle =>
+      'Генератор паролів і ключових файлів';
+
+  @override
+  String get keyfilePassphraseGeneratorSubtitle =>
+      'Генерація фраз Diceware, надійних паролів та високоентропійних файлів ключів';
+
+  @override
+  String get tabPassphrase => 'Ключова фраза';
+
+  @override
+  String get tabKeyfile => 'Ключовий файл';
+
+  @override
+  String get modeDiceware => 'Фраза Diceware';
+
+  @override
+  String get modeCustomPassword => 'Власний пароль';
+
+  @override
+  String get keyfileTypeBinary => 'Бінарний файл ключа (.key)';
+
+  @override
+  String get keyfileTypeImage => 'Шумовий графічний ключ (.png)';
+
+  @override
+  String get copyPassphraseSuccess =>
+      'Ключову фразу скопійовано в захищений буфер';
+
+  @override
+  String get copyFingerprintSuccess => 'Відбиток SHA-256 скопійовано в буфер';
+
+  @override
+  String get saveKeyfileToVault => 'Зберегти у змонтоване сховище';
+
+  @override
+  String get exportKeyfileToStorage => 'Експортувати в пам\'ять пристрою';
+
+  @override
+  String get keyfileNoOpenVaultsMessage =>
+      'Немає відкритих сховищ. Спочатку змонтуйте том.';
+
+  @override
+  String get keyfileSelectDestinationVaultTitle =>
+      'Виберіть сховище призначення';
+
+  @override
+  String keyfileVolumeIdLabel(Object volId) {
+    return 'ID тома: $volId';
+  }
+
+  @override
+  String keyfileExportSuccessMessage(Object path) {
+    return 'Ключовий файл експортовано до $path';
+  }
+
+  @override
+  String keyfileExportFailedMessage(Object error) {
+    return 'Помилка експорту: $error';
+  }
+
+  @override
+  String keyfileSavedToVaultMessage(Object vaultName, Object path) {
+    return 'Ключовий файл збережено в $vaultName: $path';
+  }
+
+  @override
+  String get keyfileWriteFailedMessage =>
+      'Не вдалося записати файл ключа у сховище';
+
+  @override
+  String keyfileSaveErrorMessage(Object error) {
+    return 'Помилка збереження у сховище: $error';
+  }
+
+  @override
+  String get passphraseGeneratedSecretLabel => 'Згенерований секрет';
+
+  @override
+  String get copyToClipboardTooltip => 'Скопіювати в буфер';
+
+  @override
+  String get generateNewTooltip => 'Згенерувати новий';
+
+  @override
+  String get passphraseStrengthWeak => 'Слабкий';
+
+  @override
+  String get passphraseStrengthGood => 'Добрий';
+
+  @override
+  String get passphraseStrengthStrong => 'Надійний';
+
+  @override
+  String get passphraseStrengthUnbreakable => 'Незламний';
+
+  @override
+  String get passphraseCrackTimeInstant => '< 1 секунди';
+
+  @override
+  String get passphraseCrackTimeShort => 'Кілька днів / місяців';
+
+  @override
+  String get passphraseCrackTimeCenturies => 'Кілька століть';
+
+  @override
+  String get passphraseCrackTimeMillionsOfYears => 'Мільйони років';
+
+  @override
+  String passphraseStrengthLabel(Object label) {
+    return 'Надійність: $label';
+  }
+
+  @override
+  String passphraseEntropyBitsLabel(Object bits) {
+    return '$bits біт ентропії';
+  }
+
+  @override
+  String passphraseCrackTimeLabel(Object crackTime) {
+    return 'Оціночний час підбору: $crackTime';
+  }
+
+  @override
+  String get dicewareOptionsTitle => 'Параметри EFF Diceware';
+
+  @override
+  String dicewareWordCountLabel(Object count) {
+    return 'Кількість слів: $count';
+  }
+
+  @override
+  String dicewareWordCountBitsLabel(Object bits) {
+    return '$bits біт';
+  }
+
+  @override
+  String dicewareWordCountSliderLabel(Object count) {
+    return '$count слів';
+  }
+
+  @override
+  String get dicewareWordSeparatorLabel => 'Розділювач слів';
+
+  @override
+  String get dicewareSeparatorHyphen => 'Дефіс ( - )';
+
+  @override
+  String get dicewareSeparatorSpace => 'Пробіл (   )';
+
+  @override
+  String get dicewareSeparatorUnderscore => 'Підкреслення ( _ )';
+
+  @override
+  String get dicewareSeparatorDot => 'Крапка ( . )';
+
+  @override
+  String get dicewareSeparatorSlash => 'Скісна риска ( / )';
+
+  @override
+  String get dicewareWordCasingLabel => 'Регістр слів';
+
+  @override
+  String get dicewareCasingLowercase => 'малі літери';
+
+  @override
+  String get dicewareCasingTitleCase => 'З Великої Літери';
+
+  @override
+  String get dicewareCasingUppercase => 'ВЕЛИКІ ЛІТЕРИ';
+
+  @override
+  String get dicewareAppendDigitLabel => 'Додати випадкову цифру (0-9)';
+
+  @override
+  String get dicewareAppendSymbolLabel => 'Додати спецсимвол (!@#\$%)';
+
+  @override
+  String get customPasswordOptionsTitle => 'Параметри пароля';
+
+  @override
+  String customPasswordLengthLabel(Object length) {
+    return 'Довжина: $length символів';
+  }
+
+  @override
+  String customPasswordLengthSliderLabel(Object length) {
+    return '$length симв.';
+  }
+
+  @override
+  String get customPasswordUppercaseLabel => 'Великі літери (A-Z)';
+
+  @override
+  String get customPasswordLowercaseLabel => 'Малі літери (a-z)';
+
+  @override
+  String get customPasswordNumbersLabel => 'Цифри (0-9)';
+
+  @override
+  String get customPasswordSymbolsLabel => 'Символи (!@#\$%^&*)';
+
+  @override
+  String get customPasswordExcludeAmbiguousLabel =>
+      'Виключити схожі символи (1, l, I, 0, O)';
+
+  @override
+  String get keyfileBinarySizeTitle => 'Розмір бінарного ключа';
+
+  @override
+  String get keyfileImageResolutionTitle => 'Роздільність графічного ключа';
+
+  @override
+  String get keyfilePresetBytes64 => '64 байти (стандарт VeraCrypt)';
+
+  @override
+  String get keyfilePresetBytes256 => '256 байтів';
+
+  @override
+  String get keyfilePresetBytes2048 => '2 КБ';
+
+  @override
+  String get keyfilePresetBytes64kb => '64 КБ';
+
+  @override
+  String get keyfilePresetBytes1mb => '1 МБ (максимальна межа)';
+
+  @override
+  String get keyfilePresetRes64 => '64 x 64 пікселів (~16 КБ)';
+
+  @override
+  String get keyfilePresetRes256 => '256 x 256 пікселів (~256 КБ)';
+
+  @override
+  String get keyfilePresetRes512 => '512 x 512 пікселів (~1 МБ)';
+
+  @override
+  String get keyfileGenerateNewTooltip => 'Згенерувати новий ключ';
+
+  @override
+  String keyfileSizeLabel(Object size) {
+    return 'Розмір: $size';
+  }
+
+  @override
+  String get keyfileFingerprintLabel => 'Відбиток SHA-256';
+
+  @override
+  String get keyfileCopyFingerprintTooltip => 'Скопіювати відбиток';
+
+  @override
+  String get duplicateFinderNoVaultsTitle => 'Немає відкритих сховищ';
+
+  @override
+  String get duplicateFinderNoVaultsMessage =>
+      'Відкрийте хоча б одне сховище для пошуку дублікатів файлів.';
+
+  @override
+  String duplicateFinderConfirmDeleteMessage(Object count, Object size) {
+    return 'Ви впевнені, що хочете безповоротно видалити $count дублікатів ($size) зі сховищ? Цю дію не можна буде скасувати.';
+  }
+
+  @override
+  String get duplicateFinderDeletePermanentlyButton => 'Видалити безповоротно';
+
+  @override
+  String duplicateFinderDeleteSuccessMessage(Object count) {
+    return 'Успішно видалено $count дублікатів файлів.';
+  }
+
+  @override
+  String get duplicateFinderIntroTitle => '3-етапний точний пошук дублікатів';
+
+  @override
+  String get duplicateFinderIntroSubtitle =>
+      'Знаходить повністю ідентичні файли незалежно від їхньої назви.';
+
+  @override
+  String get duplicateFinderStagesDescription =>
+      '• Етап 1: Групування за розміром (миттєвий аналіз метаданих)\n• Етап 2: Перевірка заголовків (16 КБ SHA-256)\n• Етап 3: Повна звірка хешів SHA-256 (100% збіг байтів)';
+
+  @override
+  String get duplicateFinderScanningVaultFallback => 'Сканування сховища...';
+
+  @override
+  String duplicateFinderProcessingFileLabel(Object fileName) {
+    return 'Обробка: $fileName';
+  }
+
+  @override
+  String duplicateFinderScanStatsLabel(
+    Object scanned,
+    Object groups,
+    Object saved,
+  ) {
+    return 'Перевірено файлів: $scanned | Знайдено груп дублікатів: $groups ($saved)';
+  }
+
+  @override
+  String duplicateFinderGroupsFoundLabel(Object count) {
+    return 'Знайдено груп дублікатів: $count';
+  }
+
+  @override
+  String duplicateFinderGroupsSummaryLabel(Object copies, Object saved) {
+    return 'Знайдено $copies копій • Можна звільнити $saved';
+  }
+
+  @override
+  String duplicateFinderVaultsSelectedLabel(Object count) {
+    return 'Вибрано сховищ: $count';
+  }
+
+  @override
+  String duplicateFinderGroupTitleLabel(
+    Object groupIndex,
+    Object size,
+    Object count,
+  ) {
+    return 'Група $groupIndex: $size (знайдено копій: $count)';
+  }
+
+  @override
+  String duplicateFinderRecoverableSpaceLabel(Object size) {
+    return 'Можна звільнити: $size';
+  }
+
+  @override
+  String get duplicateFinderPreviewFileTooltip => 'Переглянути файл';
+
+  @override
+  String duplicateFinderPreviewFailedMessage(Object fileName) {
+    return 'Не вдалося відкрити перегляд для $fileName';
+  }
+
+  @override
+  String duplicateFinderPreviewErrorMessage(Object error) {
+    return 'Помилка перегляду файлу: $error';
+  }
+
+  @override
+  String duplicateFinderFilesSelectedLabel(Object count) {
+    return 'Вибрано файлів: $count';
+  }
+
+  @override
+  String duplicateFinderBytesToBeFreedLabel(Object size) {
+    return 'Буде звільнено: $size';
+  }
+
+  @override
+  String duplicateFinderDeleteSelectedButton(Object count) {
+    return 'Видалити вибране ($count)';
+  }
+
+  @override
+  String get vaultBrowserSwitchVaultTooltip => 'Змінити сховище';
+
+  @override
+  String get vaultBrowserRootFolderLabel => 'Коренева папка';
+
+  @override
+  String vaultFilePickerTitle(Object vaultName) {
+    return 'Вибір файлів ($vaultName)';
+  }
+
+  @override
+  String get vaultFilePickerEmptyMessage => 'Папка порожня';
+
+  @override
+  String vaultFilePickerConfirmButton(Object count) {
+    return 'Вибрати файли ($count)';
+  }
+
+  @override
+  String vaultFolderPickerTitle(Object vaultName) {
+    return 'Вибір папки ($vaultName)';
+  }
+
+  @override
+  String get vaultFolderPickerEmptyMessage => 'Тут немає підпапок';
+
+  @override
+  String get vaultFolderPickerRootLabel => 'Корінь';
+
+  @override
+  String get vaultFolderPickerConfirmRootButton => 'Вибрати кореневу папку';
+
+  @override
+  String vaultFolderPickerConfirmNamedButton(Object folderName) {
+    return 'Вибрати \"$folderName\"';
+  }
+
+  @override
+  String get singleFileCryptoSelectInputTitle => 'Вибір вхідних файлів';
+
+  @override
+  String get singleFileCryptoFromDeviceTitle => 'З пам\'яті пристрою';
+
+  @override
+  String get singleFileCryptoFromDeviceSubtitle =>
+      'Вибрати файли за допомогою системного провідника';
+
+  @override
+  String get singleFileCryptoFromVaultTitle => 'З відкритого сховища';
+
+  @override
+  String get singleFileCryptoFromVaultSubtitle =>
+      'Вибрати файли з відкритого зашифрованого контейнера';
+
+  @override
+  String get singleFileCryptoSelectDestinationTitle =>
+      'Вибір папки призначення';
+
+  @override
+  String get singleFileCryptoDeviceFolderTitle => 'Папка в пам\'яті пристрою';
+
+  @override
+  String get singleFileCryptoDeviceFolderSubtitle =>
+      'Зберегти результат у пам\'ять пристрою';
+
+  @override
+  String get singleFileCryptoVaultFolderTitle => 'Папка у відкритому сховищі';
+
+  @override
+  String get singleFileCryptoVaultFolderSubtitle =>
+      'Зберегти результат всередині зашифрованого сховища';
+
+  @override
+  String get toolsSectionBackupSync => 'Резервне копіювання та синхронізація';
+
+  @override
+  String get toolVaultSyncTitle => 'Синхронізація сховищ';
+
+  @override
+  String get toolVaultSyncSubtitle =>
+      'Порівняння двох сховищ і копіювання відсутніх або новіших файлів';
+
+  @override
+  String get vaultSyncNoVaultsTitle => 'Немає змонтованих сховищ';
+
+  @override
+  String get vaultSyncNoVaultsMessage =>
+      'Змонтуйте щонайменше одне сховище, щоб порівнювати та синхронізувати його файли.';
+
+  @override
+  String get vaultSyncLeftLabel => 'Зліва';
+
+  @override
+  String get vaultSyncRightLabel => 'Справа';
+
+  @override
+  String get vaultSyncTapToSelect => 'Торкніться, щоб вибрати сховище та папку';
+
+  @override
+  String get vaultSyncSwapTooltip => 'Поміняти місцями Ліве і Праве';
+
+  @override
+  String get vaultSyncSameLocationWarning =>
+      'Ліва і права папки мають відрізнятися.';
+
+  @override
+  String get vaultSyncIntroTitle => 'Порівняння двох сховищ';
+
+  @override
+  String get vaultSyncIntroSubtitle =>
+      'Виберіть Ліве і Праве сховище (або дві папки в одному сховищі), щоб побачити відсутні, змінені чи новіші файли з кожного боку.';
+
+  @override
+  String get vaultSyncCompareButton => 'Порівняти';
+
+  @override
+  String get vaultSyncComparingLabel => 'Порівняння сховищ…';
+
+  @override
+  String vaultSyncCompareStatsLabel(Object dirs, Object entries) {
+    return 'Відскановано папок: $dirs | Знайдено відмінностей: $entries';
+  }
+
+  @override
+  String get vaultSyncCancelCompareButton => 'Скасувати';
+
+  @override
+  String get vaultSyncInSyncTitle => 'Уже синхронізовано';
+
+  @override
+  String vaultSyncInSyncMessage(Object count) {
+    return 'Усі $count відповідних файлів ідентичні з обох боків.';
+  }
+
+  @override
+  String get vaultSyncRecompareButton => 'Порівняти знову';
+
+  @override
+  String vaultSyncDifferencesFoundLabel(Object count) {
+    return 'Знайдено відмінностей: $count';
+  }
+
+  @override
+  String vaultSyncInSyncCountLabel(Object count) {
+    return '$count файлів уже збігаються з обох боків';
+  }
+
+  @override
+  String vaultSyncBadgeOnlyLeft(Object count) {
+    return '$count лише зліва';
+  }
+
+  @override
+  String vaultSyncBadgeOnlyRight(Object count) {
+    return '$count лише справа';
+  }
+
+  @override
+  String vaultSyncBadgeLeftNewer(Object count) {
+    return '$count новіших зліва';
+  }
+
+  @override
+  String vaultSyncBadgeRightNewer(Object count) {
+    return '$count новіших справа';
+  }
+
+  @override
+  String vaultSyncBadgeConflicts(Object count) {
+    return '$count потребують перегляду';
+  }
+
+  @override
+  String get vaultSyncDirectionLabel => 'Напрямок синхронізації';
+
+  @override
+  String get vaultSyncDirectionTwoWay => 'Двосторонній (рекомендовано)';
+
+  @override
+  String get vaultSyncDirectionTwoWaySubtitle =>
+      'Копіює кожен файл на ту сторону, де він відсутній або застарілий';
+
+  @override
+  String get vaultSyncDirectionLeftToRight => 'Зліва → Справа (в один бік)';
+
+  @override
+  String get vaultSyncDirectionLeftToRightSubtitle =>
+      'Передає нові й оновлені файли зліва направо; ніколи не змінює ліву сторону';
+
+  @override
+  String get vaultSyncDirectionRightToLeft => 'Справа → Зліва (в один бік)';
+
+  @override
+  String get vaultSyncDirectionRightToLeftSubtitle =>
+      'Передає нові й оновлені файли справа наліво; ніколи не змінює праву сторону';
+
+  @override
+  String get vaultSyncSearchHint => 'Пошук відмінностей';
+
+  @override
+  String get vaultSyncStatusOnlyLeft => 'Лише зліва';
+
+  @override
+  String get vaultSyncStatusOnlyRight => 'Лише справа';
+
+  @override
+  String get vaultSyncStatusLeftNewer => 'Новіший зліва';
+
+  @override
+  String get vaultSyncStatusRightNewer => 'Новіший справа';
+
+  @override
+  String get vaultSyncStatusConflict => 'Потребує перегляду';
+
+  @override
+  String get vaultSyncStatusTypeMismatch => 'Невідповідність типу';
+
+  @override
+  String get vaultSyncFolderOnlyLeftDetail => 'Папка — лише зліва';
+
+  @override
+  String get vaultSyncFolderOnlyRightDetail => 'Папка — лише справа';
+
+  @override
+  String vaultSyncBothSidesDetail(
+    Object leftSize,
+    Object leftDate,
+    Object rightSize,
+    Object rightDate,
+  ) {
+    return 'Л: $leftSize · $leftDate  →  П: $rightSize · $rightDate';
+  }
+
+  @override
+  String get vaultSyncTypeMismatchTooltip =>
+      'З одного боку файл, з іншого — папка. Вирішіть вручну у файловому менеджері';
+
+  @override
+  String get vaultSyncChangeActionTooltip => 'Змінити дію синхронізації';
+
+  @override
+  String get vaultSyncActionCopyToRight => 'Копіювати → Справа';
+
+  @override
+  String get vaultSyncActionCopyToLeft => 'Копіювати → Зліва';
+
+  @override
+  String get vaultSyncActionSkip => 'Пропустити';
+
+  @override
+  String vaultSyncChangesQueuedLabel(Object count) {
+    return 'У черзі змін: $count';
+  }
+
+  @override
+  String get vaultSyncSyncNowButton => 'Синхронізувати зараз';
+
+  @override
+  String get vaultSyncConfirmTitle => 'Почати синхронізацію?';
+
+  @override
+  String vaultSyncConfirmMessage(Object count, Object bytes) {
+    return 'Це скопіює $count елементів (загалом $bytes) між двома сторонами. Наявні однойменні файли буде перезаписано.';
+  }
+
+  @override
+  String vaultSyncStartedMessage(Object count) {
+    return 'Синхронізацію розпочато — $count елементів у черзі';
+  }
+
+  @override
+  String vaultSyncPickLocationTitle(Object side) {
+    return 'Виберіть сховище та папку ($side)';
+  }
+
+  @override
+  String get vaultSyncOverlapWarning =>
+      'Ліва та права папки не можуть бути однаковими або вкладеними одна в одну.';
+
+  @override
+  String vaultSyncPlaintextWarning(Object targets) {
+    return 'Файли, скопійовані зі сховища до $targets, зберігатимуться незашифрованими.';
+  }
+
+  @override
+  String get vaultSyncStorageSelectorLabel => 'Сховище';
+
+  @override
+  String get vaultSyncTargetKindVault => 'Зашифроване сховище';
+
+  @override
+  String get vaultSyncTargetKindDevice => 'Пам\'ять пристрою · незашифровано';
+
+  @override
+  String get vaultSyncTargetKindProvider =>
+      'Провайдер документів · незашифровано';
+
+  @override
+  String get vaultSyncAddStorageTooltip => 'Додати місце зберігання';
+
+  @override
+  String get vaultSyncEnableLocalStorageTooltip =>
+      'Увімкнути доступ до локального сховища';
+
+  @override
+  String get vaultSyncNoStoragesTitle => 'Немає сховищ для синхронізації';
+
+  @override
+  String get vaultSyncNoStoragesMessage =>
+      'Додайте папку чи провайдера документів за допомогою кнопки «+» або змонтуйте сховище.';
+
+  @override
+  String get vaultSyncReadOnlyBadge => 'Лише для читання';
+
+  @override
+  String get vaultSyncReadOnlyTooltip =>
+      'Це сховище змонтовано лише для читання — копіювати файли до нього неможливо';
+
+  @override
+  String get vaultSyncSyncingButton => 'Синхронізація…';
+
+  @override
+  String get vaultSyncNotEnoughSpaceTitle => 'Недостатньо місця';
+
+  @override
+  String vaultSyncNotEnoughSpaceMessage(
+    Object side,
+    Object required,
+    Object free,
+  ) {
+    return 'Недостатньо вільного місця на $side — потрібно $required, вільно лише $free.';
+  }
+
+  @override
+  String get removeMasterPasswordTitle => 'Видалити головний пароль';
+
+  @override
+  String get confirmRemoveMasterPasswordMessage =>
+      'Введіть поточний головний пароль для підтвердження видалення:';
+
+  @override
+  String get authenticateToRemoveMasterPassword =>
+      'Підтвердьте особу для видалення головного пароля';
+
+  @override
+  String get incorrectPassword => 'Неправильний пароль';
+
+  @override
+  String get rememberPerFolderLayoutLabel =>
+      'Пам\'ятати вигляд і сортування для кожної папки';
+
+  @override
+  String get rememberPerFolderLayoutDesc =>
+      'Зберігати вигляд (список, сітка, мозаїка) та порядок сортування для кожної папки окремо';
+
+  @override
+  String get defaultFolderLayoutLabel => 'Стандартний вигляд папки';
+
+  @override
+  String get fileInfoAction => 'Інформація';
+
+  @override
+  String get goToLocationAction => 'Перейти до розташування';
+
+  @override
+  String get copyPathAction => 'Копіювати шлях';
+
+  @override
+  String get automationSectionHeader => 'Автоматизація';
+
+  @override
+  String get automationTileTitle => 'Автоматизація';
+
+  @override
+  String get automationTileSubtitle =>
+      'Дозволити автоматизації розблоковувати, блокувати, імпортувати або експортувати файли цього сховища';
+
+  @override
+  String get automationScreenTitle => 'Автоматизація';
+
+  @override
+  String get automationUsbUnsupportedMessage =>
+      'Автоматизація наразі недоступна для сховищ на USB-накопичувачах.';
+
+  @override
+  String get automationThisVaultSectionHeader => 'Це сховище';
+
+  @override
+  String get automationAccessLabel => 'Доступ для автоматизації';
+
+  @override
+  String get automationPasswordSectionHeader => 'Пароль для автоматизації';
+
+  @override
+  String get automationPasswordStoredHint =>
+      'Пароль збережено для автоматичних викликів UNLOCK_VAULT. Збережіть новий для заміни або порожній для видалення — автоматизація також може передавати пароль безпосередньо у broadcast-інтентах.';
+
+  @override
+  String get automationPasswordNotStoredHint =>
+      'Необов\'язково. Без збереженого пароля автоматизація має передавати його з кожним broadcast-інтентом UNLOCK_VAULT.';
+
+  @override
+  String get automationNewPasswordFieldLabel => 'Новий пароль';
+
+  @override
+  String get automationPasswordFieldLabel => 'Пароль';
+
+  @override
+  String get automationClearPasswordButton => 'Очистити збережений пароль';
+
+  @override
+  String get automationSavePasswordButton => 'Зберегти пароль';
+
+  @override
+  String get automationTokenSectionHeader => 'Токен API';
+
+  @override
+  String get automationTokenDescription =>
+      'Спільний для всіх сховищ із увімкненою автоматизацією. Передається в кожному інтенті; неправильний або відсутній токен тихо ігнорується без виклику помилки.';
+
+  @override
+  String get automationRegenerateTokenButton => 'Згенерувати новий токен';
+
+  @override
+  String get automationRegenerateTokenDialogTitle => 'Згенерувати новий токен?';
+
+  @override
+  String get automationRegenerateTokenDialogMessage =>
+      'Будь-який профіль Tasker або макрос MacroDroid, який використовує поточний токен, перестане працювати, доки ви не оновите його на новий.';
+
+  @override
+  String get automationRegenerateConfirmLabel => 'Згенерувати';
+
+  @override
+  String get automationTokenRegeneratedMessage => 'Токен оновлено.';
+
+  @override
+  String get automationRegenerateTokenFailedMessage =>
+      'Не вдалося згенерувати новий токен.';
+
+  @override
+  String get automationUpdateSettingsFailedMessage =>
+      'Не вдалося оновити налаштування автоматизації.';
+
+  @override
+  String get automationSavePasswordFailedMessage =>
+      'Не вдалося зберегти пароль автоматизації.';
+
+  @override
+  String get automationPasswordClearedMessage =>
+      'Пароль автоматизації очищено.';
+
+  @override
+  String get automationPasswordSavedMessage =>
+      'Пароль автоматизації збережено.';
+
+  @override
+  String get automationConfigSectionHeader => 'Параметри конфігурації';
+
+  @override
+  String get automationConfigIntro =>
+      'Торкніться будь-якого значення нижче, щоб скопіювати. У Tasker використовуйте дію \"Send Intent\"; у MacroDroid — \"Intent\" з типом Broadcast (не Activity чи Service, інакше виникне помилка \"unable to find explicit activity class\").';
+
+  @override
+  String get automationConfigPackageLabel => 'Ім\'я пакета';
+
+  @override
+  String get automationConfigClassLabel => 'Клас ресивера';
+
+  @override
+  String get automationConfigVaultUriLabel => 'URI цього сховища';
+
+  @override
+  String get automationConfigActionsSectionHeader => 'Дії broadcast';
+
+  @override
+  String get automationActionUnlockLabel => 'Розблокувати сховище';
+
+  @override
+  String get automationActionLockLabel => 'Заблокувати сховище';
+
+  @override
+  String get automationActionImportLabel => 'Імпортувати файл';
+
+  @override
+  String get automationActionExportLabel => 'Експортувати файл';
+
+  @override
+  String get automationActionWipeLabel => 'Безповоротно стерти файл';
+
+  @override
+  String get automationActionEmergencyLockLabel =>
+      'Екстрене блокування (Рівень 1)';
+
+  @override
+  String get automationActionEmergencyPurgeLabel => 'Екстрене очищення';
+
+  @override
+  String get automationDocCommentFootnote =>
+      'Повний список параметрів extras та протокол відповідей задокументовано у VaultAutomationReceiver.kt.';
+
+  @override
+  String get automationTierOffLabel => 'Вимкнено';
+
+  @override
+  String get automationTierOffSubtitle =>
+      'Автоматизація не має доступу до цього сховища';
+
+  @override
+  String get automationTierLifecycleLabel => 'Лише розблокування / блокування';
+
+  @override
+  String get automationTierLifecycleSubtitle =>
+      'Автоматизація може лише розблоковувати та блокувати це сховище';
+
+  @override
+  String get automationTierFullLabel =>
+      'Розблокування / блокування + імпорт/експорт файлів + синхронізація';
+
+  @override
+  String get automationTierFullSubtitle =>
+      'Автоматизація також може синхронізувати налаштовані папки, імпортувати та експортувати файли, коли сховище відкрите';
+
+  @override
+  String get automationTutorialLinkLabel => 'Читати повну покрокову інструкцію';
+
+  @override
+  String get showHiddenFilesLabel => 'Показувати приховані файли';
+
+  @override
+  String get showHiddenFilesDesc =>
+      'Відображати файли з крапкою на початку та системні папки';
+
+  @override
+  String get dontAskAgain => 'Більше не запитувати';
+
+  @override
+  String get deleteAfterImportLabel => 'Видалення файлів після імпорту';
+
+  @override
+  String get deleteAfterImportModeAsk => 'Запитувати щоразу';
+
+  @override
+  String get deleteAfterImportModeAskSubtitle =>
+      'Запитувати, чи видаляти оригінальні файли після завершення імпорту';
+
+  @override
+  String get deleteAfterImportModeKeep => 'Залишати оригінали (не видаляти)';
+
+  @override
+  String get deleteAfterImportModeKeepSubtitle =>
+      'Ніколи не видаляти оригінальні файли та не запитувати';
+
+  @override
+  String get deleteAfterImportModeDelete => 'Видаляти оригінали автоматично';
+
+  @override
+  String get deleteAfterImportModeDeleteSubtitle =>
+      'Автоматично видаляти оригінали з пристрою після імпорту';
+
+  @override
+  String get deleteAfterImportVaultSettingLabel =>
+      'Видалення файлів після імпорту для цього сховища';
+
+  @override
+  String get deleteAfterImportInheritGlobal => 'Успадкувати глобальне значення';
+
+  @override
+  String deleteAfterImportInheritGlobalSubtitle(String mode) {
+    return 'Використовується глобальне значення: $mode';
+  }
+
+  @override
+  String get deleteAfterImportVaultAsk => 'Запитувати щоразу';
+
+  @override
+  String get deleteAfterImportVaultKeep => 'Завжди зберігати вихідні файли';
+
+  @override
+  String get deleteAfterImportVaultDelete => 'Завжди видаляти вихідні файли';
+
+  @override
+  String get wizardBackButton => 'Назад';
+
+  @override
+  String get wizardNextButton => 'Далі';
+
+  @override
+  String get wizardStepTypeTitle => 'Тип';
+
+  @override
+  String get wizardStepBasicInfoTitle => 'Основні дані';
+
+  @override
+  String get wizardStepAdvancedTitle => 'Розширені';
+
+  @override
+  String get wizardStepReviewTitle => 'Огляд';
+
+  @override
+  String get wizardCreateTypePrompt => 'Що ви хочете створити?';
+
+  @override
+  String get wizardChooseFormatPrompt => 'Виберіть формат контейнера';
+
+  @override
+  String get wizardEncryptionDetailsRowTitle => 'Параметри шифрування';
+
+  @override
+  String get wizardHiddenVolumeRowSubtitleConfigured =>
+      'Налаштовано — торкніться для перегляду';
+
+  @override
+  String get wizardHiddenVolumeRowSubtitleNeedsSetup =>
+      'Торкніться для налаштування';
+
+  @override
+  String get wizardSummaryTitle => 'Підсумок';
+
+  @override
+  String get wizardSummaryPasswordLabel => 'Пароль';
+
+  @override
+  String get wizardPasswordSetValue => 'Встановлено';
+
+  @override
+  String get wizardPasswordNotSetValue =>
+      'Не встановлено (використовуються ключ. файли)';
+
+  @override
+  String get wizardSummaryKeyfilesLabel => 'Ключ. файли';
+
+  @override
+  String get wizardSummaryPimDefaultValue => 'За замовчуванням';
+
+  @override
+  String get wizardSummaryPimLabel => 'PIM';
+
+  @override
+  String get wizardSummaryDriveLabel => 'USB-диск';
+
+  @override
+  String get sectionKeyStorageIntegration =>
+      'Зберігання ключів та системний доступ';
+
+  @override
+  String get sectionMaskMode => 'Режим маскування';
+
+  @override
+  String get advancedOptionsTitle => 'Розширені параметри';
+
+  @override
+  String get audioTrackTitle => 'Аудіодоріжка';
+
+  @override
+  String get noAudioTracksAvailable => 'Немає доступних аудіодоріжок';
+
+  @override
+  String trackNumberLabel(int number) {
+    return 'Доріжка $number';
+  }
+
+  @override
+  String subtitleTrackNumberLabel(int number) {
+    return 'Субтитри $number';
+  }
+
+  @override
+  String get offLabel => 'Вимкнено';
+
+  @override
+  String get externalSubtitlesLabel => 'Зовнішні субтитри (.srt/.vtt)';
+
+  @override
+  String get externalLabel => 'Зовнішні';
+
+  @override
+  String get subtitleSizeLabel => 'Розмір';
+
+  @override
+  String get subtitleSizeSmall => 'S';
+
+  @override
+  String get subtitleSizeMedium => 'M';
+
+  @override
+  String get subtitleSizeLarge => 'L';
+
+  @override
+  String get subtitleSizeExtraLarge => 'XL';
+
+  @override
+  String get subtitlePositionLabel => 'Позиція';
+
+  @override
+  String get subtitlePositionBottom => 'Внизу';
+
+  @override
+  String get subtitlePositionLower => 'Нижче центру';
+
+  @override
+  String get subtitlePositionCenter => 'По центру';
+
+  @override
+  String get subtitlePositionTop => 'Вгорі';
+
+  @override
+  String get editImageAction => 'Редагувати зображення';
+
+  @override
+  String get imageEditorUnsupportedFormatMessage =>
+      'Цей формат зображення не підтримується для редагування.';
+
+  @override
+  String get cropToolLabel => 'Обрізати';
+
+  @override
+  String get drawToolLabel => 'Малювати';
+
+  @override
+  String get textToolLabel => 'Текст';
+
+  @override
+  String get redactToolLabel => 'Приховати';
+
+  @override
+  String get rotateLeftTooltip => 'Повернути ліворуч';
+
+  @override
+  String get rotateRightTooltip => 'Повернути праворуч';
+
+  @override
+  String get cropAspectFreeLabel => 'Довільно';
+
+  @override
+  String get cropAspectSquareLabel => 'Квадрат';
+
+  @override
+  String get cropAspectOriginalLabel => 'Оригінал';
+
+  @override
+  String get applyCropTooltip => 'Застосувати обрізання';
+
+  @override
+  String get annotationColorTooltip => 'Колір';
+
+  @override
+  String get annotationStrokeWidthTooltip => 'Товщина лінії';
+
+  @override
+  String get clearAnnotationsTooltip => 'Очистити всі анотації';
+
+  @override
+  String get resetImageTooltip => 'Скинути до оригіналу';
+
+  @override
+  String get resetImageConfirmTitle => 'Скинути зображення?';
+
+  @override
+  String get resetImageConfirmMessage =>
+      'Це скасує всі обрізки та малюнки, зроблені під час цього сеансу.';
+
+  @override
+  String get addTextAnnotationTitle => 'Додати текст';
+
+  @override
+  String get addTextAnnotationHint => 'Введіть текст…';
+
+  @override
+  String get textToolHint => 'Торкніться зображення, щоб додати текст';
+
+  @override
+  String get saveImageSheetTitle => 'Зберегти зміни';
+
+  @override
+  String get saveAsNewFileOption => 'Зберегти як новий файл';
+
+  @override
+  String get saveAsNewFileDescription => 'Оригінал залишається без змін';
+
+  @override
+  String get overwriteOriginalOption => 'Перезаписати оригінал';
+
+  @override
+  String get overwriteOriginalDescription => 'Замінює оригінальний файл';
+
+  @override
+  String get newFileNameLabel => 'Назва файлу';
+
+  @override
+  String get imageEditorPngNoteMessage =>
+      'Відредаговані зображення зберігаються у форматі PNG.';
+
+  @override
+  String get imageSavedMessage => 'Зображення збережено';
+
+  @override
+  String imageSaveFailedMessage(String error) {
+    return 'Не вдалося зберегти зображення: $error';
+  }
+
+  @override
+  String get advancedRenameButton => 'Розширено';
+
+  @override
+  String get advancedRenameBatchTitle => 'Пакетне перейменування';
+
+  @override
+  String get advancedRenameRulesTab => 'Правила';
+
+  @override
+  String advancedRenamePreviewTab(int count) {
+    return 'Перегляд ($count)';
+  }
+
+  @override
+  String get advancedRenameSearchReplaceTitle => 'Пошук і заміна';
+
+  @override
+  String get advancedRenameFindTextLabel => 'Знайти текст';
+
+  @override
+  String get advancedRenameFindTextHint =>
+      'Введіть текст або шаблон для пошуку...';
+
+  @override
+  String get advancedRenameReplaceWithLabel => 'Замінити на';
+
+  @override
+  String get advancedRenameReplaceWithHint => 'Новий текст або змінні...';
+
+  @override
+  String get advancedRenameInsertVariableTooltip =>
+      'Вставити токен динамічної змінної';
+
+  @override
+  String get advancedRenameDateTimeTokens => 'ТОКЕНИ ДАТИ ТА ЧАСУ';
+
+  @override
+  String advancedRenameStandardDate(String token) {
+    return 'Стандартна дата ($token)';
+  }
+
+  @override
+  String advancedRenameYearFourDigit(String token) {
+    return 'Рік (4 цифри) ($token)';
+  }
+
+  @override
+  String advancedRenameMonth(String token) {
+    return 'Місяць ($token)';
+  }
+
+  @override
+  String advancedRenameDayOfMonth(String token) {
+    return 'День місяця ($token)';
+  }
+
+  @override
+  String advancedRenameTime(String token) {
+    return 'Час ($token)';
+  }
+
+  @override
+  String get advancedRenameDynamicIdentifiers => 'ДИНАМІЧНІ ІДЕНТИФІКАТОРИ';
+
+  @override
+  String advancedRenameUniqueUuid(String token) {
+    return 'Унікальний UUID v4 ($token)';
+  }
+
+  @override
+  String get advancedRenameRandomAlphanumeric =>
+      'Випадкові букви та цифри (8 симв.)';
+
+  @override
+  String get advancedRenameRandomDigits => 'Випадкові цифри (6 цифр)';
+
+  @override
+  String get advancedRenameEmbeddedCounter => 'ВБУДОВАНИЙ ЛІЧИЛЬНИК';
+
+  @override
+  String advancedRenamePaddedCounter(String token) {
+    return 'Лічильник із доповненням ($token)';
+  }
+
+  @override
+  String get advancedRenameRegex => 'Регулярний вираз';
+
+  @override
+  String get advancedRenameMatchCase => 'Враховувати регістр';
+
+  @override
+  String get advancedRenameAllOccurrences => 'Усі входження';
+
+  @override
+  String get advancedRenameScopeFormatting => 'Область дії та форматування';
+
+  @override
+  String get advancedRenameApplyChangesTo => 'Застосувати зміни до';
+
+  @override
+  String get advancedRenameFilename => 'Назва файлу';
+
+  @override
+  String get advancedRenameExtension => 'Розширення';
+
+  @override
+  String get advancedRenameBoth => 'Назва та розширення';
+
+  @override
+  String get advancedRenameCaseTransformation => 'Зміна регістру';
+
+  @override
+  String get advancedRenameNoChange => 'Без змін';
+
+  @override
+  String get advancedRenameLowercase => 'малі літери';
+
+  @override
+  String get advancedRenameUppercase => 'ВЕЛИКІ ЛІТЕРИ';
+
+  @override
+  String get advancedRenameTitleCase => 'Кожне З Великої';
+
+  @override
+  String get advancedRenameCapitalize => 'Перша велика';
+
+  @override
+  String get advancedRenameSequentialCounter => 'Послідовний лічильник';
+
+  @override
+  String get advancedRenameCounterDescription =>
+      'Додавати порядкові номери на початку або в кінці';
+
+  @override
+  String get advancedRenameSuffix => 'Суфікс (у кінці)';
+
+  @override
+  String get advancedRenamePrefix => 'Префікс (на початку)';
+
+  @override
+  String get advancedRenameStartAt => 'Починати з';
+
+  @override
+  String get advancedRenameDigits => 'Кількість цифр';
+
+  @override
+  String get advancedRenameDigitsHint => 'наприклад 2 (01)';
+
+  @override
+  String get advancedRenameSeparator => 'Розділювач';
+
+  @override
+  String get advancedRenameSeparatorHint => '_ або -';
+
+  @override
+  String get advancedRenameLivePreview => 'Попередній перегляд';
+
+  @override
+  String get advancedRenameDeselect => 'Зняти вибір';
+
+  @override
+  String get advancedRenameSelectAll => 'Вибрати все';
+
+  @override
+  String get advancedRenameNoFilesSelected => 'Файли не вибрано';
+
+  @override
+  String get advancedRenameNameConflictDetected => 'Виявлено конфлікт імен';
+
+  @override
+  String get advancedRenameCheckPreviewToFix =>
+      'Перейдіть на вкладку «Перегляд», щоб виправити';
+
+  @override
+  String get advancedRenameReadyToRename => 'Готово до перейменування';
+
+  @override
+  String get advancedRenameErrorsDetected => 'Виявлено помилки';
+
+  @override
+  String advancedRenameApply(int count) {
+    return 'Застосувати ($count)';
+  }
+
+  @override
+  String get advancedRenameNameCollisionWithinBatch =>
+      'Конфлікт імен у межах пакету.';
+
+  @override
+  String get advancedRenameCollidesWithUnselectedFile =>
+      'Конфліктує з невибраним файлом.';
+
+  @override
+  String advancedRenameReadyCount(int valid, int total) {
+    return '$valid готово до перейменування (загалом $total)';
+  }
+
+  @override
+  String advancedRenameReadyOfTotal(int valid, int total) {
+    return '$valid з $total готово';
+  }
+
+  @override
+  String advancedRenameRenamedItems(int succeeded, int failed) {
+    return 'Перейменовано елементів: $succeeded (помилок: $failed).';
+  }
+
+  @override
+  String advancedRenameSuccessfullyRenamed(int count) {
+    return 'Успішно перейменовано елементів: $count.';
+  }
+
+  @override
+  String get advancedRenameMonthsFull =>
+      'Січень|Лютий|Березень|Квітень|Травень|Червень|Липень|Серпень|Вересень|Жовтень|Листопад|Грудень';
+
+  @override
+  String get advancedRenameMonthsAbbr =>
+      'Січ|Лют|Бер|Кві|Тра|Чер|Лип|Сер|Вер|Жов|Лис|Гру';
+
+  @override
+  String get advancedRenameDaysFull =>
+      'Понеділок|Вівторок|Середа|Четвер|П\'ятниця|Субота|Неділя';
+
+  @override
+  String get advancedRenameDaysAbbr => 'Пн|Вт|Ср|Чт|Пт|Сб|Нд';
+
+  @override
+  String get advancedRenameResolveConflicts =>
+      'Вирішіть конфлікти імен перед застосуванням';
+
+  @override
+  String advancedRenameChangedCount(int changed, int total) {
+    return '$changed з $total';
+  }
+
+  @override
+  String get automationKeyfilesPimSectionHeader => 'Ключ. файли та PIM';
+
+  @override
+  String get automationKeyfilesPimDescription =>
+      'Зберігається разом із паролем автоматизації вище та використовується так само для UNLOCK_VAULT — для сховищ VeraCrypt/LUKS, які зазвичай розблоковуються за допомогою ключ. файлу та/або нестандартного PIM замість лише пароля.';
+
+  @override
+  String get automationSavePimButton => 'Зберегти PIM';
+
+  @override
+  String get automationCameraSectionHeader => 'Автоматизація камери';
+
+  @override
+  String get automationCameraDescription =>
+      'Дозволяє автоматизації викликати TAKE_PHOTO / START_RECORDING / STOP_RECORDING / START_AUDIO_RECORDING / STOP_AUDIO_RECORDING для цього сховища. Вимкнено за замовчуванням навіть при повному доступі — на відміну від імпорту/експорту файлів, знімання не потребує жодних індикацій на екрані, тому це окремий явний дозвіл.';
+
+  @override
+  String get automationAllowCameraCapture => 'Дозволити знімання камерою';
+
+  @override
+  String get automationOverlayPermissionTitle => 'Показ поверх інших програм';
+
+  @override
+  String get automationOverlayPermissionMessage =>
+      'Для знімання камерою у фоновому режимі на Android 14+ потрібен дозвіл «Показ поверх інших програм». Надайте цей дозвіл, щоб дозволити автоматичне знімання, коли екран заблоковано або програма працює у фоні.';
+
+  @override
+  String get automationPimSavedMessage => 'PIM збережено';
+
+  @override
+  String get automationActionImportFolderLabel => 'Імпортувати папку';
+
+  @override
+  String get automationActionExportFolderLabel => 'Експортувати папку';
+
+  @override
+  String get automationActionTakePhotoLabel => 'Зробити фото';
+
+  @override
+  String get automationActionStartRecordingLabel => 'Почати запис';
+
+  @override
+  String get automationActionStopRecordingLabel => 'Зупинити запис';
+
+  @override
+  String get automationActionStartAudioRecordingLabel => 'Почати запис аудіо';
+
+  @override
+  String get automationActionStopAudioRecordingLabel => 'Зупинити запис аудіо';
+
+  @override
+  String get filePropertiesSectionHeader => 'ВЛАСТИВОСТІ ФАЙЛУ';
+
+  @override
+  String get fullPathLabel => 'Повний шлях';
+
+  @override
+  String get sizeLabel => 'Розмір';
+
+  @override
+  String get modifiedLabel => 'Змінено';
+
+  @override
+  String get vaultLabel => 'Сховище';
+
+  @override
+  String get mediaDimensionsSectionHeader => 'МЕДІА ТА РОЗМІРИ';
+
+  @override
+  String get resolutionLabel => 'Роздільна здатність';
+
+  @override
+  String get aspectRatioLabel => 'Співвідношення сторін';
+
+  @override
+  String get formatLabel => 'Формат';
+
+  @override
+  String get exifCameraDataSectionHeader => 'ДАНІ EXIF ТА КАМЕРИ';
+
+  @override
+  String get cameraLabel => 'Камера';
+
+  @override
+  String get lensLabel => 'Об\'єктив';
+
+  @override
+  String get dateTakenLabel => 'Дата знімання';
+
+  @override
+  String get shutterSpeedLabel => 'Витримка';
+
+  @override
+  String get apertureLabel => 'Діафрагма';
+
+  @override
+  String get isoLabel => 'ISO';
+
+  @override
+  String get focalLengthLabel => 'Фокусна відстань';
+
+  @override
+  String get flashLabel => 'Спалах';
+
+  @override
+  String get softwareLabel => 'Програмне забезпечення';
+
+  @override
+  String get gpsLocationLabel => 'Місцезнаходження GPS';
+
+  @override
+  String get integrityChecksumSectionHeader => 'ЦІЛІСНІСТЬ І КОНТРОЛЬНА СУМА';
+
+  @override
+  String get computingHashMessage => 'Обчислення хешу…';
+
+  @override
+  String get tapCalculateToVerifyMessage =>
+      'Торкніться «Обчислити», щоб перевірити';
+
+  @override
+  String get calculateButton => 'Обчислити';
+
+  @override
+  String get copyDiagnosticsButton => 'Копіювати діагностику';
+
+  @override
+  String get closeButton => 'Закрити';
+
+  @override
+  String get hwAcceleratedBadge => 'АПАРАТНЕ ПРИСКОРЕННЯ';
+
+  @override
+  String get swDecoderBadge => 'ПРОГРАМНИЙ ДЕКОДЕР';
+
+  @override
+  String get videoDecoderHardwareSection =>
+      'ВІДЕОДЕКОДЕР ТА АПАРАТНЕ ЗАБЕЗПЕЧЕННЯ';
+
+  @override
+  String get decoderNameLabel => 'Назва декодера';
+
+  @override
+  String get accelerationLabel => 'Прискорення';
+
+  @override
+  String get hardwareGpuDirect => 'Апаратне (GPU Direct)';
+
+  @override
+  String get softwareCpuFallback => 'Програмне (резервний CPU)';
+
+  @override
+  String get unknownValue => 'Невідомо';
+
+  @override
+  String get framerateLabel => 'Частота кадрів';
+
+  @override
+  String get variableOrUnknown => 'Змінна / Невідомо';
+
+  @override
+  String get videoCodecLabel => 'Відеокодек';
+
+  @override
+  String get autoDetected => 'Автовизначено';
+
+  @override
+  String get colorFormatLabel => 'Формат кольору';
+
+  @override
+  String get initLatencyLabel => 'Затримка ініціалізації';
+
+  @override
+  String get audioEngineSection => 'АУДІОДВИГУН';
+
+  @override
+  String get audioDecoderLabel => 'Аудіодекодер';
+
+  @override
+  String get audioCodecLabel => 'Аудіокодек';
+
+  @override
+  String get pipelineHealthSection => 'КОНВЕЄР ТА СТАН';
+
+  @override
+  String get playbackStateLabel => 'Стан відтворення';
+
+  @override
+  String get decryptedBufferLabel => 'Розшифрований буфер';
+
+  @override
+  String secondsCached(String seconds) {
+    return '$seconds с кешовано';
+  }
+
+  @override
+  String get droppedFramesLabel => 'Втрачені кадри';
+
+  @override
+  String nFrames(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count кадрів',
+      many: '$count кадрів',
+      few: '$count кадри',
+      one: '1 кадр',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sourceStorageLabel => 'Джерело сховища';
+
+  @override
+  String directJniStreamSource(int volId) {
+    return 'Прямий потік C++ JNI (volId=$volId)';
+  }
+
+  @override
+  String get archivesTabLabel => 'Архіви';
+
+  @override
+  String get filesTabLabel => 'Файли';
+
+  @override
+  String get filesPermissionMessage =>
+      'Надайте доступ для перегляду файлів на вашому пристрої.';
+
+  @override
+  String get filesEmptyTitle => 'Тут немає файлів';
+
+  @override
+  String get filesEmptyMessage => 'Ця папка порожня.';
+
+  @override
+  String get filesNewFolderTooltip => 'Нова папка';
+
+  @override
+  String get filesNewFolderDialogTitle => 'Нова папка';
+
+  @override
+  String get filesNameHint => 'Назва';
+
+  @override
+  String get filesCreate => 'Створити';
+
+  @override
+  String get filesRename => 'Перейменувати';
+
+  @override
+  String get filesDelete => 'Видалити';
+
+  @override
+  String get filesShare => 'Поділитися';
+
+  @override
+  String get filesCopy => 'Копіювати';
+
+  @override
+  String get filesMove => 'Перемістити';
+
+  @override
+  String get filesDeleteConfirmTitle => 'Видалити назавжди?';
+
+  @override
+  String get filesChooseDestinationTitle => 'Виберіть папку';
+
+  @override
+  String get filesMoveHere => 'Перемістити сюди';
+
+  @override
+  String get filesCopyHere => 'Копіювати сюди';
+
+  @override
+  String get filesSelectAllTooltip => 'Вибрати все';
+
+  @override
+  String get filesCloseSelectionTooltip => 'Закрити';
+
+  @override
+  String get filesFolderCreated => 'Папку створено';
+
+  @override
+  String get filesCreateFolderFailed => 'Не вдалося створити папку';
+
+  @override
+  String get filesRenamed => 'Перейменовано';
+
+  @override
+  String get filesRenameFailed => 'Не вдалося перейменувати';
+
+  @override
+  String get filesNameAlreadyExists => 'Ця назва вже зайнята';
+
+  @override
+  String get filesDeleted => 'Видалено';
+
+  @override
+  String get filesDeleteFailed => 'Не вдалося видалити';
+
+  @override
+  String get filesMoved => 'Переміщено';
+
+  @override
+  String get filesMoveFailed => 'Не вдалося перемістити';
+
+  @override
+  String get filesCopied => 'Скопійовано';
+
+  @override
+  String get filesCopyFailed => 'Не вдалося скопіювати';
+
+  @override
+  String get filesOpenFailed => 'Не вдалося відкрити цей файл';
+
+  @override
+  String get filesShareFailed => 'Не вдалося поділитися цим файлом';
+
+  @override
+  String get filesFilterTooltip => 'Фільтр';
+
+  @override
+  String get filesFilterAll => 'Усі файли';
+
+  @override
+  String get filesFilterImages => 'Зображення';
+
+  @override
+  String get filesFilterVideos => 'Відео';
+
+  @override
+  String get filesFilterAudio => 'Аудіо';
+
+  @override
+  String get filesFilterDocuments => 'Документи';
+
+  @override
+  String get filesTextTooLarge =>
+      'Цей файл завеликий для попереднього перегляду.';
+
+  @override
+  String get filesTextSaved => 'Збережено';
+
+  @override
+  String get filesTextSaveFailed => 'Не вдалося зберегти';
+
+  @override
+  String get toolHeaderBackupTitle => 'Резервна копія заголовка';
+
+  @override
+  String get toolHeaderBackupSubtitle =>
+      'Резервне копіювання та відновлення заголовків контейнерів і конфігурацій сховищ';
+
+  @override
+  String get headerBackupModeExport => 'Зберегти';
+
+  @override
+  String get headerBackupModeRestore => 'Відновити';
+
+  @override
+  String get headerBackupPickExportTarget =>
+      'Виберіть, для чого створити резервну копію.';
+
+  @override
+  String get headerBackupPickRestoreTarget =>
+      'Виберіть, куди відновити резервну копію.';
+
+  @override
+  String get headerBackupTargetContainerSubtitle =>
+      'VeraCrypt, LUKS1 або LUKS2';
+
+  @override
+  String get headerBackupTargetFolderSubtitle =>
+      'gocryptfs, CryFS або Cryptomator';
+
+  @override
+  String get headerBackupExportInfoBanner =>
+      'Заголовок контейнера містить ключові дані для шифрування — у разі його втрати (биті сектори, збій запису) навіть неушкоджену ділянку даних відновити неможливо. Сховище у папці зберігає це в одному невеликому файлі конфігурації у корені. Зберігайте цю резервну копію окремо від самого контейнера.';
+
+  @override
+  String get headerBackupRestoreInfoBanner =>
+      'Відновлення перезаписує поточний заголовок (або файл конфігурації) даними з резервної копії. Спершу копія перевіряється на сумісність із цим форматом, але переконайтеся, що ви вибрали правильну ціль.';
+
+  @override
+  String headerBackupUnhealthyExportWarning(String diagnosis) {
+    return 'Цей контейнер має пошкодження ($diagnosis). Створення копії зараз означає, що резервна копія міститиме ту саму проблему. За можливості спочатку виконайте «Перевірка та відновлення» або створіть копію зараз, якщо це єдина можливість зберегти стан.';
+  }
+
+  @override
+  String get headerBackupBackUpAnyway => 'Все одно створити копію';
+
+  @override
+  String get headerBackupExportHeader => 'Експортувати заголовок';
+
+  @override
+  String get headerBackupSavedBanner =>
+      'Резервну копію збережено. Зберігайте її окремо від цього контейнера.';
+
+  @override
+  String get headerBackupSaveBackupFile => 'Зберегти файл резервної копії';
+
+  @override
+  String get headerBackupPickBackupFile => 'Вибрати файл резервної копії';
+
+  @override
+  String get headerBackupMismatchFolderVaultError =>
+      'Ця резервна копія призначена для сховища в папці, але вибраною ціллю є файл-контейнер.';
+
+  @override
+  String get headerBackupMismatchContainerFileError =>
+      'Ця резервна копія призначена для файлу-контейнера, але вибраною ціллю є сховище в папці.';
+
+  @override
+  String get headerBackupRestoredSuccess => 'Заголовок відновлено.';
+
+  @override
+  String get headerBackupRestore => 'Відновити';
+
+  @override
+  String headerBackupBackedUpAt(String date) {
+    return 'створено $date';
+  }
+
+  @override
+  String get headerBackupLogIdle => 'Журнал консолі очікує дій...';
+
+  @override
+  String get compositeCreateScreenTitle => 'Створити композитний контейнер';
+
+  @override
+  String get compositeProcessingStatus => 'Обробка…';
+
+  @override
+  String compositeCarrierFilesCountHeader(int count) {
+    return 'Файли-носії ($count)';
+  }
+
+  @override
+  String get compositeAddCarrierFilesTitle => 'Додати файли-носії';
+
+  @override
+  String get compositeAddCarrierFilesSubtitle =>
+      'Виберіть зображення, відео, аудіо або документи';
+
+  @override
+  String get compositeBrowseButtonLabel => 'Огляд';
+
+  @override
+  String compositeCarrierAllocatableSubtitle(String format, String size) {
+    return '$format • Доступно: $size';
+  }
+
+  @override
+  String get compositeCarrierAnalyzingStatus => 'Аналіз…';
+
+  @override
+  String get compositeTotalUsableCapacityHeader => 'Загальна корисна місткість';
+
+  @override
+  String compositeCapacityDistributedSubtitle(int count) {
+    return 'Розподілено між $count файлами (вирівняно за секторами 512 Б)';
+  }
+
+  @override
+  String get compositePimFieldLabel => 'PIM (Персональний множник ітерацій)';
+
+  @override
+  String get compositePimFieldHelper =>
+      'Залиште порожнім або 0 для стандартної кількості ітерацій';
+
+  @override
+  String get compositeRememberContainerTitle => 'Запам\'ятати цей контейнер';
+
+  @override
+  String get compositeRememberContainerSubtitle =>
+      'Закріпіть на панелі керування, щоб не вибирати ці файли знову. Зберігає зв\'язок між файлами в зашифрованому вигляді на цьому пристрої.';
+
+  @override
+  String get compositeEncryptionAndFilesystemHeader =>
+      'Шифрування та файлова система';
+
+  @override
+  String get compositeEncryptionAlgorithmLabel => 'Алгоритм шифрування';
+
+  @override
+  String get compositeHashAlgorithmLabel => 'Хеш-алгоритм (KDF)';
+
+  @override
+  String get compositeFilesystemTypeLabel => 'Тип файлової системи';
+
+  @override
+  String get compositeQuickFormatTitle => 'Швидке форматування';
+
+  @override
+  String get compositeQuickFormatSubtitle =>
+      'Пропускає заповнення нулями виділеного простору носія';
+
+  @override
+  String get compositeCreateContainerButton => 'Створити контейнер';
+
+  @override
+  String get compositeCreateSuccessMessage =>
+      'Композитний контейнер успішно створено!';
+
+  @override
+  String compositeDefaultContainerName(int count) {
+    return 'Композитний контейнер (файлів: $count)';
+  }
+
+  @override
+  String get compositeAlreadyHaveUnlockPrompt =>
+      'Вже маєте композитний контейнер? Розблокувати та змонтувати';
+
+  @override
+  String compositeBadgeMultipleCarriers(int count) {
+    return 'Композитний (носіїв: $count)';
+  }
+
+  @override
+  String get compositeBadgeSingleCarrier => 'Композитний носій (вибрано 1)';
+
+  @override
+  String get compositeBadgeDefault => 'Композитний контейнер';
+
+  @override
+  String get compositeSingleCarrierWarningBanner =>
+      'Виявлено композитний носій. Для розблокування композитного контейнера потрібні всі його файли-носії.';
+
+  @override
+  String get compositeSelectAllCarriersButton => 'Вибрати всі носії';
+
+  @override
+  String get compositeCarriersMissingTitle => 'Відсутні композитні носії';
+
+  @override
+  String get compositeCarriersMissingExplanation =>
+      'Один або декілька файлів-носіїв більше недоступні або були переміщені.';
+
+  @override
+  String get compositeRelocateCarriersButton => 'Вказати розташування носіїв';
+
+  @override
+  String get passwordOptionalFieldLabel => 'Пароль (необов\'язково)';
+
+  @override
+  String get plainDiskImagePasswordHint =>
+      'Пароль не потрібен — цей образ диска не зашифрований';
+
+  @override
+  String get compositePasswordHint => 'Введіть пароль композитного контейнера';
+
+  @override
+  String get generateStrongPasswordTooltip => 'Згенерувати надійний пароль';
+
+  @override
+  String get cryfsBlockSizeDefaultLabel => '32 КіБ (за замовчуванням)';
+
+  @override
+  String get hiddenVolumeConfiguredInNextStepNotice =>
+      'Параметри прихованого тому будуть налаштовані на наступному кроці.';
+
+  @override
+  String get hiddenVolumeExplanationBanner =>
+      'Прихований том розташовується у вільному просторі зовнішнього тому. Його пароль і ключові файли ОБОВ\'ЯЗКОВО повинні відрізнятися від зовнішнього тому.';
+
+  @override
+  String get hiddenVolumeCredentialsSectionHeader =>
+      'Облікові дані прихованого тому';
+
+  @override
+  String get hiddenVolumeSizeAndFormatSectionHeader =>
+      'Розмір і формат прихованого тому';
+
+  @override
+  String get shareSheetIntegrationTitle =>
+      'Інтеграція з меню спільного доступу';
+
+  @override
+  String get shareSheetIntegrationSubtitle =>
+      'Дозволити іншим програмам передавати файли безпосередньо у сховище через меню «Поділитися» Android.';
+
+  @override
+  String get shareSheetIntegrationUpdateErrorMessage =>
+      'Не вдалося оновити інтеграцію з меню спільного доступу.';
+
+  @override
+  String get autoLockOnShareImportTitle => 'Автоблокування після імпорту';
+
+  @override
+  String get autoLockOnShareImportSubtitle =>
+      'Автоматично блокувати сховище, якщо його було розблоковано спеціально для імпорту отриманого файлу';
+
+  @override
+  String get shareImportExpiredMessage =>
+      'Нічого імпортувати — термін дії запиту на спільний доступ закінчився.';
+
+  @override
+  String get sharedFileDefaultDisplayName => 'Отриманий файл';
+
+  @override
+  String importingSharedFilesMessage(int count, String destination) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Імпортування $count файлів до $destination',
+      many: 'Імпортування $count файлів до $destination',
+      few: 'Імпортування $count файлів до $destination',
+      one: 'Імпортування 1 файлу до $destination',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String sharedFileSavedMessage(int count, String destination) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Збережено $count файлів у $destination',
+      many: 'Збережено $count файлів у $destination',
+      few: 'Збережено $count файли у $destination',
+      one: 'Збережено 1 файл у $destination',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sharedFileSaveFailedMessage =>
+      'Не вдалося зберегти отриманий файл.';
+
+  @override
+  String get saveToVaultTitle => 'Зберегти у сховищі';
+
+  @override
+  String get noVaultsAvailableAddFromDashboardPrompt =>
+      'Сховищ поки немає. Спочатку додайте сховище на панелі керування.';
+
+  @override
+  String get vaultStatusUnlocked => 'Розблоковано';
+
+  @override
+  String get vaultStatusLocked => 'Заблоковано';
+
+  @override
+  String get compositeCarrierGrowthSectionHeader => 'Маскування та місткість';
+
+  @override
+  String get compositeCarrierGrowthSliderTitle => 'Збільшення файлів-носіїв';
+
+  @override
+  String compositeCarrierGrowthPercentLabel(int percent) {
+    return '+$percent% на файл';
+  }
+
+  @override
+  String get compositeCarrierGrowthUltraStealthDesc =>
+      'Ультрамаскування (~5%): Розмір файлів майже не змінюється. Абсолютно не відрізняється від природних відхилень сенсора камери.';
+
+  @override
+  String get compositeCarrierGrowthRecommendedDesc =>
+      'Рекомендовано (~10%): Баланс між маскуванням і достатньою місткістю сховища.';
+
+  @override
+  String get compositeCarrierGrowthHighCapacityDesc =>
+      'Висока місткість (~20%+): Максимізує простір сховища, проте файли-носії відчутно збільшуються.';
+
+  @override
+  String get emergencyPanicTitle => 'Екстрене очищення та захист від примусу';
+
+  @override
+  String get emergencyPanicSubtitle =>
+      'Екстрені тригери, плитка швидких налаштувань, PanicKit і розблокування під примусом';
+
+  @override
+  String get sectionPanicTiers => 'Рівень екстреного очищення';
+
+  @override
+  String get panicTierSessionLabel => 'Рівень 1: Очищення сеансу';
+
+  @override
+  String get panicTierSessionSubtitle =>
+      'Розмонтувати сховища, обнулити пам\'ять і видалити збережені паролі/облікові дані сховищ';
+
+  @override
+  String get panicTierCredentialLabel => 'Рівень 2: Очищення облікових даних';
+
+  @override
+  String get panicTierCredentialSubtitle =>
+      'Очистити список сховищ на панелі, скинути головний пароль і налаштування та очистити Keystore';
+
+  @override
+  String get panicTierNuclearLabel => 'Рівень 3: Повне знищення (Nuclear Wipe)';
+
+  @override
+  String get panicTierNuclearSubtitle =>
+      'Записати нулями та знищити всі дані програми на диску, після чого запросити видалення програми';
+
+  @override
+  String get panicQuickTileTitle => 'Плитка швидких налаштувань';
+
+  @override
+  String get panicQuickTileSubtitle =>
+      'Увімкнути плитку швидких налаштувань для миттєвого запуску налаштованого рівня очищення';
+
+  @override
+  String get triggerPanicNowTitle => 'Запустити екстрене очищення';
+
+  @override
+  String get triggerPanicNowSubtitle =>
+      'Негайно виконати налаштований рівень екстреного очищення';
+
+  @override
+  String get triggerPanicConfirmTitle => 'Виконати екстрене очищення?';
+
+  @override
+  String triggerPanicConfirmMessage(String tier) {
+    return 'Це негайно виконає $tier. Відкриті контейнери та облікові дані буде видалено згідно з цим рівнем.';
+  }
+
+  @override
+  String get triggerPanicButton => 'Очистити зараз';
+
+  @override
+  String get sectionPanicBootTrigger => 'Очищення під час перезавантаження';
+
+  @override
+  String get panicBootTriggerLevelLabel =>
+      'Рівень для запуску під час перезавантаження';
+
+  @override
+  String get panicBootTriggerArmTitle =>
+      'Активувати для наступного перезавантаження';
+
+  @override
+  String panicBootTriggerArmedSubtitle(Object tier) {
+    return 'Активовано — $tier запуститься автоматично під час наступного завантаження, після чого вимкнеться';
+  }
+
+  @override
+  String get panicBootTriggerDisarmedSubtitle =>
+      'Вимкнено — під час перезавантаження пристрій працюватиме у звичайному режимі';
+
+  @override
+  String get panicBootTriggerConfirmTitle =>
+      'Активувати очищення під час перезавантаження?';
+
+  @override
+  String panicBootTriggerConfirmMessage(Object tier) {
+    return 'Під час наступного запуску або перезавантаження пристрою (зокрема звичайного перезапуску чи автоматичного оновлення, а не лише ініційованого вами) $tier виконається автоматично ще до відкриття програми. Спрацьовує один раз, після чого тригер вимикається.';
+  }
+
+  @override
+  String get panicBootTriggerArmButton => 'Активувати';
+
+  @override
+  String get panicBootTriggerArmedSuccessMessage =>
+      'Тригер під час перезавантаження активовано';
+
+  @override
+  String get panicBootTriggerDisarmedSuccessMessage =>
+      'Тригер під час перезавантаження вимкнено';
+
+  @override
+  String get sectionPanicKit => 'Служба реагування PanicKit';
+
+  @override
+  String get panicKitEnableTitle => 'Служба реагування PanicKit';
+
+  @override
+  String get panicKitEnableSubtitle =>
+      'Дозволити підключеним зовнішнім програмам (наприклад, Ripple, Wasted) запускати очищення';
+
+  @override
+  String get panicKitEnforcePairingTitle => 'Вимагати сполучення програм';
+
+  @override
+  String get panicKitEnforcePairingSubtitle =>
+      'Перевіряти ідентифікатор пакета та відбиток сертифіката SHA-256 під час кожного сигналу запуску';
+
+  @override
+  String get panicKitPairedAppLabel => 'Підключена програма запуску';
+
+  @override
+  String get panicKitNoAppPaired => 'Немає підключених програм';
+
+  @override
+  String get panicKitUnpairButton => 'Скасувати сполучення';
+
+  @override
+  String get panicKitUnpairSuccess => 'Сполучення з тригером скасовано';
+
+  @override
+  String get sectionDuressUnlock => 'Розблокування під примусом';
+
+  @override
+  String get duressMasterPasswordRequired =>
+      'Перед налаштуванням розблокування під примусом необхідно увімкнути головний пароль у розділі безпеки.';
+
+  @override
+  String get duressPasswordTitle => 'Пароль під примусом';
+
+  @override
+  String get duressPasswordConfiguredSubtitle =>
+      'Активно — введення цього пароля на екрані блокування запускає дію під примусом';
+
+  @override
+  String get duressPasswordNotConfiguredSubtitle =>
+      'Введіть окремий пароль на екрані блокування для запуску екстрених дій';
+
+  @override
+  String get removeDuressPasswordButton => 'Видалити пароль під примусом';
+
+  @override
+  String get duressPasswordSetSuccess => 'Пароль під примусом налаштовано';
+
+  @override
+  String get duressPasswordRemovedSuccess => 'Пароль під примусом видалено';
+
+  @override
+  String get duressPinConfiguredTitle => 'PIN-код під примусом';
+
+  @override
+  String get duressPinConfiguredSubtitle =>
+      'Активно — введення цього PIN-коду на клавіатурі запускає дію під примусом';
+
+  @override
+  String get duressPinNotConfiguredSubtitle =>
+      'Введіть окремий PIN-код на клавіатурі для запуску екстрених дій';
+
+  @override
+  String get removeDuressPinButton => 'Видалити PIN-код під примусом';
+
+  @override
+  String get duressPinSetSuccess => 'PIN-код під примусом налаштовано';
+
+  @override
+  String get duressPinRemovedSuccess => 'PIN-код під примусом видалено';
+
+  @override
+  String get duressPatternTitle => 'Графічний ключ під примусом';
+
+  @override
+  String get duressPatternConfiguredSubtitle =>
+      'Активно — введення цього ключа запускає дію під примусом';
+
+  @override
+  String get duressPatternNotConfiguredSubtitle =>
+      'Намалюйте окремий ключ на екрані блокування для запуску екстрених дій';
+
+  @override
+  String get removeDuressPatternButton => 'Видалити ключ під примусом';
+
+  @override
+  String get duressPatternSetSuccess =>
+      'Графічний ключ під примусом налаштовано';
+
+  @override
+  String get duressPatternRemovedSuccess =>
+      'Графічний ключ під примусом видалено';
+
+  @override
+  String get duressMatchesMasterPasswordError =>
+      'Пароль під примусом не може збігатися з головним паролем';
+
+  @override
+  String get duressMatchesMasterPinError =>
+      'Не може збігатися з головним PIN-кодом';
+
+  @override
+  String get duressMatchesMasterPatternError =>
+      'Не може збігатися з головним графічним ключем';
+
+  @override
+  String get masterMatchesDuressPasswordError =>
+      'Головний пароль не може збігатися з паролем під примусом';
+
+  @override
+  String get masterMatchesDuressPinError =>
+      'Не може збігатися з PIN-кодом під примусом';
+
+  @override
+  String get masterMatchesDuressPatternError =>
+      'Не може збігатися з графічним ключем під примусом';
+
+  @override
+  String get toolCompositeContainerTitle => 'Композитний контейнер';
+
+  @override
+  String get toolCompositeContainerSubtitle =>
+      'Вбудовуйте та монтуйте зашифроване сховище у кількох медіафайлах';
+
+  @override
+  String get compositePasswordChangeNotSupportedMessage =>
+      'Зміна пароля не підтримується для композитних контейнерів';
+
+  @override
+  String get compositeNoCarrierFilesFoundError =>
+      'Не знайдено файлів-носіїв для композитного контейнера';
+
+  @override
+  String get compositeIncorrectCredentialsOrCarrierMismatchError =>
+      'Неправильні облікові дані або невідповідність набору носіїв';
+
+  @override
+  String get incorrectCredentialsOrInvalidContainer =>
+      'Неправильні облікові дані або пошкоджений контейнер';
+
+  @override
+  String get repairTargetFolderVaultOption => 'Сховище в папці';
+
+  @override
+  String get repairTargetFolderVaultSubtitle =>
+      'gocryptfs, CryFS або Cryptomator';
+
+  @override
+  String get repairFolderVaultHealthyDeepScan =>
+      'Проблем не виявлено — вміст усіх файлів перевірено.';
+
+  @override
+  String get repairFolderVaultHealthyStructureOnly =>
+      'Структурних проблем не виявлено. Запустіть глибоке сканування з паролем, щоб також перевірити вміст файлів.';
+
+  @override
+  String repairFolderVaultIssuesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Виявлено $count проблем',
+      many: 'Виявлено $count проблем',
+      few: 'Виявлено $count проблеми',
+      one: 'Виявлено 1 проблему',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get repairFolderVaultStructureOnlySuffix =>
+      ' (лише структура — запустіть глибоке сканування для повної перевірки вмісту)';
+
+  @override
+  String get repairDeepScanWithPasswordButton => 'Глибоке сканування з паролем';
+
+  @override
+  String repairFolderVaultSummary(
+    Object fixed,
+    Object recovered,
+    Object removed,
+  ) {
+    return 'Підсумок відновлення: $fixed виправлено, $recovered відновлено до /LOST+FOUND, $removed видалено.';
+  }
+
+  @override
+  String get repairAndRecoverVaultButton => 'Відновити сховище';
+
+  @override
+  String get repairScanAgainButton => 'Сканувати знову';
+
+  @override
+  String panicPurgeCompletedMessage(Object count) {
+    return 'Екстрене очищення завершено ($count заблоковано).';
+  }
+
+  @override
+  String get usbPermissionRequiredError => 'Потрібен дозвіл на доступ до USB';
+
+  @override
+  String get logcatScrollToBottomTooltip => 'Прокрутити до кінця';
+
+  @override
+  String logcatLinesCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count рядків',
+      many: '$count рядків',
+      few: '$count рядки',
+      one: '$count рядок',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get compositeSpaceTooSmallError =>
+      'Замало доступного місця (потрібно щонайменше 300 КБ)';
+
+  @override
+  String get compositeInitializingStatusMessage =>
+      'Ініціалізація композитного тому VeraCrypt…';
+
+  @override
+  String get compositeCreationFailedError =>
+      'Не вдалося створити композитний контейнер';
+
+  @override
+  String get compositeSelectCarriersFirstError =>
+      'Спочатку виберіть файли-носії';
+
+  @override
+  String get compositePasswordOrKeyfileRequiredError =>
+      'Потрібен пароль або ключ. файл';
+
+  @override
+  String get compositeMountingStatusMessage => 'Монтування композитного тому…';
+
+  @override
+  String get compositeAuthFailedOrCarrierMismatchError =>
+      'Помилка автентифікації або невідповідність набору файлів-носіїв';
+
+  @override
+  String get layoutModeColumnedList => 'Список зі стовпцями';
+
+  @override
+  String get longFileNameDisplayLabel => 'Довгі імена файлів';
+
+  @override
+  String get longFileNameDisplayDesc =>
+      'Виберіть, як скорочувати імена, якщо вони перевищують доступне місце';
+
+  @override
+  String get longFileNameEllipsizeStartLabel => 'Скорочувати на початку';
+
+  @override
+  String get longFileNameEllipsizeStartDesc =>
+      'Обтинає початок довгих імен, залишаючи кінець і розширення файлу видимими.';
+
+  @override
+  String get longFileNameEllipsizeMiddleLabel => 'Скорочувати посередині';
+
+  @override
+  String get longFileNameEllipsizeMiddleDesc =>
+      'Обтинає середину довгих імен, залишаючи початок і розширення файлу видимими.';
+
+  @override
+  String get longFileNameEllipsizeEndLabel => 'Скорочувати в кінці';
+
+  @override
+  String get longFileNameEllipsizeEndDesc =>
+      'Обтинає кінець довгих імен, залишаючи початок видимим.';
+
+  @override
+  String get longFileNameMarqueeLabel => 'Рухомий рядок';
+
+  @override
+  String get longFileNameMarqueeDesc =>
+      'Зберігає повне ім\'я, плавно прокручуючи його горизонтально.';
+
+  @override
+  String get showItemActionsMenuLabel =>
+      'Показувати меню з 3 крапками для елементів';
+
+  @override
+  String get showItemActionsMenuDesc =>
+      'Відображати кнопку дії з трьома крапками для файлів і папок у списках, сітках та мозаїці';
+
+  @override
+  String get gridAspectRatioLabel => 'Співвідношення сторін сітки';
+
+  @override
+  String get gridAspectSquareLabel => '1:1 (Квадрат)';
+
+  @override
+  String get gridAspectLandscapeLabel => '16:9 (Альбомна)';
+
+  @override
+  String get gridAspectPortraitLabel => '9:16 (Портретна)';
+
+  @override
+  String get fileFolderDisplaySectionHeader => 'Відображення файлів і папок';
+
+  @override
+  String get navigationBarsSectionHeader => 'Навігація та панелі';
+
+  @override
+  String get columnedListViewColumnsSectionHeader =>
+      'Стовпці списку зі стовпцями';
+
+  @override
+  String get autoHideAppBarLabel =>
+      'Автоматично приховувати панель під час прокручування';
+
+  @override
+  String get autoHideAppBarDesc =>
+      'Приховувати верхню панель під час прокручування вниз, щоб збільшити простір перегляду';
+
+  @override
+  String get useFabForToolbarLabel => 'Плавуча кнопка для панелі інструментів';
+
+  @override
+  String get useFabForToolbarDesc =>
+      'Замінити нижню панель плавучою кнопкою для максимального простору перегляду';
+
+  @override
+  String get bottomSelectionBarLabel => 'Панель вибору внизу';
+
+  @override
+  String get bottomSelectionBarDesc =>
+      'Відображати панель вибору внизу замість верхньої частини екрана';
+
+  @override
+  String get clipboardFabTapToPaste =>
+      'Торкніться, щоб вставити, утримуйте для деталей';
+
+  @override
+  String get storageLocationsTitle => 'Місця зберігання';
+
+  @override
+  String get storageLocationsSubtitle =>
+      'Внутрішня пам\'ять, карти SD та провайдери документів';
+
+  @override
+  String get storageLocationsSelectPrompt => 'Виберіть активне сховище';
+
+  @override
+  String get addStorageLocationTitle => 'Додати місце зберігання';
+
+  @override
+  String get addStorageLocationSubtitle =>
+      'Додати зовнішню карту SD, USB-накопичувач або папку';
+
+  @override
+  String get documentProviderSafLabel => 'Провайдер документів (SAF)';
+
+  @override
+  String get externalStorageLabel => 'Зовнішнє сховище';
+
+  @override
+  String get renameStorageLocationTitle => 'Перейменувати місце';
+
+  @override
+  String get removeStorageLocationTitle => 'Вилучити місце';
+
+  @override
+  String removeStorageLocationConfirm(String name) {
+    return 'Вилучити «$name» з місць зберігання? Файли не буде видалено.';
+  }
+
+  @override
+  String get storageLocationAddedSnack => 'Місце зберігання додано';
+
+  @override
+  String get storageLocationUnresolvedError =>
+      'Не вдалося отримати прямий доступ до цього місця зберігання. Переконайтеся, що надано відповідні дозволи.';
+
+  @override
+  String get storageLocationSelfReferenceError =>
+      'Це вже власне сховище цієї програми, тому додати його ще раз як зовнішнє розташування не можна. Відкрийте його зі списку своїх сховищ.';
+
+  @override
+  String get internalStorageSubtitle => 'Внутрішня пам\'ять';
+
+  @override
+  String get mediaViewerActionPlayPause => 'Відтворити / Пауза';
+
+  @override
+  String get mediaViewerActionPlaybackMode => 'Режим відтворення';
+
+  @override
+  String get mediaViewerActionBookmark => 'Закладка';
+
+  @override
+  String get mediaViewerActionDiagnostics => 'Діагностика';
+
+  @override
+  String get mediaViewerCustomizeControls => 'Налаштувати керування';
+
+  @override
+  String get mediaViewerControlsTitle => 'Елементи керування медіаплеєром';
+
+  @override
+  String get mediaViewerControlsReset =>
+      'Елементи керування скинуто до початкових';
+
+  @override
+  String get mediaViewerTransportDisplay => 'Керування відтворенням та екран';
+
+  @override
+  String get mediaViewerShowScrubberTitle => 'Показувати шкалу прогресу';
+
+  @override
+  String get mediaViewerShowScrubberDesc =>
+      'Відображати повзунок позиції та тривалості';
+
+  @override
+  String get mediaViewerShowCenterTransportTitle =>
+      'Показувати центральні кнопки відтворення';
+
+  @override
+  String get mediaViewerShowCenterTransportDesc =>
+      'Показувати велику кнопку відтворення/паузи по центру';
+
+  @override
+  String get mediaViewerShowPrevNextTitle =>
+      'Показувати кнопки «Назад» і «Далі»';
+
+  @override
+  String get mediaViewerShowPrevNextDesc =>
+      'Вимкніть, щоб залишити лише одну кнопку відтворення';
+
+  @override
+  String get mediaViewerShowStatusBadgeTitle => 'Показувати значки стану';
+
+  @override
+  String get mediaViewerShowStatusBadgeDesc =>
+      'Відображає затримку слайд-шоу та індикатори статичних зображень';
+
+  @override
+  String get mediaViewerTopBarSection => 'Верхня панель';
+
+  @override
+  String get mediaViewerBottomBarSection => 'Нижня панель';
+
+  @override
+  String get mediaViewerUnpinnedSection => 'Відкріплені (додаткове меню)';
+
+  @override
+  String get mediaViewerAllControlsPinned =>
+      'Усі елементи керування вже закріплені.';
+
+  @override
+  String get mediaPlayerControlsTitle => 'Керування плеєром';
+
+  @override
+  String get resumePlaybackTitle => 'Відновити відтворення';
+
+  @override
+  String get resumePlaybackAskEveryTime => 'Запитувати щоразу';
+
+  @override
+  String get resumePlaybackNever => 'Ніколи';
+
+  @override
+  String get resumePlaybackAlways => 'Завжди';
+
+  @override
+  String get resumePlaybackPromptTitle => 'Відновити відтворення?';
+
+  @override
+  String resumePlaybackPromptMessage(String position) {
+    return 'Продовжити з $position?';
+  }
+
+  @override
+  String get resumePlaybackStartOver => 'Спочатку';
+
+  @override
+  String get resumePlaybackResume => 'Відновити';
+
+  @override
+  String get pictureInPictureTitle => 'Автоматична картинка в картинці';
+
+  @override
+  String get pictureInPictureSubtitle =>
+      'Переходити в режим «картинка в картинці» під час виходу із застосунку, коли відтворюється відео';
+
+  @override
+  String get pictureInPictureAction => 'Картинка в картинці';
+
+  @override
+  String get mediaViewerActionLockControls => 'Заблокувати керування';
+
+  @override
+  String get mediaViewerHoldToUnlock => 'Утримуйте, щоб розблокувати';
+
+  @override
+  String get keepAudioPlayingTitle =>
+      'Продовжувати відтворення аудіо після закриття';
+
+  @override
+  String get keepAudioPlayingSubtitle =>
+      'Аудіо продовжує грати у фоновому режимі після виходу з програвача; керування через сповіщення';
+
+  @override
+  String get mediaControlsResetSuccess =>
+      'Елементи керування мультимедіа скинуто до стандартних';
+
+  @override
+  String get playbackAndDisplayHeader => 'Відтворення та відображення';
+
+  @override
+  String get showProgressBarTitle => 'Показувати шкалу прогресу (скрубер)';
+
+  @override
+  String get showProgressBarSubtitle => 'Шкала часу для відео та аудіо';
+
+  @override
+  String get scrubPreviewStyleTitle =>
+      'Стиль попереднього перегляду під час перемотування';
+
+  @override
+  String get scrubPreviewMiniBoxLabel => 'Міні-вікно';
+
+  @override
+  String get scrubPreviewMiniBoxDesc =>
+      'Невелика мініатюра над шкалою прогресу';
+
+  @override
+  String get scrubPreviewFullscreenLabel => 'Повноекранний';
+
+  @override
+  String get scrubPreviewFullscreenDesc =>
+      'Великий кадр займає весь екран під час перемотування';
+
+  @override
+  String get showTransportControlsOnPhotosTitle =>
+      'Показувати кнопки відтворення для фотографій';
+
+  @override
+  String get showTransportControlsOnPhotosSubtitle =>
+      'Керування слайд-шоу під час перегляду зображень (вимкніть для мінімалістичного вигляду)';
+
+  @override
+  String get statusBadgeTitle => 'Значок стану';
+
+  @override
+  String get statusBadgeSubtitle =>
+      'Показує таймер слайд-шоу або індикатор статичного фото';
+
+  @override
+  String get topBarActionsHeader => 'Дії верхньої панелі';
+
+  @override
+  String get topBarActionsEmptyHint =>
+      'Перетягніть дії сюди, щоб закріпити на верхній панелі';
+
+  @override
+  String get bottomDockActionsHeader => 'Дії нижньої панелі';
+
+  @override
+  String get bottomDockActionsEmptyHint =>
+      'Перетягніть дії сюди, щоб закріпити на нижній панелі';
+
+  @override
+  String get moreMenuActionsHeader => 'Дії меню «Більше» (•••)';
+
+  @override
+  String get moreMenuActionsEmptyHint =>
+      'Перетягніть дії сюди для випадного меню верхньої панелі';
+
+  @override
+  String get advancedSettingsActionsHeader =>
+      'Дії розширених налаштувань (додатково)';
+
+  @override
+  String get advancedSettingsActionsEmptyHint =>
+      'Перетягніть дії сюди для вікна розширених налаштувань';
+
+  @override
+  String get dropHereAtEnd => 'Відпустити тут наприкінці';
+
+  @override
+  String get dragItemsHereToAdd =>
+      '+ Перетягніть елементи сюди, щоб додати до цього розділу';
+
+  @override
+  String get moveToAdvancedSettingsTooltip =>
+      'Перемістити до розширених налаштувань';
+
+  @override
+  String get noVaultsMounted => 'Немає змонтованих сховищ';
+
+  @override
+  String get vaultsMountedSummary => 'сховищ(а) змонтовано';
+
+  @override
+  String get dashboardNavLabel => 'Панель керування';
+
+  @override
+  String get vaultsSectionTitle => 'Сховища';
+
+  @override
+  String get vaultStatusMounted => 'Змонтовано';
+
+  @override
+  String get lockVaultTooltip => 'Заблокувати сховище';
+
+  @override
+  String get lockAllVaultsTitle => 'Заблокувати всі сховища';
+
+  @override
+  String get safProviderLabel => 'Провайдер SAF';
+
+  @override
+  String get singleFileCryptoTitle => 'Шифрування окремого файлу';
+
+  @override
+  String get singleFileCryptoSubtitle =>
+      'Шифрування або розшифрування за межами сховищ';
+
+  @override
+  String get passwordGeneratorTitle => 'Генератор паролів';
+
+  @override
+  String get contentsLabel => 'Вміст';
+
+  @override
+  String get totalSizeLabel => 'Загальний розмір';
+
+  @override
+  String folderItemCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів',
+      many: '$count елементів',
+      few: '$count елементи',
+      one: '1 елемент',
+      zero: 'Порожньо',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calculatingFolderStats => 'Обчислення…';
+
+  @override
+  String get videoGesturesHeader => 'Жести відео та масштабування';
+
+  @override
+  String get swipeToSeekTitle => 'Проведення для перемотування';
+
+  @override
+  String get swipeToSeekSubtitle =>
+      'Проведіть горизонтально по екрану для перемотування. У списках відтворення слід використовувати кнопки навігації замість проведення між елементами';
+
+  @override
+  String get swipeToDismissTitle => 'Свайп для закриття';
+
+  @override
+  String get swipeToDismissSubtitle =>
+      'Свайпніть вниз, щоб закрити переглядач. Якщо список відтворення прокручується вертикально, свайпайте вбік';
+
+  @override
+  String get edgeSwipeBrightnessTitle => 'Свайп для регулювання яскравості';
+
+  @override
+  String get edgeSwipeBrightnessSubtitle =>
+      'Проведіть уздовж лівого краю для налаштування яскравості екрана';
+
+  @override
+  String get edgeSwipeVolumeTitle => 'Свайп для регулювання гучності';
+
+  @override
+  String get edgeSwipeVolumeSubtitle =>
+      'Проведіть уздовж правого краю для налаштування гучності';
+
+  @override
+  String get edgeSwipeHudTitle => 'Показувати індикатор жесту';
+
+  @override
+  String get edgeSwipeHudSubtitle =>
+      'Відображати відсоток під час проведення жесту';
+
+  @override
+  String get edgeSwipeWidthTitle => 'Ширина крайової зони';
+
+  @override
+  String get pinchZoomOutTitle => 'Дозволити зменшення масштабу';
+
+  @override
+  String get pinchZoomOutSubtitle =>
+      'Зведіть пальці, щоб зменшити відео нижче звичайного розміру';
+
+  @override
+  String get minZoomTitle => 'Мінімальний рівень масштабу';
+
+  @override
+  String get holdSpeedMultiplierTitle => 'Швидкість прискорення утриманням';
+
+  @override
+  String get holdSpeedMultiplierSubtitle =>
+      'Швидкість під час натискання та утримання відео';
+
+  @override
+  String get defaultAspectRatioTitle =>
+      'Співвідношення сторін за замовчуванням';
+
+  @override
+  String get defaultAspectRatioSubtitle =>
+      'Застосовується автоматично під час відкриття відео';
+
+  @override
+  String get aspectRatioModeLabel => 'Співвідношення сторін';
+
+  @override
+  String get aspectRatioBestFit => 'Найкраще припасування';
+
+  @override
+  String get aspectRatioFill => 'Заповнення';
+
+  @override
+  String get aspectRatio16x9 => '16:9';
+
+  @override
+  String get aspectRatio4x3 => '4:3';
+
+  @override
+  String get aspectRatioCentre => 'По центру';
+
+  @override
+  String get autoSyncMenuAction => 'Автосинхронізація';
+
+  @override
+  String get autoSyncSheetTitle => 'Автосинхронізація';
+
+  @override
+  String get autoSyncSheetIntro =>
+      'Автоматично підтримує цю папку та іншу папку в однаковому стані. Якщо той самий файл змінено з обох боків, зберігаються обидві версії, доки нижче не вибрано інше.';
+
+  @override
+  String get autoSyncTargetSection => 'Синхронізувати з';
+
+  @override
+  String get autoSyncChooseFolder => 'Виберіть папку';
+
+  @override
+  String get autoSyncTargetNotSetHere =>
+      'Це правило було налаштовано на іншому пристрої. Виберіть папку для використання на цьому пристрої.';
+
+  @override
+  String get autoSyncPickerSideLabel => 'Ціль синхронізації';
+
+  @override
+  String get autoSyncDirectionSection => 'Напрямок';
+
+  @override
+  String get autoSyncDirectionTwoWay => 'В обидва боки';
+
+  @override
+  String get autoSyncDirectionTwoWayHint =>
+      'Зміни з будь-якого боку копіюються на інший.';
+
+  @override
+  String get autoSyncDirectionVaultToTarget => 'Зі сховища в папку';
+
+  @override
+  String get autoSyncDirectionVaultToTargetHint =>
+      'Резервна копія: папка повторює вміст сховища. Зміни в папці не копіюються назад.';
+
+  @override
+  String get autoSyncDirectionTargetToVault => 'З папки у сховище';
+
+  @override
+  String get autoSyncDirectionTargetToVaultHint =>
+      'Імпорт: сховище повторює вміст папки. Зміни у сховищі не копіюються назад.';
+
+  @override
+  String get autoSyncConflictSection => 'Якщо файл змінено з обох боків';
+
+  @override
+  String get autoSyncConflictKeepBoth => 'Зберегти обидві версії';
+
+  @override
+  String get autoSyncConflictKeepBothHint =>
+      'Інша версія зберігається як перейменована копія з обох боків.';
+
+  @override
+  String get autoSyncConflictKeepNewer => 'Залишати новішу версію';
+
+  @override
+  String get autoSyncConflictKeepNewerHint =>
+      'Якщо неможливо визначити, яка новіша, зберігає обидві.';
+
+  @override
+  String get autoSyncConflictVaultWins => 'Залишати версію зі сховища';
+
+  @override
+  String get autoSyncConflictVaultWinsHint => 'Версію в папці буде замінено.';
+
+  @override
+  String get autoSyncConflictTargetWins => 'Залишати версію з папки';
+
+  @override
+  String get autoSyncConflictTargetWinsHint =>
+      'Версію у сховищі буде замінено.';
+
+  @override
+  String get autoSyncOptionsSection => 'Параметри';
+
+  @override
+  String get autoSyncOnUnlockTitle =>
+      'Синхронізувати під час розблокування сховища';
+
+  @override
+  String get autoSyncLiveTitle =>
+      'Підтримувати синхронізацію, поки розблоковано';
+
+  @override
+  String get autoSyncLiveSubtitle =>
+      'Час від часу перевіряє зміни, поки сховище відкрите. Не кожна зміна помічається одразу.';
+
+  @override
+  String get autoSyncDeleteTitle => 'Синхронізувати також видалення';
+
+  @override
+  String get autoSyncDeleteSubtitle =>
+      'Файл, видалений в одному місці, видаляється і в іншому. Для захисту від втрати даних видалення призупиняється, якщо папка раптово виявилася порожньою.';
+
+  @override
+  String get autoSyncDeleteSourceAfterImportTitle =>
+      'Видаляти вихідні файли після імпорту';
+
+  @override
+  String get autoSyncDeleteSourceAfterImportSubtitle =>
+      'Лише для синхронізації з папки до сховища. Вихідний файл видаляється після запису копії у сховище та перевірки збігу контрольної суми SHA-256.';
+
+  @override
+  String get autoSyncIgnoreLabel => 'Пропускати файли й папки за шаблоном';
+
+  @override
+  String get autoSyncIgnoreHelper =>
+      'Один шаблон на рядок: *.tmp відповідає назвам у будь-якому місці; node_modules пропускає цю папку та її вміст; Projects/old пропускає цей шлях від кореня синхронізації та все всередині.';
+
+  @override
+  String get autoSyncNeverSynced => 'Ще не синхронізовано';
+
+  @override
+  String autoSyncLastSynced(String time) {
+    return 'Остання синхронізація: $time';
+  }
+
+  @override
+  String autoSyncReportSummary(int copied, int deleted, int kept) {
+    return '$copied скопійовано · $deleted видалено · $kept конфліктів збережено';
+  }
+
+  @override
+  String autoSyncReportFailed(int count) {
+    return 'Файли, які не вдалося синхронізувати: $count';
+  }
+
+  @override
+  String get autoSyncReportDeletionsPaused =>
+      'Видалення призупинено для захисту даних: папка раптово спорожніла або видаляється забагато файлів одночасно.';
+
+  @override
+  String get autoSyncReportIncomplete =>
+      'Не вдалося прочитати частину папки, тому ці файли залишено без змін.';
+
+  @override
+  String get autoSyncSyncNow => 'Синхронізувати зараз';
+
+  @override
+  String get autoSyncRemove => 'Вилучити автосинхронізацію';
+
+  @override
+  String get autoSyncRemoveTitle => 'Вилучити автосинхронізацію?';
+
+  @override
+  String get autoSyncRemoveMessage =>
+      'Синхронізацію цієї папки буде зупинено. Файли в обох папках залишаться без змін.';
+
+  @override
+  String get autoSyncSaved => 'Автосинхронізацію збережено';
+
+  @override
+  String get autoSyncStarted => 'Синхронізацію розпочато';
+
+  @override
+  String get autoSyncRemoved => 'Автосинхронізацію вилучено';
+
+  @override
+  String get autoSyncSaveFailed =>
+      'Не вдалося зберегти налаштування автосинхронізації';
+
+  @override
+  String get autoSyncUnavailable =>
+      'Синхронізація для цього сховища зараз недоступна.';
+
+  @override
+  String get autoSyncProblemNoTarget => 'Виберіть папку для синхронізації.';
+
+  @override
+  String get autoSyncProblemOverlapsTarget =>
+      'Папка для синхронізації не може бути всередині цієї папки або містити її.';
+
+  @override
+  String get autoSyncProblemOverlapsOtherRule =>
+      'Для цієї папки або батьківської чи вкладеної в неї вже налаштовано автосинхронізацію.';
+
+  @override
+  String get autoSyncProblemTargetIsVault =>
+      'У цій папці зберігаються зашифровані дані сховища. Розблокуйте сховище та виберіть його у списку сховищ.';
+
+  @override
+  String get autoSyncReadOnlyNotice =>
+      'Це сховище доступне лише для читання, тому автосинхронізацію не можна зберегти.';
+
+  @override
+  String get autoSyncConfigUnreadable =>
+      'Не вдалося прочитати збережені налаштування автосинхронізації для цього сховища.';
+
+  @override
+  String autoSyncBannerRunning(String target, int done, int total) {
+    return 'Синхронізація з $target · $done з $total';
+  }
+
+  @override
+  String get autoSyncBannerAttention =>
+      'Деякі папки не вдалося синхронізувати повністю. Відкрийте налаштування автосинхронізації папки, щоб побачити подробиці.';
+
+  @override
+  String get autoSyncNotificationTitle => 'Синхронізація папок';
+
+  @override
+  String autoSyncNotificationProgress(int done, int total) {
+    return '$done з $total файлів';
+  }
+
+  @override
+  String get sectionQuickCapture => 'Швидке захоплення';
+
+  @override
+  String get quickCaptureSettingsTitle => 'Швидке захоплення';
+
+  @override
+  String get quickCaptureSettingsSubtitle =>
+      'Плитка швидких налаштувань і ярлик на головному екрані для захоплення одразу у сховище';
+
+  @override
+  String get quickCaptureTileToggleTitle => 'Плитка швидких налаштувань';
+
+  @override
+  String get quickCaptureTileToggleSubtitle =>
+      'Відкриває камеру прямо зі швидких налаштувань, без запиту PIN-коду чи графічного ключа. Перед збереженням вам усе одно потрібно вибрати та розблокувати сховище.';
+
+  @override
+  String get quickCaptureAddShortcutTitle => 'Додати на головний екран';
+
+  @override
+  String get quickCaptureAddShortcutSubtitle =>
+      'Закріпити значок швидкого захоплення на головному екрані, якщо це підтримує ваш лаунчер';
+
+  @override
+  String get quickCaptureShortcutRequestedMessage =>
+      'Запит надіслано — перевірте головний екран';
+
+  @override
+  String get quickCaptureShortcutUnsupportedMessage =>
+      'Ваш лаунчер не підтримує закріплення ярликів';
+
+  @override
+  String quickCaptureSavedToast(String name, String destination) {
+    return '$name збережено у $destination';
+  }
+
+  @override
+  String get cardSwipeActionsTitle => 'Жести змахування карток';
+
+  @override
+  String get cardSwipeActionsSubtitle =>
+      'Проведіть по картці сховища, щоб швидко відкрити дії редагування та вилучення';
+
+  @override
+  String get cameraQualitySd => '480p (SD)';
+
+  @override
+  String get cameraQualityHd => '720p (HD)';
+
+  @override
+  String get cameraQualityFhd => '1080p (FHD)';
+
+  @override
+  String get cameraQualityUhd => '4K (UHD)';
+
+  @override
+  String get cameraPhotoResMax => 'Повна (макс. роздільність)';
+
+  @override
+  String get cameraPhotoResHigh => '5 Мп (висока)';
+
+  @override
+  String get cameraPhotoResMedium => '2 Мп (середня)';
+
+  @override
+  String get cameraPhotoResLow => '1,2 Мп (низька)';
+
+  @override
+  String get cameraLensWide => 'Ширококутна';
+
+  @override
+  String get cameraLensInfrared => 'ІЧ';
+
+  @override
+  String get cameraLensFront => 'Фронтальна';
+
+  @override
+  String get appLockBehaviorTitle => 'Поведінка блокування програми';
+
+  @override
+  String get lockAppOnScreenOffTitle =>
+      'Блокувати програму під час вимкнення екрана';
+
+  @override
+  String get lockAppOnScreenOffSubtitle =>
+      'Показувати екран блокування, щойно вимикається екран';
+
+  @override
+  String get settingsHubSecuritySubtitle =>
+      'Головне блокування, біометрія та автоблокування';
+
+  @override
+  String get settingsHubStorageSubtitle =>
+      'Доступ до сховища, фонова служба та меню поширення';
+
+  @override
+  String get settingsHubFileHandlingSubtitle =>
+      'Автоматичне відкриття, мініатюри та асоціації файлів';
+
+  @override
+  String get settingsHubAppearanceSubtitle =>
+      'Теми, глибокий чорний OLED та мова';
+
+  @override
+  String get settingsHubAdvancedSubtitle =>
+      'Резервна копія налаштувань та системний журнал';
+
+  @override
+  String get toolPasswordInterchangeTitle => 'Імпорт та експорт паролів';
+
+  @override
+  String get toolPasswordInterchangeSubtitle =>
+      'Переносьте логіни, картки та нотатки між іншими менеджерами паролів';
+
+  @override
+  String get toolsSectionPasswordManager => 'Менеджер паролів';
+
+  @override
+  String get passwordInterchangeExportTab => 'Експорт';
+
+  @override
+  String get passwordInterchangeImportTab => 'Імпорт';
+
+  @override
+  String get passwordInterchangeSourceHeader => 'Звідки';
+
+  @override
+  String get passwordInterchangeChooseFolder => 'Виберіть папку сховища';
+
+  @override
+  String get passwordInterchangeIncludeSubfolders => 'Включно з підпапками';
+
+  @override
+  String get passwordInterchangeFormatHeader => 'Формат';
+
+  @override
+  String get passwordInterchangeFormatLabel => 'Формат файлу';
+
+  @override
+  String get passwordInterchangeMasterPassword => 'Головний пароль';
+
+  @override
+  String get passwordInterchangeConfirmPassword => 'Підтвердьте пароль';
+
+  @override
+  String get passwordInterchangePasswordsDontMatch => 'Паролі не збігаються';
+
+  @override
+  String get passwordInterchangeRunExport => 'Експортувати';
+
+  @override
+  String passwordInterchangeExportReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів готово до експорту',
+      many: '$count елементів готово до експорту',
+      few: '$count елементи готові до експорту',
+      one: '1 елемент готовий до експорту',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeSaveToDevice => 'Зберегти на пристрій…';
+
+  @override
+  String get passwordInterchangeSaved => 'Збережено.';
+
+  @override
+  String get passwordInterchangeFileHeader => 'Файл';
+
+  @override
+  String get passwordInterchangeChooseFile => 'Виберіть файл…';
+
+  @override
+  String get passwordInterchangeReadFile => 'Прочитати файл';
+
+  @override
+  String passwordInterchangeFoundItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Знайдено $count елементів',
+      many: 'Знайдено $count елементів',
+      few: 'Знайдено $count елементи',
+      one: 'Знайдено 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeSelectAll => 'Вибрати все';
+
+  @override
+  String get passwordInterchangeSelectNone => 'Зняти виділення';
+
+  @override
+  String passwordInterchangeWarningsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не вдалося прочитати $count рядків',
+      many: 'Не вдалося прочитати $count рядків',
+      few: 'Не вдалося прочитати $count рядки',
+      one: 'Не вдалося прочитати 1 рядок',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeDestinationHeader => 'Зберегти до';
+
+  @override
+  String get passwordInterchangeMirrorFolders => 'Відтворити папки';
+
+  @override
+  String passwordInterchangeRunImport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Імпортувати $count елементів',
+      many: 'Імпортувати $count елементів',
+      few: 'Імпортувати $count елементи',
+      one: 'Імпортувати 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String passwordInterchangeImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Імпортовано $count елементів',
+      many: 'Імпортовано $count елементів',
+      few: 'Імпортовано $count елементи',
+      one: 'Імпортовано 1 елемент',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String passwordInterchangeSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count елементів пропущено',
+      many: '$count елементів пропущено',
+      few: '$count елементи пропущено',
+      one: '1 елемент пропущено',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String autoLockIndicatorLocksAfter(String duration) {
+    return 'Блокування за бездіяльністю: $duration';
+  }
+
+  @override
+  String get autoLockIndicatorLocksOnScreenOff =>
+      'Блокування після вимкнення екрана';
+
+  @override
+  String get autoLockIndicatorNeverLocks => 'Не блокується автоматично';
+
+  @override
+  String autoLockIndicatorLocksAfterTooltip(String duration) {
+    return 'Блокується після $duration бездіяльності (скидається під час використання програми)';
+  }
+
+  @override
+  String get badgeExperimental => 'Експериментальний';
+
+  @override
+  String get createCompositeHintPrompt =>
+      'Сховати сховище, прикріпивши його частини до звичайних файлів?';
+
+  @override
+  String get createCompositeHintAction => 'Відкрити майстер композитного тому';
+
+  @override
+  String get plainDiskImageNotice =>
+      'Виявлено незашифрований образ диска. Для монтування цього тому пароль не потрібен.';
+
+  @override
+  String storageLocationUnavailable(String name) {
+    return 'Місце зберігання \"$name\" недоступне або відключено.';
+  }
+
+  @override
+  String get cameraEditPhotoTooltip => 'Редагувати фото';
+
+  @override
+  String get cameraTrimVideoTooltip => 'Обрізати відео';
+
+  @override
+  String get cameraDiscardMediaTooltip => 'Відхилити';
+
+  @override
+  String get cameraSaveMediaTooltip => 'Зберегти у сховище';
+
+  @override
+  String get cameraContinueCaptureTooltip => 'Зробити ще одне фото';
+
+  @override
+  String cameraBatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count фото',
+      many: '$count фото',
+      few: '$count фото',
+      one: '1 фото',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cameraReviewPhotosTooltip => 'Переглянути зроблені фото';
+
+  @override
+  String get vaultItemTypeAuthenticator => 'Автентифікатор';
+
+  @override
+  String get fieldIssuer => 'Сервіс';
+
+  @override
+  String get fieldAuthenticatorAccount => 'Обліковий запис';
+
+  @override
+  String get fieldSecretKey => 'Секретний ключ';
+
+  @override
+  String get fieldTotpAlgorithm => 'Алгоритм (за замовчуванням: SHA1)';
+
+  @override
+  String get fieldTotpDigits => 'Кількість цифр (за замовчуванням: 6)';
+
+  @override
+  String get fieldTotpPeriod =>
+      'Інтервал оновлення, секунди (за замовчуванням: 30)';
+
+  @override
+  String get authenticatorScreenTitle => 'Автентифікатор';
+
+  @override
+  String get authenticatorAppBarTooltip => 'Коди автентифікатора';
+
+  @override
+  String get authenticatorEmptyStateTitle => 'Кодів автентифікатора ще немає';
+
+  @override
+  String get authenticatorEmptyStateMessage =>
+      'Додайте секрет TOTP до запису пароля або створіть окремий елемент автентифікатора в будь-якому розблокованому сховищі, щоб бачити актуальні коди тут.';
+
+  @override
+  String get authenticatorNoVaultsUnlockedMessage =>
+      'Розблокуйте сховище, щоб переглянути його коди автентифікатора.';
+
+  @override
+  String get authenticatorCodeLabel => 'Код';
+
+  @override
+  String get authenticatorInvalidSecretError => 'Недійсний секретний ключ';
+
+  @override
+  String get authenticatorAddButtonTooltip => 'Додати автентифікатор';
+
+  @override
+  String get authenticatorChooseVaultTitle => 'Виберіть сховище';
+
+  @override
+  String get authenticatorOpenItemTooltip => 'Відкрити запис';
+
+  @override
+  String get authenticatorNextCodeLabel => 'Наступний код';
+
+  @override
+  String get authenticatorNextCodePrefix => 'Наступний';
+
+  @override
+  String get authenticatorCopyNextCodeTooltip => 'Скопіювати наступний код';
+
+  @override
+  String get authenticatorSettingsTitle => 'Налаштування автентифікатора';
+
+  @override
+  String get authenticatorEnableTitle => 'Увімкнути автентифікатор';
+
+  @override
+  String get authenticatorEnableSubtitle =>
+      'Автоматично сканувати відкриті сховища на наявність 2FA-кодів';
+
+  @override
+  String get authenticatorShowCodesTitle => 'Показувати коди підтвердження';
+
+  @override
+  String get authenticatorShowCodesSubtitle =>
+      'Показувати цифри відкрито замість маскування для конфіденційності';
+
+  @override
+  String get authenticatorSearchPlacementLabel => 'Розташування панелі пошуку';
+
+  @override
+  String get authenticatorPlacementBottom => 'Знизу';
+
+  @override
+  String get authenticatorPlacementTop => 'Згори';
+
+  @override
+  String get authenticatorInterchangeSection => 'Імпорт та експорт';
+
+  @override
+  String get scanQrCodeTooltip => 'Сканувати QR-код';
+
+  @override
+  String get qrScannerTitle => 'Сканувати QR-код';
+
+  @override
+  String get qrScannerHint => 'Вирівняйте QR-код у рамці';
+
+  @override
+  String get qrCodeScannedSuccess => 'QR-код успішно відскановано';
+
+  @override
+  String get invalidQrCodeError => 'Недійсний 2FA QR-код';
+
+  @override
+  String get immediateAutoLockOptionSubtitle =>
+      'Блокується, щойно екран вимикається або програма переходить у фоновий режим';
+
+  @override
+  String get autoLockIndicatorLocksImmediately => 'Миттєве блокування';
+
+  @override
+  String get quickActionLockModeTitle => 'Блокувати після швидких дій';
+
+  @override
+  String get quickActionLockModeSubtitle =>
+      'Поведінка блокування сховища під час збереження зі швидкого захоплення або вікна «Поділитися»';
+
+  @override
+  String get quickActionLockModeLeaveAsFoundLabel => 'Залишати як було';
+
+  @override
+  String get quickActionLockModeLeaveAsFoundSubtitle =>
+      'Блокувати, лише якщо сховище було заблоковано перед збереженням';
+
+  @override
+  String get quickActionLockModeAlwaysLockLabel => 'Завжди блокувати';
+
+  @override
+  String get quickActionLockModeAlwaysLockSubtitle =>
+      'Блокувати сховище негайно після збереження';
+
+  @override
+  String get quickActionLockModeLeaveOpenLabel => 'Залишати розблокованим';
+
+  @override
+  String get quickActionLockModeLeaveOpenSubtitle =>
+      'Залишати сховище відкритим відповідно до таймерів автоблокування';
+
+  @override
+  String get textEditorThemeMenuItem => 'Вигляд редактора…';
+
+  @override
+  String get textEditorThemeSheetTitle => 'Вигляд редактора';
+
+  @override
+  String get textEditorBackgroundSectionTitle => 'Фон';
+
+  @override
+  String get textEditorSyntaxThemeSectionTitle => 'Тема синтаксису';
+
+  @override
+  String get textEditorBackgroundMatchTheme => 'Як у темі';
+
+  @override
+  String get textEditorBackgroundAmoledBlack => 'Чорний AMOLED';
+
+  @override
+  String get textEditorBackgroundDarkSlate => 'Темний грифельний';
+
+  @override
+  String get textEditorBackgroundClassicLight => 'Класичний світлий';
+
+  @override
+  String get textEditorBackgroundSepia => 'Сепія';
+
+  @override
+  String get textEditorSyntaxThemeAuto => 'Авто';
+
+  @override
+  String get textEditorSyntaxThemeOneDark => 'One Dark';
+
+  @override
+  String get textEditorSyntaxThemeDracula => 'Dracula';
+
+  @override
+  String get textEditorSyntaxThemeGithubLight => 'GitHub Light';
+
+  @override
+  String get textEditorSyntaxThemeMonokai => 'Monokai';
+
+  @override
+  String get textEditorSyntaxThemeNord => 'Nord';
+
+  @override
+  String get textEditorRelativeLineNumbersLabel => 'Відносні номери рядків';
+
+  @override
+  String get textEditorRelativeLineNumbersDescription =>
+      'Показувати відстань кожного рядка від курсора замість його абсолютного номера';
+
+  @override
+  String get textEditorAutoSaveLabel => 'Автозбереження';
+
+  @override
+  String get textEditorAutoSaveDescription =>
+      'Автоматично зберігати зміни після завершення введення';
+
+  @override
+  String get cutTooltip => 'Вирізати';
+
+  @override
+  String get textEditorShowLineNumbersLabel => 'Показувати номери рядків';
+
+  @override
+  String get textEditorShowLineNumbersDescription =>
+      'Відображати номери рядків уздовж лівого краю';
+
+  @override
+  String get textEditorShowAccessoryBarLabel =>
+      'Показувати панель швидких клавіш';
+
+  @override
+  String get textEditorShowAccessoryBarDescription =>
+      'Відображати символи та інструменти над клавіатурою';
+
+  @override
+  String textEditorFontSizeLabel(int size) {
+    return 'Розмір шрифту: $size пт';
+  }
+
+  @override
+  String get textEditorCustomizeKeyBarLabel => 'Налаштувати символи';
+
+  @override
+  String get textEditorCustomizeKeyBarDescription =>
+      'Редагувати та впорядковувати символи панелі';
+
+  @override
+  String get textEditorCustomizeKeyBarTitle => 'Налаштувати символи';
+
+  @override
+  String get textEditorCustomizeKeyBarHint => 'Символи, розділені пробілом';
+
+  @override
+  String get textEditorSaveAsMenuItem => 'Зберегти як…';
+
+  @override
+  String get textEditorSaveAsDialogTitle => 'Зберегти як';
+
+  @override
+  String get textEditorSaveAsFileNameLabel => 'Назва файлу';
+
+  @override
+  String get textEditorSaveAsButton => 'Зберегти як';
+
+  @override
+  String get textEditorFileAlreadyExistsError =>
+      'Файл із такою назвою вже існує';
+
+  @override
+  String get textEditorProjectFilesTitle => 'Файли проєкту';
+
+  @override
+  String get textEditorCloseTabTooltip => 'Закрити вкладку';
+
+  @override
+  String get textEditorResetToDefault => 'Скинути до початкових';
+
+  @override
+  String get textEditorLivePreviewTitle => 'Попередній перегляд';
+
+  @override
+  String get textEditorWordWrap => 'Перенесення слів';
+
+  @override
+  String get textEditorReadOnly => 'Тільки для читання';
+
+  @override
+  String get selectImageTitle => 'Вибрати зображення';
+
+  @override
+  String get noImagesFoundMessage => 'У цій папці не знайдено зображень.';
+
+  @override
+  String get textEditorShowSymbolsBarLabel => 'Показувати рядок символів';
+
+  @override
+  String get textEditorShowSymbolsBarDescription =>
+      'Показувати панель швидких символів і розділових знаків';
+
+  @override
+  String get textEditorShowActionsBarLabel => 'Показувати рядок дій';
+
+  @override
+  String get textEditorShowActionsBarDescription =>
+      'Показувати кнопки швидких дій редактора';
+
+  @override
+  String get textEditorCustomizeActionsLabel => 'Налаштувати кнопки дій';
+
+  @override
+  String get textEditorCustomizeActionsDescription =>
+      'Вибір і зміна порядку дій редактора';
+
+  @override
+  String get textEditorCustomizeActionsTitle => 'Налаштування дій';
+
+  @override
+  String get actionUndo => 'Скасувати';
+
+  @override
+  String get actionRedo => 'Повторити';
+
+  @override
+  String get actionCursorLeft => 'Курсор вліво';
+
+  @override
+  String get actionCursorRight => 'Курсор вправо';
+
+  @override
+  String get actionSelectWord => 'Виділити слово';
+
+  @override
+  String get actionCopy => 'Копіювати';
+
+  @override
+  String get actionCut => 'Вирізати';
+
+  @override
+  String get actionPaste => 'Вставити';
+
+  @override
+  String get actionFind => 'Знайти та замінити';
+
+  @override
+  String get actionWordWrap => 'Перенесення слів';
+
+  @override
+  String get actionGoToLine => 'Перейти до рядка';
+
+  @override
+  String get actionGoToStart => 'На початок';
+
+  @override
+  String get actionGoToEnd => 'В кінець';
+
+  @override
+  String get actionIndent => 'Збільшити відступ';
+
+  @override
+  String get actionOutdent => 'Зменшити відступ';
+
+  @override
+  String get actionFormat => 'Форматувати код';
+
+  @override
+  String get actionReadOnly => 'Тільки для читання';
+
+  @override
+  String get screenLockOnlyAutoLockOption => 'Лише блокування екрана';
+
+  @override
+  String get screenLockOnlyAutoLockOptionSubtitle =>
+      'Блокується лише під час вимкнення екрана — а не коли програма переходить у фоновий режим';
+
+  @override
+  String get authenticatorScanQrSubtitle =>
+      'Сканувати окремий код або QR-код перенесення Google Authenticator';
+
+  @override
+  String get authenticatorImportBackupsSubtitle =>
+      'Імпорт із резервних копій Aegis, 2FAS, Bitwarden, Ente, Proton або andOTP';
+
+  @override
+  String authenticatorGoogleAuthImportSuccess(int count) {
+    return 'Імпортовано $count обліковий(их) запис(ів) із Google Authenticator';
+  }
+
+  @override
+  String get authenticatorMultiQrTitle => 'Виявлено додаткові QR-коди';
+
+  @override
+  String get authenticatorMultiQrMessage =>
+      'Google Authenticator розділив цей експорт на кілька QR-кодів. Сканувати наступний зараз?';
+
+  @override
+  String get authenticatorScanNextQr => 'Сканувати наступний';
+
+  @override
+  String authenticatorGoogleAuthImportError(String error) {
+    return 'Не вдалося імпортувати QR-код Google Authenticator: $error';
+  }
+
+  @override
+  String get passwordInterchangeOptionalPasswordHelper =>
+      'Потрібно, лише якщо ця резервна копія захищена паролем';
+
+  @override
+  String authenticatorSingleAccountImportedHint(String title) {
+    return 'Заповнено першим обліковим записом ($title). Щоб імпортувати всі облікові записи, відскануйте на екрані автентифікатора.';
+  }
+
+  @override
+  String get authenticatorHotpReadOnlyError =>
+      'Це сховище доступне лише для читання, тому лічильник HOTP не можна збільшити.';
+
+  @override
+  String get authenticatorHotpSaveError =>
+      'Не вдалося зберегти новий лічильник HOTP.';
+
+  @override
+  String get authenticatorGenerateNextCode => 'Згенерувати наступний код';
+
+  @override
+  String get actionSelectAll => 'Вибрати все';
+
+  @override
+  String get textEditorSelectAllMenuItem => 'Вибрати все';
+
+  @override
+  String get textEditorShowCaretScrubberLabel => 'Показувати повзунок курсора';
+
+  @override
+  String get textEditorShowCaretScrubberDescription =>
+      'Смуга перетягування для точного переміщення курсора';
+
+  @override
+  String get textEditorShowStatusBarLabel => 'Показувати рядок стану';
+
+  @override
+  String get textEditorShowStatusBarDescription =>
+      'Показувати кількість рядків і символів унизу';
+
+  @override
+  String textEditorCursorPosition(int line, int column) {
+    return 'Ряд $line, Кол $column';
+  }
+
+  @override
+  String get textEditorNewFileTooltip => 'Новий файл';
+
+  @override
+  String get textEditorCloseTab => 'Закрити';
+
+  @override
+  String get textEditorCloseOtherTabs => 'Закрити інші';
+
+  @override
+  String get textEditorCloseAllTabs => 'Закрити всі';
+
+  @override
+  String get textEditorRevertToSaved => 'Повернути до збереженого';
+
+  @override
+  String get textEditorRevertDialogTitle => 'Скасувати зміни?';
+
+  @override
+  String get textEditorRevertDialogMessage =>
+      'Скасувати всі незбережені зміни та перезавантажити файл зі сховища?';
+
+  @override
+  String get revertButton => 'Повернути';
+
+  @override
+  String get textEditorNewFolderTooltip => 'Нова папка';
+
+  @override
+  String get textEditorNewFolderDialogTitle => 'Нова папка';
+
+  @override
+  String get textEditorNewFolderFieldLabel => 'Назва папки';
+
+  @override
+  String get textEditorRenameMenuItem => 'Перейменувати';
+
+  @override
+  String get textEditorRenameDialogTitle => 'Перейменувати';
+
+  @override
+  String get textEditorMoveToMenuItem => 'Перемістити до...';
+
+  @override
+  String get textEditorMoveToDialogTitle => 'Перемістити до папки';
+
+  @override
+  String get textEditorMoveHereButton => 'Перемістити сюди';
+
+  @override
+  String get textEditorDeleteMenuItem => 'Видалити';
+
+  @override
+  String textEditorDeleteConfirmTitle(String name) {
+    return 'Видалити $name?';
+  }
+
+  @override
+  String textEditorDeleteConfirmMessage(String name) {
+    return 'Ви дійсно бажаєте видалити \"$name\"? Цю дію не можна скасувати.';
+  }
+
+  @override
+  String get videoEditorEditAction => 'Редагувати відео';
+
+  @override
+  String get videoEditorExportAction => 'Експорт';
+
+  @override
+  String get videoEditorTimelineLabel => 'Часова шкала відео';
+
+  @override
+  String get videoEditorSetStart => 'Встановити початок';
+
+  @override
+  String get videoEditorSetEnd => 'Встановити кінець';
+
+  @override
+  String get videoEditorAddSegment => 'Додати';
+
+  @override
+  String get videoEditorSplit => 'Розділити';
+
+  @override
+  String get videoEditorDeleteSegment => 'Видалити';
+
+  @override
+  String get videoEditorModeKeep => 'Залишити';
+
+  @override
+  String get videoEditorModeCutOut => 'Вирізати';
+
+  @override
+  String get videoEditorNoSegments =>
+      'Сегментів ще немає. Перемістіть повзунок і натисніть «Додати».';
+
+  @override
+  String videoEditorOutputSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Результат: $count фрагментів · $duration',
+      many: 'Результат: $count фрагментів · $duration',
+      few: 'Результат: $count фрагменти · $duration',
+      one: 'Результат: 1 фрагмент · $duration',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String videoEditorSnapNote(String start, String end) {
+    return 'Нарізка без втрат починається з ключового кадру: $start – $end';
+  }
+
+  @override
+  String get videoEditorBoundaryInvalid => 'Сегмент вийде занадто коротким.';
+
+  @override
+  String get videoEditorNoRoom => 'Тут немає місця для сегмента.';
+
+  @override
+  String get videoEditorNothingToExport => 'Немає що експортувати.';
+
+  @override
+  String get videoEditorReadOnly =>
+      'Це сховище доступне лише для читання, тому відредаговане відео не можна зберегти.';
+
+  @override
+  String videoEditorLoadFailed(String message) {
+    return 'Не вдалося відкрити відео: $message';
+  }
+
+  @override
+  String get videoEditorZoomIn => 'Збільшити';
+
+  @override
+  String get videoEditorZoomOut => 'Зменшити';
+
+  @override
+  String get videoEditorZoomFit => 'Вписати в екран';
+
+  @override
+  String get videoEditorPrevFrame => 'Попередній кадр';
+
+  @override
+  String get videoEditorNextFrame => 'Наступний кадр';
+
+  @override
+  String get videoEditorPrevKeyframe => 'Попередній ключовий кадр';
+
+  @override
+  String get videoEditorNextKeyframe => 'Наступний ключовий кадр';
+
+  @override
+  String get videoEditorExporting => 'Експорт відео';
+
+  @override
+  String videoEditorCutting(int current, int total) {
+    return 'Обрізання фрагмента $current з $total';
+  }
+
+  @override
+  String get videoEditorCuttingOne => 'Обрізання…';
+
+  @override
+  String get videoEditorSaving => 'Збереження…';
+
+  @override
+  String videoEditorSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Збережено $count відео',
+      many: 'Збережено $count відео',
+      few: 'Збережено $count відео',
+      one: 'Збережено 1 відео',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorAudioDropped =>
+      'Деякі аудіодоріжки не вдалося скопіювати.';
+
+  @override
+  String videoEditorExportFailed(String message) {
+    return 'Помилка експорту: $message';
+  }
+
+  @override
+  String get videoEditorExportCancelled => 'Експорт скасовано';
+
+  @override
+  String get videoEditorExportTitle => 'Експорт';
+
+  @override
+  String videoEditorExportSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count фрагментів · $duration',
+      many: '$count фрагментів · $duration',
+      few: '$count фрагменти · $duration',
+      one: '1 фрагмент · $duration',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorExportSingle => 'Зберегти як нове відео';
+
+  @override
+  String get videoEditorExportSingleHint => 'Оригінал залишиться без змін.';
+
+  @override
+  String get videoEditorExportMerge => 'Об\'єднати в одне відео';
+
+  @override
+  String get videoEditorExportMergeHint =>
+      'Фрагменти об\'єднуються в порядку часової шкали.';
+
+  @override
+  String get videoEditorExportSeparate => 'Зберегти окремими відео';
+
+  @override
+  String videoEditorExportSeparateHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count нових файлів',
+      many: '$count нових файлів',
+      few: '$count нові файли',
+      one: '1 новий файл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorLosslessNote =>
+      'Нарізка відбувається без втрат якості, без перекодування. Кожен фрагмент починається з найближчого ключового кадру перед початковою точкою та закінчується наступним ключовим кадром після кінцевої точки. Тонкі смужки під шкалою показують, що саме буде збережено.';
+
+  @override
+  String get videoEditorAnalyzing => 'Аналіз відео…';
+
+  @override
+  String get videoEditorDiscardTitle => 'Скасувати зміни?';
+
+  @override
+  String get videoEditorDiscardMessage =>
+      'У вас є незбережені зміни. Справді скасувати їх?';
+
+  @override
+  String get videoEditorDiscardAction => 'Скасувати';
+
+  @override
+  String get videoEditorPreviewCut => 'Попередній перегляд обрізки';
+
+  @override
+  String get videoEditorSegments => 'Сегменти';
+
+  @override
+  String get videoEditorReplaceOriginal => 'Замінити оригінальне відео';
+
+  @override
+  String get videoEditorReplaceOriginalHint =>
+      'Оригінальне відео буде замінено експортованим фрагментом.';
+
+  @override
+  String get videoEditorCustomFileName => 'Назва вихідного файлу';
+
+  @override
+  String get videoEditorSubtitlesWarning =>
+      'Примітка: вбудовані доріжки субтитрів не можна зберегти під час експорту без втрат.';
+
+  @override
+  String get videoEditorRemoveSection => 'Видалити розділ';
+
+  @override
+  String get fileSkinScreenTitle => 'Тема оформлення файлового менеджера';
+
+  @override
+  String get fileSkinSectionHeader => 'Вигляд';
+
+  @override
+  String get fileSkinEntryTitle => 'Тема оформлення';
+
+  @override
+  String get fileSkinPreviewHeader => 'Попередній перегляд';
+
+  @override
+  String get fileSkinPresetsHeader => 'Теми';
+
+  @override
+  String get fileSkinFoldersHeader => 'Папки';
+
+  @override
+  String get fileSkinFilesHeader => 'Файли';
+
+  @override
+  String get fileSkinTextHeader => 'Текст';
+
+  @override
+  String get fileSkinIconStyleLabel => 'Стиль піктограм';
+
+  @override
+  String get fileSkinContainerLabel => 'Фон піктограми';
+
+  @override
+  String get fileSkinIconColorLabel => 'Колір піктограми';
+
+  @override
+  String get fileSkinCustomIconColorLabel => 'Власний колір піктограми';
+
+  @override
+  String get fileSkinNameColorLabel => 'Колір назви';
+
+  @override
+  String get fileSkinDetailsColorLabel => 'Колір відомостей';
+
+  @override
+  String get fileSkinMonospaceLabel => 'Назви моноширинним шрифтом';
+
+  @override
+  String get fileSkinMonospaceDesc =>
+      'Використовувати шрифт фіксованої ширини для назв файлів і папок';
+
+  @override
+  String get fileSkinIconFamilyDefault => 'Типовий';
+
+  @override
+  String get fileSkinIconFamilyFilled => 'Заповнений';
+
+  @override
+  String get fileSkinIconFamilyRounded => 'Округлий';
+
+  @override
+  String get fileSkinIconFamilyOutlined => 'Контурний';
+
+  @override
+  String get fileSkinIconFamilySharp => 'Гострий';
+
+  @override
+  String get fileSkinContainerFilled => 'Заповнений';
+
+  @override
+  String get fileSkinContainerOutlined => 'Контурний';
+
+  @override
+  String get fileSkinContainerNone => 'Немає';
+
+  @override
+  String get fileSkinColorAuto => 'Автоматично';
+
+  @override
+  String get fileSkinColorAccent => 'Акцент теми';
+
+  @override
+  String get fileSkinColorNeutral => 'Нейтральний';
+
+  @override
+  String get fileSkinColorCustom => 'Власний';
+
+  @override
+  String get fileSkinColorDefault => 'Типовий';
+
+  @override
+  String get fileSkinColorHexLabel => 'Колір у форматі HEX';
+
+  @override
+  String get fileSkinPresetClassic => 'Класична';
+
+  @override
+  String get fileSkinPresetMinimalOutline => 'Контур';
+
+  @override
+  String get fileSkinPresetFrames => 'Рамки';
+
+  @override
+  String get fileSkinPresetVivid => 'Яскрава';
+
+  @override
+  String get fileSkinPresetTerminal => 'Термінал';
+
+  @override
+  String get fileSkinPresetCustom => 'Власна';
+
+  @override
+  String get compositeArchiveCarrierBlockingWarning =>
+      'Щоб продовжити, вилучіть архів із цього набору. Архіви не можна використовувати як носії складеного сховища, оскільки додавання сховища може їх пошкодити.';
+
+  @override
+  String get compositeArchiveCarrierRowWarning =>
+      'Непідтримуваний архів — вилучіть його з набору.';
+
+  @override
+  String videoEditorSelectedSegmentSummary(
+    int current,
+    int total,
+    String start,
+    String end,
+    String duration,
+  ) {
+    return 'Сегмент $current із $total: $start – $end ($duration)';
+  }
+
+  @override
+  String get videoEditorKeepModeDescription =>
+      'Експортувати вибрані сегменти, відкинувши решту.';
+
+  @override
+  String get videoEditorCutOutModeDescription =>
+      'Вилучити вибрані сегменти й експортувати решту відео.';
+
+  @override
+  String get tapEdgesToNavigateTitle => 'Торкання країв для навігації';
+
+  @override
+  String get tapEdgesToNavigateSubtitle =>
+      'Торкніться лівого або правого краю, щоб показати попередній або наступний медіафайл.';
+
+  @override
+  String get doubleTapPlayPauseTitle => 'Подвійний дотик для відтворення/паузи';
+
+  @override
+  String get doubleTapPlayPauseSubtitle =>
+      'Двічі торкніться центру екрана відео або аудіо, щоб відтворити чи призупинити замість масштабування. Торкніться рівня масштабу, який показано під час збільшення, щоб скинути вигляд.';
+
+  @override
+  String get doubleTapSkipTitle => 'Подвійний дотик для перемотування';
+
+  @override
+  String get doubleTapSkipSubtitle =>
+      'Двічі торкніться лівої або правої частини відео, щоб перемотати назад або вперед. Продовжуйте торкатися, щоб перемотати далі.';
+
+  @override
+  String get doubleTapSkipDurationTitle => 'Тривалість перемотування';
+
+  @override
+  String get loopPlaylistTitle => 'Повторювати список відтворення';
+
+  @override
+  String get loopPlaylistSubtitle =>
+      'Після останнього елемента переходити до першого під час навігації або відтворення.';
+
+  @override
+  String get showFileNamesInMediaNotificationTitle =>
+      'Показувати назви файлів у медіасповіщеннях';
+
+  @override
+  String get showFileNamesInMediaNotificationSubtitle =>
+      'Показує розшифровані назви файлів у сповіщенні, на заблокованому екрані та підключених пристроях.';
+
+  @override
+  String get textEditorEncodingTooltip => 'Кодування тексту';
+
+  @override
+  String get textEditorEncodingEncodeError =>
+      'Деякі символи не можна зберегти в цьому кодуванні.';
+
+  @override
+  String get textEditorShowTabBarLabel => 'Показувати вкладки редактора';
+
+  @override
+  String get textEditorShowTabBarDescription =>
+      'Показувати або приховувати вкладки відкритих файлів. Перемикатися між файлами також можна на бічній панелі.';
+
+  @override
+  String get textEditorAutoHideTabBarLabel =>
+      'Приховувати вкладки під час прокручування';
+
+  @override
+  String get textEditorAutoHideTabBarDescription =>
+      'Приховувати панель вкладок під час прокручування вниз і показувати її знову під час прокручування вгору.';
+
+  @override
+  String get lockWaitingForOperationsMessage =>
+      'Очікування завершення поточних операцій перед блокуванням…';
+
+  @override
+  String get mirrorSyncActivityLabel => 'Збереження змін сховища у сховище';
+
+  @override
+  String get seekGestureSensitivityTitle => 'Чутливість жесту перемотування';
+
+  @override
+  String get volumeGestureSensitivityTitle => 'Чутливість жесту гучності';
+
+  @override
+  String get brightnessGestureSensitivityTitle => 'Чутливість жесту яскравості';
+
+  @override
+  String get thumbnailSettingsHeader => 'Створення мініатюр';
+
+  @override
+  String get thumbnailGenerationStrategyTitle => 'Стратегія кадру мініатюри';
+
+  @override
+  String get thumbnailFirstFrameOption => 'Перший кадр';
+
+  @override
+  String get thumbnailPercentageFrameOption => 'Кадр у вибраній позиції';
+
+  @override
+  String get thumbnailHybridOption => 'Гібрид (пропускати порожній початок)';
+
+  @override
+  String get thumbnailFramePositionTitle => 'Бажана позиція кадру';
+
+  @override
+  String get volumeBoostHeader => 'Підсилення гучності';
+
+  @override
+  String get volumeBoostTitle => 'Увімкнути підсилення гучності';
+
+  @override
+  String get volumeBoostSubtitle =>
+      'Підсилювати тихий звук відео понад звичайну гучність програвача.';
+
+  @override
+  String get volumeBoostGainTitle => 'Рівень підсилення';
+
+  @override
+  String get decoderSelectionHeader => 'Вибір декодера';
+
+  @override
+  String get videoDecoderTitle => 'Відеодекодер';
+
+  @override
+  String get audioDecoderTitle => 'Аудіодекодер';
+
+  @override
+  String get decoderAutoOption => 'Автоматично';
+
+  @override
+  String get decoderHardwareOption => 'Апаратний';
+
+  @override
+  String get decoderSoftwareOption => 'Програмний';
+
+  @override
+  String get decoderFfmpegOption => 'FFmpeg';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningTitle =>
+      'Видалити файли з кореня локального сховища?';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningMessage =>
+      'Ця одностороння синхронізація перевірить увесь корінь локального сховища. Якщо ввімкнено видалення вихідних файлів після імпорту, файли, скопійовані до сховища, можуть бути видалені з пристрою після перевірки SHA-256. Продовжуйте, лише якщо справді хочете видалити ці оригінали.';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningConfirm => 'Зрозуміло';
+
+  @override
+  String get autoSyncScheduledTitle =>
+      'Запускати щодня, коли сховище заблоковане';
+
+  @override
+  String get autoSyncScheduledSubtitle =>
+      'Працює у фоновому режимі із закритою програмою. Android може відкласти запуск або зупинити тривале завдання. Після синхронізації сховище знову блокується.';
+
+  @override
+  String get autoSyncScheduledSetupRequired =>
+      'Потрібен повний доступ автоматизації та збережений пароль сховища.';
+
+  @override
+  String get autoSyncScheduledConfigure => 'Налаштувати фоновий доступ';
+
+  @override
+  String get autoSyncScheduleWarningTitle =>
+      'Увімкнути заплановану синхронізацію?';
+
+  @override
+  String get autoSyncScheduleWarningMessage =>
+      'Програма раз на день розблоковуватиме це сховище у фоновому режимі та блокуватиме його після синхронізації. Android може відкласти запуск. Якщо ввімкнено видалення після імпорту, вихідний файл буде видалено лише після запису копії у сховище та перевірки збігу розміру й контрольної суми SHA-256.';
+
+  @override
+  String get autoSyncScheduleEnable => 'Увімкнути розклад';
+
+  @override
+  String get autoSyncScheduleNotificationRequired =>
+      'Дозвольте сповіщення, щоб Android показував «Синхронізація сховища...» під час роботи у фоновому режимі.';
+
+  @override
+  String get autoSyncScheduleFailed =>
+      'Правило збережено, але не вдалося ввімкнути заплановану синхронізацію.';
+
+  @override
+  String get autoSyncSavedScheduled => 'Правило та щоденний розклад збережено.';
+
+  @override
+  String get autoSyncScheduledTimeTitle => 'Час щоденного запуску';
+
+  @override
+  String get autoSyncScheduledTimeSubtitle =>
+      'Місцевий час пристрою. Для швидкої перевірки виберіть час за хвилину чи дві від поточного; Android може запустити синхронізацію трохи пізніше.';
+
+  @override
+  String get autoSyncExactAlarmAccessTitle =>
+      'Дозволити точні будильники для щоденної синхронізації?';
+
+  @override
+  String get autoSyncExactAlarmAccessMessage =>
+      'Android вимагає доступу до «Будильників і нагадувань», щоб Vault Explorer запускав щоденну синхронізацію у вибраний час, коли програму закрито. Дозвольте доступ на наступному екрані, поверніться сюди й увімкніть заплановану синхронізацію знову.';
+
+  @override
+  String get autoSyncExactAlarmAccessOpen => 'Відкрити налаштування';
+
+  @override
+  String get autoSyncExactAlarmAccessUnavailable =>
+      'Не вдалося відкрити налаштування будильників Android. Увімкніть «Будильники й нагадування» для Vault Explorer у системних налаштуваннях і спробуйте ще раз.';
+
+  @override
+  String get localStoragePermissionTitle =>
+      'Надати доступ до локального сховища';
+
+  @override
+  String get localStorageGrantAccess => 'Надати доступ';
+
+  @override
+  String get hideStorageLocationsTitle => 'Приховати сховища?';
+
+  @override
+  String get hideStorageLocationsPrompt =>
+      'Доступ до всіх файлів не надано. Приховати локальне сховище й додані розташування на бічній панелі? Їх можна знову показати в налаштуваннях.';
+
+  @override
+  String get hide => 'Приховати';
+
+  @override
+  String get mediaViewerActionAdjustments => 'Коригування';
+
+  @override
+  String get adjustmentsSheetTitle => 'Коригування';
+
+  @override
+  String get adjustmentBrightness => 'Яскравість';
+
+  @override
+  String get adjustmentContrast => 'Контрастність';
+
+  @override
+  String get adjustmentSaturation => 'Насиченість';
+
+  @override
+  String get adjustmentHue => 'Відтінок';
+
+  @override
+  String get adjustmentGamma => 'Гама';
+
+  @override
+  String get adjustmentsApplyToAll => 'Застосувати до всіх файлів';
+
+  @override
+  String get adjustmentsCompareHold => 'Утримуйте для порівняння';
+
+  @override
+  String get adjustmentPresetVivid => 'Яскравий';
+
+  @override
+  String get adjustmentPresetBlackAndWhite => 'Ч/Б';
+
+  @override
+  String get adjustmentPresetWarm => 'Теплий';
+
+  @override
+  String get adjustmentPresetCool => 'Холодний';
+
+  @override
+  String get videoFilePropertiesSectionHeader => 'ВІДЕО ТА АУДІО';
+
+  @override
+  String get durationLabel => 'Тривалість';
+
+  @override
+  String get rotationLabel => 'Поворот';
+
+  @override
+  String get videoBitrateLabel => 'Бітрейт відео';
+
+  @override
+  String get audioBitrateLabel => 'Бітрейт аудіо';
+
+  @override
+  String get sampleRateLabel => 'Частота дискретизації';
+
+  @override
+  String get audioChannelsLabel => 'Аудіоканали';
+
+  @override
+  String get subtitleTracksLabel => 'Доріжки субтитрів';
+
+  @override
+  String get skinActionAccent => 'Акцент дій';
+
+  @override
+  String get skinEmphasisForActionIconsActiveControlsProgressAndLinks =>
+      'Виділення для піктограм дій, активних елементів керування, перебігу та посилань.';
+
+  @override
+  String get skinTextAndIconsOnAccentButtons =>
+      'Текст і піктограми на акцентних кнопках';
+
+  @override
+  String get skinForegroundForButtonsFilledWithTheActionAccentColor =>
+      'Колір переднього плану для кнопок із заливкою акцентним кольором дій.';
+
+  @override
+  String get skinSelectionAndIconTileBackground =>
+      'Фон виділення та плиток піктограм';
+
+  @override
+  String get skinSelectedFilesAndVaultFormat076e52 =>
+      'Вибрані файли та плитки формату сховища використовують цей колір. Заливка плаваючої кнопки має окреме налаштування.';
+
+  @override
+  String get skinTextAndIconsOnSelectionColors =>
+      'Текст і піктограми на кольорах виділення';
+
+  @override
+  String get skinForegroundForIconTilesAndOtherPrimaryContainerSurfaces =>
+      'Передній план для плиток піктограм та інших поверхонь основного контейнера.';
+
+  @override
+  String get skinSteadyMainAccent => 'Постійний головний акцент';
+
+  @override
+  String get skinAPrimaryAccentThatStaysTheSameInLightAndDarkSurfaces =>
+      'Основний акцент, який залишається незмінним на світлих і темних поверхнях.';
+
+  @override
+  String get skinMutedSteadyMainAccent =>
+      'Приглушений постійний головний акцент';
+
+  @override
+  String get skinASofterVersionOfTheSteadyPrimaryAccent =>
+      'М\'якша версія постійного основного акценту.';
+
+  @override
+  String get skinTextOnSteadyMainAccent =>
+      'Текст на постійному головному акценті';
+
+  @override
+  String get skinForegroundForPrimaryFixedColors =>
+      'Передній план для фіксованих основних кольорів.';
+
+  @override
+  String get skinMutedTextOnSteadyMainAccent =>
+      'Приглушений текст на постійному головному акценті';
+
+  @override
+  String get skinSecondaryForegroundForPrimaryFixedColors =>
+      'Вторинний передній план для фіксованих основних кольорів.';
+
+  @override
+  String get skinSecondaryAccent => 'Вторинний акцент';
+
+  @override
+  String get skinSupportingActionsAndLessProminentHighlights =>
+      'Допоміжні дії та менш помітні виділення.';
+
+  @override
+  String get skinTextOnSecondaryAccent => 'Текст на вторинному акценті';
+
+  @override
+  String get skinLabelsAndIconsOnSecondaryColoredAreas =>
+      'Мітки та піктограми на вторинних кольорових областях.';
+
+  @override
+  String get skinSecondaryBackground => 'Вторинний фон';
+
+  @override
+  String get skinSoftFillForSupportingContent =>
+      'М\'яка заливка для допоміжного вмісту.';
+
+  @override
+  String get skinTextOnSecondaryBackgrounds => 'Текст на вторинному фоні';
+
+  @override
+  String get skinForegroundForSecondaryContainers =>
+      'Передній план для вторинних контейнерів.';
+
+  @override
+  String get skinSteadySecondaryAccent => 'Постійний вторинний акцент';
+
+  @override
+  String get skinASecondaryAccentThatStaysTheSameAcrossSurfaces =>
+      'Вторинний акцент, який залишається незмінним на різних поверхнях.';
+
+  @override
+  String get skinMutedSteadySecondaryAccent =>
+      'Приглушений постійний вторинний акцент';
+
+  @override
+  String get skinASofterVersionOfTheSteadySecondaryAccent =>
+      'М\'якша версія постійного вторинного акценту.';
+
+  @override
+  String get skinTextOnSteadySecondaryAccent =>
+      'Текст на постійному вторинному акценті';
+
+  @override
+  String get skinForegroundForSecondaryFixedColors =>
+      'Передній план для фіксованих вторинних кольорів.';
+
+  @override
+  String get skinMutedTextOnSteadySecondaryAccent =>
+      'Приглушений текст на постійному вторинному акценті';
+
+  @override
+  String get skinSecondaryForegroundForSecondaryFixedColors =>
+      'Вторинний передній план для фіксованих вторинних кольорів.';
+
+  @override
+  String get skinExtraAccentColor => 'Додатковий акцентний колір';
+
+  @override
+  String get skinDecorativeHighlightsAndContrastingAccents =>
+      'Декоративні виділення та контрастні акценти.';
+
+  @override
+  String get skinTextOnExtraAccent => 'Текст на додатковому акценті';
+
+  @override
+  String get skinLabelsAndIconsOnTertiaryColoredAreas =>
+      'Мітки та піктограми на третинних кольорових областях.';
+
+  @override
+  String get skinExtraAccentBackground => 'Фон додаткового акценту';
+
+  @override
+  String get skinSoftFillForTertiaryContent =>
+      'М\'яка заливка для третинного вмісту.';
+
+  @override
+  String get skinTextOnExtraAccentBackgrounds =>
+      'Текст на фоні додаткового акценту';
+
+  @override
+  String get skinForegroundForTertiaryContainers =>
+      'Передній план для третинних контейнерів.';
+
+  @override
+  String get skinSteadyExtraAccent => 'Постійний додатковий акцент';
+
+  @override
+  String get skinATertiaryAccentThatStaysTheSameAcrossSurfaces =>
+      'Третинний акцент, який залишається незмінним на різних поверхнях.';
+
+  @override
+  String get skinMutedSteadyExtraAccent =>
+      'Приглушений постійний додатковий акцент';
+
+  @override
+  String get skinASofterVersionOfTheSteadyTertiaryAccent =>
+      'М\'якша версія постійного третинного акценту.';
+
+  @override
+  String get skinTextOnSteadyExtraAccent =>
+      'Текст на постійному додатковому акценті';
+
+  @override
+  String get skinForegroundForTertiaryFixedColors =>
+      'Передній план для фіксованих третинних кольорів.';
+
+  @override
+  String get skinMutedTextOnSteadyExtraAccent =>
+      'Приглушений текст на постійному додатковому акценті';
+
+  @override
+  String get skinSecondaryForegroundForTertiaryFixedColors =>
+      'Вторинний передній план для фіксованих третинних кольорів.';
+
+  @override
+  String get skinErrorColor => 'Колір помилки';
+
+  @override
+  String get skinErrorsDestructiveActionsAndInvalidInput =>
+      'Помилки, деструктивні дії та недійсні дані.';
+
+  @override
+  String get skinTextOnErrorColor => 'Текст на кольорі помилки';
+
+  @override
+  String get skinLabelsAndIconsOnErrorColoredAreas =>
+      'Мітки та піктограми на областях кольору помилки.';
+
+  @override
+  String get skinErrorBackground => 'Фон помилки';
+
+  @override
+  String get skinSoftFillBehindErrorMessages =>
+      'М\'яка заливка під повідомленнями про помилки.';
+
+  @override
+  String get skinTextOnErrorBackgrounds => 'Текст на фоні помилки';
+
+  @override
+  String get skinForegroundForErrorContainers =>
+      'Передній план для контейнерів помилки.';
+
+  @override
+  String get skinPageBackground => 'Фон сторінки';
+
+  @override
+  String get skinTheMainBackgroundBehindAppContent =>
+      'Основний фон позаду вмісту програми.';
+
+  @override
+  String get skinMainTextAndIcons => 'Основний текст і піктограми';
+
+  @override
+  String get skinPrimaryContentDrawnOnPageAndCardBackgrounds =>
+      'Основний вміст на фоні сторінок і карток.';
+
+  @override
+  String get skinDimmedBackground => 'Затемнений фон';
+
+  @override
+  String get skinTheDarkestNeutralSurfaceLayer =>
+      'Найтемніший нейтральний шар поверхні.';
+
+  @override
+  String get skinBrightBackground => 'Яскравий фон';
+
+  @override
+  String get skinTheLightestNeutralSurfaceLayer =>
+      'Найсвітліший нейтральний шар поверхні.';
+
+  @override
+  String get skinDeepestCardLayer => 'Найглибший шар карток';
+
+  @override
+  String get skinTheLowestAndQuietestSurfaceContainer =>
+      'Найнижчий і найстриманіший контейнер поверхні.';
+
+  @override
+  String get skinLowCardLayer => 'Низький шар карток';
+
+  @override
+  String get skinSubtleCardsAndRecessedAreas =>
+      'Непомітні картки та заглиблені області.';
+
+  @override
+  String get skinStandardCardLayer => 'Стандартний шар карток';
+
+  @override
+  String get skinCommonCardsAndGroupedContent =>
+      'Звичайні картки та згрупований вміст.';
+
+  @override
+  String get skinRaisedCardLayer => 'Піднятий шар карток';
+
+  @override
+  String get skinRaisedCardsMenusAndAppBars =>
+      'Підняті картки, меню та панелі програми.';
+
+  @override
+  String get skinTopCardLayer => 'Верхній шар карток';
+
+  @override
+  String get skinProminentPanelsAndSelectedSurfaces =>
+      'Виразні панелі та вибрані поверхні.';
+
+  @override
+  String get skinSecondaryTextAndIcons => 'Вторинний текст і піктограми';
+
+  @override
+  String get skinDetailsHintsAndSupportingLabels =>
+      'Деталі, підказки та допоміжні мітки.';
+
+  @override
+  String get skinStrongBorder => 'Виразна межа';
+
+  @override
+  String get skinVisibleBordersAndSeparators => 'Помітні межі та роздільники.';
+
+  @override
+  String get skinSubtleBorder => 'Тонка межа';
+
+  @override
+  String get skinQuietOutlinesAndLowEmphasisSeparators =>
+      'Непомітні контури та роздільники з низьким акцентом.';
+
+  @override
+  String get skinShadowTint => 'Відтінок тіні';
+
+  @override
+  String get skinTintUsedByElevatedSurfaces =>
+      'Відтінок для піднятих поверхонь.';
+
+  @override
+  String get skinModalBackdrop => 'Модальний фон';
+
+  @override
+  String get skinTintBehindDialogsAndModalSheets =>
+      'Відтінок позаду діалогових вікон і модальних панелей.';
+
+  @override
+  String get skinInvertedSurface => 'Інвертована поверхня';
+
+  @override
+  String get skinAContrastingSurfaceForInverseElements =>
+      'Контрастна поверхня для інвертованих елементів.';
+
+  @override
+  String get skinTextOnInvertedSurfaces => 'Текст на інвертованих поверхнях';
+
+  @override
+  String get skinForegroundUsedOverInverseSurfaces =>
+      'Передній план для інвертованих поверхонь.';
+
+  @override
+  String get skinInvertedMainAccent => 'Інвертований головний акцент';
+
+  @override
+  String get skinPrimaryAccentUsedOnInverseSurfaces =>
+      'Основний акцент для інвертованих поверхонь.';
+
+  @override
+  String get skinElevationTint => 'Відтінок підвищення';
+
+  @override
+  String get skinTintAppliedToElevatedSurfaces =>
+      'Відтінок, застосований до піднятих поверхонь.';
+
+  @override
+  String get skinSuccessColor => 'Колір успіху';
+
+  @override
+  String get skinCompletedActionsAndPositiveStatus =>
+      'Завершені дії та позитивний статус.';
+
+  @override
+  String get skinTextOnSuccessColor => 'Текст на кольорі успіху';
+
+  @override
+  String get skinForegroundForSuccessColoredContent =>
+      'Передній план для вмісту з кольором успіху.';
+
+  @override
+  String get skinSuccessBackground => 'Фон успіху';
+
+  @override
+  String get skinSoftFillBehindPositiveStatusMessages =>
+      'М\'яка заливка під повідомленнями позитивного статусу.';
+
+  @override
+  String get skinTextOnSuccessBackgrounds => 'Текст на фоні успіху';
+
+  @override
+  String get skinForegroundForSuccessContainers =>
+      'Передній план для контейнерів успіху.';
+
+  @override
+  String get skinWarningColor => 'Колір попередження';
+
+  @override
+  String get skinCautionAttentionAndPendingStatus =>
+      'Обережно, увага та статус очікування.';
+
+  @override
+  String get skinTextOnWarningColor => 'Текст на кольорі попередження';
+
+  @override
+  String get skinForegroundForWarningColoredContent =>
+      'Передній план для вмісту з кольором попередження.';
+
+  @override
+  String get skinWarningBackground => 'Фон попередження';
+
+  @override
+  String get skinSoftFillBehindWarningMessages =>
+      'М\'яка заливка під повідомленнями з попередженням.';
+
+  @override
+  String get skinTextOnWarningBackgrounds => 'Текст на фоні попередження';
+
+  @override
+  String get skinForegroundForWarningContainers =>
+      'Передній план для контейнерів попередження.';
+
+  @override
+  String get skinBookmarkColor => 'Колір закладки';
+
+  @override
+  String get skinSavedAndBookmarkedItems => 'Збережені елементи та закладки.';
+
+  @override
+  String get skinMainActions => 'Основні дії';
+
+  @override
+  String get skinPrimaryButtonsSelectionsAndFixedPrimaryAccents =>
+      'Основні кнопки, виділення та фіксовані основні акценти.';
+
+  @override
+  String get skinSupportingAccents => 'Допоміжні акценти';
+
+  @override
+  String get skinSecondaryAndTertiaryHighlightsAndTheirTextColors =>
+      'Вторинні й третинні виділення та їхні кольори тексту.';
+
+  @override
+  String get skinErrorMessagesAndDestructiveOrInvalidStates =>
+      'Повідомлення про помилки та деструктивні чи недійсні стани.';
+
+  @override
+  String get skinPagesCardsAndText => 'Сторінки, картки та текст';
+
+  @override
+  String get skinAppBackgroundsCardsMenusAndForegroundText =>
+      'Фон програми, картки, меню та текст переднього плану.';
+
+  @override
+  String get skinBordersAndOverlays => 'Межі та накладання';
+
+  @override
+  String get skinOutlinesShadowsAndModalBackdrops =>
+      'Контури, тіні та модальні підкладки.';
+
+  @override
+  String get skinTapAnyPreviewElement =>
+      'Торкніться будь-якого елемента попереднього перегляду';
+
+  @override
+  String get skinChooseAnAppFileOrEditorColorToSeeWhatItControls =>
+      'Виберіть колір програми, файлу чи редактора, щоб побачити, чим він керує.';
+
+  @override
+  String get skinCustomizeSkin => 'Налаштувати тему оформлення';
+
+  @override
+  String get skinLight => 'Світла';
+
+  @override
+  String get skinDark => 'Темна';
+
+  @override
+  String get skinApp => 'Програма';
+
+  @override
+  String get skinEditor => 'Редактор';
+
+  @override
+  String get skinSkinDetails => 'Параметри теми';
+
+  @override
+  String get skinNameYourSkinAndChooseWhichPaletteToEdit =>
+      'Вкажіть назву теми та виберіть палітру для редагування.';
+
+  @override
+  String get skinSkinName => 'Назва теми';
+
+  @override
+  String get skinMyCustomSkin => 'Моя власна тема оформлення';
+
+  @override
+  String get skinLightColors => 'Світлі кольори';
+
+  @override
+  String get skinDarkColors => 'Темні кольори';
+
+  @override
+  String get skinPageAndActions => 'Сторінка та дії';
+
+  @override
+  String get skinTheMainBackgroundTextAndActionColors =>
+      'Основні кольори фону, тексту та дій.';
+
+  @override
+  String get skinAppBar => 'Панель програми';
+
+  @override
+  String get skinTheTopNavigationBarIsIndependentFromCardsAndPages =>
+      'Верхня панель навігації незалежна від карток і сторінок.';
+
+  @override
+  String get skinTopBarFillColor => 'Колір заливки верхньої панелі.';
+
+  @override
+  String get skinTitleAndIcons => 'Заголовок і піктограми';
+
+  @override
+  String get skinTopBarTextAndIconColor =>
+      'Колір тексту та піктограм верхньої панелі.';
+
+  @override
+  String get skinFloatingActionButton => 'Плаваюча кнопка дії';
+
+  @override
+  String get skinItsFillAndIconColorAreSeparateFromSelectionColors =>
+      'Її заливка та колір піктограми відокремлені від кольорів виділення.';
+
+  @override
+  String get skinButtonFill => 'Заливка кнопки';
+
+  @override
+  String get skinBackgroundOfTheRoundButton => 'Фон круглої кнопки «+».';
+
+  @override
+  String get skinButtonIcon => 'Піктограма кнопки';
+
+  @override
+  String get skinIconColorOnTheRoundButton =>
+      'Колір піктограми на круглій кнопці «+».';
+
+  @override
+  String get skinDashboardVaultCards => 'Картки сховищ на панелі';
+
+  @override
+  String get skinSetTheBackgroundForLockedAndMountedVaultCards =>
+      'Встановіть фон для карток заблокованих і підключених сховищ.';
+
+  @override
+  String get skinLockedVaultCard => 'Картка заблокованого сховища';
+
+  @override
+  String get skinNeutralVaultCardFill => 'Нейтральна заливка картки сховища.';
+
+  @override
+  String get skinMountedVaultCard => 'Картка підключеного сховища';
+
+  @override
+  String get skinSeparateFillForAnUnlockedMountedVault =>
+      'Окрема заливка для розблокованого, підключеного сховища.';
+
+  @override
+  String get skinFineTuneAppColors => 'Тонке налаштування кольорів програми';
+
+  @override
+  String get skinAdvancedMaterialColorsForLessCommonElements =>
+      'Розширені кольори Material для менш поширених елементів.';
+
+  @override
+  String get skinStatusAndBookmarkColors => 'Кольори статусу та закладок';
+
+  @override
+  String get skinColorsForSuccessWarningsErrorsAndBookmarks =>
+      'Кольори для успіху, попереджень, помилок і закладок.';
+
+  @override
+  String get skinTheCustomSkinIsActive971ce3 =>
+      'Власна тема оформлення застосовується негайно, доки Файловий менеджер і Редактор налаштовані наслідувати тему програми.';
+
+  @override
+  String get skinCustomColorTapToChangeOrReset =>
+      'Власний колір — торкніться, щоб змінити або скинути до типового.';
+
+  @override
+  String get skinTapTheColorCircleToChooseAColor =>
+      'Торкніться колірного кола, щоб вибрати колір.';
+
+  @override
+  String get skinAppBarBackground => 'Фон панелі програми';
+
+  @override
+  String get skinTheDashboardAndOtherAppBarsUseThisIndependentColor =>
+      'Панель керування та інші панелі програми використовують цей окремий колір.';
+
+  @override
+  String get skinDashboardMenuIcon => 'Піктограма меню панелі';
+
+  @override
+  String get skinTheHamburgerButtonUsesTheAppBarIconColor =>
+      'Кнопка-гамбургер використовує колір піктограм панелі програми.';
+
+  @override
+  String get skinDashboardTitle => 'Заголовок панелі';
+
+  @override
+  String get skinTheDashboardTitleUsesTheAppBarForegroundColor =>
+      'Заголовок панелі використовує колір переднього плану панелі програми.';
+
+  @override
+  String get skinActionLabelAndIcon => 'Мітка та піктограма дії';
+
+  @override
+  String get skinTheActionAccentColorsLabelsb08a63 =>
+      'Акцент дій забарвлює такі мітки, як «Додати сховище», та їхні піктограми.';
+
+  @override
+  String get skinDashboardAddButton => 'Кнопка додавання на панелі';
+
+  @override
+  String get skinTheButtonFillAndPlusIconHaveSeparateSkinColors =>
+      'Заливка кнопки та піктограма плюса мають окремі кольори теми.';
+
+  @override
+  String get skinVaultCardAndIconBackground =>
+      'Фон картки та піктограми сховища';
+
+  @override
+  String get skinTheIconTileUsesPrimary5c2f93 =>
+      'Плитка піктограми використовує основний контейнер. Картка підключеного сховища змішує цей колір із піднятою поверхнею.';
+
+  @override
+  String get skinVaultFormatIconColor => 'Колір піктограми формату сховища';
+
+  @override
+  String get skinVaultFormatInitialsUseOnPrimaryContainer =>
+      'Ініціали формату сховища використовують колір на основному контейнері.';
+
+  @override
+  String get skinVaultStorageDetails => 'Деталі сховища даних';
+
+  @override
+  String get skinFreeSpaceAndCapacityUseTheSupportingTextColor =>
+      'Вільне місце та місткість використовують колір допоміжного тексту.';
+
+  @override
+  String get skin17GBFree5GB => '1,7 ГБ вільно / 5 ГБ';
+
+  @override
+  String get skinVaultStorageProgress => 'Перебіг сховища даних';
+
+  @override
+  String get skinTheProgressBarUsesTheba7c98 =>
+      'Індикатор перебігу використовує акцент програми, а в міру заповнення сховища перемикається на третинний колір і колір помилки.';
+
+  @override
+  String get skinLockActionBackground => 'Фон дії блокування';
+
+  @override
+  String get skinTheMountedVaultLockButtonUsesPrimaryContainer =>
+      'Кнопка блокування підключеного сховища використовує основний контейнер.';
+
+  @override
+  String get skinVaultActionsIconColor => 'Колір піктограми дій сховища';
+
+  @override
+  String get skinTheOverflowMenuUsesTheSupportingIconColor =>
+      'Меню додаткових дій використовує колір допоміжних піктограм.';
+
+  @override
+  String get skinMountedVaultCardBackground =>
+      'Фон картки підключеного сховища';
+
+  @override
+  String get skinThisIsTheBackgroundOfa8d0d3 =>
+      'Це фон картки підключеного сховища. Її плитка піктограми все одно використовує колір основної дії.';
+
+  @override
+  String get skinLockedVaultCardBackground =>
+      'Фон картки заблокованого сховища';
+
+  @override
+  String get skinThisColorIsIndependentFromTheAppBarAndMountedVaultCard =>
+      'Цей колір незалежний від панелі програми та картки підключеного сховища.';
+
+  @override
+  String get skinLockedVaultFormatIcon =>
+      'Піктограма формату заблокованого сховища';
+
+  @override
+  String get skinLockedVaultIconsUseTheSupportingTextAndIconColor =>
+      'Піктограми заблокованого сховища використовують колір допоміжного тексту та піктограм.';
+
+  @override
+  String get skinSharedArchive => 'Спільний архів';
+
+  @override
+  String get skinLockedVaultStatusText => 'Текст статусу заблокованого сховища';
+
+  @override
+  String get skinTheLockedStatusLabelUsesTheSupportingTextColor =>
+      'Мітка заблокованого статусу використовує колір допоміжного тексту.';
+
+  @override
+  String get skinLockedVaultActionsIcon =>
+      'Піктограма дій заблокованого сховища';
+
+  @override
+  String get skinVaultActionsMenuBackground => 'Фон меню дій сховища';
+
+  @override
+  String get skinTheEditAndRemovePopupUsesTheMenuSurfaceColor =>
+      'Спливне вікно «Редагувати» та «Видалити» використовує колір поверхні меню.';
+
+  @override
+  String get skinEditMenuItem => 'Пункт меню «Редагувати»';
+
+  @override
+  String get skinTheEditActionUsesTheRegularForegroundColor =>
+      'Дія «Редагувати» використовує звичайний колір переднього плану.';
+
+  @override
+  String get skinRemoveMenuItem => 'Пункт меню «Видалити»';
+
+  @override
+  String get skinDestructiveActionsUseTheErrorColor =>
+      'Деструктивні дії використовують колір помилки.';
+
+  @override
+  String get skinFileManagerAppBar => 'Панель менеджера файлів';
+
+  @override
+  String get skinFileBrowserToolbarsUseTheSameAppBarBackground =>
+      'Панелі інструментів переглядача файлів використовують той самий фон панелі програми.';
+
+  @override
+  String get skinFileManagerBackButton => 'Кнопка «Назад» менеджера файлів';
+
+  @override
+  String get skinToolbarNavigationIconsUseThisColor =>
+      'Піктограми навігації на панелі інструментів використовують цей колір.';
+
+  @override
+  String get skinFileManagerTitle => 'Заголовок менеджера файлів';
+
+  @override
+  String get skinTheCurrentFolderNameUsesTheAppBarForeground =>
+      'Назва поточної папки використовує передній план панелі програми.';
+
+  @override
+  String get skinFileManagerAppBarActions => 'Дії на панелі менеджера файлів';
+
+  @override
+  String get skinToolbarActionsUseThisIconColor =>
+      'Дії на панелі інструментів використовують цей колір піктограм.';
+
+  @override
+  String get skinProjects => 'Проєкти';
+
+  @override
+  String get skinFolder12Items => 'Папка · 12 елементів';
+
+  @override
+  String get skinTextFile4KB => 'Текстовий файл · 4 КБ';
+
+  @override
+  String get skinCompressedFile28MB => 'Стиснутий файл · 28 МБ';
+
+  @override
+  String get skin3Items => '3 елементи';
+
+  @override
+  String get skinFileManagerAddButton => 'Кнопка додавання у менеджері файлів';
+
+  @override
+  String get skinAddButtonIconColor => 'Колір піктограми кнопки додавання';
+
+  @override
+  String get skinThePlusIconUsesTheButtonForegroundColor =>
+      'Піктограма плюса використовує колір переднього плану кнопки.';
+
+  @override
+  String get skinEditorFileName => 'Назва файлу в редакторі';
+
+  @override
+  String get skinTheEditorToolbarUsesTheAppForegroundColor =>
+      'Панель інструментів редактора використовує колір переднього плану програми.';
+
+  @override
+  String get skinDartUTF8Ln3Col12 => ' Ряд 3, Стовп 12';
+
+  @override
+  String get skinTheMainBackgroundBehindThisScreen =>
+      'Основний фон позаду цього екрана.';
+
+  @override
+  String get skinFolderIconColor => 'Колір піктограми папки';
+
+  @override
+  String get skinFileIconColor => 'Колір піктограми файлу';
+
+  @override
+  String get skinText => ' : ';
+
+  @override
+  String get skinFolderNameColor => 'Колір назви папки';
+
+  @override
+  String get skinFileNameColor => 'Колір назви файлу';
+
+  @override
+  String get skinFileDetailsColor => 'Колір деталей файлу';
+
+  @override
+  String get skinTheSmallerDateSizeAndTypeLabelsUseThisColor =>
+      'Менші мітки дати, розміру та типу використовують цей колір.';
+
+  @override
+  String get skinFileOverflowButton => 'Кнопка додаткових дій файлу';
+
+  @override
+  String get skinEachRowSThreeDotButtonUsesTheSupportingIconColor =>
+      'Кнопка з трьома крапками кожного рядка використовує колір допоміжної піктограми.';
+
+  @override
+  String get skinSelectedFileRow => 'Рядок вибраного файлу';
+
+  @override
+  String get skinSelectedRowsUseATranslucente0ff21 =>
+      'Вибрані рядки мають напівпрозоре підсвічування основного контейнера; сам список файлів залишається на фоні сторінки.';
+
+  @override
+  String get skinFileActionsMenuBackground => 'Фон меню дій з файлом';
+
+  @override
+  String get skinTheFileActionsPopupUsesTheMenuSurfaceColor =>
+      'Спливне вікно дій над файлом використовує колір поверхні меню.';
+
+  @override
+  String get skinOpenFileMenuItem => 'Пункт меню «Відкрити файл»';
+
+  @override
+  String get skinRegularFileActionsUseTheMainTextColor =>
+      'Звичайні дії над файлами використовують основний колір тексту.';
+
+  @override
+  String get skinOpen => 'Відкрити';
+
+  @override
+  String get skinDeleteFileMenuItem => 'Пункт меню «Видалити файл»';
+
+  @override
+  String get skinEditorBackground => 'Фон редактора';
+
+  @override
+  String get skinTheCanvasColorBehindTheCode => 'Колір полотна позаду коду.';
+
+  @override
+  String get skinEditorLineNumbers => 'Номери рядків редактора';
+
+  @override
+  String get skinTheGutterAndLineNumbersBesideTheCode =>
+      'Бічна смуга та номери рядків поруч із кодом.';
+
+  @override
+  String get skinEditorTextColor => 'Колір тексту коду';
+
+  @override
+  String get skinTheDefaultCodeAndEditorTextColor =>
+      'Стандартний колір звичайного коду; текст із підсвічуванням синтаксису має власні кольори.';
+
+  @override
+  String get skinEditorCursor => 'Курсор редактора';
+
+  @override
+  String get skinTheInsertionCaretColor => 'Колір курсора вставки.';
+
+  @override
+  String get skinEditorSelectionHighlight => 'Виділення вибраного в редакторі';
+
+  @override
+  String get skinTheBackgroundUsedToHighlightSelectedCode =>
+      'Фон для виділення вибраного коду.';
+
+  @override
+  String get skinEditorKeywords => 'Ключові слова';
+
+  @override
+  String get skinEditorKeywordsExplanation =>
+      'Ключові слова мови, такі як class, void, return та if.';
+
+  @override
+  String get skinEditorTypes => 'Типи та класи';
+
+  @override
+  String get skinEditorTypesExplanation => 'Назви класів, типи та інтерфейси.';
+
+  @override
+  String get skinEditorStrings => 'Рядки';
+
+  @override
+  String get skinEditorStringsExplanation =>
+      'Текст у лапках та рядкові літерали.';
+
+  @override
+  String get skinEditorNumbers => 'Числа та значення';
+
+  @override
+  String get skinEditorNumbersExplanation =>
+      'Числові літерали, логічні значення та константи.';
+
+  @override
+  String get skinEditorFunctions => 'Функції та методи';
+
+  @override
+  String get skinEditorFunctionsExplanation =>
+      'Назви функцій, виклики методів і вбудовані елементи.';
+
+  @override
+  String get skinEditorComments => 'Коментарі';
+
+  @override
+  String get skinEditorCommentsExplanation =>
+      'Коментарі до коду та блоки документації.';
+
+  @override
+  String get textEditorColorsSectionTitle => 'Кольори та шрифт редактора';
+
+  @override
+  String get textEditorSyntaxColorsSectionTitle =>
+      'Кольори елементів синтаксису';
+
+  @override
+  String get textEditorColorsCustomized => 'Користувацькі кольори активні';
+
+  @override
+  String get textEditorResetColors => 'Скинути кольори до стандартних';
+
+  @override
+  String get textEditorFollowAppSkinNotice =>
+      'Кольори редактора відповідають активній темі програми.';
+
+  @override
+  String get textEditorCustomizeColorsIndependently =>
+      'Налаштувати кольори окремо';
+
+  @override
+  String get textEditorDefaultFromTheme => 'За замовчуванням (з теми)';
+
+  @override
+  String get skinFileManager => 'Менеджер файлів';
+
+  @override
+  String get skinFolderAndFileGlyphsTilesAndLabelColors =>
+      'Значки, плитки та кольори міток папок і файлів.';
+
+  @override
+  String get skinDetailsTextColor => 'Колір тексту деталей';
+
+  @override
+  String get skinUseTheAppSSupportingTextColor =>
+      'Використовувати колір допоміжного тексту програми';
+
+  @override
+  String get skinCustomColor => 'Власний колір';
+
+  @override
+  String get skinMonospaceFileNames => 'Моноширинні назви файлів';
+
+  @override
+  String get skinBackgroundBehindTheIcon => 'Фон позаду піктограми';
+
+  @override
+  String get skinIconColorSource => 'Джерело кольору піктограми';
+
+  @override
+  String get skinUseTheAppSMainTextColor =>
+      'Використовувати основний колір тексту програми';
+
+  @override
+  String get skinTextEditor => 'Текстовий редактор';
+
+  @override
+  String get skinCanvasGutterCursorSelectionBackgroundAndSyntaxTemplate =>
+      'Полотно, бічна смуга, курсор, виділення, фон та шаблон синтаксису.';
+
+  @override
+  String get skinGutterAndLineNumbers => 'Бічна смуга та номери рядків';
+
+  @override
+  String get skinCursor => 'Курсор';
+
+  @override
+  String get skinSelection => 'Виділення';
+
+  @override
+  String get skinEditorBackgroundTemplate => 'Шаблон фону редактора';
+
+  @override
+  String get skinSyntaxTemplate => 'Шаблон синтаксису';
+
+  @override
+  String get skinTapTheColorCircleToChooseAColor246981 =>
+      'Торкніться колірного кола, щоб вибрати колір';
+
+  @override
+  String get skinDefaultVaultExplorerIcons =>
+      'Стандартні піктограми Vault Explorer';
+
+  @override
+  String get skinSolidIcons => 'Суцільні піктограми';
+
+  @override
+  String get skinRoundedIcons => 'Закруглені піктограми';
+
+  @override
+  String get skinOutlineIcons => 'Контурні піктограми';
+
+  @override
+  String get skinSquareCornerIcons => 'Прямокутні піктограми';
+
+  @override
+  String get skinTintedTileBehindTheIcon => 'Тонована плитка позаду піктограми';
+
+  @override
+  String get skinOutlinedTileBehindTheIcon =>
+      'Контурна плитка позаду піктограми';
+
+  @override
+  String get skinNoTile => 'Без плитки';
+
+  @override
+  String get skinAutomaticFileTypeOrFolderColor =>
+      'Автоматично (колір типу файлу чи папки)';
+
+  @override
+  String get skinUseTheMainAppAccent =>
+      'Використовувати основний акцент програми';
+
+  @override
+  String get skinUseAMutedNeutralColor =>
+      'Використовувати приглушений нейтральний колір';
+
+  @override
+  String get skinChooseAColorBelow => 'Виберіть колір нижче';
+
+  @override
+  String get skinUseTheSyntaxThemeBackground =>
+      'Використовувати фон теми синтаксису';
+
+  @override
+  String get skinPureBlack => 'Чистий чорний';
+
+  @override
+  String get skinDarkSlate => 'Темний сланцевий';
+
+  @override
+  String get skinCleanWhite => 'Чистий білий';
+
+  @override
+  String get skinWarmSepia => 'Тепла сепія';
+
+  @override
+  String get skinAutomaticMatchLightOrDarkMode =>
+      'Автоматично (відповідно до світлого чи темного режиму)';
+
+  @override
+  String get skinSkinExported => 'Тему експортовано.';
+
+  @override
+  String get skinSkinsExported => 'Теми експортовано.';
+
+  @override
+  String get skinRemoveSkin => 'Видалити тему?';
+
+  @override
+  String get skinAppSkin => 'Тема оформлення програми';
+
+  @override
+  String get skinImportSkins => 'Імпортувати теми';
+
+  @override
+  String get skinExportSkins => 'Експортувати теми';
+
+  @override
+  String get skinChooseACoordinatedLookForTheAppFileManagerAndEditor =>
+      'Виберіть узгоджений вигляд для програми, менеджера файлів і редактора. ';
+
+  @override
+  String get skinLightAndDarkSystemThemesUseMatchingPaletteVariants =>
+      'Світла й темна системні теми використовують відповідні варіанти палітри.';
+
+  @override
+  String get skinEditCurrentSkin => 'Редагувати поточну тему';
+
+  @override
+  String get skinCreateASkinFromThisLook =>
+      'Створити тему на основі цього вигляду';
+
+  @override
+  String get skinYourSkins => 'Ваші теми оформлення';
+
+  @override
+  String get skinCustomAppFileManagerAndEditorColors =>
+      'Власні кольори програми, менеджера файлів і редактора';
+
+  @override
+  String get skinMaterialColorsWithLightAndDarkVariants =>
+      'Кольори Material зі світлими та темними варіантами';
+
+  @override
+  String get skinTrueBlackEditorAndDarkf97e8f =>
+      'Справжній чорний редактор і темні поверхні програми з палітрою акцентів OLED';
+
+  @override
+  String get skinYourEditableAppFileManagerAndEditorColors =>
+      'Ваші кольори для редагування в програмі, менеджері файлів і редакторі';
+
+  @override
+  String get skinSkinActions => 'Дії з темою';
+
+  @override
+  String get skinEditSkin => 'Редагувати тему';
+
+  @override
+  String get skinExportSkin => 'Експортувати тему';
+
+  @override
+  String get skinRemoveSkinf09101 => 'Видалити тему';
+
+  @override
+  String get skinDragAroundTheRingTo868d62 =>
+      'Перетягуйте по колу, щоб вибрати відтінок, потім перемістіться всередину для налаштування тону.';
+
+  @override
+  String get skinQuickColors => 'Швидкі кольори';
+
+  @override
+  String get skinEnterAnExactColor => 'Введіть точний колір';
+
+  @override
+  String get skinOptionalRGBOrARGBValue =>
+      'Необов\'язкове значення RGB або ARGB';
+
+  @override
+  String get skinRGBARGB => 'RGB / ARGB';
+
+  @override
+  String get skinUseThisValue => 'Використати це значення';
+
+  @override
+  String get skinDefaultLightDark => 'За замовчуванням Світлий / Темний';
+
+  @override
+  String get skinOLEDPureBlack => 'OLED Чистий чорний';
+
+  @override
+  String get skinCustomSkin => 'Власна тема оформлення';
+
+  @override
+  String skinImportSucceeded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Імпортовано $count тем.',
+      many: 'Імпортовано $count тем.',
+      few: 'Імпортовано $count теми.',
+      one: 'Імпортовано 1 тему.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String skinImportFailed(String error) {
+    return 'Не вдалося імпортувати тему: $error';
+  }
+
+  @override
+  String skinExportFailed(String error) {
+    return 'Не вдалося експортувати тему: $error';
+  }
+
+  @override
+  String skinRemoveConfirmation(String skin) {
+    return '«$skin» буде видалено зі збережених тем оформлення.';
+  }
+
+  @override
+  String skinSelectPreviewElement(String title) {
+    return 'Вибрати $title';
+  }
+
+  @override
+  String skinIconColorForItem(String item) {
+    return 'Колір піктограми $item';
+  }
+
+  @override
+  String skinNameColorForItem(String item) {
+    return 'Колір назви $item';
+  }
+
+  @override
+  String get skinFileIconColorSettingDescription =>
+      'Цей колір контролюється налаштуванням кольору піктограми в розділі менеджера файлів.';
+
+  @override
+  String get skinFileNameColorSettingDescription =>
+      'Цей колір контролюється налаштуванням кольору назви в розділі менеджера файлів.';
+
+  @override
+  String get skinExportedSingle => 'Тему експортовано.';
+
+  @override
+  String get skinExportedMultiple => 'Теми експортовано.';
+
+  @override
+  String get skinExportSkinsOnly => 'Лише теми';
+
+  @override
+  String get skinExportSkinsOnlySubtitle =>
+      'Кольори та стилі піктограм. Безпечно ділитися.';
+
+  @override
+  String get skinExportSkinsAndInterface => 'Теми та інтерфейс';
+
+  @override
+  String get skinExportSkinsAndInterfaceSubtitle =>
+      'Також зберігає режим теми, розташування панелі інструментів і сітки, вигляд редактора та розташування медіаплеєра. Для ваших власних резервних копій.';
+
+  @override
+  String get skinAppearanceExported => 'Теми та інтерфейс експортовано.';
+
+  @override
+  String get skinImportInterfaceTitle => 'Застосувати налаштування інтерфейсу?';
+
+  @override
+  String get skinImportInterfaceMessage =>
+      'Цей файл також містить налаштування інтерфейсу. Їх застосування замінить ваші поточні режим теми, розташування панелі інструментів і сітки, вигляд редактора та розташування медіаплеєра.';
+
+  @override
+  String get skinImportInterfaceApply => 'Застосувати';
+
+  @override
+  String get skinImportInterfaceSkip => 'Лише теми';
+
+  @override
+  String get skinInterfaceApplied => 'Налаштування інтерфейсу застосовано.';
+
+  @override
+  String get automationBatteryHintTitle => 'Дозволити запуск у фоні';
+
+  @override
+  String get automationBatteryHintMessage =>
+      'Коли VaultExplorer повністю закрито, Android може заблокувати автоматичне розблокування цього сховища. Установіть використання батареї VaultExplorer на «Без обмежень», щоб Tasker, MacroDroid та інші програми могли розблоковувати його у фоновому режимі.';
+
+  @override
+  String get automationBatteryHintButton => 'Відкрити налаштування програми';
+
+  @override
+  String get automationBatterySettingsOpenFailedMessage =>
+      'Не вдалося відкрити налаштування програми. Відкрийте Налаштування > Програми > VaultExplorer > Батарея та виберіть «Без обмежень».';
+
+  @override
+  String get skinPreviewMountedVaultName => 'Особисте сховище';
+
+  @override
+  String get skinPreviewVaultName => 'Назва сховища';
+
+  @override
+  String get skinMainTextColorAlsoColorsRegularMenuItems =>
+      'Назви сховищ і звичайні дії меню використовують основний колір тексту програми.';
+
+  @override
+  String get skinStatusBannerExamples => 'Банери стану';
+
+  @override
+  String get skinSuccessBanner => 'Банер успіху';
+
+  @override
+  String get skinWarningBanner => 'Банер попередження';
+
+  @override
+  String get skinErrorBanner => 'Банер помилки';
+
+  @override
+  String get skinSuccessBannerUsesSuccessContainer =>
+      'Заливка банера та повідомлення використовують кольори успіху.';
+
+  @override
+  String get skinWarningBannerUsesWarningContainer =>
+      'Заливка банера та повідомлення використовують кольори попередження.';
+
+  @override
+  String get skinErrorBannerUsesErrorContainer =>
+      'Заливка банера та повідомлення використовують кольори помилки.';
+
+  @override
+  String get skinPreviewChangesSaved => 'Зміни збережено';
+
+  @override
+  String get skinPreviewStorageAlmostFull => 'Сховище майже заповнене';
+
+  @override
+  String get skinPreviewCouldNotUnlockVault =>
+      'Не вдалося розблокувати сховище';
+
+  @override
+  String get skinSurfaceAndBorderExamples => 'Поверхні та межі';
+
+  @override
+  String get skinFileRowDetailsColor => 'Колір деталей рядка файлу';
+
+  @override
+  String get skinFileActionOverflowIconColor => 'Колір значка дії рядка файлу';
+
+  @override
+  String get skinMatchingElementsHighlightTogether =>
+      'Інші елементи попереднього перегляду з таким самим кольором також виділяються.';
+
+  @override
+  String get skinStatusBannerTextColor =>
+      'Текст банера використовує цей колір.';
+
+  @override
+  String get apkOpenPackageInstaller => 'Інсталятор пакетів';
+
+  @override
+  String get apkOpenPackageInstallerSubtitle =>
+      'Встановити цю програму на пристрій';
+
+  @override
+  String get apkOpenAsZip => 'Відкрити як ZIP';
+
+  @override
+  String get apkOpenAsZipSubtitle => 'Переглянути вміст і видобути файли';
+
+  @override
+  String get audioEditorEditAction => 'Редагувати аудіо';
+
+  @override
+  String get audioEditorTimelineLabel => 'Часова шкала аудіо';
+
+  @override
+  String get audioEditorAnalyzing => 'Читання аудіо…';
+
+  @override
+  String audioEditorLoadFailed(String message) {
+    return 'Не вдалося відкрити цей аудіофайл: $message';
+  }
+
+  @override
+  String get audioEditorReadOnly =>
+      'Це сховище доступне лише для читання, тому відредаговане аудіо не можна зберегти.';
+
+  @override
+  String get audioEditorExporting => 'Експорт аудіо';
+
+  @override
+  String audioEditorSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Збережено $count аудіофайлів',
+      many: 'Збережено $count аудіофайлів',
+      few: 'Збережено $count аудіофайли',
+      one: 'Збережено $count аудіофайл',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get audioEditorExportMerge => 'Об\'єднати в один файл';
+
+  @override
+  String get audioEditorExportSeparate => 'Зберегти як окремі файли';
+
+  @override
+  String get audioEditorReplaceOriginal => 'Замінити оригінальне аудіо';
+
+  @override
+  String get audioEditorReplaceOriginalHint =>
+      'Оригінальний файл буде замінено експортованим фрагментом.';
+
+  @override
+  String get audioEditorLosslessNote =>
+      'Обрізання без втрат: аудіо копіюється без перекодування, тож якість не змінюється. Розріз припадає на найближчий аудіокадр, за кілька мілісекунд від заданої точки. Теги й обкладинка не переносяться.';
+
+  @override
+  String get audioEditorCutOutModeDescription =>
+      'Вилучити вибрані сегменти й експортувати решту.';
+
+  @override
+  String audioEditorUnsupportedFormat(String format) {
+    return 'Файли $format не можна редагувати на цьому пристрої, тож цей файл можна відтворити тут, але не експортувати.';
+  }
+
+  @override
+  String get audioEditorPrevCutPoint => 'Попередня точка розрізу';
+
+  @override
+  String get audioEditorNextCutPoint => 'Наступна точка розрізу';
+
+  @override
+  String audioEditorReencodeBanner(String format) {
+    return 'Аудіо $format не можна скопіювати як є, тож під час експорту його буде перекодовано в AAC (.m4a).';
+  }
+
+  @override
+  String get audioEditorReencodeNote =>
+      'Цей формат не можна скопіювати як є, тому експортоване аудіо перекодовується в AAC. Якість лишається високою, але не ідентична побітово. Розрізи припадають точно на задані вами точки. Теги й обкладинка не переносяться.';
+
+  @override
+  String get mediaViewerActionAbLoop => 'Повторення A-B';
+
+  @override
+  String abLoopStartMarkedMessage(String time) {
+    return 'A встановлено на $time. Торкніться знову, щоб встановити B.';
+  }
+
+  @override
+  String abLoopStartedMessage(String start, String end) {
+    return 'Повторення $start – $end';
+  }
+
+  @override
+  String get abLoopEndTooCloseMessage =>
+      'B має бути після A. Перемотайте вперед і торкніться знову.';
+
+  @override
+  String get abLoopClearedMessage => 'Повторення A-B вимкнено';
+
+  @override
+  String get skinEditorPanelBackground => 'Фон панелей редактора';
+
+  @override
+  String get skinEditorPanelBackgroundDescription =>
+      'Спільний фон бічної панелі та меню додаткових дій редактора.';
+
+  @override
+  String get skinFollowAppSkin => 'Використовувати тему програми';
+
+  @override
+  String get fileSkinFollowAppSkinDescription =>
+      'Стиль файлів і папок відповідає вибраній темі програми.';
+
+  @override
+  String get fileSkinUseIndependentStylesDescription =>
+      'Використовуйте наведені нижче параметри значків і кольорів файлового менеджера.';
+
+  @override
+  String get fileSkinManagedByAppSkinTitle =>
+      'Файловий менеджер використовує тему програми';
+
+  @override
+  String get fileSkinManagedByAppSkinDescription =>
+      'У попередньому перегляді показано активну тему програми. Зміна набору або стилю нижче збереже окрему тему файлового менеджера й вимкне режим наслідування теми програми.';
+
+  @override
+  String get skinFileManagerIndependentTitle =>
+      'Файловий менеджер використовує окрему тему';
+
+  @override
+  String get skinFileManagerIndependentDescription =>
+      'Зміни стилів файлів і папок у цій темі не відображатимуться у файловому менеджері, доки він використовує власну тему. Увімкніть наслідування теми програми, щоб застосувати тему програми й тут.';
+
+  @override
+  String get skinChooseOrCreateSkin => 'Вибрати або створити тему';
+
+  @override
+  String get skinSkinShortcutCustomDescription =>
+      'Змініть спільні кольори й токени програми. Перевизначення компонентів залишаються на цій сторінці.';
+
+  @override
+  String get skinSkinShortcutPresetDescription =>
+      'Перегляньте вбудовані теми або створіть власну на основі цього вигляду.';
+
+  @override
+  String get textEditorUseIndependentAppearanceDescription =>
+      'Нижче виберіть окремий фон редактора та тему підсвічування синтаксису.';
+
+  @override
+  String get fileSkinComponentStyling => 'Стиль компонентів';
+
+  @override
+  String get textEditorStyling => 'Стиль редактора';
+
+  @override
+  String get audioFilePropertiesSectionHeader => 'АУДІО';
+
+  @override
+  String get audioTagsSectionHeader => 'ІНФОРМАЦІЯ ПРО ТРЕК';
+
+  @override
+  String get artistLabel => 'Виконавець';
+
+  @override
+  String get albumLabel => 'Альбом';
+
+  @override
+  String get yearLabel => 'Рік';
+
+  @override
+  String get genreLabel => 'Жанр';
+
+  @override
+  String get audioTrackLabel => 'Трек';
+
+  @override
+  String get bitDepthLabel => 'Бітова глибина';
+
+  @override
+  String get colorModeLabel => 'Колірний режим';
+
+  @override
+  String get transparencyLabel => 'Прозорість';
+
+  @override
+  String get animationLabel => 'Анімація';
+
+  @override
+  String get orientationLabel => 'Орієнтація';
+
+  @override
+  String get densityLabel => 'Щільність пікселів';
+
+  @override
+  String get encodingLabel => 'Кодування';
+
+  @override
+  String get skinEditorCodeTextColorDescription =>
+      'Стандартний колір тексту звичайного коду. Підсвічений синтаксисом текст зберігає власні кольори.';
+
+  @override
+  String get skinEditorInterfaceText => 'Текст інтерфейсу редактора';
+
+  @override
+  String get skinEditorInterfaceTextDescription =>
+      'Текст та значки на панелі інструментів, бічній панелі, у меню та рядку стану редактора.';
+
+  @override
+  String get equalizerTitle => 'Еквалайзер';
+
+  @override
+  String get equalizerPresetCustom => 'Власний';
+
+  @override
+  String get equalizerPreampLabel => 'Попереднє підсилення';
+
+  @override
+  String get equalizerPreventClippingTitle => 'Запобігати спотворенням';
+
+  @override
+  String get equalizerPreventClippingSubtitle =>
+      'Знижує загальну гучність рівно настільки, щоб підсилені смуги не спотворювалися';
+
+  @override
+  String get equalizerPresetFlat => 'Рівний';
+
+  @override
+  String get equalizerPresetBassBoost => 'Підсилення басів';
+
+  @override
+  String get equalizerPresetTrebleBoost => 'Підсилення високих частот';
+
+  @override
+  String get equalizerPresetVoice => 'Голос';
+
+  @override
+  String get equalizerPresetRock => 'Рок';
+
+  @override
+  String get equalizerPresetPop => 'Поп';
+
+  @override
+  String get equalizerPresetJazz => 'Джаз';
+
+  @override
+  String get equalizerPresetClassical => 'Класика';
+
+  @override
+  String get equalizerPresetElectronic => 'Електроніка';
+
+  @override
+  String get equalizerPresetLoudness => 'Тонкомпенсація';
+
+  @override
+  String get audioRecorder => 'Диктофон';
+
+  @override
+  String get audioCapturedEncrypted => 'Аудіо збережено';
+
+  @override
+  String get audioMicPermissionRequiredMessage =>
+      'Для запису аудіо потрібен дозвіл на мікрофон.';
+
+  @override
+  String get audioRecordingAllowMicrophone => 'Дозволити мікрофон';
+
+  @override
+  String get audioRecordingStartTooltip => 'Почати запис';
+
+  @override
+  String get audioRecordingStopTooltip => 'Зупинити запис';
+
+  @override
+  String get audioRecordingPauseTooltip => 'Пауза';
+
+  @override
+  String get audioRecordingResumeTooltip => 'Відновити';
+
+  @override
+  String get audioRecordingPausedLabel => 'Пауза';
+
+  @override
+  String get audioRecordingDiscardTitle => 'Відкинути запис?';
+
+  @override
+  String get audioRecordingDiscardMessage =>
+      'Цей запис не збережено, і його буде остаточно видалено.';
+
+  @override
+  String get skinAreaDashboard => 'Панель керування';
+
+  @override
+  String get skinAreaDashboardDescription =>
+      'Список сховищ, до якого ви потрапляєте, з їхніми картками.';
+
+  @override
+  String get skinAreaDrawer => 'Бічне меню';
+
+  @override
+  String get skinAreaDrawerDescription =>
+      'Висувне меню зі сховищами та ярликами.';
+
+  @override
+  String get skinAreaFilesDescription =>
+      'Файловий менеджер у розблокованому сховищі.';
+
+  @override
+  String get skinAreaEditorDescription =>
+      'Панель інструментів текстового редактора та редактора коду. Кольори полотна та підсвічування синтаксису задаються в темі редактора нижче.';
+
+  @override
+  String get skinAreaToolsDescription =>
+      'Вкладка «Інструменти» та всі інструменти, відкриті з неї.';
+
+  @override
+  String get skinAreaSettingsDescription =>
+      'Вкладка «Налаштування» та її підсторінки.';
+
+  @override
+  String get skinSharedPaletteTitle => 'Спільна палітра';
+
+  @override
+  String get skinSharedPaletteShort => 'Спільна';
+
+  @override
+  String get skinSharedPaletteDescription =>
+      'Кольори, які кожна сторінка успадковує, доки не встановить власні. Екрани без власного розділу, як-от розблокування та камера, використовують їх безпосередньо.';
+
+  @override
+  String get skinSharedBarDescription =>
+      'Верхня панель кожної сторінки, яка не встановлює власну.';
+
+  @override
+  String get skinSharedFabDescription =>
+      'Кругла кнопка додавання кожної сторінки, яка не встановлює власну.';
+
+  @override
+  String get skinPagesTitle => 'Кольори сторінок';
+
+  @override
+  String get skinPagesDescription =>
+      'Кожна сторінка зберігає власні кольори. Зміна однієї сторінки ніколи не змінює іншу.';
+
+  @override
+  String get skinResetPageColors => 'Скинути кольори сторінки';
+
+  @override
+  String get skinTokenBackground => 'Фон сторінки';
+
+  @override
+  String get skinTokenBackgroundHint =>
+      'Полотно позаду всіх елементів на цій сторінці.';
+
+  @override
+  String get skinTokenText => 'Основний текст';
+
+  @override
+  String get skinTokenTextHint =>
+      'Заголовки, назви та основний текст на цій сторінці.';
+
+  @override
+  String get skinTokenTextSecondary => 'Вторинний текст та значки';
+
+  @override
+  String get skinTokenTextSecondaryHint =>
+      'Підзаголовки, деталі, підказки та другорядні значки.';
+
+  @override
+  String get skinTokenAppBar => 'Верхня панель';
+
+  @override
+  String get skinTokenAppBarHint => 'Заливка верхньої панелі на цій сторінці.';
+
+  @override
+  String get skinTokenOnAppBar => 'Текст та значки верхньої панелі';
+
+  @override
+  String get skinTokenOnAppBarHint =>
+      'Колір заголовка та значків на верхній панелі.';
+
+  @override
+  String get skinTokenCard => 'Картки та рядки';
+
+  @override
+  String get skinTokenCardHint => 'Картки, рядки списку та згруповані панелі.';
+
+  @override
+  String get skinTokenCardActive => 'Активна картка';
+
+  @override
+  String get skinTokenCardActiveHint =>
+      'Виділена картка, наприклад розблоковане сховище.';
+
+  @override
+  String get skinTokenRaised => 'Чіпи та елементи керування';
+
+  @override
+  String get skinTokenRaisedHint =>
+      'Поля пошуку, чіпи, мініатюри та плитки значків.';
+
+  @override
+  String get skinTokenOverlay => 'Меню, діалоги та панелі';
+
+  @override
+  String get skinTokenOverlayHint =>
+      'Спливаючі меню, діалоги та нижні панелі, відкриті з цієї сторінки.';
+
+  @override
+  String get skinTokenAccent => 'Акцент';
+
+  @override
+  String get skinTokenAccentHint =>
+      'Кнопки, посилання, індикатори прогресу та активні значки.';
+
+  @override
+  String get skinTokenOnAccent => 'Текст на акценті';
+
+  @override
+  String get skinTokenOnAccentHint =>
+      'Мітки та значки на кнопках з акцентною заливкою.';
+
+  @override
+  String get skinTokenSelection => 'Виділення';
+
+  @override
+  String get skinTokenSelectionHint =>
+      'Вибрані рядки та виділені плитки значків.';
+
+  @override
+  String get skinTokenOnSelection => 'Текст на виділенні';
+
+  @override
+  String get skinTokenOnSelectionHint =>
+      'Значки та текст на вибраних елементах.';
+
+  @override
+  String get skinTokenDivider => 'Роздільники';
+
+  @override
+  String get skinTokenDividerHint =>
+      'Тонкі розділові лінії та непомітні рамки.';
+
+  @override
+  String get skinTokenOutline => 'Контури';
+
+  @override
+  String get skinTokenOutlineHint =>
+      'Помітніші контури на кнопках із рамкою та полях введення.';
+
+  @override
+  String get skinTokenFab => 'Кругла кнопка додавання';
+
+  @override
+  String get skinTokenFabHint => 'Заливка круглої кнопки додавання.';
+
+  @override
+  String get skinTokenOnFab => 'Значок круглої кнопки додавання';
+
+  @override
+  String get skinTokenOnFabHint => 'Значок «плюс» на круглій кнопці додавання.';
+
+  @override
+  String get skinPreviewConfirm => 'Підтвердити';
+
+  @override
+  String get skinPreviewCancelButton => 'Скасувати';
+
+  @override
+  String get skinPreviewSaveButton => 'Зберегти';
+
+  @override
+  String get skinPreviewRunButton => 'Запустити';
+
+  @override
+  String get skinPreviewPasteButton => 'Вставити сюди';
+
+  @override
+  String get skinPreviewUnlockButton => 'Розблокувати';
+
+  @override
+  String get skinPreviewSortChip => 'Сортування: Назва';
+
+  @override
+  String get skinPreviewSearchChip => 'Пошук файлів';
+
+  @override
+  String get skinPreviewPinnedBadge => 'Закріплено';
+
+  @override
+  String get skinPreviewVaultsHeader => 'СХОВИЩА';
+
+  @override
+  String get skinPreviewToolsSection => 'Криптографія файлів';
+
+  @override
+  String get skinPreviewToolOne => 'Генератор ключових файлів і парольних фраз';
+
+  @override
+  String get skinPreviewToolOneHint => 'Генерація паролів і ключових файлів';
+
+  @override
+  String get skinPreviewToolTwo => 'Перевірка контрольних сум і хешів';
+
+  @override
+  String get skinPreviewToolTwoHint =>
+      'Перевірка великих файлів на пошкодження';
+
+  @override
+  String get skinPreviewSettingsSection => 'Безпека';
+
+  @override
+  String get skinPreviewSettingOne => 'Блокування програми';
+
+  @override
+  String get skinPreviewSettingOneHint => 'Біометрія та автоблокування';
+
+  @override
+  String get skinPreviewSettingTwo => 'Сховище даних';
+
+  @override
+  String get skinPreviewSettingTwoHint => 'Зовнішні сховища та хмарні мости';
+
+  @override
+  String get inPlaceEditDone => 'Готово';
+
+  @override
+  String get inPlaceEditTitle => 'Розташування елементів керування';
+
+  @override
+  String get inPlaceEditHint =>
+      'Перетягуйте дії між панелями або торкніться для налаштування';
+
+  @override
+  String get inPlaceEditAvailable => 'Доступні дії';
+
+  @override
+  String get inPlaceEditTopDock => 'Верхня панель';
+
+  @override
+  String get inPlaceEditBottomDock => 'Нижня панель';
+
+  @override
+  String get inPlaceEditDragToRemove => 'Перетягніть сюди, щоб вилучити';
+
+  @override
+  String get inPlaceEditAddToTop => 'Додати на верхню панель';
+
+  @override
+  String get inPlaceEditAddToBottom => 'Додати на нижню панель';
+
+  @override
+  String get inPlaceEditEmptyDock => 'Перетягніть дії сюди';
+
+  @override
+  String get inPlaceEditPlayerSettings => 'Налаштування програвача';
+
+  @override
+  String get inPlaceEditMoveToMore => 'Перемістити до меню «Більше»';
+
+  @override
+  String get inPlaceEditMoveToAdvanced =>
+      'Перемістити до розширених налаштувань';
+
+  @override
+  String get inPlaceEditHideAction => 'Приховати дію';
+
+  @override
+  String get inPlaceEditHidden => 'Приховано';
+
+  @override
+  String get textEditorAutoHideAppBarLabel =>
+      'Автоматично приховувати панель програми';
+
+  @override
+  String get textEditorAutoHideAppBarDescription =>
+      'Приховувати верхню панель під час редагування для збільшення вертикального простору';
+
+  @override
+  String get textEditorCopyToMenuItem => 'Копіювати до…';
+
+  @override
+  String get textEditorCopyToDialogTitle => 'Копіювати в папку';
+
+  @override
+  String get textEditorCopyHereButton => 'Копіювати сюди';
+
+  @override
+  String get textEditorDuplicateMenuItem => 'Створити копію';
+
+  @override
+  String get textEditorCopiedSuccessfully => 'Успішно скопійовано';
+
+  @override
+  String get textEditorSearchFilesHint => 'Фільтрувати файли…';
+
+  @override
+  String get audioRecordingQualityLabel => 'Якість запису аудіо';
+
+  @override
+  String get audioRecordingQualityVoice => 'Голос';
+
+  @override
+  String get audioRecordingQualityStandard => 'Стандартна';
+
+  @override
+  String get audioRecordingQualityHigh => 'Висока';
+
+  @override
+  String audioRecordingQualityDetails(String bitrate, String sampleRate) {
+    return 'AAC · $bitrate kbps · $sampleRate kHz · моно';
+  }
+
+  @override
+  String get audioEditorCompressTitle => 'Розмір файлу';
+
+  @override
+  String get audioEditorCompressOriginal => 'Оригінал';
+
+  @override
+  String audioEditorCompressEstimate(String size) {
+    return 'Орієнтовний розмір: приблизно $size';
+  }
+
+  @override
+  String get audioEditorCompressNote =>
+      'Аудіо перекодовується в AAC із нижчим бітрейтом, тож файл стає меншим, але якість знижується. Розрізи припадають точно на задані вами точки. Теги й обкладинка не переносяться.';
+
+  @override
+  String get entropyStepTitle => 'Додати випадковість';
+
+  @override
+  String get entropyIntro =>
+      'Проведіть пальцем по полю різними непередбачуваними рухами. Ваші рухи домішуються до ключів шифрування та солей на додачу до захищеного генератора випадкових чисел пристрою, а не замість нього.';
+
+  @override
+  String get entropyPadHint => 'Малюйте тут пальцем';
+
+  @override
+  String get entropyPadSemantics =>
+      'Поле випадковості. Водіть по ньому пальцем, щоб зібрати випадкові рухи.';
+
+  @override
+  String entropyProgress(int percent) {
+    return 'Збираємо випадковість… $percent%';
+  }
+
+  @override
+  String get entropyComplete =>
+      'Випадковості достатньо. Продовжуйте рухатися, щоб додати більше, або переходьте далі.';
+
+  @override
+  String get entropySkippedStatus =>
+      'Пропущено. Буде використано лише захищений генератор випадкових чисел пристрою. Малюйте на полі, щоб знову додати випадковість.';
+
+  @override
+  String get entropyPoolLabel => 'Пул випадковості';
+
+  @override
+  String get entropySkip => 'Пропустити й використати лише генератор пристрою';
+
+  @override
+  String get entropyReviewLabel => 'Випадковість';
+
+  @override
+  String get entropyReviewUserAdded => 'Рух пальця + генератор пристрою';
+
+  @override
+  String get entropyReviewDeviceOnly => 'Лише генератор пристрою';
+
+  @override
+  String get automationCaptureSectionHeader => 'Камера та мікрофон';
+
+  @override
+  String get automationAllowCaptureTitle =>
+      'Дозволити зйомку камерою та мікрофоном';
+
+  @override
+  String get automationAllowCaptureSubtitle => 'Запис фото, відео та аудіо';
+
+  @override
+  String get automationPermissionsSectionHeader => 'Дозволи';
+
+  @override
+  String get automationPermissionsIntro =>
+      'Це системні дозволи Android, тому вони діють для всієї програми, а не лише для цього сховища. Відображаються лише ті, які можуть використовуватися налаштуваннями цього сховища, разом із поточним статусом.';
+
+  @override
+  String get automationPermSetupNeededTitle => 'Потрібне налаштування';
+
+  @override
+  String get automationPermAlmostReadyTitle => 'Майже готово';
+
+  @override
+  String get automationPermReadyTitle => 'Готово';
+
+  @override
+  String get automationPermReadyMessage =>
+      'Усе необхідне для автоматизації цього сховища налаштовано.';
+
+  @override
+  String get automationPermGrantButton => 'Надати';
+
+  @override
+  String get automationPermGranted => 'Надано';
+
+  @override
+  String get automationPermTagRequired => 'Обов\'язково';
+
+  @override
+  String get automationPermTagRecommended => 'Рекомендовано';
+
+  @override
+  String get automationPermTagOptional => 'Необов\'язково';
+
+  @override
+  String get automationPermDeniedMessage =>
+      'Дозвіл не надано. Якщо Android більше не запитує, увімкніть його в налаштуваннях програми.';
+
+  @override
+  String get automationPermSettingsOpenFailedMessage =>
+      'Не вдалося відкрити налаштування програми. Перейдіть у Налаштування > Програми > VaultExplorer > Дозволи.';
+
+  @override
+  String get automationPermBatteryTitle => 'Необмежене використання батареї';
+
+  @override
+  String get automationPermBatteryDescription =>
+      'Дозволяє автоматизації розблокувати це сховище, навіть коли VaultExplorer повністю закрито. Без цього Android може заблокувати дію.';
+
+  @override
+  String get automationPermNotificationsTitle => 'Сповіщення';
+
+  @override
+  String get automationPermNotificationsDescription =>
+      'Показує перебіг імпорту, експорту та синхронізації, а також індикатор під час виконання запису.';
+
+  @override
+  String get automationPermAllFilesTitle => 'Доступ до всіх файлів';
+
+  @override
+  String get automationPermAllFilesDescription =>
+      'Дозволяє діям імпорту та експорту використовувати звичайні шляхи до файлів, такі як /storage/emulated/0/…. Не потрібно для посилань content://.';
+
+  @override
+  String get automationPermCameraTitle => 'Камера';
+
+  @override
+  String get automationPermCameraDescription =>
+      'Фото та відео, зняті засобами автоматизації.';
+
+  @override
+  String get automationPermMicrophoneTitle => 'Мікрофон';
+
+  @override
+  String get automationPermMicrophoneDescription =>
+      'Аудіозаписи та звук відео. Також перевіряється під час зйомки фото та відео.';
+
+  @override
+  String get automationPermOverlayDescription =>
+      'Потрібно лише якщо ваша програма автоматизації запускає зйомку фото чи відео через Broadcast на Android 14+. Не потрібно в разі прямого виклику активності зйомки.';
+
+  @override
+  String automationPermSetupNeededMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Відсутні $count обов\'язкових дозволів. Деякі дії автоматизації не працюватимуть, доки їх не буде надано.',
+      many:
+          'Відсутні $count обов\'язкових дозволів. Деякі дії автоматизації не працюватимуть, доки їх не буде надано.',
+      few:
+          'Відсутні $count обов\'язкові дозволи. Деякі дії автоматизації не працюватимуть, доки їх не буде надано.',
+      one:
+          'Відсутній $count обов\'язковий дозвіл. Деякі дії автоматизації не працюватимуть, доки його не буде надано.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String automationPermAlmostReadyMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Ще вимкнено $count рекомендованих налаштувань. Автоматизація працює, але може бути менш надійною.',
+      many:
+          'Ще вимкнено $count рекомендованих налаштувань. Автоматизація працює, але може бути менш надійною.',
+      few:
+          'Ще вимкнено $count рекомендовані налаштування. Автоматизація працює, але може бути менш надійною.',
+      one:
+          'Ще вимкнено $count рекомендоване налаштування. Автоматизація працює, але може бути менш надійною.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resetSizeOnLayoutChangeLabel =>
+      'Скидати розмір під час зміни вигляду';
+
+  @override
+  String get resetSizeOnLayoutChangeDesc =>
+      'Повертати масштаб списку та кількість стовпців сітки й мозаїки до типових значень під час зміни вигляду';
+
+  @override
+  String get thumbnailUseGlobalDefaultDesc =>
+      'Дотримується типових налаштувань мініатюр у налаштуваннях програми, тому зміни там застосовуються і до цього сховища.';
+
+  @override
+  String get resetVaultThumbnailsTitle =>
+      'Скинути всі сховища до налаштувань за замовчуванням';
+
+  @override
+  String get resetVaultThumbnailsSubtitle =>
+      'Змушує кожне сховище дотримуватися наведених вище налаштувань мініатюр за замовчуванням, зокрема сховища з власними налаштуваннями.';
+
+  @override
+  String resetVaultThumbnailsConfirmMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count сховищ мають власні налаштування мініатюр. Змусити їх дотримуватися налаштувань за замовчуванням?',
+      many:
+          '$count сховищ мають власні налаштування мініатюр. Змусити їх дотримуватися налаштувань за замовчуванням?',
+      few:
+          '$count сховища мають власні налаштування мініатюр. Змусити їх дотримуватися налаштувань за замовчуванням?',
+      one:
+          '$count сховище має власні налаштування мініатюр. Змусити його дотримуватися налаштувань за замовчуванням?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resetVaultThumbnailsDone(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count сховищ тепер дотримуються налаштувань за замовчуванням',
+      many: '$count сховищ тепер дотримуються налаштувань за замовчуванням',
+      few: '$count сховища тепер дотримуються налаштувань за замовчуванням',
+      one: '$count сховище тепер дотримується налаштувань за замовчуванням',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String thumbnailGlobalInContainerConfirmMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count сховищ дотримуються цього налаштування за замовчуванням і почнуть зберігати мініатюри всередині сховища. Це повільніше й неможливо для сховищ лише для читання.',
+      many:
+          '$count сховищ дотримуються цього налаштування за замовчуванням і почнуть зберігати мініатюри всередині сховища. Це повільніше й неможливо для сховищ лише для читання.',
+      few:
+          '$count сховища дотримуються цього налаштування за замовчуванням і почнуть зберігати мініатюри всередині сховища. Це повільніше й неможливо для сховищ лише для читання.',
+      one:
+          '$count сховище дотримується цього налаштування за замовчуванням і почне зберігати мініатюри всередині сховища. Це повільніше й неможливо для сховищ лише для читання.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanAdjustCornersTitle => 'Налаштування кутів';
+
+  @override
+  String get scanResultTitle => 'Відсканована сторінка';
+
+  @override
+  String get scanAutoDetectButton => 'Автовизначення';
+
+  @override
+  String get scanFullImageButton => 'Усе зображення';
+
+  @override
+  String get scanFilterColor => 'Колір';
+
+  @override
+  String get scanFilterGrayscale => 'Відтінки сірого';
+
+  @override
+  String get scanHintSearching => 'Наведіть камеру на документ';
+
+  @override
+  String get scanHintFound => 'Документ виявлено';
+
+  @override
+  String get scanNoDocumentFound =>
+      'Документ не виявлено. Перетягніть кути, щоб вони збігалися зі сторінкою.';
+
+  @override
+  String get scanProcessingFailed => 'Не вдалося обробити цю сторінку';
+
+  @override
+  String get scanDetectingEdges => 'Виявлення країв…';
+
+  @override
+  String get scanOutputPdf => 'PDF';
+
+  @override
+  String get scanOutputImages => 'Зображення';
+
+  @override
+  String get scanPdfFailed => 'Не вдалося створити PDF';
+
+  @override
+  String get settingsSearchHint => 'Пошук у налаштуваннях';
+
+  @override
+  String get settingsSearchClear => 'Очистити пошук';
+
+  @override
+  String get settingsSearchNoResults => 'Відповідних налаштувань не знайдено';
+
+  @override
+  String get settingsSearchNoResultsHint =>
+      'Спробуйте інше слово або перевірте написання.';
+
+  @override
+  String get settingsSearchUnavailable =>
+      'Цей параметр відображається лише тоді, коли увімкнено пов\'язане налаштування.';
+
+  @override
+  String createArchiveCompressingSubtitle(String count, String size) {
+    return 'Стиснення $count ($size)';
+  }
+
+  @override
+  String createArchiveInsufficientSpace(String required, String available) {
+    return 'Недостатньо вільного місця — потрібно $required, доступно лише $available.';
+  }
+
+  @override
+  String get createArchiveMediaRecommendation =>
+      'Виявлено попередньо стиснені медіафайли. Режим «Без стиснення» вибрано автоматично для економії процесора та заряду.';
+
+  @override
+  String get createArchiveNameLabel => 'Назва архіву';
+
+  @override
+  String get createArchiveNameHint => 'архів';
+
+  @override
+  String get createArchiveSelectFormatTooltip => 'Вибрати формат';
+
+  @override
+  String get createArchiveSecuritySection => 'Безпека';
+
+  @override
+  String get createArchivePasswordLabel => 'Пароль (необов\'язково)';
+
+  @override
+  String get createArchivePasswordHintText => 'Введіть пароль';
+
+  @override
+  String get createArchiveConfirmPasswordLabel => 'Підтвердіть пароль';
+
+  @override
+  String get createArchiveConfirmPasswordHint => 'Повторіть пароль';
+
+  @override
+  String get passphraseStrengthFair => 'Задовільний';
+
+  @override
+  String get createArchiveEncryptFilenamesNeedsPassword =>
+      'Потрібен пароль для попереднього перегляду файлів';
+
+  @override
+  String get createArchiveEncryptFilenamesActive =>
+      'Приховує список файлів до розблокування';
+
+  @override
+  String get createArchiveAdvancedOptions => 'Розширені параметри';
+
+  @override
+  String get createArchiveCompressionLevel => 'Рівень стиснення';
+
+  @override
+  String get createArchiveSplitHintZip =>
+      'Збережеться як .z01, .z02 … і фінальний .zip. Тримайте всі частини в одній папці.';
+
+  @override
+  String get createArchiveSplitHintSevenZip =>
+      'Збережеться як .7z.001, .7z.002 … Тримайте всі частини в одній папці.';
+
+  @override
+  String get createArchiveSplitVolumes => 'Розділити на томи';
+
+  @override
+  String get createArchiveSplitVolumeNone => 'Немає';
+
+  @override
+  String get createArchiveCustomVolumeSizeLabel => 'Власний розмір тому (МБ)';
+
+  @override
+  String get createArchiveCustomVolumeSizeHint => 'напр., 50';
+
+  @override
+  String get archiveCompressionStoreTitle =>
+      'Без стиснення (0) — Тільки пакування';
+
+  @override
+  String get archiveCompressionStoreDesc =>
+      'Миттєве пакування, найкраще для відео, музики та архівів';
+
+  @override
+  String get archiveCompressionFastTitle => 'Швидке (1–3) — Прискорене';
+
+  @override
+  String get archiveCompressionFastDesc =>
+      'Швидке стиснення для щоденного обміну';
+
+  @override
+  String get archiveCompressionNormalTitle => 'Звичайне (5) — Збалансовано';
+
+  @override
+  String get archiveCompressionNormalDesc =>
+      'Збалансоване стиснення та швидкість';
+
+  @override
+  String get archiveCompressionUltraTitle => 'Ультра (9) — Найменший розмір';
+
+  @override
+  String get archiveCompressionUltraDesc =>
+      'Найменший розмір, повільніше стиснення';
+
+  @override
+  String get officeViewerErrorTitle => 'Неможливо переглянути цей документ';
+
+  @override
+  String get officeViewerEncrypted =>
+      'Цей документ захищено паролем, а зашифровані файли Office переглянути неможливо.';
+
+  @override
+  String get officeViewerUnsupported =>
+      'Не вдалося прочитати цей файл. Він може бути пошкоджений або мати формат, який переглядач не підтримує.';
+
+  @override
+  String get officeViewerTooLarge =>
+      'Цей документ завеликий для перегляду в програмі.';
+
+  @override
+  String get officeViewerSpeakerNotes => 'Нотатки доповідача';
+
+  @override
+  String get fileAssocDocumentViewer => 'Вбудований переглядач документів';
+
+  @override
+  String get viewOfficeDocumentsInApp =>
+      'Перегляд файлів Word, Excel, PowerPoint і OpenDocument у програмі';
+
+  @override
+  String get archiveCompressionMethodLabel => 'Метод стиснення';
+
+  @override
+  String get archiveMethodLzma2Desc =>
+      'Найкращий універсальний вибір. Також використовується в .tar.xz.';
+
+  @override
+  String get archiveMethodLzmaDesc =>
+      'Старіший метод 7-Zip. Також використовується в .tar.lzma.';
+
+  @override
+  String get archiveMethodDeflateDesc =>
+      'Найшвидший, але файли більші, а сумісність найширша. Також використовується в ZIP і .tar.gz.';
+
+  @override
+  String archiveMethodFixedInfo(String format, String method) {
+    return '$format завжди стискає за допомогою $method.';
+  }
+
+  @override
+  String get archiveMethodMoreInSevenZip =>
+      'LZMA2 і LZMA доступні в архівах 7-Zip.';
+
+  @override
+  String get archiveMethodStoreNote =>
+      'Режим «Без стиснення» не стискає, тому методу для вибору немає.';
+
+  @override
+  String get browserTabsEnabledTitle =>
+      'Використовувати вкладки файлового менеджера';
+
+  @override
+  String get browserTabsEnabledSubtitle =>
+      'Залишайте відкритими кілька розташувань і перемикайтеся між ними.';
+
+  @override
+  String get browserTabNew => 'Нова вкладка';
+
+  @override
+  String get browserTabClose => 'Закрити вкладку';
+
+  @override
+  String get browserTabCloseOthers => 'Закрити інші вкладки';
+
+  @override
+  String get browserTabDuplicate => 'Дублювати вкладку';
+
+  @override
+  String get browserTabMoveToOtherPane => 'Перемістити в іншу панель';
+
+  @override
+  String get browserTabSwitchPrevious => 'Перейти на попередню вкладку';
+
+  @override
+  String get browserTabOpenInNewTab => 'Відкрити в новій вкладці';
+
+  @override
+  String browserTabLimitReached(int max) {
+    return 'Досягнуто ліміту вкладок ($max)';
+  }
+
+  @override
+  String get browserTabCloseToLeft => 'Закрити вкладки ліворуч';
+
+  @override
+  String get browserTabCloseToRight => 'Закрити вкладки праворуч';
+
+  @override
+  String get browserTabCloseAll => 'Закрити всі';
+
+  @override
+  String get dualPaneEnabledTitle => 'Використовувати дві панелі';
+
+  @override
+  String get dualPaneEnabledSubtitle =>
+      'Показувати дві відкриті вкладки поруч, якщо екран достатньо широкий. Потрібно ввімкнути вкладки файлового менеджера.';
+
+  @override
+  String get pressBackAgainToExit => 'Натисніть «назад» ще раз, щоб вийти';
+
+  @override
+  String get tabEdgeSwipeLabel => 'Жест свайпу між вкладками';
+
+  @override
+  String get tabSwipeBetweenTabsTitle => 'Свайп між вкладками';
+
+  @override
+  String get tabSwipeBetweenTabsOnDesc =>
+      'Проведіть убік по папці, щоб перейти до наступної або попередньої вкладки.';
+
+  @override
+  String get tabSwipeBetweenTabsOffDesc =>
+      'Вкладки перемикаються лише зі смуги вкладок. Два жести нижче тоді працюють будь-де на екрані.';
+
+  @override
+  String get tabSwipeRightOnFirstTab => 'Свайп праворуч на першій вкладці';
+
+  @override
+  String get tabSwipeRightAnywhere => 'Свайп праворуч будь-де';
+
+  @override
+  String get tabSwipeLeftOnLastTab => 'Свайп ліворуч на останній вкладці';
+
+  @override
+  String get tabSwipeLeftAnywhere => 'Свайп ліворуч будь-де';
+
+  @override
+  String get tabSwipeActionNewTab => 'Відкрити нову вкладку';
+
+  @override
+  String get tabSwipeActionOpenDrawer => 'Відкрити бічне меню';
+
+  @override
+  String get tabSwipeActionLoopFirst => 'По колу до першої вкладки';
+
+  @override
+  String get tabSwipeActionLoopLast => 'По колу до останньої вкладки';
+
+  @override
+  String get tabSwipeActionNothing => 'Нічого не робити';
+
+  @override
+  String get tabSwipeRightNothingDesc =>
+      'Бічне меню, як і раніше, відкривається від лівого краю екрана та кнопкою меню.';
+
+  @override
+  String get tabSwipeRightLoopDesc =>
+      'Бічне меню відкривається від лівого краю екрана або кнопкою меню. Якщо вкладка одна, цей свайп відкриває його.';
+
+  @override
+  String get tabSwipeNewTabsFromStripDesc =>
+      'Нові вкладки, як і раніше, відкриваються зі смуги вкладок.';
+
+  @override
+  String get tabSwipePreviewFirstTab => 'Перша вкладка';
+
+  @override
+  String get tabSwipePreviewLastTab => 'Остання вкладка';
+
+  @override
+  String get appBarAtBottomLabel => 'Показувати панель унизу';
+
+  @override
+  String get appBarAtBottomDesc =>
+      'Переміщує панель програми з верхньої частини екрана донизу, щоб її було легше діставати великим пальцем.';
+
+  @override
+  String get selectByIconLabel => 'Вибір дотиком до значка';
+
+  @override
+  String get selectByIconDesc =>
+      'У поданні списком дотик до значка файлу або папки вибирає його. Якщо вимкнено, дотик до значка нічого не робить.';
+
+  @override
+  String get showFileExtensionsLabel => 'Показувати розширення файлів';
+
+  @override
+  String get showFileExtensionsDesc =>
+      'Показує розширення наприкінці назв файлів. Під час пошуку розширення завжди показуються.';
+
+  @override
+  String get itemActionsMenuTitle => 'Дії з елементом';
+
+  @override
+  String get itemActionsMenuDesc =>
+      'Виберіть, які дії відображаються в меню елемента та в меню вибору, і в якому порядку.';
+
+  @override
+  String get itemActionsQuickRowHeader => 'Рядок швидких дій';
+
+  @override
+  String get itemActionsMenuListHeader => 'Список меню';
+
+  @override
+  String get itemActionsMoveToQuickRow => 'Перемістити до рядка швидких дій';
+
+  @override
+  String get itemActionsMoveToMenuList => 'Перемістити до списку меню';
+
+  @override
+  String get skinEditStarted =>
+      'Редактор тем увімкнено. Використовуйте плаваючі кнопки на будь-якому екрані, щоб вибрати колір і змінити його.';
+
+  @override
+  String get skinEditSaved => 'Тему збережено';
+
+  @override
+  String get skinEditPickTooltip => 'Вибрати елемент для перефарбування';
+
+  @override
+  String get skinEditPickStopTooltip =>
+      'Припинити вибір і користуватися застосунком як зазвичай';
+
+  @override
+  String get skinEditDoneTooltip => 'Зберегти й закрити редактор тем';
+
+  @override
+  String get skinEditHint =>
+      'Торкніться будь-якого елемента, щоб змінити його колір. Торкніться піпетки ще раз, щоб користуватися застосунком як зазвичай.';
+
+  @override
+  String get skinEditLayersTitle => 'Кольори в цьому місці';
+
+  @override
+  String get skinEditAlsoUsedBy => 'Цей самий колір також використовують';
+
+  @override
+  String get skinEditClosest =>
+      'Точного збігу для цього кольору немає; це найближчий колір теми.';
+
+  @override
+  String get skinEditNoMatch =>
+      'У цьому місці не використовується колір теми напряму. Виберіть колір зі списку.';
+
+  @override
+  String get skinEditAllColors => 'Усі кольори';
+
+  @override
+  String get skinEditBackToEditor => 'Назад до редактора кольору';
+
+  @override
+  String get skinEditStatusInherited => 'Успадкований';
+
+  @override
+  String get skinEditReset => 'Скинути';
+
+  @override
+  String get skinEditMoreOptions => 'Усі кольори та параметри';
+
+  @override
+  String get skinEditCollapse => 'Згорнути панель';
+
+  @override
+  String get skinEditExpand => 'Розгорнути панель';
+
+  @override
+  String skinEditPageColors(String page) {
+    return 'Кольори: $page';
+  }
+
+  @override
+  String get skinEditDockTop => 'Перемістити панель угору';
+
+  @override
+  String get skinEditDockBottom => 'Перемістити панель униз';
+
+  @override
+  String get skinEditEditorIndependent =>
+      'Текстовий редактор використовує власні кольори, тож зміни тут не з’являться в ньому, доки він не почне наслідувати тему застосунку.';
+
+  @override
+  String get cameraKeepShootingTooltip =>
+      'Продовжувати зйомку після кожного кадру';
+
+  @override
+  String get cameraSegmentLengthOff => 'Вимкнено';
+
+  @override
+  String cameraSegmentLengthMinutes(int minutes) {
+    return '$minutes хв';
+  }
+
+  @override
+  String get cameraSegmentLengthTooltip =>
+      'Розбивати запис на частини, які зберігаються під час зйомки';
+
+  @override
+  String get cameraSegmentSpaceMessage =>
+      'Недостатньо вільного місця у сховищі. Запис зупинено; частину, яку не вдалося зберегти, залишено для перегляду.';
+
+  @override
+  String get audioSegmentedStopTitle => 'Зупинити запис?';
+
+  @override
+  String get audioSegmentedStopMessage =>
+      'Частини, записані на цей момент, уже збережено у сховищі. Зупинити зараз і зберегти решту?';
+
+  @override
+  String get audioSegmentedStopAction => 'Зупинити та зберегти';
+
+  @override
+  String get audioUnsavedPartsTitle => 'Деякі частини не вдалося зберегти';
+
+  @override
+  String audioUnsavedPartsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Не вдалося зберегти $count записаної частини.',
+      many: 'Не вдалося зберегти $count записаних частин.',
+      few: 'Не вдалося зберегти $count записані частини.',
+      one: 'Не вдалося зберегти $count записану частину.',
+    );
+    return '$_temp0 Звільніть місце та спробуйте ще раз або видаліть їх.';
+  }
+
+  @override
+  String get segmentRetrySave => 'Спробувати знову';
+
+  @override
+  String get imageEditorActionAuto => 'Авто';
+
+  @override
+  String get imageEditorActionFlip => 'Віддзеркалити';
+
+  @override
+  String get imageEditorActionRotate => 'Обертати';
+
+  @override
+  String get imageEditorActionColor => 'Колір';
+
+  @override
+  String get imageEditorActionSize => 'Розмір';
+
+  @override
+  String get imageEditorActionOpacity => 'Непрозорість';
+
+  @override
+  String get imageEditorActionStyle => 'Стиль';
+
+  @override
+  String get imageEditorExportSave => 'Експорт / Зберегти';
+
+  @override
+  String get imageEditorRevertOriginal => 'Повернути до оригіналу';
+
+  @override
+  String get imageEditorTuneImageToolLabel => 'Корекція зображення';
+
+  @override
+  String get imageEditorLooksToolLabel => 'Стилі';
+
+  @override
+  String get imageEditorLookCurrent => 'Поточний';
+
+  @override
+  String get imageEditorLookPortrait => 'Портрет';
+
+  @override
+  String get imageEditorLookDramatic => 'Драматичний';
+
+  @override
+  String get imageEditorLookVintage => 'Вінтаж';
+
+  @override
+  String get imageEditorTuneAmbiance => 'Атмосфера';
+
+  @override
+  String get imageEditorTuneWarmth => 'Теплота';
+
+  @override
+  String get imageEditorTuneShadows => 'Тіні';
+
+  @override
+  String get imageEditorCropAspectDin => 'DIN';
+
+  @override
+  String get imageEditorAngle => 'Кут';
+
+  @override
+  String get fontSizeSmall => 'Малий';
+
+  @override
+  String get fontSizeMedium => 'Середній';
+
+  @override
+  String get fontSizeLarge => 'Великий';
+
+  @override
+  String get fontSizeExtraLarge => 'Дуже великий';
+
+  @override
+  String get imageEditorTextPlaceholder =>
+      'ДВІЧІ ТОРКНІТЬСЯ, ЩОБ ЗМІНИТИ ТЕКСТ';
+
+  @override
+  String get imageEditorFontSizePreview => 'Приклад перегляду ABC 123';
+
+  @override
+  String imageEditorPhotoLabel(int index) {
+    return 'Фото $index';
+  }
+
+  @override
+  String get cameraPauseRecordingTooltip => 'Призупинити запис';
+
+  @override
+  String get cameraResumeRecordingTooltip => 'Відновити запис';
+
+  @override
+  String get cameraSnapshotTooltip => 'Зробити фото під час запису';
+
+  @override
+  String get cameraPauseFailedMessage =>
+      'Не вдалося призупинити або відновити запис';
+
+  @override
+  String get floatingPlayerTitle => 'Плаваючий відеоплеєр';
+
+  @override
+  String get floatingPlayerSubtitle =>
+      'Якщо закрити плеєр під час відтворення відео, воно продовжиться в невеликому вікні, яке можна переміщувати. Після виходу із застосунку воно перейде в режим «картинка в картинці» з кнопкою «Лише аудіо»';
+
+  @override
+  String get floatingPlayerExpandTooltip => 'Розгорнути';
+
+  @override
+  String get floatingPlayerAudioOnly => 'Лише аудіо';
+
+  @override
+  String get floatingPlayerShowVideo => 'Показати відео';
+
+  @override
+  String get masterLockTitle => 'Головне блокування';
+
+  @override
+  String get masterLockInactiveSubtitle =>
+      'Вимагати пароль, PIN-код або графічний ключ для відкриття програми';
+
+  @override
+  String get masterLockChooseTitle => 'Виберіть, як блокувати програму';
+
+  @override
+  String get masterLockBackupTitle => 'Додайте резервний спосіб розблокування';
+
+  @override
+  String get masterLockBackupMessage =>
+      'Біометричне розблокування потребує пароля, PIN-коду або графічного ключа як запасного варіанту. Виберіть, що налаштувати додатково.';
+
+  @override
+  String get masterCredentialPassword => 'Пароль';
+
+  @override
+  String get masterCredentialPin => 'PIN-код';
+
+  @override
+  String get masterCredentialPattern => 'Графічний ключ';
+
+  @override
+  String get masterCredentialSet => 'Встановлено';
+
+  @override
+  String get masterCredentialNotSet => 'Не встановлено';
+
+  @override
+  String get duressMasterLockRequired =>
+      'Перед налаштуванням розблокування під примусом необхідно увімкнути головне блокування у розділі безпеки.';
+
+  @override
+  String get skinTokenGroupSurface => 'Поверхні';
+
+  @override
+  String get skinTokenGroupContent => 'Текст та іконки';
+
+  @override
+  String get skinTokenGroupBorder => 'Межі';
+
+  @override
+  String get skinTokenGroupChrome => 'Верхня панель';
+
+  @override
+  String get skinTokenGroupAction => 'Кнопки';
+
+  @override
+  String get skinTokenGroupControl => 'Перемикачі та повзунки';
+
+  @override
+  String get skinTokenGroupChoice => 'Чіпи та сегменти';
+
+  @override
+  String get skinTokenGroupSelection => 'Вибрані елементи';
+
+  @override
+  String get skinTokenGroupOverlay => 'Меню, діалоги та панелі';
+
+  @override
+  String get skinTokenGroupFloating => 'Плаваючі елементи';
+
+  @override
+  String get skinTokenSurfacePage => 'Фон сторінки';
+
+  @override
+  String get skinTokenSurfacePageHint =>
+      'Полотно за всіма елементами на цій сторінці.';
+
+  @override
+  String get skinTokenSurfaceCard => 'Картки та рядки';
+
+  @override
+  String get skinTokenSurfaceCardHint =>
+      'Картки, рядки списку та згруповані панелі.';
+
+  @override
+  String get skinTokenSurfaceCardActive => 'Активна картка';
+
+  @override
+  String get skinTokenSurfaceCardActiveHint =>
+      'Виділена картка, наприклад розблоковане сховище.';
+
+  @override
+  String get skinTokenSurfaceTile => 'Плитки та мініатюри';
+
+  @override
+  String get skinTokenSurfaceTileHint =>
+      'Заповнювачі мініатюр, плитки іконок і блоки коду.';
+
+  @override
+  String get skinTokenSurfaceField => 'Поля вводу';
+
+  @override
+  String get skinTokenSurfaceFieldHint =>
+      'Заливка текстових полів і панелей пошуку.';
+
+  @override
+  String get skinTokenContentPrimary => 'Основний текст';
+
+  @override
+  String get skinTokenContentPrimaryHint =>
+      'Заголовки, імена та основний текст.';
+
+  @override
+  String get skinTokenContentSecondary => 'Вторинний текст';
+
+  @override
+  String get skinTokenContentSecondaryHint =>
+      'Підзаголовки, деталі та підказки.';
+
+  @override
+  String get skinTokenContentIcon => 'Іконки';
+
+  @override
+  String get skinTokenContentIconHint =>
+      'Прості іконки, які не знаходяться на кнопці чи панелі.';
+
+  @override
+  String get skinTokenBorderDivider => 'Розділювачі';
+
+  @override
+  String get skinTokenBorderDividerHint =>
+      'Тонкі лінії між рядками та розділами.';
+
+  @override
+  String get skinTokenBorderOutline => 'Контури';
+
+  @override
+  String get skinTokenBorderOutlineHint =>
+      'Межі контурних кнопок і невибраних прапорців.';
+
+  @override
+  String get skinTokenBorderFocus => 'Кільце фокусу';
+
+  @override
+  String get skinTokenBorderFocusHint =>
+      'Межа текстового поля, що редагується.';
+
+  @override
+  String get skinTokenChromeTopBar => 'Верхня панель';
+
+  @override
+  String get skinTokenChromeTopBarHint => 'Заливка верхньої панелі.';
+
+  @override
+  String get skinTokenChromeOnTopBar => 'Текст та іконки верхньої панелі';
+
+  @override
+  String get skinTokenChromeOnTopBarHint =>
+      'Колір заголовка та іконок на верхній панелі.';
+
+  @override
+  String get skinTokenActionPrimary => 'Заповнені кнопки';
+
+  @override
+  String get skinTokenActionPrimaryHint => 'Заливка заповнених кнопок.';
+
+  @override
+  String get skinTokenActionOnPrimary => 'Підпис заповненої кнопки';
+
+  @override
+  String get skinTokenActionOnPrimaryHint =>
+      'Підпис та іконка на заповненій кнопці.';
+
+  @override
+  String get skinTokenActionTonal => 'Підняті кнопки';
+
+  @override
+  String get skinTokenActionTonalHint => 'Заливка піднятих і тональних кнопок.';
+
+  @override
+  String get skinTokenActionOnTonal => 'Підпис піднятої кнопки';
+
+  @override
+  String get skinTokenActionOnTonalHint =>
+      'Підпис та іконка на піднятій кнопці.';
+
+  @override
+  String get skinTokenActionText => 'Текстові та контурні кнопки';
+
+  @override
+  String get skinTokenActionTextHint =>
+      'Колір підпису текстових кнопок, контурних кнопок і посилань.';
+
+  @override
+  String get skinTokenControlActive => 'Елемент увімкнено';
+
+  @override
+  String get skinTokenControlActiveHint =>
+      'Доріжка перемикача у ввімкненому стані, вибрані прапорці та радіокнопки, заливка повзунка та прогресу.';
+
+  @override
+  String get skinTokenControlOnActive => 'Повзунок перемикача та галочка';
+
+  @override
+  String get skinTokenControlOnActiveHint =>
+      'Повзунок увімкненого перемикача та галочка всередині прапорця.';
+
+  @override
+  String get skinTokenControlTrack => 'Доріжка елемента керування';
+
+  @override
+  String get skinTokenControlTrackHint =>
+      'Доріжка вимкненого перемикача та порожня частина повзунків і смуг прогресу.';
+
+  @override
+  String get skinTokenControlInactive => 'Елемент вимкнено';
+
+  @override
+  String get skinTokenControlInactiveHint =>
+      'Повзунок вимкненого перемикача та межі невідмічених прапорців.';
+
+  @override
+  String get skinTokenChoiceBackground => 'Чіп';
+
+  @override
+  String get skinTokenChoiceBackgroundHint =>
+      'Заливка невибраних чіпів і сегментів.';
+
+  @override
+  String get skinTokenChoiceSelected => 'Вибраний чіп';
+
+  @override
+  String get skinTokenChoiceSelectedHint =>
+      'Заливка вибраного чіпа або сегмента.';
+
+  @override
+  String get skinTokenChoiceOnSelected => 'Підпис вибраного чіпа';
+
+  @override
+  String get skinTokenChoiceOnSelectedHint =>
+      'Підпис та іконка на вибраному чіпі або сегменті.';
+
+  @override
+  String get skinTokenChoiceBorder => 'Межа чіпа';
+
+  @override
+  String get skinTokenChoiceBorderHint =>
+      'Контур чіпів і сегментованих кнопок.';
+
+  @override
+  String get skinTokenSelectionFill => 'Вибраний рядок';
+
+  @override
+  String get skinTokenSelectionFillHint =>
+      'Вибрані файли та рядки, а також підсвічені плитки іконок.';
+
+  @override
+  String get skinTokenSelectionOn => 'Текст та іконки вибраного рядка';
+
+  @override
+  String get skinTokenSelectionOnHint =>
+      'Текст та іконки, показані на вибраному рядку.';
+
+  @override
+  String get skinTokenOverlayMenu => 'Меню';
+
+  @override
+  String get skinTokenOverlayMenuHint =>
+      'Спливаючі, випадаючі та контекстні меню.';
+
+  @override
+  String get skinTokenOverlayOnMenu => 'Текст меню';
+
+  @override
+  String get skinTokenOverlayOnMenuHint => 'Текст та іконки в меню.';
+
+  @override
+  String get skinTokenOverlayDialog => 'Діалоги';
+
+  @override
+  String get skinTokenOverlayDialogHint => 'Заливка діалогових вікон.';
+
+  @override
+  String get skinTokenOverlayOnDialog => 'Заголовок діалогу';
+
+  @override
+  String get skinTokenOverlayOnDialogHint =>
+      'Текст заголовка діалогових вікон.';
+
+  @override
+  String get skinTokenOverlaySheet => 'Нижні панелі';
+
+  @override
+  String get skinTokenOverlaySheetHint => 'Заливка нижніх панелей.';
+
+  @override
+  String get skinTokenOverlayOnSheet => 'Текст нижньої панелі';
+
+  @override
+  String get skinTokenOverlayOnSheetHint => 'Текст та іконки в нижніх панелях.';
+
+  @override
+  String get skinTokenOverlayScrim => 'Затемнення за діалогами';
+
+  @override
+  String get skinTokenOverlayScrimHint =>
+      'Затемнення позаду діалогів і нижніх панелей.';
+
+  @override
+  String get skinTokenFloatingFab => 'Кругла кнопка додавання';
+
+  @override
+  String get skinTokenFloatingFabHint => 'Заливка круглої кнопки додавання.';
+
+  @override
+  String get skinTokenFloatingOnFab => 'Іконка круглої кнопки додавання';
+
+  @override
+  String get skinTokenFloatingOnFabHint =>
+      'Іконка на круглій кнопці додавання.';
+
+  @override
+  String get skinTokenFloatingToast => 'Плашка сповіщення';
+
+  @override
+  String get skinTokenFloatingToastHint =>
+      'Заливка інформаційного повідомлення, що з\'являється знизу.';
+
+  @override
+  String get skinTokenFloatingOnToast => 'Текст плашки сповіщення';
+
+  @override
+  String get skinTokenFloatingOnToastHint =>
+      'Текст та іконка на інформаційному повідомленні.';
+
+  @override
+  String get skinTokenFloatingTooltip => 'Підказки';
+
+  @override
+  String get skinTokenFloatingTooltipHint => 'Заливка підказок.';
+
+  @override
+  String get skinTokenFloatingOnTooltip => 'Текст підказки';
+
+  @override
+  String get skinTokenFloatingOnTooltipHint => 'Текст у спливаючих підказках.';
+
+  @override
+  String get skinTokenGroupAccent => 'Акцентні кольори';
+
+  @override
+  String get skinTokenGroupStatus => 'Стан та помилки';
+
+  @override
+  String get skinTokenSurfacePanel => 'Панелі';
+
+  @override
+  String get skinTokenSurfacePanelHint =>
+      'Картки зі стандартного віджета карток, панель закладок, клітинки сітки та інформаційні панелі.';
+
+  @override
+  String get skinTokenChromeBar => 'Панелі та смуги вкладок';
+
+  @override
+  String get skinTokenChromeBarHint =>
+      'Панелі дій, смуги вкладок, панель вибору та нижні панелі.';
+
+  @override
+  String get skinTokenAccentPrimary => 'Акцент';
+
+  @override
+  String get skinTokenAccentPrimaryHint =>
+      'Виділення, посилання в тексті, невеликі акцентні іконки та значки.';
+
+  @override
+  String get skinTokenAccentSecondary => 'Вторинний акцент';
+
+  @override
+  String get skinTokenAccentSecondaryHint => 'Вторинні виділення та теги.';
+
+  @override
+  String get skinTokenAccentTertiary => 'Третинний акцент';
+
+  @override
+  String get skinTokenAccentTertiaryHint => 'Третинні виділення та теги.';
+
+  @override
+  String get skinTokenAccentTertiaryContainer => 'Заливка третинного акценту';
+
+  @override
+  String get skinTokenAccentTertiaryContainerHint =>
+      'Заливка позаду третинних виділень.';
+
+  @override
+  String get skinTokenAccentOnTertiaryContainer =>
+      'Текст заливки третинного акценту';
+
+  @override
+  String get skinTokenAccentOnTertiaryContainerHint =>
+      'Текст та іконки на третинній заливці.';
+
+  @override
+  String get skinTokenStatusDanger => 'Помилки та видалення';
+
+  @override
+  String get skinTokenStatusDangerHint =>
+      'Текст помилки, дії видалення та межі помилок.';
+
+  @override
+  String get skinTokenStatusOnDanger => 'Текст на кольорі помилки';
+
+  @override
+  String get skinTokenStatusOnDangerHint =>
+      'Текст та іконки, відображені на кольорі помилки.';
+
+  @override
+  String get skinTokenStatusDangerContainer =>
+      'Заливка повідомлення про помилку';
+
+  @override
+  String get skinTokenStatusDangerContainerHint =>
+      'Заливка повідомлень про помилки та банерів.';
+
+  @override
+  String get skinTokenStatusOnDangerContainer =>
+      'Текст повідомлення про помилку';
+
+  @override
+  String get skinTokenStatusOnDangerContainerHint =>
+      'Текст та іконки в повідомленнях про помилки.';
+
+  @override
+  String get skinTokenStatusInfo => 'Заливка інформаційного повідомлення';
+
+  @override
+  String get skinTokenStatusInfoHint => 'Заливка інформаційних банерів.';
+
+  @override
+  String get skinTokenStatusOnInfo => 'Текст інформаційного повідомлення';
+
+  @override
+  String get skinTokenStatusOnInfoHint =>
+      'Текст та іконки в інформаційних банерах.';
+}

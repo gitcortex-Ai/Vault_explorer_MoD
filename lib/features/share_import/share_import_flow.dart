@@ -1,0 +1,228 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vaultexplorer/core/api/vault_engine_types.dart';
+import 'package:vaultexplorer/core/api/vault_file_io_api.dart';
+import 'package:vaultexplorer/core/api/vault_lifecycle_api.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/filesystem/mounted_container_filesystem.dart';
+import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/data/models/clipboard_item.dart';
+import 'package:vaultexplorer/data/models/file_operation.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/services/app_settings_service.dart';
+import 'package:vaultexplorer/features/browser/widgets/conflict_resolution_sheet.dart';
+import 'package:vaultexplorer/features/dashboard/vault_dashboard_controller.dart';
+import 'package:vaultexplorer/features/share_import/share_destination_sheet.dart';
+import 'package:vaultexplorer/features/tools/models/tool_models.dart';
+
+/// Presents the "where should this go?" flow for a file shared into the app
+/// via the Android Share Sheet, then imports it.
+///
+/// [isColdStart] says whether the app's own UI existed before this share
+/// arrived -- true when this activity/task only exists *because of* the
+/// share (nothing in the app for the person to go back to), false when the
+/// app was already open and being used and the share simply arrived on top
+/// of it. It gates every [SystemNavigator.pop] in this flow: popping is the
+/// right way to hand control back to the sharing app when there was nothing
+/// else here, but it would otherwise forcibly close an app session the
+/// person was already in the middle of the moment the share finishes (or is
+/// cancelled) -- see `MainShell._onIncomingShareRequest`'s two call sites
+/// for how cold vs. warm delivery is told apart.
+Future<void> presentIncomingShareImport(
+  BuildContext context,
+  WidgetRef ref,
+  IncomingShareRequest request, {
+  required bool isColdStart,
+  void Function(Route<CryptoDestination> route)? onRouteCreated,
+  bool Function()? isCurrent,
+}) async {
+  final vaultFileIoApi = ref.read(vaultFileIoApiProvider);
+
+  final route = MaterialPageRoute<CryptoDestination>(
+    builder: (_) => const ShareDestinationSheet(),
+  );
+  onRouteCreated?.call(route);
+  final destination = await Navigator.push<CryptoDestination>(context, route);
+  if (isCurrent != null && !isCurrent()) {
+    return;
+  }
+  if (destination == null) {
+    await vaultFileIoApi.cancelPendingShareRequest();
+    if (isColdStart) {
+      await vaultFileIoApi.returnToSharingApp();
+      SystemNavigator.pop();
+    }
+    return;
+  }
+  final container = destination.container;
+  final relativePath = destination.relativePath;
+  if (!destination.isVault || container == null || relativePath == null) {
+    await vaultFileIoApi.cancelPendingShareRequest();
+    return;
+  }
+
+  final pick = await vaultFileIoApi.prepareShareImport(
+    container,
+    relativePath,
+  );
+  if (pick == null) {
+    if (context.mounted) {
+      showAppSnackBar(
+        context,
+        message: context.l10n.shareImportExpiredMessage,
+        tone: AppBannerTone.warning,
+      );
+    }
+    return;
+  }
+
+  ConflictPlan conflictPlan = const {};
+  if (pick.conflicts.isNotEmpty) {
+    if (!context.mounted) {
+      await vaultFileIoApi.cancelPickedImport(pick.pickToken);
+      return;
+    }
+    final entries = buildShareImportConflictEntries(
+      conflicts: pick.conflicts,
+      items: pick.items,
+    );
+    final resolved = await ConflictResolutionSheet.show(
+      context,
+      conflicts: entries,
+      cancelLabel: context.l10n.cancelImportButton,
+      caseSensitive: namesAreCaseSensitive(container),
+    );
+    if (resolved == null) {
+      await vaultFileIoApi.cancelPickedImport(pick.pickToken);
+      if (isColdStart) {
+        await vaultFileIoApi.returnToSharingApp();
+        SystemNavigator.pop();
+      }
+      return;
+    }
+    conflictPlan = resolved;
+  }
+
+   if (!context.mounted) return;
+  final settings = await ref.read(appSettingsServiceProvider).loadSettings();
+  final shouldRelock = switch (settings.quickActionLockMode) {
+    QuickActionLockMode.alwaysLock => true,
+    QuickActionLockMode.leaveAsFound => destination.wasInitiallyLocked,
+    QuickActionLockMode.leaveOpen => false,
+  };
+
+  final opSvc = ref.read(fileOperationServiceProvider);
+  final vaultLifecycleApi = ref.read(vaultLifecycleApiProvider);
+  final dashboardController = ref.read(vaultDashboardControllerProvider.notifier);
+
+  final op = opSvc.enqueueImport(
+    dest: container,
+    destDirPath: relativePath,
+    items: pick.items,
+    isFolder: false,
+    sourceDisplayName: context.l10n.sharedFileDefaultDisplayName,
+    performImport: (opId) => vaultFileIoApi.importFiles(
+      container,
+      relativePath,
+      opId,
+      pick.pickToken,
+      conflictPlan: conflictPlan.map((k, v) => MapEntry(k, v.name)),
+    ),
+    l10n: context.l10n,
+  );
+  _attachCompletionListener(
+    opSvc: opSvc,
+    op: op,
+    vaultFileIoApi: vaultFileIoApi,
+    vaultLifecycleApi: vaultLifecycleApi,
+    dashboardController: dashboardController,
+    container: container,
+    shouldRelock: shouldRelock,
+    isColdStart: isColdStart,
+  );
+
+  if (context.mounted) {
+    final count = pick.items.length;
+    showAppSnackBar(
+      context,
+      message: context.l10n.importingSharedFilesMessage(count, destination.displayName),
+      tone: AppBannerTone.info,
+    );
+  }
+}
+
+/// Builds the [ConflictResolutionSheet] entry list for a share-import pick's
+/// reported [conflicts], looking up each conflicting name in [items] for its
+/// size and directory-ness. Falls back to a zero-size synthetic item if a
+/// conflicting name isn't found among [items] (e.g. it only exists in the
+/// destination folder already, not among the freshly-shared items) rather
+/// than throwing, matching [ImportPickResult]'s own permissive shape.
+List<ConflictEntry> buildShareImportConflictEntries({
+  required List<ImportPickConflict> conflicts,
+  required List<ClipboardItem> items,
+}) =>
+    conflicts
+        .map(
+          (c) => ConflictEntry(
+            item: items.firstWhere(
+              (i) => i.path == c.name,
+              orElse: () => ClipboardItem(
+                path: c.name,
+                isDir: c.destIsDir,
+                sizeBytes: 0,
+              ),
+            ),
+            destIsDir: c.destIsDir,
+          ),
+        )
+        .toList();
+
+void _attachCompletionListener({
+  required FileOperationService opSvc,
+  required FileOperation op,
+  required VaultFileIoApi vaultFileIoApi,
+  required VaultLifecycleApi vaultLifecycleApi,
+  required VaultDashboardController dashboardController,
+  required MountedContainer container,
+  required bool shouldRelock,
+  required bool isColdStart,
+}) {
+  void listener() {
+    final done =
+        op.status != FileOperationStatus.running &&
+        op.status != FileOperationStatus.pending;
+    if (!done) return;
+    op.removeListener(listener);
+    if (!shareImportNeedsAttention(op.status)) {
+      opSvc.dismiss(op.id);
+      if (shouldRelock) {
+        vaultLifecycleApi.lockContainer(container.uri).catchError((_) => false);
+        dashboardController.onContainerLocked(container.volId);
+      }
+      // Only hand control back to the sharing app when there was nothing
+      // else here to begin with -- see presentIncomingShareImport's
+      // isColdStart doc comment. When the app was already open, leave the
+      // person right where they are; the dashboard already reflects the
+      // finished import.
+      if (isColdStart) {
+        Future.delayed(const Duration(milliseconds: 600), () async {
+          await vaultFileIoApi.returnToSharingApp();
+          SystemNavigator.pop();
+        });
+      }
+    }
+  }
+
+  op.addListener(listener);
+}
+
+/// Whether a just-finished share-import operation in [status] needs the
+/// person's attention -- if so, [_attachCompletionListener] leaves it
+/// visible in the active-transfers UI instead of auto-dismissing it and
+/// closing the share-target activity.
+bool shareImportNeedsAttention(FileOperationStatus status) =>
+    status == FileOperationStatus.failed ||
+    status == FileOperationStatus.diskFull ||
+    status == FileOperationStatus.completedWithErrors;

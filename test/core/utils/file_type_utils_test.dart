@@ -1,0 +1,221 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:vaultexplorer/core/utils/file_type_utils.dart';
+
+void main() {
+  group('isAppEncryptedFileName', () {
+    test('recognizes the native .vxenc extension', () {
+      expect(isAppEncryptedFileName('secret.vxenc'), isTrue);
+    });
+
+    test('recognizes the AES Crypt-compatible .aes extension', () {
+      expect(isAppEncryptedFileName('secret.aes'), isTrue);
+    });
+
+    test('is case-insensitive', () {
+      expect(isAppEncryptedFileName('SECRET.VXENC'), isTrue);
+      expect(isAppEncryptedFileName('Secret.Aes'), isTrue);
+    });
+
+    test('rejects unrelated extensions', () {
+      expect(isAppEncryptedFileName('notes.txt'), isFalse);
+      expect(isAppEncryptedFileName('archive.zip'), isFalse);
+      expect(isAppEncryptedFileName('no-extension'), isFalse);
+    });
+  });
+
+  group('iconForFile', () {
+    test('maps known extensions to their category icon', () {
+      expect(iconForFile('report.pdf'), Icons.picture_as_pdf_outlined);
+      expect(iconForFile('photo.jpg'), Icons.image_outlined);
+      expect(iconForFile('photo.PNG'), Icons.image_outlined); // case-insensitive
+      expect(iconForFile('clip.mp4'), Icons.ondemand_video_outlined);
+      expect(iconForFile('song.mp3'), Icons.audio_file_outlined);
+      expect(iconForFile('notes.txt'), Icons.article_outlined);
+      expect(iconForFile('page.html'), Icons.language_rounded);
+      expect(iconForFile('bundle.zip'), Icons.archive_outlined);
+    });
+
+    test('every audio extension gets the music icon, case-insensitively', () {
+      for (final ext in audioFileExtensions) {
+        expect(iconForFile('a.$ext'), Icons.audio_file_outlined, reason: ext);
+        expect(iconForFile('a.${ext.toUpperCase()}'),
+            Icons.audio_file_outlined,
+            reason: ext);
+      }
+      for (final ext in ['ac3', 'ogg', 'aiff', 'amr', 'opus', 'wma']) {
+        expect(audioFileExtensions, contains(ext));
+      }
+    });
+
+    test('every video extension gets the video icon, case-insensitively', () {
+      for (final ext in videoFileExtensions) {
+        expect(iconForFile('v.$ext'), Icons.ondemand_video_outlined,
+            reason: ext);
+        expect(iconForFile('v.${ext.toUpperCase()}'),
+            Icons.ondemand_video_outlined,
+            reason: ext);
+      }
+      expect(videoFileExtensions, contains('wmv'));
+    });
+
+    test('audio and video extension sets do not overlap', () {
+      expect(audioFileExtensions.intersection(videoFileExtensions), isEmpty);
+    });
+
+    test('.ts is TypeScript source (code), not an MPEG transport stream', () {
+      expect(fileKindOf('index.ts'), FileKind.code);
+      expect(iconForFile('index.ts'), isNot(Icons.ondemand_video_outlined));
+    });
+
+    test('office documents, spreadsheets and presentations get their own '
+        'icons', () {
+      expect(iconForFile('a.docx'), Icons.description_outlined);
+      expect(iconForFile('a.odt'), Icons.description_outlined);
+      expect(iconForFile('a.xlsx'), Icons.table_chart_outlined);
+      expect(iconForFile('a.csv'), Icons.table_chart_outlined);
+      expect(iconForFile('a.pptx'), Icons.slideshow_outlined);
+    });
+
+    test('bz2/xz archives get the archive icon, not the generic one', () {
+      expect(iconForFile('a.bz2'), Icons.archive_outlined);
+      expect(iconForFile('a.xz'), Icons.archive_outlined);
+      expect(iconForFile('a.tar.zst'), Icons.archive_outlined);
+    });
+
+    test('tar.lzma, iso and cpio get the archive icon', () {
+      expect(iconForFile('a.tar.lzma'), Icons.archive_outlined);
+      expect(iconForFile('a.iso'), Icons.archive_outlined);
+      expect(iconForFile('a.cpio'), Icons.archive_outlined);
+    });
+
+    test('app-encrypted files get the encrypted icon', () {
+      for (final name in ['a.vxenc', 'a.aes', 'A.VXENC']) {
+        expect(isAppEncryptedFileName(name), isTrue, reason: name);
+        expect(fileKindOf(name), FileKind.encrypted, reason: name);
+      }
+    });
+
+    test('falls back to a generic file icon for unknown extensions', () {
+      expect(iconForFile('data.xyz'), Icons.insert_drive_file_outlined);
+    });
+
+    test('falls back to a generic file icon for names with no extension',
+        () {
+      expect(iconForFile('README'), Icons.insert_drive_file_outlined);
+    });
+  });
+
+  group('fileKindOf / fileKindExtensions', () {
+    test('every kind except generic has extensions, and generic has none',
+        () {
+      for (final kind in FileKind.values) {
+        if (kind == FileKind.generic) {
+          expect(fileKindExtensions.containsKey(kind), isFalse);
+        } else {
+          expect(fileKindExtensions[kind], isNotEmpty, reason: kind.name);
+        }
+      }
+    });
+
+    test('no extension is claimed by two kinds', () {
+      final all = fileKindExtensions.values.expand((e) => e).toList();
+      expect(all.length, all.toSet().length,
+          reason: 'duplicates: ${all.where((e) => all.where((x) => x == e).length > 1).toSet()}');
+    });
+
+    test('extensions are stored lower-case with no dot', () {
+      for (final entry in fileKindExtensions.entries) {
+        for (final ext in entry.value) {
+          expect(ext, ext.toLowerCase(), reason: ext);
+          expect(ext.contains('.'), isFalse, reason: ext);
+        }
+      }
+    });
+
+    test('every extension classifies back to the kind that lists it', () {
+      for (final entry in fileKindExtensions.entries) {
+        for (final ext in entry.value) {
+          expect(fileKindOf('f.$ext'), entry.key, reason: ext);
+          expect(fileKindOf('F.${ext.toUpperCase()}'), entry.key, reason: ext);
+        }
+      }
+    });
+
+    test('every kind has a distinct icon', () {
+      final icons = {
+        for (final kind in FileKind.values)
+          kind: iconForFile(
+            kind == FileKind.generic
+                ? 'f.xyz'
+                : 'f.${fileKindExtensions[kind]!.first}',
+          ),
+      };
+      expect(icons.values.toSet(), hasLength(FileKind.values.length));
+    });
+
+    test('unknown and extension-less names are generic', () {
+      expect(fileKindOf('data.xyz'), FileKind.generic);
+      expect(fileKindOf('README'), FileKind.generic);
+      expect(fileKindOf(''), FileKind.generic);
+      expect(fileKindOf('trailing.'), FileKind.generic);
+    });
+  });
+
+  group('colorForFile', () {
+    test('known categories get distinct accent colors from the default',
+        () {
+      final defaultColor = colorForFile('README');
+      expect(colorForFile('report.pdf'), isNot(defaultColor));
+      expect(colorForFile('photo.jpg'), isNot(defaultColor));
+      expect(colorForFile('clip.mp4'), isNot(defaultColor));
+    });
+
+    test('is case-insensitive on the extension', () {
+      expect(colorForFile('report.PDF'), colorForFile('report.pdf'));
+    });
+
+    test('every audio/video extension shares its category color', () {
+      for (final ext in audioFileExtensions) {
+        expect(colorForFile('a.$ext'), colorForFile('song.mp3'), reason: ext);
+      }
+      for (final ext in videoFileExtensions) {
+        expect(colorForFile('v.$ext'), colorForFile('clip.mp4'), reason: ext);
+      }
+    });
+
+    test('unknown extensions and no-extension names share the same '
+        'default color', () {
+      expect(colorForFile('data.xyz'), colorForFile('README'));
+    });
+  });
+
+  group('vaultIconForExt / vaultColorForExt', () {
+    const knownTypes = [
+      'password',
+      'paymentCard',
+      'identity',
+      'secureNote',
+      'bankAccount',
+      'softwareLicense',
+    ];
+
+    test('every known vault item type has both an icon and a color', () {
+      for (final ext in knownTypes) {
+        expect(vaultIconForExt(ext), isNotNull, reason: ext);
+        expect(vaultColorForExt(ext), isNotNull, reason: ext);
+      }
+    });
+
+    test('an unrecognized extension returns null for both, not a '
+        'fallback', () {
+      expect(vaultIconForExt('unknownType'), isNull);
+      expect(vaultColorForExt('unknownType'), isNull);
+    });
+
+    test('each known type maps to a visually distinct icon', () {
+      final icons = knownTypes.map(vaultIconForExt).toSet();
+      expect(icons, hasLength(knownTypes.length));
+    });
+  });
+}

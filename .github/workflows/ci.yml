@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter_analyze_and_test:
+    name: Flutter analyze & test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check code boundaries
+        run: python3 scripts/check_code_boundaries.py
+
+      - name: Fetch Flutter tags
+        run: git -C .flutter fetch --tags
+
+      - name: Add Flutter (submodule) to PATH
+        run: echo "$GITHUB_WORKSPACE/.flutter/bin" >> "$GITHUB_PATH"
+
+      - name: flutter --version
+        run: flutter --version
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: flutter analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: flutter test
+        run: flutter test
+
+  kotlin_unit_tests:
+    name: Kotlin unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Fetch Flutter tags
+        run: git -C .flutter fetch --tags
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Add Flutter (submodule) to PATH
+        run: echo "$GITHUB_WORKSPACE/.flutter/bin" >> "$GITHUB_PATH"
+
+      - name: flutter --version
+        run: flutter --version
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: ./gradlew testDebugUnitTest
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Upload Kotlin test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-unit-test-report
+          path: android/app/build/reports/tests/testDebugUnitTest
+          retention-days: 14
+
+  native_host_tests:
+    name: Native host-side tests (no NDK)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure (host build)
+        run: cmake -S android/app/src/main/cpp -B build-host-tests -DCMAKE_BUILD_TYPE=Debug -DLIBGAV1_THREADPOOL_USE_STD_MUTEX=1
+
+      - name: Build test binaries
+        run: >
+          cmake --build build-host-tests -j --target
+          sector_batching_test fs_scan_test kdf_table_test decrypted_block_cache_test
+          cryfs_block_cipher_test user_entropy_test utf16le_password_test composite_block_device_test
+          container_header_test container_utils_crc32_test chunked_block_device_test
+          archive_engine_test doc_scan_test archive_create_options_test archive_split_test
+
+      - name: Run tests (ctest)
+        working-directory: build-host-tests
+        run: ctest --output-on-failure
+
+  native_ext_backend_tests:
+    name: Native ext backend tests (real ext2/3/4 images, e2fsck)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools and filesystem tools
+        run: sudo apt-get update && sudo apt-get install -y g++ libext2fs-dev e2fsprogs libssl-dev libmbedtls-dev
+
+      - name: Build and run ext_backend_test
+        run: sh android/app/src/main/cpp/filesystems/test/run_ext_backend_test.sh
+
+  native_ntfs_backend_tests:
+    name: Native NTFS backend tests (pinned ntfs-3g, app's own mkntfs)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools and the ntfs-3g utilities used as independent oracles
+        run: sudo apt-get update && sudo apt-get install -y g++ git ntfs-3g libssl-dev libmbedtls-dev
+
+      - name: Build and run ntfs_backend_test
+        run: sh android/app/src/main/cpp/filesystems/test/run_ntfs_backend_test.sh

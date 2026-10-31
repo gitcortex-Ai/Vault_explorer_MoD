@@ -1,0 +1,1223 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/theme/app_theme.dart';
+import 'package:vaultexplorer/core/utils/entropy_pool.dart';
+import 'package:vaultexplorer/core/utils/sensitive_clipboard.dart';
+import 'package:vaultexplorer/core/utils/validation_utils.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/core/widgets/crypto_forms/entropy_collector.dart';
+import 'package:vaultexplorer/data/models/container_format.dart';
+import 'package:vaultexplorer/data/models/crypto_algorithms.dart';
+import 'package:vaultexplorer/data/models/usb_device_info.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/container_wizard_shared.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/quick_password_generator_sheet.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/usb_create_container_controller.dart';
+
+enum _WizStep { basics, security, advanced, hiddenVolume, randomness, review }
+
+class UsbCreateContainerSheet extends ConsumerStatefulWidget {
+  const UsbCreateContainerSheet({super.key});
+
+  @override
+  ConsumerState<UsbCreateContainerSheet> createState() =>
+      _UsbCreateContainerSheetState();
+}
+
+class _UsbCreateContainerSheetState extends ConsumerState<UsbCreateContainerSheet> {
+  final _sizeCtrl = TextEditingController(text: '1024');
+  final _passwordCtrl = TextEditingController();
+  final _confirmPasswordCtrl = TextEditingController();
+  final _pimCtrl = TextEditingController();
+
+  final _hiddenPasswordCtrl = TextEditingController();
+  final _hiddenConfirmPasswordCtrl = TextEditingController();
+  final _hiddenPimCtrl = TextEditingController();
+  final _hiddenSizeCtrl = TextEditingController(text: '10');
+
+  bool _obscure = true;
+  bool _confirmObscure = true;
+  bool _pimObscure = true;
+  bool _hiddenObscure = true;
+  bool _hiddenConfirmObscure = true;
+  bool _hiddenPimObscure = true;
+
+  /// Touch-movement randomness gathered by the "Add randomness" step. Owned
+  /// here (not by the step widget) so it survives stepping back and forth.
+  final _entropyPool = EntropyPool();
+  bool _entropySatisfied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _entropyPool.addListener(_onEntropyChanged);
+  }
+
+  // The pool notifies on every sample; only a change of "may continue" needs
+  // the wizard (its Next button) to rebuild.
+  void _onEntropyChanged() {
+    final satisfied = _entropyPool.isSatisfied;
+    if (satisfied != _entropySatisfied && mounted) {
+      setState(() => _entropySatisfied = satisfied);
+    }
+  }
+
+  @override
+  void dispose() {
+    _entropyPool.removeListener(_onEntropyChanged);
+    _entropyPool.dispose();
+    _sizeCtrl.dispose();
+    _passwordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
+    _pimCtrl.dispose();
+    _hiddenPasswordCtrl.dispose();
+    _hiddenConfirmPasswordCtrl.dispose();
+    _hiddenPimCtrl.dispose();
+    _hiddenSizeCtrl.dispose();
+    super.dispose();
+  }
+
+  // Shared with CreateContainerSheet -- see container_wizard_shared.dart.
+  List<String> _availableFileSystems(CreateFormat format) => availableFileSystemsForFormat(format);
+  List<CipherAlgo> _cipherChoices(CreateFormat format) => cipherChoicesForFormat(format);
+  List<HashAlgo> _hashChoices(CreateFormat format) => hashChoicesForFormat(format);
+
+  Future<void> _create(UsbCreateContainerState state) async {
+    final device = state.selected;
+    if (device == null) return;
+
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: context.l10n.eraseDeviceTitle(device.productName),
+      message: context.l10n.eraseDeviceMessage,
+      confirmLabel: context.l10n.eraseAndCreateButton,
+      isDestructive: true,
+    );
+    if (!confirmed || !mounted) return;
+
+    // A copy of the pool's bytes for this attempt; wiped as soon as the call
+    // returns. The pool itself is kept so a retry after a failure doesn't
+    // make the user move their finger again.
+    final userEntropy = _entropyPool.takeBytes();
+    final bool ok;
+    try {
+      ok = await ref.read(usbCreateContainerProvider.notifier).createUsbContainer(
+            sizeText: _sizeCtrl.text,
+            passwordText: _passwordCtrl.text,
+            confirmPasswordText: _confirmPasswordCtrl.text,
+            pimText: _pimCtrl.text,
+            hiddenPasswordText: _hiddenPasswordCtrl.text,
+            hiddenConfirmPasswordText: _hiddenConfirmPasswordCtrl.text,
+            hiddenPimText: _hiddenPimCtrl.text,
+            hiddenSizeText: _hiddenSizeCtrl.text,
+            l10n: context.l10n,
+            userEntropy: userEntropy,
+          );
+    } finally {
+      userEntropy.fillRange(0, userEntropy.length, 0);
+    }
+
+    if (ok && mounted) {
+      Navigator.pop(context);
+      showAppSnackBar(
+        context,
+        message: context.l10n.usbContainerCreatedSnack,
+        tone: AppBannerTone.success,
+      );
+    }
+  }
+
+  Future<void> _openPasswordGenerator({bool isHidden = false}) async {
+    final password = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+      ),
+      builder: (ctx) => const QuickPasswordGeneratorSheet(),
+    );
+
+    if (password != null && mounted) {
+      setState(() {
+        if (isHidden) {
+          _hiddenPasswordCtrl.text = password;
+          _hiddenConfirmPasswordCtrl.text = password;
+          _hiddenObscure = false;
+          _hiddenConfirmObscure = false;
+        } else {
+          _passwordCtrl.text = password;
+          _confirmPasswordCtrl.text = password;
+          _obscure = false;
+          _confirmObscure = false;
+        }
+      });
+      await ref.read(sensitiveClipboardProvider).copy(password);
+    }
+  }
+
+  List<_WizStep> _stepKinds(UsbCreateContainerState state) => [
+    _WizStep.basics,
+    _WizStep.security,
+    _WizStep.advanced,
+    if (state.format == CreateFormat.veracrypt && state.enableHiddenVolume)
+      _WizStep.hiddenVolume,
+    _WizStep.randomness,
+    _WizStep.review,
+  ];
+
+  bool _canProceedBasicInfo(UsbCreateContainerState state) =>
+      state.selected != null && (double.tryParse(_sizeCtrl.text) ?? 0) > 0;
+
+  bool _canProceedSecurity(UsbCreateContainerState state) =>
+      (_passwordCtrl.text.isNotEmpty || state.outerKeyfiles.isNotEmpty) &&
+      (_passwordCtrl.text.isEmpty ||
+          _passwordCtrl.text == _confirmPasswordCtrl.text);
+
+  // Shared with CreateContainerSheet -- see container_wizard_shared.dart.
+  HiddenVolumeValidation? _hiddenVolumeValidationResult(
+    UsbCreateContainerState state,
+  ) {
+    if (!state.enableHiddenVolume || state.format != CreateFormat.veracrypt)
+      return null;
+    return computeHiddenVolumeValidation(
+      sizeText: _sizeCtrl.text,
+      sizeUnit: state.sizeUnit,
+      pimText: _pimCtrl.text,
+      hiddenPimText: _hiddenPimCtrl.text,
+      hiddenSizeText: _hiddenSizeCtrl.text,
+      hiddenSizeUnit: state.hiddenSizeUnit,
+      outerPassword: _passwordCtrl.text,
+      hiddenPassword: _hiddenPasswordCtrl.text,
+      hasHiddenKeyfiles: state.hiddenKeyfiles.isNotEmpty,
+      outerKeyfileUris: state.outerKeyfiles.map((k) => k.uri).toSet(),
+      hiddenKeyfileUris: state.hiddenKeyfiles.map((k) => k.uri).toSet(),
+      l10n: context.l10n,
+    );
+  }
+
+  bool _canProceedHiddenVolume(UsbCreateContainerState state) {
+    if (!state.enableHiddenVolume || state.format != CreateFormat.veracrypt)
+      return true;
+    final validation = _hiddenVolumeValidationResult(state);
+    return validation != null && validation.isValid;
+  }
+
+  bool _canProceedFor(_WizStep kind, UsbCreateContainerState state) =>
+      switch (kind) {
+        _WizStep.basics => _canProceedBasicInfo(state),
+        _WizStep.security => _canProceedSecurity(state),
+        _WizStep.advanced => true,
+        _WizStep.hiddenVolume => _canProceedHiddenVolume(state),
+        _WizStep.randomness => _entropyPool.isSatisfied,
+        _WizStep.review => true,
+      };
+
+  String _stepTitle(_WizStep kind) => switch (kind) {
+    _WizStep.basics => context.l10n.wizardStepBasicInfoTitle,
+    _WizStep.security => context.l10n.securityCredentialsSectionHeader,
+    _WizStep.advanced => context.l10n.compositeEncryptionAndFilesystemHeader,
+    _WizStep.hiddenVolume => context.l10n.hiddenVolumeHeader,
+    _WizStep.randomness => context.l10n.entropyStepTitle,
+    _WizStep.review => context.l10n.wizardStepReviewTitle,
+  };
+
+  void _goNext(UsbCreateContainerState state) {
+    final kinds = _stepKinds(state);
+    final safe = state.currentStep.clamp(0, kinds.length - 1);
+    if (safe == kinds.length - 1) {
+      _create(state);
+    } else {
+      ref.read(usbCreateContainerProvider.notifier).setCurrentStep(safe + 1);
+    }
+  }
+
+  void _goBackOrExit(UsbCreateContainerState state) {
+    if (state.currentStep > 0) {
+      ref.read(usbCreateContainerProvider.notifier).setCurrentStep(state.currentStep - 1);
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<String?>(
+      usbCreateContainerProvider.select((s) => s.suggestedSizeText),
+      (previous, next) {
+        if (next != null) {
+          _sizeCtrl.text = next;
+        }
+      },
+    );
+
+    final state = ref.watch(usbCreateContainerProvider);
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+    final isShortScreen = MediaQuery.sizeOf(context).height < 520;
+
+    final kinds = _stepKinds(state);
+    final safeStep = state.currentStep.clamp(0, kinds.length - 1);
+    final currentKind = kinds[safeStep];
+    final isLastStep = safeStep == kinds.length - 1;
+
+    final inputDecorationTheme = InputDecorationTheme(
+      filled: true,
+      fillColor: cs.surfaceContainerHighest,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: isShortScreen ? 11 : 16,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+    );
+
+    return Theme(
+      data: Theme.of(
+        context,
+      ).copyWith(inputDecorationTheme: inputDecorationTheme),
+      child: WizardScaffold(
+        appBarTitle: l10n.formatUsbDriveScreenTitle,
+        currentStep: safeStep,
+        totalSteps: kinds.length,
+        stepTitle: _stepTitle(currentKind),
+        stepContent: _stepContent(
+          currentKind,
+          state,
+          cs,
+          textTheme,
+          isShortScreen,
+        ),
+        busy: state.busy,
+        busyMessage: l10n.usbContainerCreationInProgressWait,
+        canProceed: _canProceedFor(currentKind, state),
+        isLastStep: isLastStep,
+        nextLabel: isLastStep
+            ? l10n.eraseAndCreateContainerButton
+            : l10n.wizardNextButton,
+        onNext: () => _goNext(state),
+        onBackOrExit: () => _goBackOrExit(state),
+        errorMessage: state.error,
+      ),
+    );
+  }
+
+  Widget _stepContent(
+    _WizStep kind,
+    UsbCreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) => switch (kind) {
+    _WizStep.basics => _buildBasicsStep(state, cs, textTheme),
+    _WizStep.security => _buildSecurityStep(
+      state,
+      cs,
+      textTheme,
+      isShortScreen,
+    ),
+    _WizStep.advanced => _buildAdvancedStep(state, cs, textTheme),
+    _WizStep.hiddenVolume => _buildHiddenVolumeStep(
+      state,
+      cs,
+      textTheme,
+      isShortScreen,
+    ),
+    _WizStep.randomness => EntropyCollector(pool: _entropyPool),
+    _WizStep.review => _buildReviewStep(state, cs, textTheme),
+  };
+
+  // Combines the old standalone "type" step (encryption format) with the
+  // old standalone "basic info" step (drive picker + size) into one screen
+  // -- mirrors the same merge in create_container_sheet.dart.
+  Widget _buildBasicsStep(UsbCreateContainerState state, ColorScheme cs, TextTheme textTheme) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.wizardChooseFormatPrompt,
+          style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: WizardSelectionCard(
+                format: ContainerFormat.veracrypt,
+                title: CreateFormat.veracrypt.label,
+                selected: state.format == CreateFormat.veracrypt,
+                enabled: !state.busy,
+                onTap: () =>
+                    ref.read(usbCreateContainerProvider.notifier).setFormat(CreateFormat.veracrypt),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: WizardSelectionCard(
+                format: ContainerFormat.luks1,
+                title: CreateFormat.luks1.label,
+                selected: state.format == CreateFormat.luks1,
+                enabled: !state.busy,
+                onTap: () =>
+                    ref.read(usbCreateContainerProvider.notifier).setFormat(CreateFormat.luks1),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: WizardSelectionCard(
+                format: ContainerFormat.luks2,
+                title: CreateFormat.luks2.label,
+                selected: state.format == CreateFormat.luks2,
+                enabled: !state.busy,
+                onTap: () =>
+                    ref.read(usbCreateContainerProvider.notifier).setFormat(CreateFormat.luks2),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _buildDriveAndSizeCard(state, cs, textTheme),
+      ],
+    );
+  }
+
+  Widget _buildDriveAndSizeCard(UsbCreateContainerState state, ColorScheme cs, TextTheme textTheme) {
+    final l10n = context.l10n;
+    final busy = state.busy;
+
+    return SectionCard(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: InlineBanner(
+            l10n.formattingErasesEverythingWarning,
+            tone: AppBannerTone.warning,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.selectUsbDriveLabel,
+                style: textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: cs.primary,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 10),
+              if (state.loadingDevices)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  ),
+                )
+              else if (state.devices.isEmpty)
+                Card(
+                  elevation: 0,
+                  color: cs.surfaceContainerHigh,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHighest,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.usb_off_rounded, size: 32, color: cs.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.noUsbStorageDetected,
+                          style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.connectOtgDriveToFormat,
+                          style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: busy ? null : () => ref.read(usbCreateContainerProvider.notifier).loadDevices(),
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: Text(l10n.refreshListButton),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size(0, 44),
+                            shape: const StadiumBorder(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                RadioGroup<UsbDeviceInfo>(
+                  groupValue: state.selected,
+                  onChanged: (v) {
+                    if (!busy && v != null) {
+                      ref.read(usbCreateContainerProvider.notifier).selectDevice(v, l10n);
+                    }
+                  },
+                  child: Column(
+                    children: state.devices.map((d) {
+                      final isSelected = state.selected?.deviceName == d.deviceName;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: InkWell(
+                          onTap: busy
+                              ? null
+                              : () => ref
+                                  .read(usbCreateContainerProvider.notifier)
+                                  .selectDevice(d, l10n),
+                          borderRadius: BorderRadius.circular(18),
+                          child: Card(
+                            elevation: 0,
+                            color: isSelected
+                                ? cs.primaryContainer.withValues(alpha: 0.15)
+                                : cs.surfaceContainerHigh,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              side: BorderSide(
+                                color: isSelected
+                                    ? cs.primary
+                                    : cs.outlineVariant.withValues(alpha: 0.3),
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? cs.primaryContainer
+                                          : cs.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Icon(
+                                      Icons.usb_rounded,
+                                      size: 22,
+                                      color: isSelected
+                                          ? cs.onPrimaryContainer
+                                          : cs.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          d.productName,
+                                          style: textTheme.bodyLarge?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          d.hasPermission ? l10n.readyToFormat : l10n.permissionRequired,
+                                          style: textTheme.bodySmall?.copyWith(
+                                            color: d.hasPermission ? cs.primary : cs.onSurfaceVariant,
+                                            fontWeight: d.hasPermission ? FontWeight.w500 : null,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Radio<UsbDeviceInfo>(
+                                    value: d,
+                                    activeColor: cs.primary,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: _sizeCtrl,
+                      enabled: !busy,
+                      onChanged: (_) => setState(() {}),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        labelText: l10n.containerSizeLabel,
+                        prefixIcon: const Icon(Icons.sd_card_outlined, size: 20),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: OptionPickerTile<String>(
+                      label: l10n.unitLabel,
+                      value: state.sizeUnit,
+                      options: [
+                        SelectOption(value: 'MB', label: l10n.unitMbMegabytes),
+                        SelectOption(value: 'GB', label: l10n.unitGbGigabytes),
+                      ],
+                      onChanged: busy
+                          ? (v) {}
+                          : (v) => ref.read(usbCreateContainerProvider.notifier).setSizeUnit(v),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  state.fetchingCapacity
+                      ? l10n.readingDriveCapacity
+                      : state.usableCapacityBytes != null
+                          ? l10n.driveUsableCapacity((state.usableCapacityBytes! / (1024 * 1024)).floor())
+                          : l10n.mustNotExceedDriveCapacity,
+                  style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSecurityStep(
+    UsbCreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) {
+    final l10n = context.l10n;
+    final vPad = isShortScreen ? 4.0 : 8.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionCard(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                isShortScreen ? 10 : 16,
+                16,
+                vPad,
+              ),
+              child: TextField(
+                controller: _passwordCtrl,
+                enabled: !state.busy,
+                obscureText: _obscure,
+                onChanged: (_) => setState(() {}),
+                autofillHints: null,
+                decoration: InputDecoration(
+                  labelText: l10n.passwordFieldLabel,
+                  prefixIcon: Icon(
+                    Icons.key_rounded,
+                    size: 20,
+                    color: cs.primary,
+                  ),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.auto_awesome_rounded,
+                          size: 20,
+                          color: cs.primary,
+                        ),
+                        tooltip: l10n.generateStrongPasswordTooltip,
+                        onPressed: state.busy
+                            ? null
+                            : () => _openPasswordGenerator(),
+                      ),
+                      PasswordVisibilityToggle(
+                        obscured: _obscure,
+                        enabled: !state.busy,
+                        onToggle: () => setState(() => _obscure = !_obscure),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, vPad, 16, vPad),
+              child: TextField(
+                controller: _confirmPasswordCtrl,
+                enabled: !state.busy,
+                obscureText: _confirmObscure,
+                onChanged: (_) => setState(() {}),
+                autofillHints: null,
+                decoration: InputDecoration(
+                  labelText: l10n.confirmPasswordFieldLabelTitleCase,
+                  prefixIcon: Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 20,
+                    color: cs.primary,
+                  ),
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _confirmObscure,
+                    enabled: !state.busy,
+                    onToggle: () =>
+                        setState(() => _confirmObscure = !_confirmObscure),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                vPad,
+                16,
+                isShortScreen ? 8 : 12,
+              ),
+              child: TextField(
+                controller: _pimCtrl,
+                enabled: !state.busy,
+                keyboardType: TextInputType.number,
+                obscureText: _pimObscure,
+                obscuringCharacter: '*',
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.pimOptionalLabel,
+                  prefixIcon: Icon(
+                    Icons.pin_rounded,
+                    size: 20,
+                    color: cs.primary,
+                  ),
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _pimObscure,
+                    enabled: !state.busy,
+                    onToggle: () => setState(() => _pimObscure = !_pimObscure),
+                  ),
+                ),
+              ),
+            ),
+            KeyfilesPicker(
+              keyfiles: state.outerKeyfiles,
+              picking: state.pickingOuterKeyfiles,
+              onPick: () => ref
+                  .read(usbCreateContainerProvider.notifier)
+                  .pickOuterKeyfiles(),
+              onRemove: (k) => ref
+                  .read(usbCreateContainerProvider.notifier)
+                  .removeOuterKeyfile(k),
+              enabled: !state.busy,
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              value: state.remember,
+              onChanged: state.busy
+                  ? null
+                  : (val) => ref
+                        .read(usbCreateContainerProvider.notifier)
+                        .setRemember(val),
+              title: Text(l10n.rememberContainerLabel),
+              subtitle: Text(
+                l10n.rememberContainerSubtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              secondary: Icon(
+                Icons.push_pin_outlined,
+                color: cs.primary,
+                size: 22,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAdvancedStep(
+    UsbCreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    final l10n = context.l10n;
+    final cipherChoices = _cipherChoices(state.format);
+    final hashChoices = _hashChoices(state.format);
+    final fileSystems = _availableFileSystems(state.format);
+    final outerReady =
+        _passwordCtrl.text.isNotEmpty || state.outerKeyfiles.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionCard(
+          children: [
+            OptionPickerTile<int>(
+              label: l10n.encryptionAlgorithmLabel,
+              value: state.cipherId,
+              prefixIcon: Icons.security_rounded,
+              options: cipherChoices
+                  .map((c) => SelectOption(value: c.id, label: c.label))
+                  .toList(),
+              onChanged: state.busy
+                  ? (value) {}
+                  : (value) => ref
+                        .read(usbCreateContainerProvider.notifier)
+                        .setCipherId(value),
+            ),
+            OptionPickerTile<int>(
+              label: l10n.hashAlgorithmLabel,
+              value: state.hashId,
+              prefixIcon: Icons.tag_rounded,
+              options: hashChoices
+                  .map((h) => SelectOption(value: h.id, label: h.label))
+                  .toList(),
+              onChanged: state.busy
+                  ? (value) {}
+                  : (value) => ref
+                        .read(usbCreateContainerProvider.notifier)
+                        .setHashId(value),
+            ),
+            OptionPickerTile<String>(
+              label: l10n.formatFileSystemLabel,
+              value: state.fileSystem,
+              prefixIcon: Icons.dns_rounded,
+              options: fileSystems
+                  .map((fs) => SelectOption(value: fs, label: fs))
+                  .toList(),
+              onChanged: state.busy
+                  ? (value) {}
+                  : (value) => ref
+                        .read(usbCreateContainerProvider.notifier)
+                        .setFileSystem(value),
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              title: Text(
+                l10n.quickFormatTitle,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                l10n.quickFormatDescription,
+                style: textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              value: state.quickFormat,
+              onChanged: state.busy
+                  ? null
+                  : (value) => ref
+                        .read(usbCreateContainerProvider.notifier)
+                        .setQuickFormat(value),
+            ),
+          ],
+        ),
+        if (state.format == CreateFormat.veracrypt) ...[
+          const SizedBox(height: 16),
+          SectionCard(
+            children: [
+              SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                value: outerReady && state.enableHiddenVolume,
+                onChanged: outerReady && !state.busy
+                    ? (value) => ref
+                          .read(usbCreateContainerProvider.notifier)
+                          .setEnableHiddenVolume(value)
+                    : null,
+                title: Text(
+                  l10n.createHiddenVolumeToggleTitle,
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  outerReady
+                      ? (state.enableHiddenVolume
+                            ? l10n.hiddenVolumeConfiguredInNextStepNotice
+                            : l10n.createInvisibleSecondaryVolume)
+                      : l10n.setOuterPasswordFirstToEnable,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+                secondary: Icon(
+                  Icons.visibility_off_outlined,
+                  color: outerReady
+                      ? cs.primary
+                      : cs.onSurfaceVariant.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHiddenVolumeStep(
+    UsbCreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) {
+    final l10n = context.l10n;
+    final validation = _hiddenVolumeValidationResult(state);
+    final cipherChoices = _cipherChoices(state.format);
+    final hashChoices = _hashChoices(state.format);
+    final fileSystems = _availableFileSystems(state.format);
+    final vPad = isShortScreen ? 4.0 : 8.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InlineBanner(
+          l10n.hiddenVolumeExplanationBanner,
+          tone: AppBannerTone.info,
+          icon: Icons.shield_outlined,
+        ),
+        const SizedBox(height: 14),
+        SectionHeader(l10n.hiddenVolumeCredentialsSectionHeader),
+        SectionCard(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                isShortScreen ? 10 : 16,
+                16,
+                vPad,
+              ),
+              child: TextField(
+                controller: _hiddenPasswordCtrl,
+                enabled: !state.busy,
+                obscureText: _hiddenObscure,
+                onChanged: (_) => setState(() {}),
+                autofillHints: null,
+                decoration: InputDecoration(
+                  labelText: l10n.hiddenPasswordLabel,
+                  prefixIcon: Icon(
+                    Icons.key_rounded,
+                    size: 20,
+                    color: cs.primary,
+                  ),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.auto_awesome_rounded,
+                          size: 20,
+                          color: cs.primary,
+                        ),
+                        tooltip: l10n.generateStrongPasswordTooltip,
+                        onPressed: state.busy
+                            ? null
+                            : () => _openPasswordGenerator(isHidden: true),
+                      ),
+                      PasswordVisibilityToggle(
+                        obscured: _hiddenObscure,
+                        enabled: !state.busy,
+                        onToggle: () =>
+                            setState(() => _hiddenObscure = !_hiddenObscure),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, vPad, 16, vPad),
+              child: TextField(
+                controller: _hiddenConfirmPasswordCtrl,
+                enabled: !state.busy,
+                obscureText: _hiddenConfirmObscure,
+                onChanged: (_) => setState(() {}),
+                autofillHints: null,
+                decoration: InputDecoration(
+                  labelText: l10n.confirmHiddenPasswordLabel,
+                  prefixIcon: Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 20,
+                    color: cs.primary,
+                  ),
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _hiddenConfirmObscure,
+                    enabled: !state.busy,
+                    onToggle: () => setState(
+                      () => _hiddenConfirmObscure = !_hiddenConfirmObscure,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                vPad,
+                16,
+                isShortScreen ? 8 : 12,
+              ),
+              child: TextField(
+                controller: _hiddenPimCtrl,
+                enabled: !state.busy,
+                keyboardType: TextInputType.number,
+                obscureText: _hiddenPimObscure,
+                obscuringCharacter: '*',
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.pimOptionalLabel,
+                  prefixIcon: Icon(
+                    Icons.pin_rounded,
+                    size: 20,
+                    color: cs.primary,
+                  ),
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _hiddenPimObscure,
+                    enabled: !state.busy,
+                    onToggle: () =>
+                        setState(() => _hiddenPimObscure = !_hiddenPimObscure),
+                  ),
+                ),
+              ),
+            ),
+            KeyfilesPicker(
+              keyfiles: state.hiddenKeyfiles,
+              picking: state.pickingHiddenKeyfiles,
+              onPick: () => ref
+                  .read(usbCreateContainerProvider.notifier)
+                  .pickHiddenKeyfiles(),
+              onRemove: (keyfile) => ref
+                  .read(usbCreateContainerProvider.notifier)
+                  .removeHiddenKeyfile(keyfile),
+              enabled: !state.busy,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SectionHeader(l10n.hiddenVolumeSizeAndFormatSectionHeader),
+        SectionCard(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(isShortScreen ? 12 : 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: _hiddenSizeCtrl,
+                      enabled: !state.busy,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.hiddenSizeLabel,
+                        prefixIcon: const Icon(
+                          Icons.sd_card_outlined,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OptionPickerTile<String>(
+                      label: l10n.unitLabel,
+                      value: state.hiddenSizeUnit,
+                      options: [
+                        SelectOption(value: 'MB', label: l10n.unitMbMegabytes),
+                        SelectOption(value: 'GB', label: l10n.unitGbGigabytes),
+                      ],
+                      onChanged: state.busy
+                          ? (value) {}
+                          : (value) => ref
+                                .read(usbCreateContainerProvider.notifier)
+                                .setHiddenSizeUnit(value),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            OptionPickerTile<int>(
+              label: l10n.encryptionAlgorithmLabel,
+              value: state.hiddenCipherId,
+              prefixIcon: Icons.security_rounded,
+              options: cipherChoices
+                  .map(
+                    (cipher) =>
+                        SelectOption(value: cipher.id, label: cipher.label),
+                  )
+                  .toList(),
+              onChanged: state.busy
+                  ? (value) {}
+                  : (value) => ref
+                        .read(usbCreateContainerProvider.notifier)
+                        .setHiddenCipherId(value),
+            ),
+            OptionPickerTile<int>(
+              label: l10n.hashAlgorithmLabel,
+              value: state.hiddenHashId,
+              prefixIcon: Icons.tag_rounded,
+              options: hashChoices
+                  .map(
+                    (hash) => SelectOption(value: hash.id, label: hash.label),
+                  )
+                  .toList(),
+              onChanged: state.busy
+                  ? (value) {}
+                  : (value) => ref
+                        .read(usbCreateContainerProvider.notifier)
+                        .setHiddenHashId(value),
+            ),
+            OptionPickerTile<String>(
+              label: l10n.hiddenFileSystemLabel,
+              value: state.hiddenFileSystem,
+              prefixIcon: Icons.dns_rounded,
+              options: fileSystems
+                  .map((fs) => SelectOption(value: fs, label: fs))
+                  .toList(),
+              onChanged: state.busy
+                  ? (value) {}
+                  : (value) => ref
+                        .read(usbCreateContainerProvider.notifier)
+                        .setHiddenFileSystem(value),
+            ),
+          ],
+        ),
+        if (validation != null && !validation.isValid) ...[
+          const SizedBox(height: 12),
+          InlineBanner(validation.error!, tone: AppBannerTone.warning),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildReviewStep(UsbCreateContainerState state, ColorScheme cs, TextTheme textTheme) {
+    final l10n = context.l10n;
+    final rows = <Widget>[
+      WizardSummaryRow(
+        icon: Icons.enhanced_encryption_rounded,
+        label: l10n.containerFormatLabel,
+        value: state.format.label,
+      ),
+      WizardSummaryRow(
+        icon: Icons.usb_rounded,
+        label: l10n.wizardSummaryDriveLabel,
+        value: state.selected?.productName ?? '—',
+      ),
+      WizardSummaryRow(
+        icon: Icons.sd_card_rounded,
+        label: l10n.containerSizeLabel,
+        value: '${_sizeCtrl.text} ${state.sizeUnit}',
+      ),
+      WizardSummaryRow(
+        icon: Icons.dns_rounded,
+        label: l10n.formatFileSystemLabel,
+        value: state.fileSystem,
+      ),
+      WizardSummaryRow(
+        icon: Icons.security_rounded,
+        label: l10n.encryptionAlgorithmLabel,
+        value: CipherAlgo.nameFor(state.cipherId),
+      ),
+      WizardSummaryRow(
+        icon: Icons.tag_rounded,
+        label: l10n.hashAlgorithmLabel,
+        value: HashAlgo.nameFor(state.hashId),
+      ),
+      WizardSummaryRow(
+        icon: Icons.password_outlined,
+        label: l10n.wizardSummaryPimLabel,
+        value: _pimCtrl.text.trim().isEmpty
+            ? l10n.wizardSummaryPimDefaultValue
+            : l10n.wizardPasswordSetValue,
+      ),
+      WizardSummaryRow(
+        icon: Icons.bolt_rounded,
+        label: l10n.quickFormatTitle,
+        value: state.quickFormat ? l10n.vaultInfoYesValue : l10n.vaultInfoNoValue,
+      ),
+      WizardSummaryRow(
+        icon: Icons.key_rounded,
+        label: l10n.wizardSummaryPasswordLabel,
+        value: _passwordCtrl.text.isNotEmpty
+            ? l10n.wizardPasswordSetValue
+            : l10n.wizardPasswordNotSetValue,
+      ),
+      WizardSummaryRow(
+        icon: Icons.shuffle_rounded,
+        label: l10n.entropyReviewLabel,
+        value: _entropyPool.hasUserEntropy
+            ? l10n.entropyReviewUserAdded
+            : l10n.entropyReviewDeviceOnly,
+      ),
+      WizardSummaryRow(
+        icon: Icons.push_pin_outlined,
+        label: l10n.rememberContainerLabel,
+        value: state.remember ? l10n.vaultInfoYesValue : l10n.vaultInfoNoValue,
+      ),
+      WizardSummaryRow(
+        icon: Icons.insert_drive_file_outlined,
+        label: l10n.wizardSummaryKeyfilesLabel,
+        value: state.outerKeyfiles.isEmpty
+            ? l10n.noKeyfilesAttached
+            : '${state.outerKeyfiles.length}',
+      ),
+      WizardSummaryRow(
+        icon: Icons.visibility_off_outlined,
+        label: l10n.hiddenVolumeHeader,
+        value: (state.format == CreateFormat.veracrypt && state.enableHiddenVolume)
+            ? l10n.vaultInfoYesValue
+            : l10n.vaultInfoNoValue,
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: InlineBanner(
+            l10n.formattingErasesEverythingWarning,
+            tone: AppBannerTone.warning,
+          ),
+        ),
+        SectionHeader(l10n.wizardSummaryTitle),
+        SectionCard(children: rows),
+      ],
+    );
+  }
+}

@@ -1,0 +1,537 @@
+# VaultExplorer Automation Setup Guide (Tasker & MacroDroid)
+
+VaultExplorer supports background automation via Android Broadcast Intents. You can unlock/lock vaults, import/export files and whole folders, take a photo or record video or audio straight into a vault, stream decrypted files directly through memory without flash writes, and securely wipe plaintext source files -- all without opening the UI.
+
+Every intent is sent as a **Broadcast** to VaultExplorer's receiver, which returns an `AUTOMATION_RESULT` broadcast with status and diagnostics.
+
+---
+
+## 1. Enable Automation for Your Vault
+
+1. Open **VaultExplorer** and navigate to your vault's settings (or tap the vault card settings icon).
+2. Tap **Automation**.
+3. Under **Automation access**, select your desired tier:
+   - **Off**: Automation cannot access this vault.
+   - **Unlock / lock only (Lifecycle)**: Permits `UNLOCK_VAULT` and `LOCK_VAULT` actions.
+   - **Unlock / lock + file import-export (Full)**: Permits file-level actions -- `IMPORT_FILE`, `EXPORT_FILE`, `IMPORT_FOLDER`, `EXPORT_FOLDER` -- and background sync (`SYNC_VAULT` and unlock-triggered auto-sync).
+4. *(Optional)* **Automation Password**: Set a password if you want `UNLOCK_VAULT` to mount unattended without requiring the automation task to supply the password in plaintext.
+5. *(Optional, only shown once the tier above is set to Full)* **Allow camera capture**: a separate switch that unlocks `TAKE_PHOTO`, `START_RECORDING`, `STOP_RECORDING`, `START_AUDIO_RECORDING`, and `STOP_AUDIO_RECORDING` for this vault. It's off by default even at Full tier -- a photo taken this way needs no on-screen indication at all, so it's a bigger trust decision than file import/export and gets its own explicit opt-in. Audio-only recording is covered by this same switch rather than a second one: video recording already captures the microphone under it. Turning tier back down from Full and later back up to Full clears this switch again; you'll need to re-enable it.
+6. Copy your **API Token** and **Vault URI** displayed on the screen.
+
+---
+
+## 2. Intent Target Configuration
+
+Every intent sent to VaultExplorer targets either the Broadcast Receiver or (for camera capture on Android 14+) the invisible Capture Activity:
+
+#### General Actions (Unlock, Lock, Import, Export, Wipe, Panic)
+| Setting | Value |
+| :--- | :--- |
+| **Package** | `com.aeidolon.vaultexplorer` |
+| **Class / Component** | `com.aeidolon.vaultexplorer.automation.VaultAutomationReceiver` |
+| **Target Type** | **Broadcast** *(Not Activity or Service!)* |
+
+#### Camera & Microphone Actions (`TAKE_PHOTO`, `START_RECORDING`, `START_AUDIO_RECORDING`)
+On Android 14+ (API 34+), the OS enforces strict "while-in-use" restrictions on camera and microphone hardware. This applies to audio-only recording as much as to video, so `START_AUDIO_RECORDING` is configured the same way. (`STOP_RECORDING` and `STOP_AUDIO_RECORDING` only stop a recording that already has the hardware, so they are ordinary **Broadcast** actions to `VaultAutomationReceiver`.) You can configure these actions in two ways:
+
+- **Option A (Recommended — Direct Activity)**: Set Target Type to **Activity** (or `am start`) targeting:
+  - **Component**: `com.aeidolon.vaultexplorer.automation.VaultAutomationCaptureActivity`
+  - Runs invisibly without UI or animations. It is recommended because it doesn't go through Option B's broadcast trampoline (and so doesn't need the "Display over other apps" permission); your automation app must still be allowed to start activities on your device -- see the OEM setup guide if it is blocked.
+- **Option B (Broadcast Trampoline)**: Set Target Type to **Broadcast** targeting `VaultAutomationReceiver`. The receiver trampolines to the invisible activity. On Android 14+, grant VaultExplorer the **"Display over other apps"** permission in device settings so the OS permits background activity launching.
+
+> ⚠️ **Important**: In **MacroDroid**, set **Intent Target** to **Broadcast** for general actions (or **Activity** if using Option A for camera). In **Tasker**, set **Target** to **Broadcast Receiver** (or **Activity** for Option A).
+
+---
+
+## 3. Broadcast Actions & Extras
+
+All actions require `api_token`. Vault-specific actions also require `vault_uri`.
+
+### `UNLOCK_VAULT`
+Mounts the vault so files can be accessed or imported/exported.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.UNLOCK_VAULT`
+- **Extras**:
+  - `api_token` *(String, required)*: Your shared API token.
+  - `vault_uri` *(String, required)*: The target vault URI.
+  - `password` *(String, optional)*: Vault password. If omitted, falls back to the stored automation password.
+  - `pim` *(Int, optional)*: VeraCrypt Personal Iteration Multiplier (e.g. `485`). Default: `0` (uses default algorithm iterations).
+  - `keyfile_uris` *(String, optional)*: Pipe-delimited list of keyfile paths or content URIs (e.g. `/storage/emulated/0/keys/key1.bin|/storage/emulated/0/keys/key2.bin`). If omitted, falls back to pre-registered keyfiles configured in vault settings.
+  - `cipher_id` *(Int, optional)*: Cipher algorithm ID hint (e.g. `0` for AES). Default: `255` (auto-detect all ciphers). Supplying this skips trial-and-error decryption passes and speeds up mounting.
+  - `hash_id` *(Int, optional)*: Hash algorithm ID hint (e.g. `0` for SHA-512). Default: `255` (auto-detect).
+  - `read_only` *(Boolean, optional)*: Mount in read-only mode (`true` / `false`). Default: `false`.
+
+*Note: If the vault is already mounted, it returns `OK` immediately.*
+
+If the app is closed and the vault has sync rules enabled for **Sync when
+the vault is unlocked** or live watch, a successful writable unlock also
+runs those rules in the background. This needs the vault's **Full**
+automation tier because sync can write or delete files. The unlock result is
+sent after that background run finishes, and a foreground notification
+shows the sync progress. When the app is already open, its normal sync
+coordinator handles the unlock instead.
+
+---
+
+### `SYNC_VAULT`
+Runs all configured unlock-sync and live-watch rules for an already
+unlocked, writable vault. This is also available as an explicit action if
+you want to run sync independently of an unlock.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.SYNC_VAULT`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+
+The vault must have the **Full** automation tier. The operation runs as
+foreground work and reports its progress in a notification. A missing or
+unavailable sync target is reported as a failed sync result. If the app is
+open, use its sync controls; the broadcast returns `BUSY` rather than run a
+second sync beside the app's coordinator.
+
+---
+
+### `LOCK_VAULT`
+Unmounts and locks the vault, purging decrypted session material from memory.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.LOCK_VAULT`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+
+---
+
+### `IMPORT_FILE`
+Imports a file (or batch of files matching a glob pattern) from the host filesystem directly into the encrypted vault. Requires the **Full** tier and an unlocked vault.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.IMPORT_FILE`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+  - `source_path` *(String, required)*: Either an absolute file/folder path on the device (e.g. `/storage/emulated/0/DCIM/Camera/IMG_001.jpg`), or a `content://` SAF URI.
+  - `vault_path` *(String, required)*: Relative destination path or directory in the vault. Any missing parent folders inside the vault are created automatically.
+  - `pattern` *(String, optional)*: Glob wildcard pattern (e.g. `*.xlsx`, `HOSPITAL_RECEIPT_*`, `**/*.pdf`). When specified, `source_path` is treated as a directory and all matching files are imported in a single batch.
+  - `exclude_pattern` *(String, optional)*: Glob pattern, or comma-separated glob patterns, for files or folders to skip in batch mode (e.g. `Android,Download`). A matching folder excludes all its contents; a pattern without `/` matches that name at any depth.
+  - `recursive` *(Boolean, optional)*: Whether glob matching traverses subdirectories. Default: `true`.
+  - `delete_source` *(Boolean, optional)*: If `true`, wipes matched source files upon successful import. For a raw filesystem path this is a secure overwrite-then-delete; for a `content://` source it's a normal provider delete.
+
+---
+
+### `EXPORT_FILE`
+Exports a decrypted file from the vault to the host filesystem, OR streams it directly through memory without writing decrypted bytes to flash storage. Requires the **Full** tier and an unlocked vault.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.EXPORT_FILE`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+  - `vault_path` *(String, required)*: Relative path inside the vault to read.
+  - `dest_path` *(String, optional)*: Either an absolute destination *file* path on the host filesystem, or a `content://` SAF *tree* (folder) URI. (Required unless `stream_mode=true`).
+  - `pattern` *(String, optional)*: Glob pattern to export matching files in batch. Supplying `exclude_pattern` also selects batch mode when you want to export everything except the excluded paths.
+  - `exclude_pattern` *(String, optional)*: Glob pattern, or comma-separated glob patterns, for files or folders to skip in batch mode (e.g. `Android,Download`). A matching folder excludes all its contents; a pattern without `/` matches that name at any depth.
+  - `recursive` *(Boolean, optional)*: Whether glob matching traverses subdirectories. Default: `true`.
+  - `stream_mode` *(Boolean, optional)*: **Zero-Disk Decrypted Data Streaming**. If `true`, VaultExplorer creates a memory-backed seekable proxy file descriptor and returns a `stream_uri` in `AUTOMATION_RESULT`. The stream supports **random-access seeking (`lseek`)** and multi-pass reading (for 2-pass image decoders, video players, and PDF viewers) during its 5-minute validity window without writing plaintext to flash storage.
+
+---
+
+### `IMPORT_FOLDER`
+Recursively imports an entire folder (and everything inside it) into the vault with optional glob filtering. Requires the **Full** tier and an unlocked vault.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.IMPORT_FOLDER`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+  - `source_path` *(String, required)*: Absolute folder path on the device, or a `content://` SAF *tree* URI.
+  - `vault_path` *(String, optional)*: Destination folder inside the vault. Omit, or leave empty, to import into the vault root.
+  - `pattern` *(String, optional)*: Glob pattern (e.g. `*.pdf`, `{jpg,png}`) to import only matching files.
+  - `exclude_pattern` *(String, optional)*: Glob pattern, or comma-separated glob patterns, for files or folders to skip (e.g. `Android,Download`). A matching folder excludes all its contents; a pattern without `/` matches that name at any depth. Excluded source files are not imported or deleted by `delete_source`.
+  - `recursive` *(Boolean, optional)*: Whether traversal enters subdirectories. Default: `true`.
+  - `delete_source` *(Boolean, optional)*: Same semantics as `IMPORT_FILE`'s `delete_source`, applied per file.
+
+One file failing doesn't abort the rest -- it's best-effort, non-blocking batch execution. Check `result_code`/`result_message` and count extras (`matched_count`, `succeeded_count`, `failed_count`, `skipped_count`).
+
+---
+
+### `EXPORT_FOLDER`
+Recursively exports a vault folder (and everything inside it) out to the host filesystem with optional glob filtering. Requires the **Full** tier and an unlocked vault.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.EXPORT_FOLDER`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+  - `vault_path` *(String, optional)*: Source folder inside the vault. Omit, or leave empty, to export the whole vault.
+  - `dest_path` *(String, required)*: Absolute destination folder path on the device, or a `content://` SAF tree URI. Created automatically if it doesn't exist yet.
+  - `pattern` *(String, optional)*: Glob wildcard filter (e.g. `*.docx`).
+  - `exclude_pattern` *(String, optional)*: Glob pattern, or comma-separated glob patterns, for files or folders to skip (e.g. `Android,Download`). A matching folder excludes all its contents; a pattern without `/` matches that name at any depth.
+  - `recursive` *(Boolean, optional)*: Default `true`.
+
+Same best-effort, per-file semantics as `IMPORT_FOLDER`.
+
+---
+
+### `TAKE_PHOTO`
+Captures a single photo directly through the device camera and saves it straight into the vault -- no preview, no UI, nothing shown on screen. Requires the **Full** tier *and* the separate **Allow camera capture** switch (see Section 1), plus an unlocked vault.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.TAKE_PHOTO`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+  - `vault_path` *(String, optional)*: Destination path inside the vault. If omitted, a name like `IMG_20260823_153000.jpg` is generated at the vault root (matching the in-app camera's own naming), with a numeric suffix added if that name is already taken.
+  - `camera_facing` *(String, optional)*: `back` (default) or `front`.
+
+Camera and microphone permission must already be granted to VaultExplorer beforehand (open the app's own camera screen once to trigger the system permission prompt) -- automation has no way to show that prompt itself. See `PERMISSION_DENIED` / `CAMERA_UNAVAILABLE` below for how that surfaces.
+
+---
+
+### `START_RECORDING`
+Starts recording video (with audio, by default) directly into the vault, and keeps recording until a matching `STOP_RECORDING` arrives. Same tier/opt-in requirements as `TAKE_PHOTO`.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.START_RECORDING`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+  - `vault_path` *(String, optional)*: Destination path inside the vault. If omitted, a name like `VID_20260823_153000.mp4` is generated at the vault root, same collision handling as `TAKE_PHOTO`.
+  - `camera_facing` *(String, optional)*: `back` (default) or `front`.
+  - `video_quality` *(String, optional)*: `hd` / `fhd` (default) / `uhd`.
+  - `record_audio` *(Boolean, optional)*: Default `true`.
+  - `segment_minutes` *(Int, optional)*: Default `0` (one file, written when the recording stops). Above `0` the recording is cut into parts of about that many minutes, and each part is saved into the vault the moment it is complete, so a crash, a kill or a camera that is taken away costs at most the part in progress instead of the whole recording. See *Segmented recording* below.
+
+Only one automation-triggered recording can be in progress at a time (across all vaults) -- a second `START_RECORDING` while one is already running gets `BUSY`. Because this needs a real, ongoing camera session, Android requires a persistent notification while it's active (unlike `TAKE_PHOTO`, which is fast enough to need none at all) -- the notification has its own **Stop** button too, in case your automation task never gets to send `STOP_RECORDING`. As a further backstop, a recording auto-stops and saves on its own after **3 hours** if nothing tells it to stop -- so a missed trigger loses at most the tail end, not the whole recording.
+
+---
+
+### `STOP_RECORDING`
+Stops the in-progress automation recording started by `START_RECORDING` and finalizes it into the vault.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.STOP_RECORDING`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*: Must match the vault the current recording is writing into.
+
+On success, the `AUTOMATION_RESULT` broadcast includes an extra `duration_ms` *(Long)* with the recording's length. A long recording's finalize step (streaming the whole file into the vault) can take a little while -- if VaultExplorer gives up waiting and reports `ERROR`/a timeout message, the save may still complete moments later in the background; the broadcast reply and the actual data landing in the vault aren't strictly the same guarantee.
+
+---
+
+### `START_AUDIO_RECORDING`
+Starts recording audio only (microphone, no camera) directly into the vault, and keeps recording until a matching `STOP_AUDIO_RECORDING` arrives. Same tier/opt-in requirements as `TAKE_PHOTO` and `START_RECORDING`.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.START_AUDIO_RECORDING`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*
+  - `vault_path` *(String, optional)*: Destination path inside the vault. If omitted, a name like `AUD_20260823_153000.m4a` is generated at the vault root (matching the in-app audio recorder's own naming), with a numeric suffix added if that name is already taken. The recording is AAC audio in an M4A container, so a custom `vault_path` should end in `.m4a`.
+  - `audio_quality` *(String, optional)*: `voice` / `standard` (default) / `high`. Mono AAC, the same presets as the in-app recorder's "Audio recording quality" setting: `voice` = 32 kbps / 22.05 kHz (smallest files, fine for speech), `standard` = 64 kbps / 44.1 kHz, `high` = 128 kbps / 44.1 kHz (music and ambient sound). Case-insensitive; a missing or unrecognised value records at `standard`. This is chosen per request -- the in-app setting isn't applied to automation recordings.
+
+  - `segment_minutes` *(Int, optional)*: Same as for `START_RECORDING`: above `0`, the audio is cut into parts of about that many minutes, each saved into the vault as it is complete. See *Segmented recording* below.
+
+There are no `camera_facing`, `video_quality` or `record_audio` extras -- they don't apply. Only the microphone permission is needed (the camera permission is **not**); grant it once by recording from VaultExplorer's own audio recorder, since automation can't show the system prompt itself.
+
+There is one automation recording slot, shared with video: a `START_AUDIO_RECORDING` while a video (or audio) recording is in progress gets `BUSY`, and so does a `START_RECORDING` while an audio recording is in progress. Android requires a persistent notification while the microphone is in use in the background, so the recording shows a notification ("Recording audio") with its own **Stop & save** button, in case your task never gets to send `STOP_AUDIO_RECORDING`. As a backstop, an audio recording auto-stops and saves on its own after **3 hours** if nothing tells it to stop.
+
+While recording, the audio is held in an on-device temporary file that is zero-filled and deleted as soon as it has been saved into the vault (or if saving fails). It isn't encrypted until it lands in the vault, the same as video.
+
+The vault has to stay unlocked until the recording has been saved, because the audio is written into it when the recording stops. A `LOCK_VAULT` sent mid-recording makes that final save fail and the recording is discarded -- and so can VaultExplorer's own auto-lock (inactivity timeout, or lock on screen off) if the app is open while you record. The in-app audio recorder suppresses the screen-off lock while it runs; an automation recording does not. For long unattended recordings, keep the vault's auto-lock from firing, and send `LOCK_VAULT` only after `STOP_AUDIO_RECORDING` has replied.
+
+---
+
+### `STOP_AUDIO_RECORDING`
+Stops the in-progress automation recording started by `START_AUDIO_RECORDING` and finalizes it into the vault.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.STOP_AUDIO_RECORDING`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `vault_uri` *(String, required)*: Must match the vault the current recording is writing into.
+
+On success, the `AUTOMATION_RESULT` broadcast includes an extra `duration_ms` *(Long)* with the recording's length. The same finalize-timeout caveat as `STOP_RECORDING` applies.
+
+#### Segmented recording (`segment_minutes`)
+With `segment_minutes` set, a long unattended recording no longer lives in a single temporary file until the very end. The recorder switches to a new file when a part is full -- without pausing, so no audio or video is dropped at the seam -- and every finished part is written into the vault right away and wiped from temporary storage.
+
+- **File names**: the part number is added before the extension of the recording's name: `VID_20260823_153000.mp4` is saved as `VID_20260823_153000_part001.mp4`, `..._part002.mp4` and so on (a custom `vault_path` works the same way). A part name that is already taken in the vault is skipped, never overwritten, so numbers can have gaps.
+- **Length**: video parts are cut on a keyframe, so each is the length you asked for to within a couple of frames. Audio part length is enforced as a file size derived from the bitrate, so an audio part can be somewhat shorter or longer than the minutes you asked for. Values above 240 are capped at 240. The value may be sent as a number or as text (Tasker and MacroDroid often send text).
+- **Result**: `STOP_RECORDING` / `STOP_AUDIO_RECORDING` report `OK` only when every part reached the vault, and the message names the number of parts (`Recording saved in 3 parts (...)`); `duration_ms` is the length of the whole recording. If some parts could not be saved (the vault was locked or full while they closed), the result is `ERROR` and says how many parts were not saved -- the parts that were saved stay in the vault.
+- **Still true**: only one recording at a time, the notification and its **Stop** button, and the 3-hour backstop all behave exactly as for a single-file recording.
+- **Limit**: if the camera or microphone is taken away mid-recording (a call, another app), the part that was in progress is lost; the earlier parts are already safe.
+
+Each STOP only stops its own kind of recording: `STOP_AUDIO_RECORDING` won't end a video recording and `STOP_RECORDING` won't end an audio one -- either gets `NOT_RECORDING` with a message naming the right action to send. If the save to the vault fails, the take is discarded and the result is `ERROR` (there is no UI to retry from).
+
+---
+
+### `WIPE_FILE`
+Securely zeroes out and deletes any plaintext file on the device storage.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.WIPE_FILE`
+- **Extras**:
+  - `api_token` *(String, required)*
+  - `source_path` *(String, required)*: Absolute filesystem path to wipe.
+
+---
+
+### `EMERGENCY_LOCK`
+Immediately unmounts and locks all active vaults, zeroes decrypted key material from system memory, and stops the foreground keep-alive service (**Tier 1: Session Purge**). Does not require `vault_uri`.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.EMERGENCY_LOCK`
+- **Extras**:
+  - `api_token` *(String, required)*: Your shared API token.
+
+---
+
+### `EMERGENCY_PURGE`
+Immediately executes an emergency panic purge. If `tier` is omitted, it executes whatever purge level is configured in the app's **Emergency Panic** settings. Does not require `vault_uri`.
+
+- **Action**: `com.aeidolon.vaultexplorer.action.EMERGENCY_PURGE`
+- **Extras**:
+  - `api_token` *(String, required)*: Your shared API token.
+  - `tier` *(Int, optional)*: Explicit purge level override:
+    - `1`: **Session Purge** (unmounts vaults, zeroes memory, purges cached passwords).
+    - `2`: **Credential Purge** (wipes vault bookmarks list, resets master lock/settings, purges Android Keystore).
+    - `3`: **Nuclear Wipe** (zero-fills and shreds all app storage on disk, then requests system uninstallation).
+    *(If omitted or invalid, uses the globally configured tier).*
+
+---
+
+## 4. Reading Results (`AUTOMATION_RESULT`)
+
+VaultExplorer broadcasts a response intent for every processed action:
+
+- **Action**: `com.aeidolon.vaultexplorer.action.AUTOMATION_RESULT`
+- **Received Extras**:
+  - `original_action` *(String)*: The action that was executed.
+  - `result_code` *(String)*: Status code:
+    - `OK`: Action completed successfully.
+    - `AUTH_FAIL`: Invalid credentials or decryption failure.
+    - `NOT_MOUNTED`: The vault is locked and must be unlocked first.
+    - `FORBIDDEN`: Action not allowed by the vault's automation tier (or, for camera and audio-recording actions, the separate **Allow camera capture** switch isn't on).
+    - `INVALID_ARGS`: Missing or malformed parameters/paths.
+    - `ERROR`: General failure or I/O exception.
+    - `PARTIAL` *(batch operations only)*: The folder or glob batch finished, but at least one file failed. Check `result_message` and the count extras below.
+    - `PERMISSION_DENIED` *(`TAKE_PHOTO` / `START_RECORDING` / `START_AUDIO_RECORDING` only)*: Camera/microphone permission isn't granted on-device (for `START_AUDIO_RECORDING`, just the microphone). Automation can't trigger the system permission prompt itself -- open VaultExplorer's own camera screen (or, for audio, its audio recorder) once to grant it, then retry.
+    - `CAMERA_UNAVAILABLE` *(`TAKE_PHOTO` / `START_RECORDING` only)*: The camera couldn't be opened -- commonly because something else (e.g. VaultExplorer's own in-app camera screen) already has it open, or a hardware/driver error. Any other failure to open the camera -- including a device policy or MDM profile that has disabled it -- is also reported as `CAMERA_UNAVAILABLE`, with the underlying camera error code in the message; there is no separate `CAMERA_DISABLED` result code.
+    - `MIC_UNAVAILABLE` *(`START_AUDIO_RECORDING` only)*: The microphone couldn't be opened -- commonly because another app is holding it (e.g. a call), or a device policy has blocked it. The underlying error is in `result_message`. Other failures (such as the temporary file not being writable) are reported as plain `ERROR`.
+    - `BUSY` *(`START_RECORDING` / `START_AUDIO_RECORDING` only)*: An automation recording (video or audio) is already in progress.
+    - `NOT_RECORDING` *(`STOP_RECORDING` / `STOP_AUDIO_RECORDING` only)*: Nothing is currently recording, the in-progress recording belongs to a different vault than the one named in `vault_uri`, or it is the other kind of recording (video vs. audio) -- the message says which STOP action to send instead.
+  - `result_message` *(String)*: Human-readable message or error details.
+  - `duration_ms` *(Long, only present on a successful `STOP_RECORDING` / `STOP_AUDIO_RECORDING`)*: Length of the recording that was just saved, in milliseconds.
+  - `matched_count` *(Int, batch operations)*: Number of files matched by glob pattern (or total files traversed when no `pattern` is set).
+  - `succeeded_count` *(Int, batch operations)*: Number of files successfully imported/exported.
+  - `failed_count` *(Int, batch operations)*: Number of files that failed mid-operation (I/O error, permission denied, etc.).
+  - `skipped_count` *(Int, batch operations)*: Number of files skipped (e.g. destination already exists, pattern excluded, or zero-byte files).
+  - `stream_uri` *(String, only present when `stream_mode=true` on `EXPORT_FILE`)*: Temporary `content://` URI to read or view decrypted bytes directly through memory without flash writes.
+
+> 💡 **Tip**: If your automation tool receives **no response at all**, verify your `api_token`. Requests with invalid or missing tokens are discarded silently to prevent token brute-forcing.
+
+---
+
+## 5. Typical Automation Workflows
+
+### Standard Sync: Camera / File Sync
+A standard task chain unlocks the vault, imports the file (with optional secure wipe of the original), and locks the vault:
+
+[Trigger] (e.g., New photo taken / Schedule)
+
+├─► Send Broadcast: UNLOCK_VAULT │ (Wait for AUTOMATION_RESULT: result_code ==
+"OK" or 1s delay) │ ├─► Send Broadcast: IMPORT_FILE (source_path, vault_path,
+delete_source=true) │ (Wait for AUTOMATION_RESULT: result_code == "OK") │ └─►
+Send Broadcast: LOCK_VAULT
+
+
+### Variant: Whole-folder sync with glob filter
+Swap `IMPORT_FILE` for `IMPORT_FOLDER` and add a `pattern` to batch-import only matching files. With `delete_source=true` the originals are securely wiped after each successful transfer:
+
+IMPORT_FOLDER source_path = /storage/emulated/0/DCIM/Camera vault_path = Photos
+pattern = *.{jpg,jpeg,png,heic} delete_source = true
+
+Add `exclude_pattern = Screenshots` to skip every folder named `Screenshots` and its contents, or `exclude_pattern = Trips/Private` to skip that path under the selected source folder.
+
+
+### Variant: Direct capture (no separate camera app involved)
+Skips the OS camera / gallery step entirely -- VaultExplorer takes the photo or video itself, straight into the vault. Requires the **Allow camera capture** switch from Section 1.
+
+[Trigger] (e.g., NFC tag, geofence, a specific charger plugged in)
+
+├─► Send Broadcast: UNLOCK_VAULT │ (Wait for AUTOMATION_RESULT: result_code ==
+"OK") │ ├─► Send Broadcast: TAKE_PHOTO (camera_facing=front) │ (Wait for
+AUTOMATION_RESULT) │ └─► Send Broadcast: LOCK_VAULT
+
+### Variant: Record audio for as long as a condition holds
+`START_AUDIO_RECORDING` and `STOP_AUDIO_RECORDING` bracket a recording, so
+pair them with the trigger's start and end (for example a Bluetooth device
+connecting and disconnecting, or entering and leaving a geofence). Unlock
+first and lock afterwards, but only lock *after* the stop has replied -- locking
+the vault mid-recording makes the final save fail:
+
+[Trigger start] ─► UNLOCK_VAULT ─► START_AUDIO_RECORDING (wait for `OK`)
+
+[Trigger end] ─► STOP_AUDIO_RECORDING (wait for `OK`, read `duration_ms`) ─►
+LOCK_VAULT
+
+
+---
+
+## 6. Recipe Examples
+
+### MacroDroid Setup
+
+In MacroDroid, use a **2-Macro** setup: one macro to send requests, and another macro to listen for `AUTOMATION_RESULT`.
+
+#### Macro 1: "Send Action" (e.g. Unlock or Request Stream)
+1. Add Action ➔ **Connectivity ➔ Send Intent**.
+2. Configure:
+   * **Target**: `Broadcast` *(⚠️ Do not select Activity!)*
+   * **Action**: `com.aeidolon.vaultexplorer.action.EXPORT_FILE` *(or desired action)*
+   * **Package**: `com.aeidolon.vaultexplorer`
+   * **Class**: `com.aeidolon.vaultexplorer.automation.VaultAutomationReceiver`
+   * **Extra 1** (`String`): `api_token` = `<YOUR_TOKEN>`
+   * **Extra 2** (`String`): `vault_uri` = `<YOUR_VAULT_URI>`
+   * **Extra 3** (`String`): `vault_path` = `document.pdf`
+   * **Extra 4** (`Boolean`): `stream_mode` = `true` *(or set `dest_path` for normal file export)*
+
+#### Macro 2: "Catch & Process Results"
+1. Add Trigger ➔ **Device Events ➔ Intent Received**:
+   * **Action**: `com.aeidolon.vaultexplorer.action.AUTOMATION_RESULT`
+   * **Extra name**: `stream_uri` *(or `result_code`)*
+   * **Extra value to match**: `*`
+   * **Save to variable**: Create a String variable (e.g. `stream_url`)
+2. Add Action ➔ **Notification ➔ Display Dialog**:
+   * Text: `Result: {v=stream_url}`
+3. *(Optional, for stream mode)* Add Action ➔ **Connectivity ➔ Send Intent**:
+   * **Target**: `Activity`
+   * **Action**: `android.intent.action.VIEW`
+   * **Data**: `{v=stream_url}`
+   * **MIME Type**: `*/*` *(or `application/pdf`, `image/jpeg`, `text/plain`)*
+   * **Flags**: `FLAG_GRANT_READ_URI_PERMISSION` *(or value `1`)*
+
+---
+
+### Tasker Setup
+
+1. Add action ➔ **System ➔ Send Intent**:
+   * **Action**: `com.aeidolon.vaultexplorer.action.EXPORT_FILE`
+   * **Package**: `com.aeidolon.vaultexplorer`
+   * **Class**: `com.aeidolon.vaultexplorer.automation.VaultAutomationReceiver`
+   * **Target**: `Broadcast Receiver`
+   * **Extra**:
+     ```text
+     api_token:<YOUR_TOKEN>
+     vault_uri:<YOUR_VAULT_URI>
+     vault_path:document.pdf
+     stream_mode:true
+     ```
+2. Create a Profile with **Event ➔ System ➔ Intent Received**:
+   * **Action**: `com.aeidolon.vaultexplorer.action.AUTOMATION_RESULT`
+   * In the linked task, read `%stream_uri`, `%result_code`, or `%result_message`.
+
+---
+
+### Zero-Disk Decrypted Data Streaming (CLI & Shell)
+
+Use `stream_mode=true` on `EXPORT_FILE` to stream decrypted files directly into memory-backed file descriptors:
+
+#### Step 1 — Request the stream in PowerShell / Bash:
+```bash
+adb shell "am broadcast -a com.aeidolon.vaultexplorer.action.EXPORT_FILE -n com.aeidolon.vaultexplorer/.automation.VaultAutomationReceiver --es api_token '<YOUR_TOKEN>' --es vault_uri '<YOUR_VAULT_URI>' --es vault_path 'photos/image.jpg' --ez stream_mode true"
+
+Step 2 — Read or view the stream:
+
+Option A: Open directly in your device's image, video, or PDF viewer:
+
+adb shell "am start -a android.intent.action.VIEW -d '<STREAM_URI>' -t 'image/jpeg' --grant-read-uri-permission" 
+
+Option B: Pipe directly to PC or CLI tools (Termux / Linux):
+
+# Save directly to PC without touching Android flash storage:
+adb exec-out content read --uri "<STREAM_URI>" > image.jpg
+```
+# Or compute hash on-device:
+termux-saf-read "<STREAM_URI>" | sha256sum
+
+⚠️ Stream constraints: Stream sessions remain valid for 5 minutes and allow
+multiple random-access reads (such as image EXIF parsing followed by pixel
+rendering) before expiring. Up to 16 concurrent streams are supported
+simultaneously.
+
+Glob Pattern Syntax Reference
+
+The `pattern` and `exclude_pattern` extras use the same offline glob syntax:
+
+| Pattern         | Matches                                                    |
+| :-------------- | :--------------------------------------------------------- |
+| `*`             | Any characters within a single directory level (no `/`)    |
+| `**`            | Any characters including path separators (cross-directory) |
+| `?`             | Exactly one character (not `/`)                            |
+| `[a-z]`         | Any character in a range                                   |
+| `[!a-z]`        | Any character **not** in a range                           |
+| `{jpg,png,gif}` | Any of the comma-separated alternatives                    |
+
+You can also pass multiple independent patterns separated by commas, for
+example `exclude_pattern = Android,Download` skips both folder names and all
+their contents at any depth. Commas inside `{...}` brace alternatives remain
+part of that single glob pattern.
+
+Pattern matching is case-insensitive by default. Examples:
+
+  - *.pdf — all PDFs in the immediate folder
+  - **/*.pdf — all PDFs in the folder and all subdirectories
+  - REPORT_202[4-9]_*.xlsx — spreadsheets from 2024–2029
+  - {IMG,VID}_*.{jpg,mp4} — camera files with standard naming
+
+`pattern` is an inclusion filter: only matching files are transferred.
+`exclude_pattern` is a separate exclusion filter: matching files are skipped,
+and a matching folder also excludes everything beneath it. A pattern without
+`/` matches a file or folder name at any depth; a slash-separated path is
+relative to the selected folder. For example, `node_modules` excludes every
+folder with that name and its contents, while `Projects/private` excludes that
+path from the selected folder root and all of its contents. Exclusions are
+counted in `skipped_count`.
+
+## 7. OEM Background Service Survival
+
+For device-specific instructions on keeping the background foreground service
+alive on Samsung, Xiaomi, OnePlus, and Pixel devices, see the OEM Setup Guide.
+
+**Set VaultExplorer's battery usage to Unrestricted.** When an automation fires
+while VaultExplorer is fully closed, Android starts the app from nothing, and
+on Android 12 and newer it will not let a freshly started background process
+start a foreground service unless the app has an exemption. Unrestricted
+battery usage is one such exemption. Without it the action fails, and the
+`AUTOMATION_RESULT` has `result_code` `ERROR` with a `result_message` that
+says Android refused to start foreground work and tells you to change the
+battery setting. If an `UNLOCK_VAULT` succeeds but the message says the
+keep-alive service could not start, the vault is unlocked but may re-lock if
+Android stops the app -- the same setting fixes that. VaultExplorer shows a hint
+with a shortcut to the right settings page on a vault's Automation screen
+whenever the setting is not Unrestricted.
+
+## 8. Important Notes & Gotchas
+
+  - Windows / PowerShell Quoting: When passing vault URIs containing parentheses
+    (e.g. primary%3Avault%20(1)) through adb shell, enclose the entire argument
+    string in single quotes (e.g. adb shell "am broadcast ... --es vault_uri
+    'content://...'"). Otherwise, PowerShell will strip the quotes and Android's
+    shell will crash with an unexpected ( syntax error.
+  - File Paths: source_path/dest_path accept either a real absolute filesystem
+    path (e.g. /storage/emulated/0/...) or a content:// SAF URI. The SAF form
+    only works if VaultExplorer already holds a persisted permission grant for
+    that exact URI. When you don't already have such a grant, a raw filesystem
+    path is simpler and always works.
+  - Tiers: IMPORT_FILE, EXPORT_FILE, IMPORT_FOLDER, and EXPORT_FOLDER all
+    require the Full automation tier. Lifecycle only permits UNLOCK_VAULT and
+    LOCK_VAULT. TAKE_PHOTO, START_RECORDING, STOP_RECORDING,
+    START_AUDIO_RECORDING, and STOP_AUDIO_RECORDING require Full tier and the
+    separate Allow camera capture switch -- see Section 1.
+  - Camera actions are genuinely silent: TAKE_PHOTO shows nothing on screen at
+    all -- no notification, no shutter UI. START_RECORDING/STOP_RECORDING do
+    show a persistent notification while recording (Android requires this for
+    any app using the camera in the background), with its own manual Stop
+    button. START_AUDIO_RECORDING/STOP_AUDIO_RECORDING behave the same way for
+    the microphone.
+  - Folder syncs are best-effort: IMPORT_FOLDER/EXPORT_FOLDER don't abort on the
+    first failed file -- check for result_code == "PARTIAL" if you need to know
+    whether everything actually made it across.
+  - Stream Mode vs SAF Mounting: Zero-Disk Decrypted Streams (stream_mode=true)
+    provide ephemeral, read-only in-memory streams ideal for viewers, CLI pipes,
+    and exports. For interactive 2-way text/code editing where changes must save
+    back to the vault, use VaultExplorer's DocumentsProvider mount instead.
+  - Token Invalidation: Regenerating your API token in VaultExplorer immediately
+    invalidates existing tasks until updated.
+  - USB Storage: Automation is currently not supported on hardware USB
+    OTG-mounted drives.

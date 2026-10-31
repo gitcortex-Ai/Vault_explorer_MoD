@@ -1,0 +1,1441 @@
+package com.aeidolon.vaultexplorer.engine
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.media.MediaCodec
+import android.media.MediaExtractor
+import android.media.MediaFormat
+import android.media.audiofx.LoudnessEnhancer
+import android.net.Uri
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.view.Surface
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.Format
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.audio.AudioProcessor
+import androidx.media3.common.Tracks
+import androidx.media3.common.VideoSize
+import androidx.media3.common.text.CueGroup
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.PlayerMessage
+import androidx.media3.exoplayer.Renderer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
+import androidx.media3.exoplayer.mediacodec.MediaCodecInfo
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.exoplayer.video.MediaCodecVideoRenderer
+import androidx.media3.exoplayer.video.VideoRendererEventListener
+import androidx.media3.extractor.DefaultExtractorsFactory
+import androidx.media3.extractor.ExtractorsFactory
+import androidx.media3.extractor.mkv.MatroskaExtractor
+import androidx.media3.extractor.mp4.FragmentedMp4Extractor
+import androidx.media3.extractor.mp4.Mp4Extractor
+import com.aeidolon.vaultexplorer.DeviceCapabilityProfiler
+import com.aeidolon.vaultexplorer.VeLog
+import com.aeidolon.vaultexplorer.container.ContainerMediaDataSource
+import com.aeidolon.vaultexplorer.container.SoftwareDecodeCursor
+import com.aeidolon.vaultexplorer.container.VideoThumbnailCoordinator
+import com.aeidolon.vaultexplorer.container.scrubToleranceUs
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.view.TextureRegistry
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicLong
+import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.DecoderManager
+import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.DecoderMode
+import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory
+
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+class NativePlayerManager(private val context: Context) : Player.Listener {
+    companion object {
+        private const val TAG = "NativePlayerManager"
+        private const val POSITION_UPDATE_INTERVAL_MS = 200L
+        private const val DIAGNOSTICS_EMIT_INTERVAL_MS = 1000L
+
+        // An A-B loop's end is kept this far short of the end of the item, so
+        // the jump back to A always happens during playback. Past it the item
+        // would end (or, under repeat-one, wrap to 0 rather than to A) before
+        // the loop message could be delivered. The Dart viewer applies the
+        // same margin (AbLoopState.endGuard) so the marker matches.
+        private const val AB_LOOP_END_GUARD_MS = 150L
+
+        // How far short of B a seek past it is put (see onPositionDiscontinuity).
+        // Far below AbLoopState.minLength, so it can never reach A.
+        private const val AB_LOOP_SEEK_BACKOFF_MS = 30L
+
+        // How long one scrub-preview request may spend decoding forward from
+        // a keyframe to reach the exact frame before it settles for the
+        // closest one it has (the next request then carries on from there).
+        // Bounds worst-case latency on slow decoders / high resolutions.
+        private const val SCRUB_DECODE_BUDGET_MS = 150L
+    }
+
+    private var textureRegistry: TextureRegistry? = null
+    private var textureEntry: TextureRegistry.SurfaceTextureEntry? = null
+    private var surface: Surface? = null
+    private var textureId: Long = -1L
+
+    /**
+     * Set while the picture-in-picture window (its own activity, with its own
+     * SurfaceView) is showing the video. The player then draws there instead
+     * of into the Flutter texture, and the video track stays on while the app
+     * is in the background: the window is what is on screen. It outlives
+     * [release]: a playlist moves to its next item by releasing and recreating
+     * the player, and that item must keep showing in the window.
+     */
+    private var externalSurfaceView: android.view.SurfaceView? = null
+
+    private var player: ExoPlayer? = null
+    private var decoderManager: DecoderManager? = null
+    private var requestedVideoDecoderMode = DecoderMode.AUTO
+    private var requestedAudioDecoderMode = DecoderMode.AUTO
+    private var volumeBoostEnabled = false
+    private var volumeBoostGainMb = 2000
+    private var loudnessEnhancer: LoudnessEnhancer? = null
+    private var loudnessAudioSessionId = 0
+
+    // Software 10-band equalizer living inside the player's audio sink (see
+    // AudioEqualizerProcessor). One instance for the manager's lifetime: the
+    // ExoPlayer instance is reused across items, and the processor is reset by
+    // the sink whenever the stream changes. Settings are pushed per item from
+    // Dart (initialize) and live (setEqualizer); the default is "off", so other
+    // users of this single player (video editor, camera review) never hear it.
+    private val equalizerProcessor = AudioEqualizerProcessor()
+    private var currentVolId: Int = -1
+    private var currentFilePath: String = ""
+    // True when currentFilePath is a real, already-plaintext absolute path
+    // on device storage (the decoy's local file manager -- see
+    // LocalFileIoBackend.dart's doc comment for the equivalent Dart-side
+    // split) rather than a path inside a mounted, encrypted container.
+    // Read directly off disk via buildMediaSource's local branch below,
+    // bypassing ContainerFileSystem/the native vault engine entirely --
+    // there's no session to decrypt from and nothing here needs one.
+    private var currentIsLocalStorage: Boolean = false
+
+    // True when the viewer that opened this item asked for background
+    // playback + a media notification (vault or local-storage items -- see
+    // initialize()). Other users of this single player (video editor, camera
+    // review) leave it off and never get a notification.
+    private var mediaSessionEnabled: Boolean = false
+    // Mirrors the activity's started/stopped state (MainActivity.onStart/
+    // onStop): while stopped nothing is on screen, so video decoding is
+    // switched off and only audio keeps playing.
+    private var appInBackground: Boolean = false
+    // Set by the floating player's "audio only" button: the video is not being
+    // shown, so it is not decoded either. Lives as long as the player it was
+    // set on (release() clears it): an item change re-applies it from Dart, and
+    // it can never carry over into a later video.
+    private var audioOnly: Boolean = false
+
+    var methodChannel: MethodChannel? = null
+    var eventSink: EventChannel.EventSink? = null
+        set(value) {
+            field = value
+            if (value != null && isMirrorDownloading) {
+                emitEvent("mirrorPullStatus", mapOf("isDownloading" to true))
+            }
+        }
+    var setPlaybackActiveCallback: ((Boolean) -> Unit)? = null
+
+     private var isMirrorDownloading = false
+    private var isFallbackMode = false
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    /**
+     * What the media session / notification may do to this player. Skip
+     * requests go to the Dart viewer (which owns the playlist) as events.
+     */
+    private val sessionHost = object : VaultPlaybackSession.Host {
+        override fun play() {
+            this@NativePlayerManager.play()
+        }
+
+        override fun pause() {
+            this@NativePlayerManager.pause()
+        }
+
+        override fun skipToNext() {
+            emitEvent("mediaSessionAction", mapOf("action" to "next"))
+        }
+
+        override fun skipToPrevious() {
+            emitEvent("mediaSessionAction", mapOf("action" to "previous"))
+        }
+
+        override fun stopForLock() {
+            player?.let {
+                it.stop()
+                it.clearMediaItems()
+            }
+        }
+
+        override fun closeViewer() {
+            emitEvent("mediaSessionAction", mapOf("action" to "stop"))
+        }
+    }
+
+    // --- Scrub-preview (seekbar drag thumbnail) state ---
+    // A single dedicated thread, separate from VideoThumbnailCoordinator's
+    // browser-thumbnail pool: this work is latency-sensitive and tied to
+    // one interactive drag gesture, not a background batch. The extractor
+    // + codec pair is opened once per drag (startScrubPreview) and reused
+    // across every position the finger crosses (getScrubPreviewFrame),
+    // rather than paying MediaCodec.configure()/start() per frame.
+    private val previewFrameExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    // Every request/session-close bumps this; a queued task that finds
+    // its own id no longer current when it *starts* (superseded by a
+    // newer scrub position before its turn came up) or *finishes*
+    // (superseded while it was decoding) drops its result silently
+    // instead of delivering a stale frame out of order.
+    private val previewRequestSeq = AtomicLong(0)
+    private var previewExtractor: MediaExtractor? = null
+    private var previewCodec: MediaCodec? = null
+    private var previewDurationUs: Long = 0L
+    // Clockwise degrees (0/90/180/270) the container says a decoded frame
+    // must be turned to appear upright. MediaCodec's ByteBuffer/Image output
+    // is always in *coded* orientation -- a phone-recorded portrait clip
+    // decodes as a sideways landscape frame -- so the preview has to apply
+    // this itself. Only touched on previewFrameExecutor's thread, like the
+    // fields above.
+    private var previewRotationDegrees: Int = 0
+    // Where the preview decoder stands between requests, so a forward drag
+    // can keep decoding instead of re-seeking every time. Same threading
+    // rule as the fields above; reset whenever the codec is (re)opened,
+    // closed, or a decode throws.
+    private val previewCursor = SoftwareDecodeCursor()
+
+    private fun createExtractorsFactory(lenient: Boolean): ExtractorsFactory {
+        val factory = DefaultExtractorsFactory()
+        factory.setConstantBitrateSeekingEnabled(true)
+        if (lenient) {
+            factory.setMp4ExtractorFlags(
+                Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS or
+                Mp4Extractor.FLAG_READ_WITHIN_GOP_SAMPLE_DEPENDENCIES
+            )
+            factory.setMatroskaExtractorFlags(
+                MatroskaExtractor.FLAG_DISABLE_SEEK_FOR_CUES
+            )
+            factory.setFragmentedMp4ExtractorFlags(
+                FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS or
+                FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+            )
+        } else {
+            factory.setMp4ExtractorFlags(
+                Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS
+            )
+            factory.setFragmentedMp4ExtractorFlags(
+                FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS or
+                FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+            )
+        }
+        // Raw .ac3/.eac3 come out of Media3 unseekable (every seek lands on 0:00); make them seekable.
+        // Media3 has no AIFF extractor; AiffExtractor sniffs first and is a no-op for other formats.
+        return AiffAwareExtractorsFactory(SeekableAc3ExtractorsFactory(factory))
+    }
+
+    /**
+     * Builds the [ProgressiveMediaSource] for either playback path, shared
+     * between [initialize] and the lenient-fallback retry in
+     * [onPlayerError] so the two can't drift out of sync on which
+     * (volId, filePath, isLocalStorage) maps to which data source.
+     *
+     * Local storage uses Media3's own stock [DefaultDataSource] against a
+     * plain file:// Uri -- FileDataSource under the hood, resolved via
+     * ordinary java.io.File access, no ContentResolver/FileProvider
+     * round-trip needed since this never leaves the process. Vault
+     * playback keeps the existing [VaultMedia3DataSource] pipeline, which
+     * streams decrypted bytes straight from the C++ engine.
+     */
+    private fun buildMediaSource(
+        volId: Int,
+        filePath: String,
+        isLocalStorage: Boolean,
+        extractorsFactory: ExtractorsFactory,
+    ): ProgressiveMediaSource {
+        val dataSourceFactory: DataSource.Factory = if (isLocalStorage) {
+            DefaultDataSource.Factory(context)
+        } else {
+            VaultMedia3DataSourceFactory(volId, filePath)
+        }
+       val mediaUri = if (isLocalStorage) {
+            if (filePath.startsWith("content://")) {
+                val resolved = com.aeidolon.vaultexplorer.MainActivity.activeMainActivity
+                    ?.safStorageManager
+                    ?.resolveDocumentUriFromTreePath(filePath)
+                    ?: Uri.parse(filePath)
+                VeLog.i(TAG) { "buildMediaSource: SAF video stream resolved URI=$resolved" }
+                resolved
+            } else {
+                Uri.fromFile(File(filePath))
+            }
+        } else {
+            Uri.parse("vault://$volId/$filePath")
+        }
+        return ProgressiveMediaSource.Factory(dataSourceFactory, extractorsFactory)
+            .createMediaSource(MediaItem.fromUri(mediaUri))
+    }
+
+    init {
+        com.aeidolon.vaultexplorer.saf.MirrorPullEvents.setListener { vId, vPath, phase ->
+            val curPath = currentFilePath.trim('/')
+            val normPath = vPath.trim('/')
+            if (vId == currentVolId && (normPath == curPath || curPath.endsWith(normPath) || normPath.endsWith(curPath))) {
+                isMirrorDownloading = (phase == com.aeidolon.vaultexplorer.saf.MirrorPullEvents.Phase.STARTED)
+                emitEvent("mirrorPullStatus", mapOf("isDownloading" to isMirrorDownloading))
+            }
+        }
+    }
+
+    private val positionUpdateRunnable = object : Runnable {
+        override fun run() {
+            val p = player ?: return
+            if (!p.isPlaying) return
+            emitPositionUpdate(p)
+            mainHandler.postDelayed(this, POSITION_UPDATE_INTERVAL_MS)
+        }
+    }
+
+    // A-B loop. Both are C.TIME_UNSET while no loop is set; only the start is
+    // set between marking A and marking B, when it acts as a floor (see
+    // onPositionDiscontinuity). The jump back to
+    // the start is driven by a PlayerMessage delivered by the playback thread
+    // at the exact end position -- not by the 200ms position ticks sent to
+    // Dart, which would overshoot B by up to a tick on every pass.
+    private var abLoopStartMs: Long = C.TIME_UNSET
+    private var abLoopEndMs: Long = C.TIME_UNSET
+    private var abLoopMessage: PlayerMessage? = null
+
+    private var videoDecoderName: String = "Initializing..."
+    private var audioDecoderName: String = "Initializing..."
+    private var isVideoHw: Boolean = true
+    private var isAudioHw: Boolean = false
+    private var videoFrameRate: Float = 0f
+    private var videoMimeType: String = ""
+    private var audioMimeType: String = ""
+    private var droppedVideoFrames: Int = 0
+    private var videoDecoderInitTimeMs: Long = 0
+    private var colorInfoString: String = "SDR"
+    private var lastDiagnosticsEmitTimeMs: Long = 0L
+
+    fun setTextureRegistry(registry: TextureRegistry) {
+        this.textureRegistry = registry
+    }
+
+    private val analyticsListener = object : AnalyticsListener {
+        override fun onRenderedFirstFrame(
+            eventTime: AnalyticsListener.EventTime,
+            output: Any,
+            renderTimeMs: Long
+        ) {
+            emitEvent("renderedFirstFrame", emptyMap())
+        }
+
+        override fun onVideoDecoderInitialized(
+            eventTime: AnalyticsListener.EventTime,
+            decoderName: String,
+            initializationDurationMs: Long
+        ) {
+            videoDecoderName = decoderName
+            videoDecoderInitTimeMs = initializationDurationMs
+            isVideoHw = !isSoftwareDecoder(decoderName)
+            emitDiagnosticsUpdateThrottled()
+        }
+
+        override fun onAudioDecoderInitialized(
+            eventTime: AnalyticsListener.EventTime,
+            decoderName: String,
+            initializationDurationMs: Long
+        ) {
+            audioDecoderName = decoderName
+            isAudioHw = !isSoftwareDecoder(decoderName)
+            emitDiagnosticsUpdateThrottled()
+        }
+
+        override fun onVideoInputFormatChanged(
+            eventTime: AnalyticsListener.EventTime,
+            format: Format,
+            decoderReuseEvaluation: androidx.media3.exoplayer.DecoderReuseEvaluation?
+        ) {
+            videoFrameRate = if (format.frameRate > 0) format.frameRate else videoFrameRate
+            videoMimeType = format.sampleMimeType ?: ""
+            colorInfoString = when {
+                format.colorInfo?.colorTransfer == C.COLOR_TRANSFER_ST2084 -> "HDR10"
+                format.colorInfo?.colorTransfer == C.COLOR_TRANSFER_HLG -> "HLG"
+                format.colorInfo?.colorSpace == C.COLOR_SPACE_BT2020 -> "Rec.2020 (HDR/WCG)"
+                else -> "SDR (BT.709)"
+            }
+            emitDiagnosticsUpdateThrottled()
+        }
+
+        override fun onAudioInputFormatChanged(
+            eventTime: AnalyticsListener.EventTime,
+            format: Format,
+            decoderReuseEvaluation: androidx.media3.exoplayer.DecoderReuseEvaluation?
+        ) {
+            audioMimeType = format.sampleMimeType ?: ""
+            emitDiagnosticsUpdateThrottled()
+        }
+
+        override fun onDroppedVideoFrames(
+            eventTime: AnalyticsListener.EventTime,
+            droppedFrames: Int,
+            elapsedMs: Long
+        ) {
+            droppedVideoFrames += droppedFrames
+            emitDiagnosticsUpdateThrottled()
+        }
+    }
+
+    private fun isSoftwareDecoder(decoderName: String): Boolean {
+        val lower = decoderName.lowercase()
+        return lower.startsWith("ffmpeg") ||
+               lower.startsWith("c2.android.") ||
+               lower.startsWith("omx.google.") ||
+               lower.contains(".sw.") ||
+               lower.endsWith(".sw")
+    }
+
+    fun getDiagnosticsMap(): Map<String, Any?> {
+        val p = player
+        return mapOf(
+            "videoDecoderName" to videoDecoderName,
+            "isVideoHardwareAccelerated" to isVideoHw,
+            "audioDecoderName" to audioDecoderName,
+            "isAudioHardwareAccelerated" to isAudioHw,
+            "frameRate" to videoFrameRate,
+            "videoMimeType" to videoMimeType,
+            "audioMimeType" to audioMimeType,
+            "droppedFrames" to droppedVideoFrames,
+            "decoderInitTimeMs" to videoDecoderInitTimeMs,
+            "colorInfo" to colorInfoString,
+            "bufferedMs" to (p?.bufferedPosition ?: 0L),
+            "volId" to currentVolId,
+            "filePath" to currentFilePath,
+            "textureId" to textureId,
+        )
+    }
+
+    private fun emitDiagnosticsUpdateThrottled() {
+        val now = System.currentTimeMillis()
+        if (now - lastDiagnosticsEmitTimeMs >= DIAGNOSTICS_EMIT_INTERVAL_MS) {
+            lastDiagnosticsEmitTimeMs = now
+            emitDiagnosticsUpdate()
+        }
+    }
+
+    private fun emitDiagnosticsUpdate() {
+        emitEvent("diagnosticsUpdate", getDiagnosticsMap())
+    }
+
+    fun initialize(
+        volId: Int,
+        filePath: String,
+        isLocalStorage: Boolean = false,
+        videoDecoderModeName: String = "AUTO",
+        audioDecoderModeName: String = "AUTO",
+        volumeBoostEnabled: Boolean = false,
+        volumeBoostGainMb: Int = 2000,
+        initialPositionMs: Long = 0L,
+        mediaSession: Boolean = false,
+        equalizer: Map<*, *>? = null,
+    ): Long {
+        // A scrub-preview session from the outgoing video (if the user
+        // swiped to the next item mid-drag) is pinned to that video's
+        // extractor/codec -- never valid for whatever loads next.
+        endScrubPreview()
+        currentVolId = volId
+        currentFilePath = filePath
+        currentIsLocalStorage = isLocalStorage
+        // Background playback + notification apply to vault items and to
+        // plain local-storage items alike; the caller decides (it never asks
+        // for one on the archive preview). Local items are not bound to a
+        // vault, so locking a vault never ends their session.
+        mediaSessionEnabled = mediaSession
+        if (mediaSessionEnabled) {
+            VaultPlaybackSession.onMediaChanged(volId, filePath, isLocalStorage)
+        }
+        requestedVideoDecoderMode = parseDecoderMode(videoDecoderModeName)
+        requestedAudioDecoderMode = parseDecoderMode(audioDecoderModeName)
+        this.volumeBoostEnabled = volumeBoostEnabled
+        this.volumeBoostGainMb = volumeBoostGainMb.coerceIn(0, 2000)
+        equalizerProcessor.update(EqualizerSettings.fromMap(equalizer))
+        isMirrorDownloading = false
+        videoDecoderName = "Initializing..."
+        audioDecoderName = "Initializing..."
+        isVideoHw = true
+        isAudioHw = false
+        videoFrameRate = 0f
+        videoMimeType = ""
+        audioMimeType = ""
+        droppedVideoFrames = 0
+        videoDecoderInitTimeMs = 0
+        colorInfoString = "SDR"
+        lastDiagnosticsEmitTimeMs = 0L
+
+        // A loop belongs to the outgoing item: a message left registered would
+        // fire against whatever timeline loads next.
+        clearAbLoop()
+
+        // 1. ALWAYS disconnect ExoPlayer from surface FIRST before destroying the surface
+        mainHandler.removeCallbacks(positionUpdateRunnable)
+        var exoPlayer = player
+        if (exoPlayer != null) {
+            exoPlayer.stop()
+            exoPlayer.clearVideoSurface()
+            exoPlayer.clearMediaItems()
+        }
+
+        // 2. NOW safely release the old surface and textureEntry
+        surface?.release()
+        surface = null
+        textureEntry?.release()
+        textureEntry = null
+
+        // 3. Create a FRESH SurfaceTextureEntry for this new video
+        val registry = textureRegistry ?: throw IllegalStateException("TextureRegistry not set")
+        val entry = registry.createSurfaceTexture()
+        textureEntry = entry
+        textureId = entry.id()
+        val st = entry.surfaceTexture()
+        val newSurface = Surface(st)
+        surface = newSurface
+
+        // 4. Create or reuse ExoPlayer instance
+        if (exoPlayer == null) {
+            val tier = DeviceCapabilityProfiler.tierFor(context)
+            val loadControl = buildLoadControl(tier)
+            val manager = DecoderManager(requestedVideoDecoderMode, requestedAudioDecoderMode)
+            decoderManager = manager
+            val renderersFactory = HighPerformanceRenderersFactory(context, manager, equalizerProcessor)
+            exoPlayer = ExoPlayer.Builder(context, renderersFactory)
+                .setLoadControl(loadControl)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                        .setUsage(C.USAGE_MEDIA)
+                        .build(),
+                    true
+                )
+                // Playback must survive the screen turning off: keep the CPU
+                // awake while playing (released again on pause/stop)...
+                .setWakeMode(C.WAKE_MODE_LOCAL)
+                // ...and pause when headphones are unplugged / the headset
+                // disconnects, which matters once audio can play unattended.
+                .setHandleAudioBecomingNoisy(true)
+                .build()
+            exoPlayer.setVideoChangeFrameRateStrategy(C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF)
+            exoPlayer.addListener(this)
+            exoPlayer.addAnalyticsListener(analyticsListener)
+            player = exoPlayer
+            manager.attach(exoPlayer)
+        } else {
+            decoderManager?.selectVideoDecoder(requestedVideoDecoderMode)
+            decoderManager?.selectAudioDecoder(requestedAudioDecoderMode)
+        }
+        applyVolumeBoost(exoPlayer.audioSessionId)
+        applyBackgroundVideoPolicy(exoPlayer)
+
+        // 5. Connect the output to ExoPlayer and prepare. While the
+        // picture-in-picture window is up, a new item belongs in it.
+        val pipView = externalSurfaceView
+        if (pipView != null) {
+            exoPlayer.setVideoSurfaceView(pipView)
+        } else {
+            exoPlayer.setVideoSurface(newSurface)
+        }
+
+         isFallbackMode = false
+        val extractorsFactory = createExtractorsFactory(lenient = false)
+        val mediaSource = buildMediaSource(volId, filePath, isLocalStorage, extractorsFactory)
+
+        exoPlayer.setMediaSource(mediaSource)
+        if (initialPositionMs > 0L) {
+            exoPlayer.seekTo(initialPositionMs)
+        }
+        exoPlayer.prepare()
+
+        VeLog.d(TAG) { "Player initialized for volId=$volId, pathLen=${filePath.length}, isLocalStorage=$isLocalStorage, fresh textureId=$textureId" }
+        return textureId
+    }
+
+    private fun buildLoadControl(tier: DeviceCapabilityProfiler.Tier): DefaultLoadControl {
+        val (minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs) = when (tier) {
+            DeviceCapabilityProfiler.Tier.LOW    -> Quadruple(8_000, 20_000, 2_000, 4_000)
+            DeviceCapabilityProfiler.Tier.MEDIUM -> Quadruple(12_000, 30_000, 2_500, 5_000)
+            DeviceCapabilityProfiler.Tier.HIGH   -> Quadruple(15_000, 40_000, 3_000, 6_000)
+        }
+        val maxBufferBytes = when (tier) {
+            DeviceCapabilityProfiler.Tier.LOW    -> 32 * 1024 * 1024
+            DeviceCapabilityProfiler.Tier.MEDIUM -> 48 * 1024 * 1024
+            DeviceCapabilityProfiler.Tier.HIGH   -> 64 * 1024 * 1024
+        }
+        return DefaultLoadControl.Builder()
+            .setBufferDurationsMs(minBufferMs, maxBufferMs, bufferForPlaybackMs, bufferForPlaybackAfterRebufferMs)
+            .setTargetBufferBytes(maxBufferBytes)
+            .setPrioritizeTimeOverSizeThresholds(false)
+            .setBackBuffer(0, false)
+            .build()
+    }
+
+    private data class Quadruple(val a: Int, val b: Int, val c: Int, val d: Int)
+
+    /**
+     * Called from MainActivity.onStart/onStop. While the activity is stopped
+     * nothing can be seen, so the video track is switched off (frees the video
+     * decoder, and stops frames being pushed at a texture nobody is drawing)
+     * and only audio keeps playing; it is switched back on when the activity
+     * returns.
+     */
+    fun setAppInBackground(background: Boolean) {
+        appInBackground = background
+        player?.let { applyBackgroundVideoPolicy(it) }
+    }
+
+    /**
+     * "Audio only": the video track is switched off (no decoding, nothing
+     * pushed at the texture) while the sound carries on, and back on again
+     * with `false`. Like [setAppInBackground], but asked for by the person
+     * rather than caused by the activity being stopped.
+     */
+    fun setAudioOnly(enabled: Boolean) {
+        audioOnly = enabled
+        player?.let { applyBackgroundVideoPolicy(it) }
+    }
+
+    /**
+     * Moves the video output into the picture-in-picture window's [view].
+     * Returns false when there is no player to show.
+     */
+    fun attachExternalSurface(view: android.view.SurfaceView): Boolean {
+        val p = player ?: return false
+        externalSurfaceView = view
+        p.setVideoSurfaceView(view)
+        applyBackgroundVideoPolicy(p)
+        return true
+    }
+
+    /** Puts the video output back into the Flutter texture. */
+    fun detachExternalSurface(view: android.view.SurfaceView) {
+        if (externalSurfaceView !== view) return
+        externalSurfaceView = null
+        val p = player ?: return
+        p.clearVideoSurfaceView(view)
+        surface?.let { p.setVideoSurface(it) }
+        applyBackgroundVideoPolicy(p)
+    }
+
+    private fun applyBackgroundVideoPolicy(p: ExoPlayer) {
+        val disabled = (appInBackground || audioOnly) && externalSurfaceView == null
+        if (p.trackSelectionParameters.disabledTrackTypes.contains(C.TRACK_TYPE_VIDEO) == disabled) return
+        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, disabled)
+            .build()
+    }
+
+    fun play() {
+        val p = player ?: return
+        if (p.playbackState == Player.STATE_ENDED || (p.duration > 0 && p.currentPosition >= p.duration)) {
+            p.seekTo(0L)
+        }
+        p.play()
+    }
+
+    fun pause() { player?.pause() }
+
+     fun seekTo(positionMs: Long) {
+        val p = player ?: return
+        p.seekTo(positionMs)
+        emitPositionUpdate(p)
+    }
+
+    fun setSpeed(speed: Float) {
+        player?.setPlaybackSpeed(speed)
+    }
+
+    fun setVolume(volume: Float) {
+        player?.volume = volume.coerceIn(0f, 1f)
+    }
+
+    fun setVolumeBoost(enabled: Boolean, gainMb: Int) {
+        volumeBoostEnabled = enabled
+        volumeBoostGainMb = gainMb.coerceIn(0, 2000)
+        player?.let { applyVolumeBoost(it.audioSessionId) }
+    }
+
+    /** Live update from the equalizer sheet; takes effect on the next audio buffer. */
+    fun setEqualizer(settings: Map<*, *>?) {
+        equalizerProcessor.update(EqualizerSettings.fromMap(settings))
+    }
+
+    fun setDecoderModes(videoModeName: String, audioModeName: String) {
+        val videoMode = parseDecoderMode(videoModeName)
+        val audioMode = parseDecoderMode(audioModeName)
+        requestedVideoDecoderMode = videoMode
+        requestedAudioDecoderMode = audioMode
+        decoderManager?.let { manager ->
+            manager.selectVideoDecoder(videoMode)
+            manager.selectAudioDecoder(audioMode)
+        }
+    }
+
+    private fun parseDecoderMode(name: String): DecoderMode =
+        runCatching { DecoderMode.valueOf(name.uppercase()) }.getOrDefault(DecoderMode.AUTO)
+
+    private fun applyVolumeBoost(audioSessionId: Int) {
+        if (audioSessionId <= 0) return
+        if (loudnessAudioSessionId != audioSessionId) {
+            runCatching { loudnessEnhancer?.release() }
+            loudnessEnhancer = null
+            loudnessAudioSessionId = audioSessionId
+        }
+        val enhancer = loudnessEnhancer ?: runCatching {
+            LoudnessEnhancer(audioSessionId).also { loudnessEnhancer = it }
+        }.getOrNull() ?: return
+        runCatching {
+            enhancer.setTargetGain(volumeBoostGainMb)
+            enhancer.enabled = volumeBoostEnabled
+        }.onFailure { VeLog.w(TAG) { "Volume boost update failed: ${it.message}" } }
+    }
+
+    private fun releaseVolumeBoost() {
+        runCatching { loudnessEnhancer?.release() }
+        loudnessEnhancer = null
+        loudnessAudioSessionId = 0
+    }
+
+    fun setLooping(loop: Boolean) {
+        player?.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+    }
+
+    /**
+     * Repeats the section [startMs, endMs) of the current item until
+     * [clearAbLoop]. Playback that crosses [endMs] jumps back to [startMs]
+     * (the message is kept after delivery, so it fires on every pass).
+     * Takes precedence over the item-level repeat mode. An invalid range
+     * just clears any loop. While the loop is set, seeks are kept inside the
+     * section (see [onPositionDiscontinuity]).
+     */
+    fun setAbLoop(startMs: Long, endMs: Long) {
+        val p = player ?: return
+        clearAbLoop()
+        val duration = p.duration
+        val end = if (duration != C.TIME_UNSET && duration > 0L) {
+            minOf(endMs, duration - AB_LOOP_END_GUARD_MS)
+        } else {
+            endMs
+        }
+        if (startMs < 0L || end <= startMs) return
+        abLoopStartMs = startMs
+        abLoopEndMs = end
+        abLoopMessage = p.createMessage { _, _ ->
+            val loopStart = abLoopStartMs
+            if (loopStart != C.TIME_UNSET) player?.seekTo(loopStart)
+        }
+            .setLooper(Looper.getMainLooper())
+            .setPosition(end)
+            .setDeleteAfterDelivery(false)
+            .send()
+    }
+
+    /** The player's exact position, or -1 when there is no player. */
+    fun getPositionMs(): Long = player?.currentPosition ?: -1L
+
+    /**
+     * Marks A before B is chosen. Until [setAbLoop] or [clearAbLoop],
+     * the person cannot seek to anywhere before [startMs]: such a seek lands
+     * on [startMs] instead.
+     */
+    fun setAbLoopStart(startMs: Long) {
+        clearAbLoop()
+        if (startMs >= 0L) abLoopStartMs = startMs
+    }
+
+    fun clearAbLoop() {
+        abLoopStartMs = C.TIME_UNSET
+        abLoopEndMs = C.TIME_UNSET
+        runCatching { abLoopMessage?.cancel() }
+        abLoopMessage = null
+    }
+
+    fun getAudioTracks(): List<Map<String, Any?>> {
+        val p = player ?: return emptyList()
+        return extractTracks(p, C.TRACK_TYPE_AUDIO)
+    }
+
+    fun getSubtitleTracks(): List<Map<String, Any?>> {
+        val p = player ?: return emptyList()
+        return extractTracks(p, C.TRACK_TYPE_TEXT)
+    }
+
+    private fun extractTracks(player: ExoPlayer, trackType: @C.TrackType Int): List<Map<String, Any?>> {
+        val result = mutableListOf<Map<String, Any?>>()
+        val tracks = player.currentTracks
+        for (group in tracks.groups) {
+            if (group.type != trackType) continue
+            for (trackIdx in 0 until group.length) {
+                val format = group.getTrackFormat(trackIdx)
+                val isSelected = group.isTrackSelected(trackIdx)
+                val info = mutableMapOf<String, Any?>(
+                    "groupIndex" to tracks.groups.indexOf(group),
+                    "trackIndex" to trackIdx,
+                    "isSelected" to isSelected,
+                    "language" to format.language,
+                    "label" to format.label,
+                    "mimeType" to format.sampleMimeType,
+                    "id" to format.id,
+                )
+                if (trackType == C.TRACK_TYPE_AUDIO) {
+                    info["channelCount"] = format.channelCount
+                    info["sampleRate"] = format.sampleRate
+                    info["bitrate"] = format.bitrate
+                }
+                result.add(info)
+            }
+        }
+        return result
+    }
+
+    fun selectAudioTrack(groupIndex: Int, trackIndex: Int) {
+        selectTrack(C.TRACK_TYPE_AUDIO, groupIndex, trackIndex)
+    }
+
+    fun selectSubtitleTrack(groupIndex: Int, trackIndex: Int) {
+        selectTrack(C.TRACK_TYPE_TEXT, groupIndex, trackIndex)
+    }
+
+    fun disableSubtitleTrack() {
+        val p = player ?: return
+        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+            .build()
+        emitEvent("cues", mapOf("text" to ""))
+    }
+
+    private fun selectTrack(trackType: @C.TrackType Int, groupIndex: Int, trackIndex: Int) {
+        val p = player ?: return
+        val tracks = p.currentTracks
+        if (groupIndex < 0 || groupIndex >= tracks.groups.size) return
+        val group = tracks.groups[groupIndex]
+        if (group.type != trackType) return
+        if (trackIndex < 0 || trackIndex >= group.length) return
+        val override = TrackSelectionOverride(group.mediaTrackGroup, listOf(trackIndex))
+        p.trackSelectionParameters = p.trackSelectionParameters.buildUpon()
+            .setTrackTypeDisabled(trackType, false)
+            .setOverrideForType(override)
+            .build()
+    }
+
+    // --- Scrub-preview (seekbar drag thumbnail) ---
+    //
+    // Deliberately always software-decoded (see VideoThumbnailCoordinator's
+    // doc comment on why a software MediaCodec doesn't contend for hw
+    // decoder resources): this session runs *while the same video is
+    // already open and possibly playing* in this exact ExoPlayer instance,
+    // so a second hardware decode attempt here is precisely the scenario
+    // that coordinator exists to avoid. A single MediaExtractor+MediaCodec
+    // pair is opened once (startScrubPreview) and reused for every
+    // position the drag visits (getScrubPreviewFrame) until the gesture
+    // ends (endScrubPreview) -- cheap per-frame, unlike re-configuring a
+    // codec from scratch each time.
+    //
+    // All three entry points are safe to call from the platform thread;
+    // the actual extractor/codec work always happens on
+    // previewFrameExecutor's single thread, so previewExtractor/
+    // previewCodec/previewDurationUs are only ever touched there.
+
+    /**
+     * Opens a scrub-preview session pinned to whichever (volId, filePath,
+     * isLocalStorage) is current right now. Any existing session is torn
+     * down first, so a stray double-start can't leak a codec.
+     *
+     * [callback] receives whether a preview is available for this video at
+     * all (false for an unsupported codec, an empty file path, or a track
+     * layout with no video track -- e.g. audio-only) -- the caller should
+     * skip showing scrub-preview UI entirely rather than call
+     * getScrubPreviewFrame for a session that never opened.
+     */
+    fun startScrubPreview(callback: (available: Boolean) -> Unit) {
+        val volId = currentVolId
+        val filePath = currentFilePath
+        val isLocalStorage = currentIsLocalStorage
+        previewRequestSeq.incrementAndGet()
+        previewFrameExecutor.execute {
+            closePreviewSessionOnPreviewThread()
+            if (filePath.isEmpty()) {
+                mainHandler.post { callback(false) }
+                return@execute
+            }
+            val opened = try {
+                openPreviewSessionOnPreviewThread(volId, filePath, isLocalStorage)
+            } catch (e: Exception) {
+                VeLog.w(TAG) { "Scrub preview session failed to open: ${e.message}" }
+                closePreviewSessionOnPreviewThread()
+                false
+            }
+            mainHandler.post { callback(opened) }
+        }
+    }
+
+    /**
+     * Decodes the frame nearest [positionMs] using the session opened by
+     * [startScrubPreview]. If a newer call to this method (or
+     * [endScrubPreview]) arrives before this one has started or finished
+     * decoding, this call drops its result instead of delivering a frame
+     * for a position the user has already scrubbed past -- so callers
+     * don't need to track request ordering themselves, though coalescing
+     * requests on the Dart side first is still worthwhile to avoid
+     * queueing more decode work than the finger's pace warrants.
+     *
+     * [callback] receives JPEG bytes, or null if no session is open, the
+     * position couldn't be decoded, or this request was superseded.
+     */
+    fun getScrubPreviewFrame(positionMs: Long, maxSize: Int, quality: Int, callback: (ByteArray?) -> Unit) {
+        val myId = previewRequestSeq.incrementAndGet()
+        previewFrameExecutor.execute {
+            if (myId != previewRequestSeq.get()) return@execute
+            val extractor = previewExtractor
+            val codec = previewCodec
+            if (extractor == null || codec == null) {
+                mainHandler.post { callback(null) }
+                return@execute
+            }
+            val clampedMs = if (previewDurationUs > 0) {
+                positionMs.coerceIn(0L, previewDurationUs / 1000L)
+            } else {
+                positionMs.coerceAtLeast(0L)
+            }
+            val rotation = previewRotationDegrees
+            val toleranceUs = scrubToleranceUs(previewDurationUs)
+            val bytes = try {
+                val frame = VideoThumbnailCoordinator.decodeSoftwareFrameNear(
+                    extractor,
+                    codec,
+                    clampedMs * 1000L,
+                    toleranceUs,
+                    previewCursor,
+                    SCRUB_DECODE_BUDGET_MS,
+                )
+                if (frame != null) {
+                    val scaled = VideoThumbnailCoordinator.scaledToFit(frame, maxSize)
+                    // Rotate *after* scaling: same result, but the bitmap being
+                    // copied is at most maxSize on its long edge instead of
+                    // the full decoded frame.
+                    val upright = rotatedBy(scaled, rotation)
+                    val stream = ByteArrayOutputStream()
+                    upright.compress(Bitmap.CompressFormat.JPEG, quality.coerceIn(1, 100), stream)
+                    if (upright !== scaled) upright.recycle()
+                    if (scaled !== frame) scaled.recycle()
+                    frame.recycle()
+                    stream.toByteArray()
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                // The codec may be part-way through a stream now; forget where
+                // we thought it was so the next request re-seeks from scratch.
+                previewCursor.reset()
+                VeLog.w(TAG) { "Scrub preview frame decode failed: ${e.message}" }
+                null
+            }
+            if (myId == previewRequestSeq.get()) {
+                mainHandler.post { callback(bytes) }
+            }
+        }
+    }
+
+    /** Returns [src] turned clockwise by [degrees], or [src] itself when no turn is needed. */
+    private fun rotatedBy(src: Bitmap, degrees: Int): Bitmap {
+        if (degrees == 0) return src
+        val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
+        return Bitmap.createBitmap(src, 0, 0, src.width, src.height, matrix, true)
+    }
+
+    /** Ends the current scrub-preview session, releasing its codec/extractor. */
+    fun endScrubPreview() {
+        // Invalidates any getScrubPreviewFrame call still queued or
+        // mid-decode on previewFrameExecutor before this close runs.
+        previewRequestSeq.incrementAndGet()
+        previewFrameExecutor.execute { closePreviewSessionOnPreviewThread() }
+    }
+
+    /** Must only be called on previewFrameExecutor's thread. */
+    private fun openPreviewSessionOnPreviewThread(volId: Int, filePath: String, isLocalStorage: Boolean): Boolean {
+        // extractor/codec are declared outside the try (mirroring
+        // ThumbnailHandlers.extractVideoFrameSoftware's established
+        // pattern for this exact hazard) so the finally below can
+        // release whichever of them got created, however far this got.
+        // A first version of this function only released `extractor` in
+        // the two early "no video track" / "no software decoder"
+        // returns below, with no cleanup at all if
+        // createByCodecName/configure/start threw -- and start() is
+        // exactly the call MediaCodec documents as throwing when codec
+        // resources are unavailable. That leaked the extractor (and,
+        // for a local or content:// path, its file descriptor) on every
+        // failed attempt, which starves the next decode a little more,
+        // including totally unrelated ones like the file-browser
+        // thumbnail pipeline -- a cascade that gets worse the more it
+        // fails, which matches a real regression report better than a
+        // one-off leak would.
+        var extractor: MediaExtractor? = null
+        var codec: MediaCodec? = null
+        var success = false
+        try {
+            val ext = MediaExtractor()
+            extractor = ext
+            if (isLocalStorage) {
+                if (filePath.startsWith("content://")) {
+                    val resolved = com.aeidolon.vaultexplorer.MainActivity.activeMainActivity
+                        ?.safStorageManager?.resolveDocumentUriFromTreePath(filePath)
+                        ?: Uri.parse(filePath)
+                    ext.setDataSource(context, resolved, null)
+                } else {
+                    ext.setDataSource(filePath)
+                }
+            } else {
+                ext.setDataSource(ContainerMediaDataSource(context, filePath, filePath, volId))
+            }
+
+            var videoTrackIndex = -1
+            var format: MediaFormat? = null
+            var mimeType: String? = null
+            for (i in 0 until ext.trackCount) {
+                val trackFormat = ext.getTrackFormat(i)
+                val mime = trackFormat.getString(MediaFormat.KEY_MIME) ?: continue
+                if (mime.startsWith("video/")) {
+                    videoTrackIndex = i
+                    format = trackFormat
+                    mimeType = mime
+                    break
+                }
+            }
+            if (videoTrackIndex < 0 || format == null || mimeType == null) {
+                return false
+            }
+            val swCodecName = VideoThumbnailCoordinator.findSoftwareDecoderName(mimeType)
+            if (swCodecName == null) {
+                return false
+            }
+            ext.selectTrack(videoTrackIndex)
+
+            val dec = MediaCodec.createByCodecName(swCodecName)
+            codec = dec
+            dec.configure(format, null, null, 0)
+            dec.start()
+
+            previewExtractor = ext
+            previewCodec = dec
+            previewDurationUs = if (format.containsKey(MediaFormat.KEY_DURATION)) {
+                format.getLong(MediaFormat.KEY_DURATION)
+            } else {
+                0L
+            }
+            previewRotationDegrees = if (format.containsKey(MediaFormat.KEY_ROTATION)) {
+                ((format.getInteger(MediaFormat.KEY_ROTATION) % 360) + 360) % 360
+            } else {
+                0
+            }
+            previewCursor.reset()
+            success = true
+            return true
+        } finally {
+            if (!success) {
+                runCatching { codec?.stop() }
+                runCatching { codec?.release() }
+                runCatching { extractor?.release() }
+            }
+        }
+    }
+
+    /** Must only be called on previewFrameExecutor's thread. */
+    private fun closePreviewSessionOnPreviewThread() {
+        runCatching { previewCodec?.stop() }
+        runCatching { previewCodec?.release() }
+        previewCodec = null
+        runCatching { previewExtractor?.release() }
+        previewExtractor = null
+        previewDurationUs = 0L
+        previewRotationDegrees = 0
+        previewCursor.reset()
+    }
+
+    fun release() {
+        endScrubPreview()
+        clearAbLoop()
+        isFallbackMode = false
+        mainHandler.removeCallbacks(positionUpdateRunnable)
+        player?.let { p ->
+            // The media session must let go of a live player, so this goes
+            // first. It keeps the playback window (service/notification)
+            // open briefly -- the viewer releases and recreates the player on
+            // every item change.
+            VaultPlaybackSession.onPlayerReleasing(p)
+            decoderManager?.detach()
+            p.clearVideoSurface()
+            p.removeListener(this)
+            p.release()
+        }
+        mediaSessionEnabled = false
+        audioOnly = false
+        player = null
+        // externalSurfaceView is deliberately kept: every item change releases
+        // and recreates the player, and the next item belongs in the
+        // picture-in-picture window too. Only the window going away
+        // (detachExternalSurface) ends it.
+        decoderManager = null
+        equalizerProcessor.update(EqualizerSettings.DISABLED)
+        releaseVolumeBoost()
+        surface?.release()
+        surface = null
+        textureEntry?.release()
+        textureEntry = null
+        textureId = -1L
+        currentVolId = -1
+        currentFilePath = ""
+        currentIsLocalStorage = false
+    }
+
+    fun getPlayer(): ExoPlayer? = player
+
+    override fun onRenderedFirstFrame() {
+        emitEvent("renderedFirstFrame", emptyMap())
+    }
+
+    override fun onAudioSessionIdChanged(audioSessionId: Int) {
+        applyVolumeBoost(audioSessionId)
+    }
+
+     override fun onPositionDiscontinuity(
+        oldPosition: Player.PositionInfo,
+        newPosition: Player.PositionInfo,
+        reason: Int
+    ) {
+        // Once A is marked nothing before it can be picked, and once B is
+        // marked nothing from it onwards. Whatever asked for the seek
+        // (seekbar, double-tap, notification controls), it ends up inside
+        // the section. A seek to exactly A is left alone, which also keeps
+        // the loop's own jump back from retriggering this.
+        if (reason == Player.DISCONTINUITY_REASON_SEEK && abLoopStartMs != C.TIME_UNSET) {
+            val target = newPosition.positionMs
+            if (target < abLoopStartMs) {
+                player?.seekTo(abLoopStartMs)
+                return
+            }
+            if (abLoopEndMs != C.TIME_UNSET && target >= abLoopEndMs) {
+                // Just short of B rather than on it: the loop message only
+                // fires when playback moves across B, which a seek that
+                // lands exactly on B would skip. Playing on from here
+                // crosses it within a few frames and wraps to A.
+                player?.seekTo(abLoopEndMs - AB_LOOP_SEEK_BACKOFF_MS)
+                return
+            }
+        }
+        player?.let { emitPositionUpdate(it) }
+    }
+
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        val state = when (playbackState) {
+            Player.STATE_IDLE -> "idle"
+            Player.STATE_BUFFERING -> "buffering"
+            Player.STATE_READY -> "ready"
+            Player.STATE_ENDED -> "ended"
+            else -> "unknown"
+        }
+        // An active A-B loop never lets the item end: if playback gets all the
+        // way to the end anyway (B sits at the very end, or the person seeked
+        // past B), go back to A instead of stopping.
+        if (playbackState == Player.STATE_ENDED &&
+            abLoopStartMs != C.TIME_UNSET &&
+            abLoopEndMs != C.TIME_UNSET
+        ) {
+            player?.let { p ->
+                p.seekTo(abLoopStartMs)
+                p.play()
+            }
+            return
+        }
+        emitEvent("playbackState", mapOf("state" to state))
+        if (playbackState == Player.STATE_READY) {
+            emitTracksChanged()
+            player?.let { emitPositionUpdate(it) }
+        }
+    }
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        emitEvent("playingChanged", mapOf("isPlaying" to isPlaying))
+        val p = player
+        if (isPlaying && mediaSessionEnabled && p != null) {
+            VaultPlaybackSession.onPlaying(
+                context,
+                p,
+                sessionHost,
+                currentVolId,
+                currentFilePath,
+                currentIsLocalStorage,
+            )
+        }
+        if (isPlaying) {
+            mainHandler.post(positionUpdateRunnable)
+        } else {
+            mainHandler.removeCallbacks(positionUpdateRunnable)
+            player?.let { emitPositionUpdate(it) }
+        }
+    }
+
+    override fun onVideoSizeChanged(videoSize: VideoSize) {
+        emitEvent("videoSize", mapOf(
+            "width" to videoSize.width,
+            "height" to videoSize.height,
+        ))
+    }
+
+    override fun onCues(cueGroup: CueGroup) {
+        val text = cueGroup.cues.mapNotNull { it.text?.toString() }
+            .filter { it.isNotBlank() }
+            .joinToString("\n")
+        emitEvent("cues", mapOf("text" to text))
+    }
+
+    override fun onTracksChanged(tracks: Tracks) {
+        emitTracksChanged()
+    }
+
+    override fun onPlayerError(error: PlaybackException) {
+        val p = player
+        if (!isFallbackMode && p != null && currentFilePath.isNotEmpty()) {
+            VeLog.w(TAG) { "Primary extractor failed on $currentFilePath (${error.errorCodeName}: ${error.message}). Retrying with lenient fallback extractor..." }
+            isFallbackMode = true
+            val wasPlaying = p.playWhenReady
+            val currentPos = p.currentPosition
+
+            val fallbackExtractorsFactory = createExtractorsFactory(lenient = true)
+            val fallbackMediaSource =
+                buildMediaSource(currentVolId, currentFilePath, currentIsLocalStorage, fallbackExtractorsFactory)
+
+            p.setMediaSource(fallbackMediaSource)
+            if (currentPos > 0) {
+                p.seekTo(currentPos)
+            }
+            p.prepare()
+            if (wasPlaying) {
+                p.play()
+            }
+            return
+        }
+
+        VeLog.e(TAG, error) { "Player error: ${error.errorCodeName}: ${error.message}" }
+        emitEvent("error", mapOf(
+            "code" to error.errorCode,
+            "message" to (error.message ?: "Unknown playback error"),
+        ))
+    }
+
+    private fun emitPositionUpdate(player: ExoPlayer) {
+        emitEvent("positionUpdate", mapOf(
+            "positionMs" to player.currentPosition,
+            "durationMs" to player.duration.let { if (it == C.TIME_UNSET) 0L else it },
+            "bufferedMs" to player.bufferedPosition,
+        ))
+    }
+
+    private fun emitTracksChanged() {
+        emitEvent("tracksChanged", mapOf(
+            "audioTracks" to getAudioTracks(),
+            "subtitleTracks" to getSubtitleTracks(),
+        ))
+    }
+
+    private fun emitEvent(type: String, data: Map<String, Any?>) {
+        mainHandler.post {
+            val payload = HashMap<String, Any?>(data)
+            payload["event"] = type
+            eventSink?.success(payload)
+        }
+    }
+}
+
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+private class HighSpeedMediaCodecVideoRenderer(
+    context: Context,
+    mediaCodecSelector: MediaCodecSelector,
+    allowedJoiningTimeMs: Long,
+    enableDecoderFallback: Boolean,
+    eventHandler: Handler?,
+    eventListener: VideoRendererEventListener?,
+    maxDroppedFramesBeforeNotify: Int
+) : MediaCodecVideoRenderer(
+    context,
+    mediaCodecSelector,
+    allowedJoiningTimeMs,
+    enableDecoderFallback,
+    eventHandler,
+    eventListener,
+    maxDroppedFramesBeforeNotify
+) {
+    override fun getMediaFormat(
+        format: Format,
+        codecMimeType: String,
+        codecMaxValues: MediaCodecVideoRenderer.CodecMaxValues,
+        codecOperatingRate: Float,
+        deviceNeedsNoPostProcessWorkaround: Boolean,
+        tunnelingAudioSessionId: Int
+    ): MediaFormat {
+        val mediaFormat = super.getMediaFormat(
+            format,
+            codecMimeType,
+            codecMaxValues,
+            codecOperatingRate,
+            deviceNeedsNoPostProcessWorkaround,
+            tunnelingAudioSessionId
+        )
+
+        val streamFps = if (format.frameRate > 0f) format.frameRate else 30f
+        val pixelRate = format.width.toLong() * format.height.toLong() * streamFps
+        val fourK30PixelRate = 3840L * 2160L * 30L
+        if (format.width > 0 && format.height > 0 && pixelRate > fourK30PixelRate) {
+            // Decoder input timestamps still carry the true frame cadence. Avoid
+            // passing a 60 fps capability hint to vendor decoders that advertise
+            // only 4K30 but can decode this stream when the hint is omitted.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                mediaFormat.removeKey(MediaFormat.KEY_FRAME_RATE)
+            } else {
+                mediaFormat.setFloat(MediaFormat.KEY_FRAME_RATE, 30f)
+            }
+        }
+        return mediaFormat
+    }
+
+    override fun getCodecOperatingRateV23(
+        targetPlaybackSpeed: Float,
+        format: Format,
+        streamFormats: Array<out Format>
+    ): Float {
+        val streamFps = if (format.frameRate > 0f) format.frameRate else 30f
+        val pixelRate = format.width.toLong() * format.height.toLong() * streamFps
+        val fourK30PixelRate = 3840L * 2160L * 30L
+
+        // KEY_OPERATING_RATE is only a hint, but some vendor codecs treat it as a
+        // hard capability check. On devices that can decode 4K60 without the hint,
+        // explicitly requesting 60 fps can make MediaCodec.configure fail and send
+        // playback to the much slower software decoder. Leave it unset above 4K30;
+        // the codec can still consume the stream at its own supported rate.
+        if (format.width > 0 && format.height > 0 && pixelRate > fourK30PixelRate) {
+            return CODEC_OPERATING_RATE_UNSET
+        }
+
+        val defaultRate = super.getCodecOperatingRateV23(targetPlaybackSpeed, format, streamFormats)
+        if (defaultRate != CODEC_OPERATING_RATE_UNSET) {
+            return defaultRate.coerceAtMost(120f)
+        }
+        return (streamFps * targetPlaybackSpeed).coerceAtMost(120f)
+    }
+}
+
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+private class HighPerformanceRenderersFactory(
+    context: Context,
+    private val decoderManager: DecoderManager,
+    private val equalizerProcessor: AudioEqualizerProcessor,
+) : NextRenderersFactory(context) {
+    init {
+        setDecoderManager(decoderManager)
+        setEnableDecoderFallback(true)
+        setExtensionRendererMode(EXTENSION_RENDERER_MODE_ON)
+        forceEnableMediaCodecAsynchronousQueueing()
+    }
+
+    /**
+     * One sink shared by every audio renderer (MediaCodec and FFmpeg), with
+     * the equalizer as its only custom processor.
+     *
+     * Float output stays off on purpose: DefaultAudioSink skips custom
+     * processors on its float path, so enabling it would silently bypass the
+     * equalizer. It is already off by default; this just pins it.
+     */
+    override fun buildAudioSink(
+        context: Context,
+        enableFloatOutput: Boolean,
+        enableAudioOutputPlaybackParams: Boolean,
+    ): AudioSink? {
+        return DefaultAudioSink.Builder(context)
+            .setEnableFloatOutput(false)
+            .setEnableAudioOutputPlaybackParameters(enableAudioOutputPlaybackParams)
+            .setAudioProcessors(arrayOf<AudioProcessor>(equalizerProcessor))
+            .build()
+    }
+
+    override fun buildVideoRenderers(
+        context: Context,
+        extensionRendererMode: Int,
+        mediaCodecSelector: MediaCodecSelector,
+        enableDecoderFallback: Boolean,
+        eventHandler: Handler,
+        eventListener: VideoRendererEventListener,
+        allowedVideoJoiningTimeMs: Long,
+        out: ArrayList<Renderer>
+    ) {
+        val modeAwareSelector = object : MediaCodecSelector {
+            override fun getDecoderInfos(
+                mimeType: String,
+                requiresSecureDecoder: Boolean,
+                requiresTunnelingDecoder: Boolean,
+            ): List<MediaCodecInfo> {
+                val decoders = mediaCodecSelector.getDecoderInfos(
+                    mimeType,
+                    requiresSecureDecoder,
+                    requiresTunnelingDecoder,
+                )
+                return when (decoderManager.videoMode) {
+                    DecoderMode.AUTO -> decoders
+                    DecoderMode.HARDWARE -> decoders.filter { it.hardwareAccelerated }
+                    DecoderMode.SOFTWARE -> decoders.filter { it.softwareOnly }
+                    DecoderMode.FFMPEG -> emptyList()
+                }
+            }
+        }
+
+        val generatedRenderers = ArrayList<Renderer>()
+        super.buildVideoRenderers(
+            context,
+            extensionRendererMode,
+            modeAwareSelector,
+            enableDecoderFallback,
+            eventHandler,
+            eventListener,
+            allowedVideoJoiningTimeMs,
+            generatedRenderers,
+        )
+        generatedRenderers.forEach { renderer ->
+            if (renderer is MediaCodecVideoRenderer) {
+                out.add(
+                    HighSpeedMediaCodecVideoRenderer(
+                        context,
+                        modeAwareSelector,
+                        allowedVideoJoiningTimeMs,
+                        enableDecoderFallback,
+                        eventHandler,
+                        eventListener,
+                        50,
+                    ),
+                )
+            } else {
+                out.add(renderer)
+            }
+        }
+    }
+}

@@ -1,0 +1,667 @@
+// Cross-cutting event plumbing extracted from the legacy VaultExplorerApi's
+// static listener registries + initMethodCallHandler() (Phase 2 of the
+// Riverpod migration). Exposed as a single @Riverpod(keepAlive: true)
+// instance (see lib/core/providers/vault_engine_providers.dart) so it keeps
+// exactly the "one native MethodCallHandler for the process lifetime"
+// behaviour the old static singleton had, without a hand-rolled singleton.
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:flutter/services.dart';
+import 'package:vaultexplorer/core/services/cache_coordinator.dart';
+import 'package:vaultexplorer/core/utils/listener_registry.dart';
+import 'package:vaultexplorer/core/utils/ve_log.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/services/vault_engine/channel_methods.dart';
+
+import 'vault_engine_types.dart';
+
+const _kLogTag = 'VaultEngineEvents';
+
+class VaultEngineEvents {
+  void Function(String ext, String pkg)? onAppSelectedCallback;
+
+  Completer<bool>? _cameraPermissionCompleter;
+  Completer<bool>? _storagePermissionCompleter;
+  Completer<bool>? _notificationPermissionCompleter;
+  Completer<bool>? _automationPermissionCompleter;
+
+  Future<bool> awaitCameraPermissionResult() {
+    final completer = Completer<bool>();
+    _cameraPermissionCompleter = completer;
+    return completer.future;
+  }
+
+  Future<bool> awaitStoragePermissionResult() {
+    final completer = Completer<bool>();
+    _storagePermissionCompleter = completer;
+    return completer.future;
+  }
+
+  Future<bool> awaitNotificationPermissionResult() {
+    final completer = Completer<bool>();
+    _notificationPermissionCompleter = completer;
+    return completer.future;
+  }
+
+  Future<bool> awaitAutomationPermissionResult() {
+    final completer = Completer<bool>();
+    _automationPermissionCompleter = completer;
+    return completer.future;
+  }
+
+  final ListenerRegistry<int> _usbContainerDetachedRegistry =
+      ListenerRegistry<int>();
+  void addUsbContainerDetachedListener(void Function(int volId) listener) =>
+      _usbContainerDetachedRegistry.add(listener);
+  void removeUsbContainerDetachedListener(void Function(int volId) listener) =>
+      _usbContainerDetachedRegistry.remove(listener);
+
+  final ListenerRegistry<int> _hiddenVolumeProtectionTriggeredRegistry =
+      ListenerRegistry<int>();
+  void addHiddenVolumeProtectionTriggeredListener(
+    void Function(int volId) listener,
+  ) => _hiddenVolumeProtectionTriggeredRegistry.add(listener);
+  void removeHiddenVolumeProtectionTriggeredListener(
+    void Function(int volId) listener,
+  ) => _hiddenVolumeProtectionTriggeredRegistry.remove(listener);
+
+  final ListenerRegistry<int> _vaultForceLockedRegistry =
+      ListenerRegistry<int>();
+  void addVaultForceLockedListener(void Function(int volId) listener) =>
+      _vaultForceLockedRegistry.add(listener);
+  void removeVaultForceLockedListener(void Function(int volId) listener) =>
+      _vaultForceLockedRegistry.remove(listener);
+
+  final ListenerRegistry<MountedContainer> _vaultAutomationUnlockedRegistry =
+      ListenerRegistry<MountedContainer>();
+  void addVaultAutomationUnlockedListener(
+    void Function(MountedContainer container) listener,
+  ) => _vaultAutomationUnlockedRegistry.add(listener);
+  void removeVaultAutomationUnlockedListener(
+    void Function(MountedContainer container) listener,
+  ) => _vaultAutomationUnlockedRegistry.remove(listener);
+
+  /// Answers the native `SYNC_VAULT` automation action while this app is
+  /// open. Unlike the listener registries above this is a single handler
+  /// whose result is sent back to the native caller, which waits for it
+  /// ({'code': 'OK' | 'ERROR' | ..., 'message': ...}). Null until the sync
+  /// coordinator has registered itself.
+  Future<Map<String, Object?>> Function(String vaultUri)? automationSyncHandler;
+
+  final ListenerRegistry<int> _containerLockedRegistry =
+      ListenerRegistry<int>();
+  void addContainerLockedListener(void Function(int volId) listener) =>
+      _containerLockedRegistry.add(listener);
+  void removeContainerLockedListener(void Function(int volId) listener) =>
+      _containerLockedRegistry.remove(listener);
+  void notifyContainerLocked(int volId) =>
+      _containerLockedRegistry.notify(volId);
+
+  final ListenerRegistry<int> _mirrorPushActivityRegistry =
+      ListenerRegistry<int>();
+  int _mirrorPushActiveCount = 0;
+  int get mirrorPushActiveCount => _mirrorPushActiveCount;
+  void addMirrorPushActivityListener(void Function(int activeCount) listener) =>
+      _mirrorPushActivityRegistry.add(listener);
+  void removeMirrorPushActivityListener(
+    void Function(int activeCount) listener,
+  ) => _mirrorPushActivityRegistry.remove(listener);
+
+  void _setMirrorPushActivity(int activeCount) {
+    final next = activeCount < 0 ? 0 : activeCount;
+    if (_mirrorPushActiveCount == next) return;
+    _mirrorPushActiveCount = next;
+    _mirrorPushActivityRegistry.notify(next);
+  }
+
+  final ListenerRegistry<int> _backgroundRecordingStopRequestedRegistry =
+      ListenerRegistry<int>();
+  void addBackgroundRecordingStopRequestedListener(
+    void Function(int volId) listener,
+  ) => _backgroundRecordingStopRequestedRegistry.add(listener);
+  void removeBackgroundRecordingStopRequestedListener(
+    void Function(int volId) listener,
+  ) => _backgroundRecordingStopRequestedRegistry.remove(listener);
+
+  final List<void Function()> _screenOffListeners = [];
+  void addScreenOffListener(void Function() listener) =>
+      _screenOffListeners.add(listener);
+  void removeScreenOffListener(void Function() listener) =>
+      _screenOffListeners.remove(listener);
+
+  // Downward Panic Notification (architecture plan Component 5/6): fired
+  // from MainActivity's PanicHooks implementation after PanicManager.kt
+  // has already finished the corresponding purge step natively -- these
+  // are notifications that it happened, not requests for Dart to do
+  // anything to make it happen. No payload: by the time either of these
+  // fires every container is already unmounted (and, for the credential
+  // event, every Keystore alias/credential store already cleared), so
+  // there is nothing left for a listener to act on except its own
+  // in-memory state (cached biometric-unlock flags, decrypted buffers a
+  // screen might be holding, etc.) -- see PanicHooks.kt's own doc comment.
+  final List<void Function()> _panicSessionPurgedListeners = [];
+  void addPanicSessionPurgedListener(void Function() listener) =>
+      _panicSessionPurgedListeners.add(listener);
+  void removePanicSessionPurgedListener(void Function() listener) =>
+      _panicSessionPurgedListeners.remove(listener);
+
+  // Quick Capture: fired from QuickCaptureBridge.kt when the person taps
+  // the Quick Settings tile or the pinned shortcut while Dart's engine is
+  // already alive (VaultQuickCaptureActivity.onCreate/onNewIntent). No
+  // payload -- MainShell reacts by pushing QuickCaptureScreen; a
+  // cold-started request instead goes through
+  // QuickCaptureApi.checkPendingQuickCaptureRequest at startup, since
+  // this listener isn't registered yet for that case.
+  final List<void Function()> _quickCaptureRequestedListeners = [];
+  void addQuickCaptureRequestedListener(void Function() listener) =>
+      _quickCaptureRequestedListeners.add(listener);
+  void removeQuickCaptureRequestedListener(void Function() listener) =>
+      _quickCaptureRequestedListeners.remove(listener);
+
+  final List<void Function()> _panicCredentialsPurgedListeners = [];
+  void addPanicCredentialsPurgedListener(void Function() listener) =>
+      _panicCredentialsPurgedListeners.add(listener);
+  void removePanicCredentialsPurgedListener(void Function() listener) =>
+      _panicCredentialsPurgedListeners.remove(listener);
+
+  final ListenerRegistry<int> _unlockStartedRegistry = ListenerRegistry<int>();
+  void addUnlockStartedListener(void Function(int volId) listener) =>
+      _unlockStartedRegistry.add(listener);
+  void removeUnlockStartedListener(void Function(int volId) listener) =>
+      _unlockStartedRegistry.remove(listener);
+
+  final ListenerRegistry<UnlockProgress> _unlockProgressRegistry =
+      ListenerRegistry<UnlockProgress>();
+  void addUnlockProgressListener(
+    void Function(UnlockProgress progress) listener,
+  ) => _unlockProgressRegistry.add(listener);
+  void removeUnlockProgressListener(
+    void Function(UnlockProgress progress) listener,
+  ) => _unlockProgressRegistry.remove(listener);
+
+  final ListenerRegistry<ImportProgress> _importProgressRegistry =
+      ListenerRegistry<ImportProgress>();
+  void addImportProgressListener(
+    void Function(ImportProgress progress) listener,
+  ) => _importProgressRegistry.add(listener);
+  void removeImportProgressListener(
+    void Function(ImportProgress progress) listener,
+  ) => _importProgressRegistry.remove(listener);
+
+  final ListenerRegistry<ImportItemFinished> _importItemFinishedRegistry =
+      ListenerRegistry<ImportItemFinished>();
+  void addImportItemFinishedListener(
+    void Function(ImportItemFinished progress) listener,
+  ) => _importItemFinishedRegistry.add(listener);
+  void removeImportItemFinishedListener(
+    void Function(ImportItemFinished progress) listener,
+  ) => _importItemFinishedRegistry.remove(listener);
+
+  final ListenerRegistry<ExportProgress> _exportProgressRegistry =
+      ListenerRegistry<ExportProgress>();
+  void addExportProgressListener(
+    void Function(ExportProgress progress) listener,
+  ) => _exportProgressRegistry.add(listener);
+  void removeExportProgressListener(
+    void Function(ExportProgress progress) listener,
+  ) => _exportProgressRegistry.remove(listener);
+
+  final ListenerRegistry<ExportItemFinished> _exportItemFinishedRegistry =
+      ListenerRegistry<ExportItemFinished>();
+  void addExportItemFinishedListener(
+    void Function(ExportItemFinished progress) listener,
+  ) => _exportItemFinishedRegistry.add(listener);
+  void removeExportItemFinishedListener(
+    void Function(ExportItemFinished progress) listener,
+  ) => _exportItemFinishedRegistry.remove(listener);
+
+  final ListenerRegistry<SplitJoinProgress> _splitJoinProgressRegistry =
+      ListenerRegistry<SplitJoinProgress>();
+  void addSplitJoinProgressListener(
+    void Function(SplitJoinProgress progress) listener,
+  ) => _splitJoinProgressRegistry.add(listener);
+  void removeSplitJoinProgressListener(
+    void Function(SplitJoinProgress progress) listener,
+  ) => _splitJoinProgressRegistry.remove(listener);
+
+  final ListenerRegistry<VideoEditProgress> _videoEditProgressRegistry =
+      ListenerRegistry<VideoEditProgress>();
+  void addVideoEditProgressListener(
+    void Function(VideoEditProgress progress) listener,
+  ) => _videoEditProgressRegistry.add(listener);
+  void removeVideoEditProgressListener(
+    void Function(VideoEditProgress progress) listener,
+  ) => _videoEditProgressRegistry.remove(listener);
+
+  final ListenerRegistry<AudioWaveformChunk> _audioWaveformChunkRegistry =
+      ListenerRegistry<AudioWaveformChunk>();
+  void addAudioWaveformChunkListener(
+    void Function(AudioWaveformChunk chunk) listener,
+  ) => _audioWaveformChunkRegistry.add(listener);
+  void removeAudioWaveformChunkListener(
+    void Function(AudioWaveformChunk chunk) listener,
+  ) => _audioWaveformChunkRegistry.remove(listener);
+
+  final ListenerRegistry<AudioEditProgress> _audioEditProgressRegistry =
+      ListenerRegistry<AudioEditProgress>();
+  void addAudioEditProgressListener(
+    void Function(AudioEditProgress progress) listener,
+  ) => _audioEditProgressRegistry.add(listener);
+  void removeAudioEditProgressListener(
+    void Function(AudioEditProgress progress) listener,
+  ) => _audioEditProgressRegistry.remove(listener);
+
+  final ListenerRegistry<CopyProgress> _copyProgressRegistry =
+      ListenerRegistry<CopyProgress>();
+  void addCopyProgressListener(void Function(CopyProgress progress) listener) =>
+      _copyProgressRegistry.add(listener);
+  void removeCopyProgressListener(
+    void Function(CopyProgress progress) listener,
+  ) => _copyProgressRegistry.remove(listener);
+
+  final ListenerRegistry<RepairLogLine> _repairLogRegistry =
+      ListenerRegistry<RepairLogLine>();
+  void addRepairLogListener(void Function(RepairLogLine line) listener) =>
+      _repairLogRegistry.add(listener);
+  void removeRepairLogListener(void Function(RepairLogLine line) listener) =>
+      _repairLogRegistry.remove(listener);
+
+  final ListenerRegistry<HashProgress> _hashProgressRegistry =
+      ListenerRegistry<HashProgress>();
+  void addHashProgressListener(void Function(HashProgress progress) listener) =>
+      _hashProgressRegistry.add(listener);
+  void removeHashProgressListener(
+    void Function(HashProgress progress) listener,
+  ) => _hashProgressRegistry.remove(listener);
+
+  /// Pushed by IncomingShareBridge.deliver() (native) when the app is
+  /// already running and the person shares something into it from another
+  /// app -- see `lib/features/share_import/`. Cold-start delivery instead
+  /// goes through `VaultFileIoApi.checkPendingShareRequest`'s pull, since a
+  /// push this early in app startup would have no listener yet; both paths
+  /// end up building the same [IncomingShareRequest] shape.
+  final ListenerRegistry<IncomingShareRequest> _incomingShareRequestRegistry =
+      ListenerRegistry<IncomingShareRequest>();
+  void addIncomingShareRequestListener(
+    void Function(IncomingShareRequest request) listener,
+  ) => _incomingShareRequestRegistry.add(listener);
+  void removeIncomingShareRequestListener(
+    void Function(IncomingShareRequest request) listener,
+  ) => _incomingShareRequestRegistry.remove(listener);
+
+  final Map<int, int> _activeBatchCounts = {};
+  final Set<int> _lockPending = {};
+
+  void beginBatch(int volId) {
+    _activeBatchCounts.update(volId, (count) => count + 1, ifAbsent: () => 1);
+  }
+
+  void endBatch(int volId) {
+    final count = _activeBatchCounts[volId];
+    if (count == null) return;
+    if (count <= 1) {
+      _activeBatchCounts.remove(volId);
+    } else {
+      _activeBatchCounts[volId] = count - 1;
+    }
+  }
+
+  bool hasActiveBatch(int volId) => _activeBatchCounts.containsKey(volId);
+
+  bool acquireLockGuard(int volId) {
+    if (hasActiveBatch(volId) || _lockPending.contains(volId)) {
+      return false;
+    }
+    _lockPending.add(volId);
+    return true;
+  }
+
+  void releaseLockGuard(int volId) => _lockPending.remove(volId);
+
+  /// Attaches the native -> Dart method-call dispatch to [channel]. Called
+  /// once by the `vaultEngineEventsProvider` (keepAlive), replacing the old
+  /// `VaultExplorerApi.initMethodCallHandler()` static call from `main()`.
+  void registerHandler(MethodChannel channel) {
+    channel.setMethodCallHandler((call) async {
+      if (call.method == 'onMirrorPushActivity') {
+        final args = call.arguments as Map<Object?, Object?>?;
+        _setMirrorPushActivity((args?['activeCount'] as num?)?.toInt() ?? 0);
+      } else if (call.method == 'onAppSelected') {
+        final ext = call.arguments['extension'] as String?;
+        final pkg = call.arguments['package'] as String?;
+        if (ext != null && pkg != null) {
+          onAppSelectedCallback?.call(ext, pkg);
+        }
+      } else if (call.method == 'onUsbContainerDetached') {
+        final volId = call.arguments['volId'] as int?;
+        if (volId != null) {
+          _usbContainerDetachedRegistry.notify(volId);
+        }
+      } else if (call.method == 'onHiddenVolumeProtectionTriggered') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final volId = args['volId'] as int?;
+        if (volId != null) {
+          _hiddenVolumeProtectionTriggeredRegistry.notify(volId);
+        }
+      } else if (call.method == 'onVaultForceLocked') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final volId = args['volId'] as int?;
+        VeLog.i(
+          _kLogTag,
+          'native onVaultForceLocked received for volId=$volId',
+        );
+        if (volId != null) {
+          _vaultForceLockedRegistry.notify(volId);
+        }
+      } else if (call.method == 'onIncomingShareRequest') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final rawItems = (args['items'] as List?) ?? const [];
+        final items = rawItems
+            .map((it) => incomingShareItemFromWire(it as Map<Object?, Object?>))
+            .whereType<IncomingShareItem>()
+            .toList();
+        if (items.isNotEmpty) {
+          _incomingShareRequestRegistry.notify((items: items));
+        }
+      } else if (call.method == 'onVaultAutomationUnlocked') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final volId = args['volId'] as int?;
+        final uri = args['uri'] as String?;
+        if (volId != null && uri != null) {
+          _vaultAutomationUnlockedRegistry.notify(
+            MountedContainer(
+              uri: uri,
+              displayName: args['displayName'] as String? ?? uri,
+              volId: volId,
+              rootFiles: (args['files'] as List?)?.cast<String>() ?? const [],
+              mountedAt: DateTime.now(),
+              totalSpace: 0,
+              freeSpace: 0,
+              containerFormat:
+                  args['containerFormat'] as String? ?? 'veracrypt',
+              readOnly: args['readOnly'] as bool? ?? false,
+            ),
+          );
+        }
+      } else if (call.method == 'onVaultAutomationSyncRequested') {
+        final args = call.arguments as Map<Object?, Object?>?;
+        final uri = args?['uri'] as String?;
+        final handler = automationSyncHandler;
+        if (uri == null || handler == null) {
+          return <String, Object?>{
+            'code': 'ERROR',
+            'message': 'The open app is not ready to run sync',
+          };
+        }
+        try {
+          return await handler(uri);
+        } catch (e) {
+          logSwallowed('onVaultAutomationSyncRequested', e);
+          return <String, Object?>{
+            'code': 'ERROR',
+            'message': 'Sync failed (${e.runtimeType})',
+          };
+        }
+      } else if (call.method == 'onBackgroundRecordingStopRequested') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final volId = args['volId'] as int?;
+        if (volId != null) {
+          _backgroundRecordingStopRequestedRegistry.notify(volId);
+        }
+      } else if (call.method == 'onScreenOff') {
+        VeLog.i(
+          _kLogTag,
+          'native onScreenOff received, notifying ${_screenOffListeners.length} listener(s)',
+        );
+        for (final listener in List.of(_screenOffListeners)) {
+          listener();
+        }
+      } else if (call.method == 'onPanicSessionPurged') {
+        VeLog.i(
+          _kLogTag,
+          'native onPanicSessionPurged received, notifying '
+          '${_panicSessionPurgedListeners.length} listener(s)',
+        );
+        for (final listener in List.of(_panicSessionPurgedListeners)) {
+          listener();
+        }
+      } else if (call.method == 'onQuickCaptureRequested') {
+        VeLog.i(
+          _kLogTag,
+          'native onQuickCaptureRequested received, notifying '
+          '${_quickCaptureRequestedListeners.length} listener(s)',
+        );
+        for (final listener in List.of(_quickCaptureRequestedListeners)) {
+          listener();
+        }
+      } else if (call.method == 'onPanicCredentialsPurged') {
+        VeLog.i(
+          _kLogTag,
+          'native onPanicCredentialsPurged received, notifying '
+          '${_panicCredentialsPurgedListeners.length} listener(s)',
+        );
+        for (final listener in List.of(_panicCredentialsPurgedListeners)) {
+          listener();
+        }
+      } else if (call.method == 'onUnlockStarted') {
+        final volId = call.arguments['volId'] as int?;
+        if (volId != null) {
+          _unlockStartedRegistry.notify(volId);
+        }
+      } else if (call.method == 'onUnlockProgress') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final volId = args['volId'] as int?;
+        final attempted = args['attempted'] as int?;
+        final total = args['total'] as int?;
+        if (volId != null && attempted != null && total != null) {
+          final progress = (
+            volId: volId,
+            attempted: attempted,
+            total: total,
+            hashId: args['hashId'] as int? ?? 255,
+            cipherId: args['cipherId'] as int? ?? 255,
+            containerFormat: args['containerFormat'] as String? ?? 'veracrypt',
+            slot: args['slot'] as int? ?? 0,
+          );
+          _unlockProgressRegistry.notify(progress);
+        }
+      } else if (call.method == 'onImportProgress') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = args['opId'] as int?;
+        final done = args['done'] as int?;
+        final total = args['total'] as int?;
+        if (opId != null && done != null && total != null) {
+          final progress = (
+            opId: opId,
+            done: done,
+            total: total,
+            currentName: args['currentName'] as String? ?? '',
+            transferredBytes: (args['transferredBytes'] as num?)?.toInt() ?? 0,
+            totalBytes: (args['totalBytes'] as num?)?.toInt() ?? 0,
+          );
+          _importProgressRegistry.notify(progress);
+        }
+      } else if (call.method == 'onImportItemFinished') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = args['opId'] as int?;
+        final sourceName = args['sourceName'] as String?;
+        final resolvedName = args['resolvedName'] as String?;
+        final isDir = args['isDir'] as bool? ?? false;
+        final success = args['success'] as bool? ?? false;
+        if (opId != null && sourceName != null && resolvedName != null) {
+          _importItemFinishedRegistry.notify((
+            opId: opId,
+            sourceName: sourceName,
+            resolvedName: resolvedName,
+            isDir: isDir,
+            success: success,
+          ));
+        }
+      } else if (call.method == 'onExportProgress') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = args['opId'] as int?;
+        final done = args['done'] as int?;
+        final total = args['total'] as int?;
+        if (opId != null && done != null && total != null) {
+          final progress = (
+            opId: opId,
+            done: done,
+            total: total,
+            currentName: args['currentName'] as String? ?? '',
+            transferredBytes: (args['transferredBytes'] as num?)?.toInt() ?? 0,
+            totalBytes: (args['totalBytes'] as num?)?.toInt() ?? 0,
+          );
+          _exportProgressRegistry.notify(progress);
+        }
+      } else if (call.method == 'onExportItemFinished') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = args['opId'] as int?;
+        final sourceName = args['sourceName'] as String?;
+        final isDir = args['isDir'] as bool? ?? false;
+        final success = args['success'] as bool? ?? false;
+        if (opId != null && sourceName != null) {
+          _exportItemFinishedRegistry.notify((
+            opId: opId,
+            sourceName: sourceName,
+            isDir: isDir,
+            success: success,
+          ));
+        }
+      } else if (call.method == 'onSplitJoinProgress') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = args['opId'] as int?;
+        final bytesDone = (args['bytesDone'] as num?)?.toInt();
+        final bytesTotal = (args['bytesTotal'] as num?)?.toInt();
+        if (opId != null && bytesDone != null && bytesTotal != null) {
+          _splitJoinProgressRegistry.notify((
+            opId: opId,
+            bytesDone: bytesDone,
+            bytesTotal: bytesTotal,
+          ));
+        }
+      } else if (call.method == 'onVideoEditProgress') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = (args['opId'] as num?)?.toInt();
+        final outputIndex = (args['outputIndex'] as num?)?.toInt();
+        final outputCount = (args['outputCount'] as num?)?.toInt();
+        final phase = args['phase'] as String?;
+        final fraction = (args['fraction'] as num?)?.toDouble();
+        if (opId != null &&
+            outputIndex != null &&
+            outputCount != null &&
+            phase != null &&
+            fraction != null) {
+          _videoEditProgressRegistry.notify((
+            opId: opId,
+            outputIndex: outputIndex,
+            outputCount: outputCount,
+            phase: phase,
+            fraction: fraction,
+          ));
+        }
+      } else if (call.method == 'onAudioEditProgress') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = (args['opId'] as num?)?.toInt();
+        final outputIndex = (args['outputIndex'] as num?)?.toInt();
+        final outputCount = (args['outputCount'] as num?)?.toInt();
+        final phase = args['phase'] as String?;
+        final fraction = (args['fraction'] as num?)?.toDouble();
+        if (opId != null &&
+            outputIndex != null &&
+            outputCount != null &&
+            phase != null &&
+            fraction != null) {
+          _audioEditProgressRegistry.notify((
+            opId: opId,
+            outputIndex: outputIndex,
+            outputCount: outputCount,
+            phase: phase,
+            fraction: fraction,
+          ));
+        }
+      } else if (call.method == 'onAudioWaveformChunk') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = (args['opId'] as num?)?.toInt();
+        final start = (args['start'] as num?)?.toInt();
+        final total = (args['total'] as num?)?.toInt();
+        final peaksPerSecond = (args['peaksPerSecond'] as num?)?.toDouble();
+        final peaks = args['peaks'];
+        if (opId != null &&
+            start != null &&
+            total != null &&
+            peaksPerSecond != null &&
+            peaks is Uint8List) {
+          _audioWaveformChunkRegistry.notify((
+            opId: opId,
+            start: start,
+            total: total,
+            peaksPerSecond: peaksPerSecond,
+            peaks: peaks,
+          ));
+        }
+      } else if (call.method == 'onCopyProgress') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = args['opId'] as int?;
+        final bytesDelta = (args['bytesDelta'] as num?)?.toInt();
+        if (opId != null && bytesDelta != null) {
+          _copyProgressRegistry.notify((opId: opId, bytesDelta: bytesDelta));
+        }
+      } else if (call.method == 'onHashProgress') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = args['opId'] as int?;
+        final bytesDone = (args['bytesDone'] as num?)?.toInt();
+        final bytesTotal = (args['bytesTotal'] as num?)?.toInt();
+        if (opId != null && bytesDone != null && bytesTotal != null) {
+          _hashProgressRegistry.notify((
+            opId: opId,
+            bytesDone: bytesDone,
+            bytesTotal: bytesTotal,
+          ));
+        }
+      } else if (call.method == 'onRepairLog') {
+        final args = call.arguments as Map<Object?, Object?>;
+        final opId = args['opId'] as int?;
+        final message = args['message'] as String?;
+        if (opId != null && message != null) {
+          _repairLogRegistry.notify((opId: opId, message: message));
+        }
+      } else if (call.method == 'onCameraPermissionResult') {
+        final granted = call.arguments['granted'] as bool? ?? false;
+        _cameraPermissionCompleter?.complete(granted);
+        _cameraPermissionCompleter = null;
+      } else if (call.method == 'onStoragePermissionResult') {
+        final granted = call.arguments['granted'] as bool? ?? false;
+        _storagePermissionCompleter?.complete(granted);
+        _storagePermissionCompleter = null;
+      } else if (call.method == 'onNotificationPermissionResult') {
+        final granted = call.arguments['granted'] as bool? ?? false;
+        _notificationPermissionCompleter?.complete(granted);
+        _notificationPermissionCompleter = null;
+      } else if (call.method == 'onAutomationPermissionResult') {
+        final granted = call.arguments['granted'] as bool? ?? false;
+        _automationPermissionCompleter?.complete(granted);
+        _automationPermissionCompleter = null;
+      } else if (call.method == ChannelMethods.onTrimMemory) {
+        final level =
+            (call.arguments as Map<Object?, Object?>?)?['level'] as int? ?? 0;
+        final trimLevel = level >= 15 ? TrimLevel.severe : TrimLevel.moderate;
+        CacheCoordinator.trimAll(trimLevel);
+      }
+    });
+
+    // Flutter may not have installed its method-call handler yet when the
+    // native activity first attaches. Pull the current snapshot so an upload
+    // already in progress is still visible when the dashboard opens.
+    unawaited(() async {
+      try {
+        final args = await channel.invokeMapMethod<String, Object?>(
+          ChannelMethods.getMirrorPushActivity,
+        );
+        _setMirrorPushActivity((args?['activeCount'] as num?)?.toInt() ?? 0);
+      } catch (_) {
+        // Older native builds and non-Android platforms have no mirror proxy.
+      }
+    }());
+  }
+}

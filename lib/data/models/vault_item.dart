@@ -1,0 +1,400 @@
+import 'dart:math';
+
+import 'package:vaultexplorer/l10n/generated/app_localizations.dart';
+
+// ── Item type enum ─────────────────────────────────────────────────────────────
+
+enum VaultItemType {
+  password,
+  paymentCard,
+  identity,
+  secureNote,
+  bankAccount,
+  softwareLicense,
+  authenticator;
+
+  String label(AppLocalizations l10n) => switch (this) {
+        VaultItemType.password => l10n.vaultItemTypePassword,
+        VaultItemType.paymentCard => l10n.vaultItemTypePaymentCard,
+        VaultItemType.identity => l10n.vaultItemTypeIdentity,
+        VaultItemType.secureNote => l10n.vaultItemTypeSecureNote,
+        VaultItemType.bankAccount => l10n.vaultItemTypeBankAccount,
+        VaultItemType.softwareLicense => l10n.vaultItemTypeSoftwareLicense,
+        VaultItemType.authenticator => l10n.vaultItemTypeAuthenticator,
+      };
+
+  String get icon => switch (this) {
+        VaultItemType.password => 'key',
+        VaultItemType.paymentCard => 'credit_card',
+        VaultItemType.identity => 'badge',
+        VaultItemType.secureNote => 'note',
+        VaultItemType.bankAccount => 'account_balance',
+        VaultItemType.softwareLicense => 'computer',
+        VaultItemType.authenticator => 'verified_user',
+      };
+
+  String toJson() => name;
+
+  static VaultItemType fromJson(String? value) => switch (value) {
+        'password' => VaultItemType.password,
+        'paymentCard' => VaultItemType.paymentCard,
+        'identity' => VaultItemType.identity,
+        'secureNote' => VaultItemType.secureNote,
+        'bankAccount' => VaultItemType.bankAccount,
+        'softwareLicense' => VaultItemType.softwareLicense,
+        'authenticator' => VaultItemType.authenticator,
+        _ => VaultItemType.secureNote,
+      };
+}
+
+// ── Field definition ───────────────────────────────────────────────────────────
+
+enum FieldType { text, secret, multiline, date, phone, email, url, number, select }
+
+class VaultFieldOption {
+  final String value;
+  final String label;
+
+  const VaultFieldOption({
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is VaultFieldOption &&
+          runtimeType == other.runtimeType &&
+          value == other.value &&
+          label == other.label;
+
+  @override
+  int get hashCode => Object.hash(value, label);
+}
+
+class VaultField {
+  final String key;
+  final String label;
+  final FieldType type;
+  final bool required;
+  final List<VaultFieldOption>? options;
+  final String? defaultValue;
+  String value;
+
+  VaultField({
+    required this.key,
+    required this.label,
+    required this.type,
+    this.required = false,
+    this.options,
+    this.defaultValue,
+    this.value = '',
+  });
+
+  VaultField copyWith({
+    String? value,
+    List<VaultFieldOption>? options,
+    String? defaultValue,
+  }) =>
+      VaultField(
+        key: key,
+        label: label,
+        type: type,
+        required: required,
+        options: options ?? this.options,
+        defaultValue: defaultValue ?? this.defaultValue,
+        value: value ?? this.value,
+      );
+
+  Map<String, dynamic> toJson() => {'key': key, 'value': value};
+
+  String get displayValue {
+    if (options != null && options!.isNotEmpty) {
+      final current = value.trim();
+      final opt = options!.cast<VaultFieldOption?>().firstWhere(
+            (o) =>
+                o != null &&
+                (o.value.toLowerCase() == current.toLowerCase() ||
+                    o.value.toLowerCase() ==
+                        current.toLowerCase().replaceAll(RegExp(r'[\s\-_]'), '')),
+            orElse: () => null,
+          );
+      if (opt != null) return opt.label;
+    }
+    return value;
+  }
+
+  static VaultField fromTemplate(
+    Map<String, dynamic> template,
+    Map<String, dynamic> values,
+  ) {
+    final rawOptions = template['options'];
+    List<VaultFieldOption>? options;
+    if (rawOptions is List) {
+      options = rawOptions.map((opt) {
+        if (opt is VaultFieldOption) return opt;
+        if (opt is Map<String, dynamic>) {
+          return VaultFieldOption(
+            value: opt['value'] as String,
+            label: opt['label'] as String,
+          );
+        }
+        final s = opt.toString();
+        return VaultFieldOption(value: s, label: s);
+      }).toList();
+    }
+
+    final defaultValue = template['defaultValue'] as String?;
+    final key = template['key'] as String;
+    final String val;
+    if (values.containsKey(key)) {
+      val = values[key] as String? ?? '';
+    } else {
+      val = defaultValue ?? '';
+    }
+
+    return VaultField(
+      key: key,
+      label: template['label'] as String,
+      type: FieldType.values.firstWhere(
+        (t) => t.name == (template['type'] as String? ?? 'text'),
+        orElse: () => FieldType.text,
+      ),
+      required: template['required'] as bool? ?? false,
+      options: options,
+      defaultValue: defaultValue,
+      value: val,
+    );
+  }
+}
+
+// ── Item templates ─────────────────────────────────────────────────────────────
+
+class VaultItemTemplate {
+  static List<Map<String, dynamic>> fieldsFor(VaultItemType type, AppLocalizations l10n) =>
+      switch (type) {
+        VaultItemType.password => [
+            {'key': 'username', 'label': l10n.fieldUsernameEmail, 'type': 'text', 'required': true},
+            {'key': 'password', 'label': l10n.fieldPassword, 'type': 'secret', 'required': true},
+            {'key': 'url', 'label': l10n.fieldWebsiteUrl, 'type': 'url'},
+            {'key': 'totp_secret', 'label': l10n.fieldTotpSecret, 'type': 'secret'},
+            {'key': 'notes', 'label': l10n.fieldNotes, 'type': 'multiline'},
+          ],
+        VaultItemType.paymentCard => [
+            {'key': 'cardholder', 'label': l10n.fieldCardholderName, 'type': 'text', 'required': true},
+            {'key': 'number', 'label': l10n.fieldCardNumber, 'type': 'secret', 'required': true},
+            {'key': 'expiry', 'label': l10n.fieldExpiryMMYY, 'type': 'text', 'required': true},
+            {'key': 'cvv', 'label': l10n.fieldCvvCvc, 'type': 'secret', 'required': true},
+            {'key': 'pin', 'label': l10n.fieldPin, 'type': 'secret'},
+            {'key': 'bank', 'label': l10n.fieldIssuingBank, 'type': 'text'},
+            {'key': 'notes', 'label': l10n.fieldNotes, 'type': 'multiline'},
+          ],
+        VaultItemType.identity => [
+            {'key': 'full_name', 'label': l10n.fieldFullName, 'type': 'text', 'required': true},
+            {'key': 'dob', 'label': l10n.fieldDateOfBirth, 'type': 'date'},
+            {'key': 'nationality', 'label': l10n.fieldNationality, 'type': 'text'},
+            {'key': 'passport_no', 'label': l10n.fieldPassportNumber, 'type': 'secret'},
+            {'key': 'passport_expiry', 'label': l10n.fieldPassportExpiry, 'type': 'date'},
+            {'key': 'national_id', 'label': l10n.fieldNationalIdSsn, 'type': 'secret'},
+            {'key': 'drivers_license', 'label': l10n.fieldDriversLicense, 'type': 'text'},
+            {'key': 'address', 'label': l10n.fieldAddress, 'type': 'multiline'},
+            {'key': 'phone', 'label': l10n.fieldPhone, 'type': 'phone'},
+            {'key': 'email', 'label': l10n.fieldEmail, 'type': 'email'},
+            {'key': 'notes', 'label': l10n.fieldNotes, 'type': 'multiline'},
+          ],
+        VaultItemType.secureNote => [
+            {'key': 'content', 'label': l10n.fieldNote, 'type': 'multiline', 'required': true},
+          ],
+        VaultItemType.bankAccount => [
+            {'key': 'bank_name', 'label': l10n.fieldBankName, 'type': 'text', 'required': true},
+            {'key': 'account_holder', 'label': l10n.fieldAccountHolder, 'type': 'text', 'required': true},
+            {'key': 'account_number', 'label': l10n.fieldAccountNumber, 'type': 'secret', 'required': true},
+            {'key': 'routing_number', 'label': l10n.fieldRoutingSortCode, 'type': 'secret'},
+            {'key': 'iban', 'label': l10n.fieldIban, 'type': 'secret'},
+            {'key': 'swift', 'label': l10n.fieldSwiftBic, 'type': 'text'},
+            {'key': 'account_type', 'label': l10n.fieldAccountType, 'type': 'text'},
+            {'key': 'pin', 'label': l10n.fieldPin, 'type': 'secret'},
+            {'key': 'notes', 'label': l10n.fieldNotes, 'type': 'multiline'},
+          ],
+        VaultItemType.softwareLicense => [
+            {'key': 'product', 'label': l10n.fieldProductName, 'type': 'text', 'required': true},
+            {'key': 'license_key', 'label': l10n.fieldLicenseKey, 'type': 'secret', 'required': true},
+            {'key': 'registered_to', 'label': l10n.fieldRegisteredTo, 'type': 'text'},
+            {'key': 'email', 'label': l10n.fieldRegistrationEmail, 'type': 'email'},
+            {'key': 'purchase_date', 'label': l10n.fieldPurchaseDate, 'type': 'date'},
+            {'key': 'expiry_date', 'label': l10n.fieldExpiryRenewalDate, 'type': 'date'},
+            {'key': 'download_url', 'label': l10n.fieldDownloadUrl, 'type': 'url'},
+            {'key': 'notes', 'label': l10n.fieldNotes, 'type': 'multiline'},
+          ],
+        // A standalone TOTP entry -- the same `totp_secret` field key a
+        // `password` item's optional 2FA field already uses (see that case
+        // above), so both feed the same live-code display and Authenticator
+        // aggregator with no type-specific branching needed there. The
+        // three advanced fields are rarely touched -- left blank, they
+        // default to SHA1/6-digit/30-second at generation time (see
+        // TotpConfig.fromFields), the values essentially every real-world
+        // issuer uses.
+        VaultItemType.authenticator => [
+            {'key': 'issuer', 'label': l10n.fieldIssuer, 'type': 'text'},
+            {'key': 'account', 'label': l10n.fieldAuthenticatorAccount, 'type': 'text'},
+            {'key': 'totp_secret', 'label': l10n.fieldSecretKey, 'type': 'secret', 'required': true},
+            {
+              'key': 'totp_type',
+              'label': 'Type',
+              'type': 'select',
+              'defaultValue': 'totp',
+              'options': const [
+                VaultFieldOption(value: 'totp', label: 'TOTP (Time-based)'),
+                VaultFieldOption(value: 'hotp', label: 'HOTP (Counter-based)'),
+                VaultFieldOption(value: 'steam', label: 'Steam Guard'),
+              ],
+            },
+            {
+              'key': 'totp_algorithm',
+              'label': l10n.fieldTotpAlgorithm,
+              'type': 'select',
+              'defaultValue': 'SHA1',
+              'options': const [
+                VaultFieldOption(value: 'SHA1', label: 'SHA1'),
+                VaultFieldOption(value: 'SHA256', label: 'SHA256'),
+                VaultFieldOption(value: 'SHA512', label: 'SHA512'),
+              ],
+            },
+            {
+              'key': 'totp_digits',
+              'label': l10n.fieldTotpDigits,
+              'type': 'select',
+              'defaultValue': '6',
+              'options': const [
+                VaultFieldOption(value: '6', label: '6 digits'),
+                VaultFieldOption(value: '7', label: '7 digits'),
+                VaultFieldOption(value: '8', label: '8 digits'),
+              ],
+            },
+            {
+              'key': 'totp_period',
+              'label': l10n.fieldTotpPeriod,
+              'type': 'select',
+              'defaultValue': '30',
+              'options': const [
+                VaultFieldOption(value: '30', label: '30 seconds'),
+                VaultFieldOption(value: '60', label: '60 seconds'),
+                VaultFieldOption(value: '15', label: '15 seconds'),
+              ],
+            },
+            {'key': 'hotp_counter', 'label': 'HOTP counter', 'type': 'number'},
+            {'key': 'notes', 'label': l10n.fieldNotes, 'type': 'multiline'},
+          ],
+      };
+}
+
+// ── VaultItem ─────────────────────────────────────────────────────────────────
+
+class VaultItem {
+  final String id;
+  final VaultItemType type;
+  String title;
+  final Map<String, String> fields;
+  final DateTime createdAt;
+  DateTime updatedAt;
+  bool bookmark;
+
+  VaultItem({
+    required this.id,
+    required this.type,
+    required this.title,
+    required this.fields,
+    required this.createdAt,
+    required this.updatedAt,
+    this.bookmark = false,
+  });
+
+  /// Returns the primary display subtitle (first non-empty non-secret field).
+  String subtitle(AppLocalizations l10n) {
+    final template = VaultItemTemplate.fieldsFor(type, l10n);
+    for (final t in template) {
+      final fieldType = FieldType.values.firstWhere(
+        (ft) => ft.name == (t['type'] as String? ?? 'text'),
+        orElse: () => FieldType.text,
+      );
+      if (fieldType == FieldType.secret) continue;
+      if (fieldType == FieldType.multiline) continue;
+      final v = fields[t['key'] as String] ?? '';
+      if (v.isNotEmpty) return v;
+    }
+    return '';
+  }
+
+  List<VaultField> vaultFields(AppLocalizations l10n) {
+    final template = VaultItemTemplate.fieldsFor(type, l10n);
+    return template
+        .map((t) => VaultField.fromTemplate(t, fields))
+        .toList();
+  }
+
+  VaultItem copyWithFields(Map<String, String> newFields, String newTitle) =>
+      VaultItem(
+        id: id,
+        type: type,
+        title: newTitle,
+        fields: Map.from(newFields),
+        createdAt: createdAt,
+        updatedAt: DateTime.now(),
+        bookmark: bookmark,
+      );
+
+  VaultItem copyWithBookmark(bool fav) => VaultItem(
+        id: id,
+        type: type,
+        title: title,
+        fields: fields,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        bookmark: fav,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'type': type.toJson(),
+        'title': title,
+        'fields': fields,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
+        'bookmark': bookmark,
+      };
+
+  factory VaultItem.fromJson(Map<String, dynamic> j) => VaultItem(
+        id: j['id'] as String,
+        type: VaultItemType.fromJson(j['type'] as String?),
+        title: j['title'] as String? ?? '',
+        fields: (j['fields'] as Map<String, dynamic>? ?? {})
+            .map((k, v) => MapEntry(k, v.toString())),
+        createdAt: DateTime.tryParse(j['createdAt'] as String? ?? '') ??
+            DateTime.now(),
+        updatedAt: DateTime.tryParse(j['updatedAt'] as String? ?? '') ??
+            DateTime.now(),
+        // Falls back to the legacy 'favourite' key so items saved before the
+        // favourite->bookmark rename still load with their state intact.
+        bookmark: j['bookmark'] as bool? ?? j['favourite'] as bool? ?? false,
+      );
+
+  static final _idRandom = Random();
+
+  static VaultItem create(VaultItemType type, String title) {
+    final now = DateTime.now();
+    return VaultItem(
+      // A bare microsecond timestamp isn't actually collision-resistant --
+      // some platforms' clocks don't tick every microsecond in wall-clock
+      // reality (this was confirmed in practice, not just in theory: two
+      // items created back-to-back in a test run produced the identical
+      // id). Appending a random suffix means two items still get distinct
+      // ids even when they land in the same clock tick.
+      id: '${now.microsecondsSinceEpoch}-${_idRandom.nextInt(1 << 31)}',
+      type: type,
+      title: title,
+      fields: {},
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
+}

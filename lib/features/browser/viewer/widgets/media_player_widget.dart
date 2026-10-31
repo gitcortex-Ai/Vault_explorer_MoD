@@ -1,0 +1,2693 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:ui';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:vaultexplorer/core/api/vault_file_io_api.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/models/thumbnail_cache_mode.dart';
+import 'package:vaultexplorer/data/models/thumbnail_generation_strategy.dart';
+import 'package:vaultexplorer/data/models/thumbnail_quality.dart';
+import 'package:vaultexplorer/data/models/video_aspect_ratio_mode.dart';
+import 'package:vaultexplorer/data/models/media_decoder_mode.dart';
+import 'package:vaultexplorer/data/services/media_aspect_ratio_cache.dart';
+import 'package:vaultexplorer/data/services/thumbnail_cache_service.dart';
+import 'package:vaultexplorer/core/utils/format_utils.dart';
+import 'package:vaultexplorer/core/widgets/zoom_indicator_pill.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_viewer_constants.dart';
+import 'package:vaultexplorer/features/browser/viewer/playlist_swipe_claim.dart';
+import 'package:vaultexplorer/features/browser/viewer/models/viewer_adjustments.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/color_adjust_filter.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/edge_swipe_claim_recognizer.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/swipe_to_seek_claim_recognizer.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/swipe_seek_hud.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/swipe_to_dismiss_layer.dart';
+import 'package:vaultexplorer/data/services/session_lock_controller.dart';
+
+import 'package:vaultexplorer/data/models/scrub_preview_style.dart';
+import 'package:vaultexplorer/features/browser/viewer/screen_brightness_bridge.dart';
+import 'package:vaultexplorer/features/browser/viewer/video_playback_manager.dart';
+import '../caption_track.dart';
+import '../native_video_controller.dart';
+import '../video_scrub_preview_controller.dart';
+
+class VideoPlaybackProgress {
+  final Duration position;
+  final Duration duration;
+  final double sliderValue;
+  final bool isDragging;
+
+  const VideoPlaybackProgress({
+    this.position = Duration.zero,
+    this.duration = Duration.zero,
+    this.sliderValue = 0.0,
+    this.isDragging = false,
+  });
+
+  VideoPlaybackProgress copyWith({
+    Duration? position,
+    Duration? duration,
+    double? sliderValue,
+    bool? isDragging,
+  }) {
+    final currentDragging = isDragging ?? this.isDragging;
+    final currentDuration = duration ?? this.duration;
+    final currentPosition = position ?? this.position;
+    double computedSlider = 0.0;
+
+    if (currentDragging) {
+      computedSlider = (sliderValue ?? this.sliderValue).clamp(0.0, 1.0);
+    } else if (currentDuration.inMilliseconds > 0) {
+      final ratio =
+          currentPosition.inMilliseconds / currentDuration.inMilliseconds;
+      computedSlider = ratio.clamp(0.0, 1.0);
+      if (computedSlider.isNaN) computedSlider = 0.0;
+    }
+
+    return VideoPlaybackProgress(
+      position: currentPosition,
+      duration: currentDuration,
+      sliderValue: computedSlider,
+      isDragging: currentDragging,
+    );
+  }
+}
+
+/// Lets the viewer ask the video it is showing where it is on screen right
+/// now. The widget registers itself while it holds the probe, so the viewer
+/// can measure at the moment that matters (as a close begins, mid-swipe and
+/// all) instead of trusting the last reported position.
+class VideoFrameProbe {
+  Object? _owner;
+  Rect? Function()? _measure;
+
+  void _attach(Object owner, Rect? Function() measure) {
+    _owner = owner;
+    _measure = measure;
+  }
+
+  // A no-op for anyone but the current holder, so a page that lost the probe
+  // can't take it from the one that has it now.
+  void _detach(Object owner) {
+    if (!identical(_owner, owner)) return;
+    _owner = null;
+    _measure = null;
+  }
+
+  /// Where the video frame is, in logical pixels of the app's view and
+  /// clipped to the screen, or null when there is no video to measure.
+  Rect? measure() => _measure?.call();
+}
+
+class MediaPlayerWidget extends ConsumerStatefulWidget {
+  final MountedContainer container;
+  final String fileName;
+  final String contentUriString;
+  final bool showUI;
+  final ValueListenable<double>? dismissProgress;
+  final ValueChanged<bool> onToggleUI;
+  final ValueChanged<bool> onZoomChanged;
+  /// Seconds one double-tap on the left or right side skips; 0 turns
+  /// double-tap skipping off.
+  final int skipSeconds;
+  final bool isAudio;
+  final bool subtitlesEnabled;
+  final double subtitleFontSize;
+  final double subtitleVerticalPosition;
+  final ValueChanged<double>? onSubtitleVerticalPositionChanged;
+  final double playbackSpeed;
+  final int rotationQuarterTurns;
+  final ViewerAdjustments adjustments;
+  final ValueChanged<bool> onSubtitlesAvailableChanged;
+  final ValueNotifier<VideoPlaybackProgress> progressNotifier;
+  final void Function(int width, int height)? onSizeKnown;
+  final VoidCallback? onError;
+  final VideoPlaybackManager playbackManager;
+  final Uint8List? posterBytes;
+  final ThumbnailCacheMode thumbnailCacheMode;
+  final ThumbnailQuality thumbnailQuality;
+  final bool enableZoom;
+  final bool isMuted;
+  final ValueChanged<bool>? onMuteChanged;
+  final VideoAspectRatioMode videoAspectRatioMode;
+
+  /// Told where the video is on screen (logical pixels, clipped to the screen)
+  /// and the device pixel ratio, after layouts and zooms. The viewer passes it
+  /// on to picture-in-picture, so that Android animates from the video itself
+  /// into the PiP window. Only the video actually showing should be given one.
+  final void Function(Rect rect, double devicePixelRatio)? onVideoRectChanged;
+
+  /// Held by the one video the viewer is on; see [VideoFrameProbe].
+  final VideoFrameProbe? videoFrameProbe;
+  final bool edgeSwipeBrightnessEnabled;
+  final bool edgeSwipeVolumeEnabled;
+  final bool edgeSwipeHudEnabled;
+  final double edgeSwipeWidthFraction;
+  final bool pinchZoomOutEnabled;
+  final double minVideoZoomScale;
+  final double holdToSpeedMultiplier;
+  final bool swipeToSeekEnabled;
+  final bool tapEdgesToNavigate;
+
+  /// Double-tapping the middle plays or pauses instead of zooming; the zoom
+  /// is reset from the zoom-level pill.
+  final bool doubleTapPlayPause;
+  final double zoomIndicatorBottomOffset;
+  final double seekSensitivity;
+  final double volumeGestureSensitivity;
+  final double brightnessGestureSensitivity;
+  final bool volumeBoostEnabled;
+  final int volumeBoostGainMb;
+  final MediaDecoderMode videoDecoderMode;
+  final MediaDecoderMode audioDecoderMode;
+  final ThumbnailGenerationStrategy thumbnailGenerationStrategy;
+  final ValueChanged<bool>? onEdgeTap;
+
+  const MediaPlayerWidget({
+    super.key,
+    required this.container,
+    required this.fileName,
+    required this.contentUriString,
+    required this.showUI,
+    this.dismissProgress,
+    required this.onToggleUI,
+    required this.onZoomChanged,
+    required this.skipSeconds,
+    required this.isAudio,
+    required this.subtitlesEnabled,
+    this.subtitleFontSize = 15.0,
+    this.subtitleVerticalPosition = 0.0,
+    this.onSubtitleVerticalPositionChanged,
+    required this.playbackSpeed,
+    required this.rotationQuarterTurns,
+    this.adjustments = ViewerAdjustments.identity,
+    required this.onSubtitlesAvailableChanged,
+    required this.progressNotifier,
+    required this.playbackManager,
+    this.posterBytes,
+    this.thumbnailCacheMode = ThumbnailCacheMode.appCache,
+    this.thumbnailQuality = ThumbnailQuality.defaultQuality,
+    this.thumbnailGenerationStrategy = ThumbnailGenerationStrategy.hybrid,
+    this.onSizeKnown,
+    this.onError,
+    this.isMuted = false,
+    this.onMuteChanged,
+    this.enableZoom = true,
+    this.videoAspectRatioMode = VideoAspectRatioMode.bestFit,
+    this.onVideoRectChanged,
+    this.videoFrameProbe,
+    this.edgeSwipeBrightnessEnabled = true,
+    this.edgeSwipeVolumeEnabled = true,
+    this.edgeSwipeHudEnabled = true,
+    this.edgeSwipeWidthFraction = 0.25,
+    this.pinchZoomOutEnabled = true,
+    this.minVideoZoomScale = 0.25,
+    this.holdToSpeedMultiplier = 2.0,
+    this.swipeToSeekEnabled = false,
+    this.tapEdgesToNavigate = true,
+    this.doubleTapPlayPause = true,
+    this.zoomIndicatorBottomOffset = 16,
+    this.seekSensitivity = 1.0,
+    this.volumeGestureSensitivity = 1.0,
+    this.brightnessGestureSensitivity = 1.0,
+    this.volumeBoostEnabled = false,
+    this.volumeBoostGainMb = 2000,
+    this.videoDecoderMode = MediaDecoderMode.auto,
+    this.audioDecoderMode = MediaDecoderMode.auto,
+    this.onEdgeTap,
+  });
+
+  @override
+  ConsumerState<MediaPlayerWidget> createState() => _MediaPlayerWidgetState();
+}
+
+class _MediaPlayerWidgetState extends ConsumerState<MediaPlayerWidget>
+    with TickerProviderStateMixin {
+  VaultFileIoApi get _fileIoApi => ref.read(vaultFileIoApiProvider);
+
+  NativeVideoController? _boundController;
+  bool _isActive = false;
+  bool _initialized = false;
+  String? _playerError;
+  CaptionTrack? _captionFile;
+  bool _isSeeking = false;
+  bool _showLeftIndicator = false;
+  bool _showRightIndicator = false;
+  bool _isSpeedHeld = false;
+  final GlobalKey _interactiveViewerKey = GlobalKey();
+  final GlobalKey _videoFrameKey = GlobalKey();
+  bool _videoRectReportScheduled = false;
+  Timer? _skipDebounceTimer;
+  bool _isSkipActive = false;
+  bool _skipBackwards = false;
+  int _accumulatedSkipSeconds = 0;
+  Duration? _baseSeekPosition;
+  int _captionsToken = 0;
+  final TransformationController _videoTransformationController =
+      TransformationController();
+  static const double _baselineZoomScale = 1.0;
+  static const double _maxZoomScale = 4.0;
+  double _videoScale = _baselineZoomScale;
+  TapDownDetails? _videoDoubleTapDetails;
+  Size _lastKnownVideoSize = Size.zero;
+  double? _knownAspectRatio;
+  Uint8List? _localPosterBytes;
+  late final ThumbnailCacheService _thumbnailCache;
+
+  AnimationController? _zoomAnimationController;
+  Animation<Matrix4>? _zoomAnimation;
+
+  final Set<int> _activeTouchPointers = {};
+  final Map<int, Offset> _edgeTapStartPositions = {};
+  final Map<int, bool> _edgeTapDirections = {};
+  double _tapViewportWidth = 0;
+  double? _brightnessDragStartLevel;
+  double _brightnessLevel = 0.5;
+  bool _showBrightnessHud = false;
+  Timer? _brightnessHudTimer;
+  double? _volumeDragStartLevel;
+  double _volumeLevel = 1.0;
+  bool _showVolumeHud = false;
+  Timer? _volumeHudTimer;
+  bool _isBrightnessDragging = false;
+  EdgeSwipeClaimRecognizer? _brightnessClaim;
+  EdgeSwipeClaimRecognizer? _volumeClaim;
+  bool _isVolumeDragging = false;
+  bool _isSwipeSeeking = false;
+  bool _showSwipeSeekHud = false;
+  Timer? _swipeSeekHudTimer;
+  SwipeToSeekClaimRecognizer? _swipeToSeekClaim;
+  Duration _seekDragStartPosition = Duration.zero;
+  Duration _seekDragTotalDuration = Duration.zero;
+  Duration _swipeSeekTargetPosition = Duration.zero;
+  Duration _swipeSeekDelta = Duration.zero;
+  double _seekDragAccumulatedDx = 0.0;
+  bool _wasPlayingBeforeSwipeSeek = false;
+  VideoScrubPreviewController? _swipeSeekPreview;
+  double _effectiveHoldSpeed = 2.0;
+  bool _isPlayingReported = false;
+  late final SessionLockController _lockController;
+
+  void _updateMediaPlayingState(bool isPlaying) {
+    if (_isPlayingReported == isPlaying) return;
+    _isPlayingReported = isPlaying;
+    _lockController.setMediaPlaying(isPlaying);
+  }
+
+  /// Accurately extracts 2D scale, ignoring the 3D Z-axis which is always 1.0
+  static double _getMatrixScale(Matrix4 matrix) {
+    final double x = matrix.storage[0];
+    final double y = matrix.storage[1];
+    return math.sqrt(x * x + y * y);
+  }
+
+  bool get _isZoomed =>
+      (_getMatrixScale(_videoTransformationController.value) -
+              _baselineZoomScale)
+          .abs() >
+      0.01;
+  bool get _isZoomedIn =>
+      _getMatrixScale(_videoTransformationController.value) >
+      _baselineZoomScale + 0.001;
+
+  Widget _fadeWhileDismissing(Widget child) {
+    final progress = widget.dismissProgress;
+    if (progress == null) return child;
+    return ValueListenableBuilder<double>(
+      valueListenable: progress,
+      child: child,
+      builder: (context, value, child) => Opacity(
+        opacity: (1.0 - value).clamp(0.0, 1.0).toDouble(),
+        child: child,
+      ),
+    );
+  }
+
+  double get _effectiveMinZoomScale => widget.pinchZoomOutEnabled
+      ? widget.minVideoZoomScale.clamp(
+          MediaViewerConstants.minVideoZoomFloor,
+          1.0,
+        )
+      : _baselineZoomScale;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.videoFrameProbe?._attach(this, _measureVideoRect);
+    _lockController = ref.read(sessionLockControllerProvider);
+    _thumbnailCache = ref.read(thumbnailCacheServiceProvider);
+    final initialPoster =
+        widget.posterBytes ??
+        _thumbnailCache.peekMemory(
+          widget.container,
+          widget.fileName,
+          widget.thumbnailQuality,
+        );
+    _localPosterBytes = initialPoster;
+    widget.playbackManager.activeControllerNotifier.addListener(
+      _onSharedControllerChanged,
+    );
+    widget.playbackManager.currentFileNotifier.addListener(
+      _onCurrentFileChanged,
+    );
+    _knownAspectRatio = MediaAspectRatioCache.get(
+      widget.container,
+      widget.fileName,
+    );
+    _brightnessLevel = ScreenBrightnessBridge.lastKnownLevel;
+    DeviceVolumeBridge.getVolume().then((vol) {
+      if (mounted) {
+        setState(() => _volumeLevel = vol);
+      }
+    });
+
+    _zoomAnimationController =
+        AnimationController(
+          vsync: this,
+          duration: MediaViewerConstants.animationDuration,
+        )..addListener(() {
+          if (_zoomAnimation != null) {
+            _isClampingMatrix = true;
+            _videoTransformationController.value = _zoomAnimation!.value;
+            _isClampingMatrix = false;
+          }
+        });
+
+    _videoTransformationController.addListener(_onVideoTransformationChanged);
+    _syncBoundController();
+    _ensurePosterLoaded();
+  }
+
+  Future<void> _ensurePosterLoaded() async {
+    if (_localPosterBytes != null) {
+      return;
+    }
+    try {
+      final bytes = await _thumbnailCache.fetch(
+        container: widget.container,
+        filePath: widget.fileName,
+        mode: widget.thumbnailCacheMode,
+        quality: widget.thumbnailQuality,
+      );
+      if (bytes != null && bytes.isNotEmpty && mounted) {
+        setState(() {
+          _localPosterBytes = bytes;
+        });
+      }
+    } catch (_) {
+      // Poster load failed; fall back to no poster.
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant MediaPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.videoFrameProbe, widget.videoFrameProbe)) {
+      oldWidget.videoFrameProbe?._detach(this);
+      widget.videoFrameProbe?._attach(this, _measureVideoRect);
+    }
+    if (oldWidget.fileName != widget.fileName) {
+      // File changed — reset poster for new file
+      final newPoster =
+          widget.posterBytes ??
+          _thumbnailCache.peekMemory(
+            widget.container,
+            widget.fileName,
+            widget.thumbnailQuality,
+          );
+      _localPosterBytes = newPoster;
+      _knownAspectRatio = MediaAspectRatioCache.get(
+        widget.container,
+        widget.fileName,
+      );
+      _ensurePosterLoaded();
+    } else if (widget.posterBytes != null &&
+        widget.posterBytes != oldWidget.posterBytes) {
+      // Same file, but explicit new poster bytes provided
+      _localPosterBytes = widget.posterBytes!;
+    }
+    if (widget.isMuted != oldWidget.isMuted) {
+      if (widget.isMuted) {
+        _volumeLevel = 0.0;
+      } else {
+        DeviceVolumeBridge.getVolume().then((vol) {
+          if (mounted) setState(() => _volumeLevel = vol > 0 ? vol : 0.5);
+        });
+      }
+    }
+    if (_boundController != null &&
+        oldWidget.playbackSpeed != widget.playbackSpeed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _boundController?.setPlaybackSpeed(widget.playbackSpeed);
+      });
+    }
+    if (_boundController != null &&
+        (oldWidget.volumeBoostEnabled != widget.volumeBoostEnabled ||
+            oldWidget.volumeBoostGainMb != widget.volumeBoostGainMb)) {
+      unawaited(
+        _boundController!.setVolumeBoost(
+          widget.volumeBoostEnabled,
+          widget.volumeBoostGainMb,
+        ),
+      );
+    }
+    if (_boundController != null &&
+        (oldWidget.videoDecoderMode != widget.videoDecoderMode ||
+            oldWidget.audioDecoderMode != widget.audioDecoderMode)) {
+      unawaited(
+        _boundController!.setDecoderModes(
+          widget.videoDecoderMode,
+          widget.audioDecoderMode,
+        ),
+      );
+    }
+    _syncBoundController();
+  }
+
+  void _onSharedControllerChanged() => _syncBoundController();
+  void _onCurrentFileChanged() => _syncBoundController();
+
+  void _syncBoundController() {
+    final shouldBeActive =
+        widget.playbackManager.currentFileName == widget.fileName;
+    final target =
+        widget.playbackManager.getControllerFor(widget.fileName) ??
+        (shouldBeActive ? widget.playbackManager.activeController : null);
+    if (shouldBeActive == _isActive && identical(target, _boundController))
+      return;
+    final becameActive = shouldBeActive && !_isActive;
+    final becameInactive = !shouldBeActive && _isActive;
+    _boundController?.removeListener(_onControllerTick);
+    _boundController = target;
+    target?.addListener(_onControllerTick);
+    final nowInitialized = target?.value.isInitialized ?? false;
+    _isActive = shouldBeActive;
+    _initialized = nowInitialized;
+    _playerError = null;
+    if (target != null && target.value.size != Size.zero) {
+      _lastKnownVideoSize = target.value.size;
+    }
+    if (becameInactive) {
+      _videoScale = _baselineZoomScale;
+      _videoTransformationController.value = Matrix4.identity();
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+    _onControllerTick();
+    if (becameActive) {
+      _loadCaptionsForThisFile();
+    } else if (becameInactive) {
+      _updateMediaPlayingState(false);
+      _captionsToken++;
+      _captionFile = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onZoomChanged(true);
+      });
+    }
+  }
+
+  Future<void> _loadCaptionsForThisFile() async {
+    final token = ++_captionsToken;
+    final captionFile = await _loadCaptions(widget.fileName);
+    if (token != _captionsToken || !mounted) return;
+    setState(() => _captionFile = captionFile);
+  }
+
+  void _onControllerTick() {
+    if (!mounted) return;
+    final controller = _boundController;
+    if (controller == null) {
+      _updateMediaPlayingState(false);
+      return;
+    }
+    _updateMediaPlayingState(_isActive && controller.value.isPlaying);
+    if (controller.value.hasError) {
+      if (_playerError == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _playerError == null) {
+            final rawError = controller.value.errorDescription;
+            setState(() {
+              _playerError = rawError.isNotEmpty
+                  ? (rawError ==
+                            'Video decoder unavailable — hardware codec contention'
+                        ? context.l10n.videoDecoderUnavailableError
+                        : rawError)
+                  : context.l10n.mediaStreamInitFailedError;
+            });
+            widget.onError?.call();
+            widget.onToggleUI(
+              true,
+            ); // Force reveal top bar and action menus on error
+          }
+        });
+      }
+      return;
+    }
+    if (!_initialized && controller.value.isInitialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_initialized) {
+          setState(() => _initialized = true);
+        }
+      });
+    }
+    final newSize = controller.value.size;
+    if (newSize.width > 0 &&
+        newSize.height > 0 &&
+        newSize != _lastKnownVideoSize) {
+      _lastKnownVideoSize = newSize;
+      MediaAspectRatioCache.put(
+        widget.container,
+        widget.fileName,
+        newSize.width.round(),
+        newSize.height.round(),
+      );
+      widget.onSizeKnown?.call(newSize.width.round(), newSize.height.round());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    }
+    if (!_isActive) return;
+    if (widget.progressNotifier.value.isDragging || _isSeeking) return;
+
+    final Duration rawPos = controller.value.position;
+    final Duration rawDur = controller.value.duration;
+
+    final newProgress = widget.progressNotifier.value.copyWith(
+      position: rawPos < Duration.zero ? Duration.zero : rawPos,
+      duration: rawDur < Duration.zero ? Duration.zero : rawDur,
+    );
+
+    if (widget.progressNotifier.value.position != newProgress.position ||
+        widget.progressNotifier.value.duration != newProgress.duration ||
+        (widget.progressNotifier.value.sliderValue - newProgress.sliderValue)
+                .abs() >
+            0.0005) {
+      widget.progressNotifier.value = newProgress;
+    }
+  }
+
+  Future<CaptionTrack?> _loadCaptions(String videoPath) async {
+    final dotIndex = videoPath.lastIndexOf('.');
+    if (dotIndex == -1) return null;
+    final basePath = videoPath.substring(0, dotIndex);
+    for (final ext in ['srt', 'vtt']) {
+      final subPath = '$basePath.$ext';
+      try {
+        final size = await _fileIoApi.getFileSize(widget.container, subPath);
+        if (size > 0) {
+          final data = await _fileIoApi.readFileChunk(
+            widget.container,
+            subPath,
+            0,
+            size,
+          );
+          if (data != null && data.isNotEmpty) {
+            final text = utf8.decode(data, allowMalformed: true);
+            widget.onSubtitlesAvailableChanged(true);
+            return ext == 'srt'
+                ? CaptionTrack.subRip(text)
+                : CaptionTrack.webVtt(text);
+          }
+        }
+      } catch (_) {
+        // Expected when no matching .srt/.vtt file exists next to the
+        // video for this extension -- try the next extension, or fall
+        // through to "no subtitles available" below.
+      }
+    }
+    widget.onSubtitlesAvailableChanged(false);
+    return null;
+  }
+
+  String _captionTextAt(Duration position) {
+    final file = _captionFile;
+    if (file == null) return '';
+    return file.captionAt(position)?.text ?? '';
+  }
+
+  @override
+  void dispose() {
+    widget.videoFrameProbe?._detach(this);
+    _updateMediaPlayingState(false);
+    _skipDebounceTimer?.cancel();
+    _brightnessHudTimer?.cancel();
+    _volumeHudTimer?.cancel();
+    _swipeSeekHudTimer?.cancel();
+    _swipeSeekPreview?.dispose();
+    _swipeSeekPreview = null;
+    _boundController?.removeListener(_onControllerTick);
+    widget.playbackManager.activeControllerNotifier.removeListener(
+      _onSharedControllerChanged,
+    );
+    widget.playbackManager.currentFileNotifier.removeListener(
+      _onCurrentFileChanged,
+    );
+    _zoomAnimationController?.dispose();
+    _videoTransformationController.removeListener(
+      _onVideoTransformationChanged,
+    );
+    _videoTransformationController.dispose();
+    super.dispose();
+  }
+
+  void _onSpeedHoldStart(LongPressStartDetails details) {
+    final controller = _boundController;
+    if (controller == null) return;
+    HapticFeedback.heavyImpact();
+    final box = context.findRenderObject();
+    final width = box is RenderBox && box.hasSize
+        ? box.size.width
+        : MediaQuery.of(context).size.width;
+    final isLeft = details.localPosition.dx < width * 0.35;
+
+    final double targetSpeed;
+    if (widget.holdToSpeedMultiplier < 1.0) {
+      targetSpeed = widget.holdToSpeedMultiplier;
+    } else if (isLeft) {
+      targetSpeed = 0.5;
+    } else {
+      targetSpeed = widget.holdToSpeedMultiplier;
+    }
+
+    _effectiveHoldSpeed = targetSpeed;
+    controller.setPlaybackSpeed(targetSpeed);
+    setState(() => _isSpeedHeld = true);
+  }
+
+  void _onSpeedHoldEnd(LongPressEndDetails _) {
+    final controller = _boundController;
+    if (controller == null) return;
+    controller.setPlaybackSpeed(widget.playbackSpeed);
+    setState(() => _isSpeedHeld = false);
+  }
+
+  Matrix4 _calculateZoomMatrix({
+    required Offset localPosition,
+    required double scale,
+  }) {
+    final x = -localPosition.dx * (scale - 1.0);
+    final y = -localPosition.dy * (scale - 1.0);
+    return Matrix4.identity()
+      ..translateByDouble(x, y, 0.0, 1.0)
+      ..scaleByDouble(scale, scale, 1.0, 1.0);
+  }
+
+  bool _isClampingMatrix = false;
+
+  void _onVideoTransformationChanged() {
+    if (_isClampingMatrix || !mounted) return;
+    _scheduleVideoRectReport();
+    final vpSize = MediaQuery.of(context).size;
+    if (vpSize.width <= 0 || vpSize.height <= 0) return;
+
+    final matrix = _videoTransformationController.value;
+    final s = _getMatrixScale(matrix);
+    if (s <= 0) return;
+
+    if (s < _effectiveMinZoomScale) {
+      final clampedS = _effectiveMinZoomScale;
+      final dx = vpSize.width * (1.0 - clampedS) / 2.0;
+      final dy = vpSize.height * (1.0 - clampedS) / 2.0;
+      _isClampingMatrix = true;
+      _videoTransformationController.value = Matrix4.identity()
+        ..translateByDouble(dx, dy, 0.0, 1.0)
+        ..scaleByDouble(clampedS, clampedS, clampedS, 1.0);
+      _isClampingMatrix = false;
+      return;
+    }
+
+    // Constrain momentum flings & pans when zoomed in to lock borders
+    if (s >= 1.0) {
+      final scaledW = vpSize.width * s;
+      final scaledH = vpSize.height * s;
+      final currentTx = matrix.storage[12];
+      final currentTy = matrix.storage[13];
+
+      final double clampedTx = scaledW > vpSize.width
+          ? currentTx.clamp(vpSize.width - scaledW, 0.0)
+          : (vpSize.width - scaledW) / 2.0;
+      final double clampedTy = scaledH > vpSize.height
+          ? currentTy.clamp(vpSize.height - scaledH, 0.0)
+          : (vpSize.height - scaledH) / 2.0;
+
+      if ((currentTx - clampedTx).abs() > 0.001 ||
+          (currentTy - clampedTy).abs() > 0.001) {
+        _isClampingMatrix = true;
+        _videoTransformationController.value = Matrix4.identity()
+          ..translateByDouble(clampedTx, clampedTy, 0.0, 1.0)
+          ..scaleByDouble(s, s, 1.0, 1.0);
+        _isClampingMatrix = false;
+      }
+    }
+  }
+
+  Matrix4 _clampVideoMatrix(Matrix4 matrix, double vw, double vh) {
+    if (vw <= 0 || vh <= 0) return matrix;
+    final s = _getMatrixScale(matrix);
+    if (s <= 0) return matrix;
+    final clampedS = s.clamp(
+      _effectiveMinZoomScale,
+      MediaViewerConstants.maxVideoZoom,
+    );
+
+    if (clampedS < 1.0) {
+      final dx = vw * (1.0 - clampedS) / 2.0;
+      final dy = vh * (1.0 - clampedS) / 2.0;
+      return Matrix4.identity()
+        ..translateByDouble(dx, dy, 0.0, 1.0)
+        ..scaleByDouble(clampedS, clampedS, clampedS, 1.0);
+    }
+
+    final scaledW = vw * s;
+    final scaledH = vh * s;
+    final currentTx = matrix.storage[12];
+    final currentTy = matrix.storage[13];
+
+    final double clampedTx = scaledW > vw
+        ? currentTx.clamp(vw - scaledW, 0.0)
+        : (vw - scaledW) / 2.0;
+    final double clampedTy = scaledH > vh
+        ? currentTy.clamp(vh - scaledH, 0.0)
+        : (vh - scaledH) / 2.0;
+
+    return Matrix4.identity()
+      ..translateByDouble(clampedTx, clampedTy, 0.0, 1.0)
+      ..scaleByDouble(s, s, 1.0, 1.0);
+  }
+
+  void _animateVideoZoomTo(Matrix4 targetMatrix, {required bool toBaseline}) {
+    final controller = _zoomAnimationController;
+    if (controller == null) {
+      _videoTransformationController.value = targetMatrix;
+      return;
+    }
+
+    controller.stop();
+    _zoomAnimation = Matrix4Tween(
+      begin: _videoTransformationController.value,
+      end: targetMatrix,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutCubic));
+
+    controller.forward(from: 0.0).then((_) {
+      if (mounted) {
+        setState(() {
+          _videoScale = _getMatrixScale(_videoTransformationController.value);
+        });
+        widget.onZoomChanged(toBaseline);
+      }
+    });
+  }
+
+  void _handleVideoDoubleTap() {
+    if (widget.isAudio) return;
+
+    // When zoom is not default (in or out), double-tap always resets to 1.0x baseline
+    if (_isZoomed) {
+      _animateVideoZoomTo(Matrix4.identity(), toBaseline: true);
+      return;
+    }
+
+    final doubleTapDetails = _videoDoubleTapDetails;
+    if (doubleTapDetails == null) return;
+    final context = _interactiveViewerKey.currentContext;
+    if (context == null || !context.mounted) return;
+    final box = context.findRenderObject();
+    if (box is! RenderBox) return;
+    final double targetScale = _maxZoomScale;
+    final Matrix4 targetMatrix;
+    if (box.hasSize) {
+      final position = box.globalToLocal(doubleTapDetails.globalPosition);
+      if (position.isFinite) {
+        targetMatrix = _calculateZoomMatrix(
+          localPosition: position,
+          scale: targetScale,
+        );
+      } else {
+        targetMatrix = Matrix4.identity()
+          ..scaleByDouble(targetScale, targetScale, 1.0, 1.0);
+      }
+    } else {
+      targetMatrix = Matrix4.identity()
+        ..scaleByDouble(targetScale, targetScale, 1.0, 1.0);
+    }
+
+    final vpSize = MediaQuery.of(context).size;
+    final clampedMatrix = _clampVideoMatrix(
+      targetMatrix,
+      vpSize.width,
+      vpSize.height,
+    );
+
+    widget.onZoomChanged(false);
+    _animateVideoZoomTo(clampedMatrix, toBaseline: false);
+  }
+
+  void _togglePlayPause() {
+    final controller = _boundController;
+    if (controller == null || !controller.value.isInitialized) return;
+    HapticFeedback.lightImpact();
+    if (controller.value.isPlaying) {
+      unawaited(controller.pause());
+    } else {
+      unawaited(controller.play());
+    }
+  }
+
+  void _resetVideoZoom() {
+    HapticFeedback.selectionClick();
+    _animateVideoZoomTo(Matrix4.identity(), toBaseline: true);
+  }
+
+  void _handleDoubleTapSkip({required bool backwards}) {
+    if (_isSkipActive) {
+      if (_skipBackwards == backwards) return;
+      _executePendingSeek();
+    }
+    final controller = _boundController;
+    if (controller == null) return;
+
+    _isSkipActive = true;
+    _skipBackwards = backwards;
+    _baseSeekPosition = controller.value.position;
+    _accumulatedSkipSeconds = widget.skipSeconds;
+
+    HapticFeedback.lightImpact();
+    setState(() {
+      if (backwards) {
+        _showLeftIndicator = true;
+        _showRightIndicator = false;
+      } else {
+        _showRightIndicator = true;
+        _showLeftIndicator = false;
+      }
+    });
+
+    _restartSkipTimer();
+  }
+
+  void _onSkipPointerDown(PointerDownEvent event, double width) {
+    if (!_isSkipActive) return;
+    final dx = event.localPosition.dx;
+    final edgeWidth = width * MediaViewerConstants.tapToNavigateEdgeFraction;
+    final isLeft = dx >= edgeWidth && dx < width * 0.3;
+    final isRight = dx > width * 0.7 && dx <= width - edgeWidth;
+
+    if ((_skipBackwards && isLeft) || (!_skipBackwards && isRight)) {
+      HapticFeedback.lightImpact();
+      setState(() {
+        _accumulatedSkipSeconds += widget.skipSeconds;
+      });
+      _restartSkipTimer();
+    } else {
+      _executePendingSeek();
+    }
+  }
+
+  void _restartSkipTimer() {
+    _skipDebounceTimer?.cancel();
+    _skipDebounceTimer = Timer(
+      MediaViewerConstants.doubleTapIndicatorDelay,
+      _executePendingSeek,
+    );
+  }
+
+  Future<void> _executePendingSeek() async {
+    _skipDebounceTimer?.cancel();
+    _skipDebounceTimer = null;
+
+    if (!_isSkipActive) return;
+    _isSkipActive = false;
+
+    final controller = _boundController;
+    final basePos = _baseSeekPosition;
+    final skipSec = _accumulatedSkipSeconds;
+    final backwards = _skipBackwards;
+
+    _baseSeekPosition = null;
+    _accumulatedSkipSeconds = 0;
+
+    if (controller != null && basePos != null && skipSec > 0) {
+      final duration = controller.value.duration;
+      final target = backwards
+          ? basePos - Duration(seconds: skipSec)
+          : basePos + Duration(seconds: skipSec);
+      final clampedPos = target < Duration.zero
+          ? Duration.zero
+          : (target > duration ? duration : target);
+
+      _isSeeking = true;
+      await controller.seekTo(clampedPos);
+      _isSeeking = false;
+    }
+
+    if (mounted) {
+      setState(() {
+        _showLeftIndicator = false;
+        _showRightIndicator = false;
+      });
+    }
+  }
+
+  /// Where the video frame is on screen right now, once this frame has been
+  /// laid out: the frame's box through every transform above it (zoom,
+  /// rotation, fit), clipped to the screen. That is the area Android should
+  /// animate into the picture-in-picture window.
+  void _scheduleVideoRectReport() {
+    if (widget.onVideoRectChanged == null || _videoRectReportScheduled) return;
+    _videoRectReportScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _videoRectReportScheduled = false;
+      if (!mounted) return;
+      final callback = widget.onVideoRectChanged;
+      final visible = _measureVideoRect();
+      if (callback == null || visible == null) return;
+      callback(visible, View.of(context).devicePixelRatio);
+    });
+  }
+
+  /// The video frame's box through every transform above it (zoom, rotation,
+  /// fit, a swipe in progress), clipped to the screen; null when it is not
+  /// laid out or not on screen.
+  Rect? _measureVideoRect() {
+    if (!mounted) return null;
+    final box = _videoFrameKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.attached || !box.hasSize) return null;
+    final view = View.of(context);
+    final bounds = MatrixUtils.transformRect(
+      box.getTransformTo(null),
+      Offset.zero & box.size,
+    );
+    final screen = Offset.zero & (view.physicalSize / view.devicePixelRatio);
+    final visible = bounds.intersect(screen);
+    return visible.isEmpty ? null : visible;
+  }
+
+  Widget _buildVideoTexture(NativeVideoController controller) {
+    _scheduleVideoRectReport();
+    final mode = widget.videoAspectRatioMode;
+    // The filter wraps only the texture, so the black letterbox bars stay
+    // black and the filtered area is exactly the video frame. It sits inside
+    // the AnimatedScale / AnimatedOpacity morph in the caller.
+    final textureView = ColorAdjustFilter(
+      adjustments: widget.adjustments,
+      child: NativeVideoPlayerView(controller: controller),
+    );
+    final rawSize = controller.value.size;
+    if (rawSize.width <= 0 || rawSize.height <= 0) {
+      return RotatedBox(
+        quarterTurns: widget.rotationQuarterTurns,
+        child: ColoredBox(color: Colors.black, child: textureView),
+      );
+    }
+    double sizedWidth = rawSize.width;
+    double sizedHeight = rawSize.height;
+    final BoxFit fit;
+    switch (mode) {
+      case VideoAspectRatioMode.bestFit:
+        fit = BoxFit.contain;
+      case VideoAspectRatioMode.fill:
+        fit = BoxFit.fill;
+      case VideoAspectRatioMode.ratio16x9:
+      case VideoAspectRatioMode.ratio4x3:
+        fit = BoxFit.cover;
+      case VideoAspectRatioMode.centre:
+        fit = BoxFit.none;
+        final dpr = MediaQuery.of(context).devicePixelRatio;
+        if (dpr > 0) {
+          sizedWidth = rawSize.width / dpr;
+          sizedHeight = rawSize.height / dpr;
+        }
+    }
+    return RotatedBox(
+      quarterTurns: widget.rotationQuarterTurns,
+      child: ColoredBox(
+        color: Colors.black,
+        child: SizedBox.expand(
+          child: FittedBox(
+            fit: fit,
+            clipBehavior: Clip.hardEdge,
+            child: SizedBox(
+              key: _videoFrameKey,
+              width: sizedWidth,
+              height: sizedHeight,
+              child: textureView,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScrubPreviewFrame(
+    Uint8List frameBytes,
+    NativeVideoController controller,
+  ) {
+    final mode = widget.videoAspectRatioMode;
+    final rawSize = controller.value.size;
+    double sizedWidth = rawSize.width > 0 ? rawSize.width : 1600;
+    double sizedHeight = rawSize.height > 0 ? rawSize.height : 900;
+    final BoxFit fit;
+    switch (mode) {
+      case VideoAspectRatioMode.bestFit:
+        fit = BoxFit.contain;
+      case VideoAspectRatioMode.fill:
+        fit = BoxFit.fill;
+      case VideoAspectRatioMode.ratio16x9:
+      case VideoAspectRatioMode.ratio4x3:
+        fit = BoxFit.cover;
+      case VideoAspectRatioMode.centre:
+        fit = BoxFit.none;
+        final dpr = MediaQuery.of(context).devicePixelRatio;
+        if (dpr > 0 && rawSize.width > 0 && rawSize.height > 0) {
+          sizedWidth = rawSize.width / dpr;
+          sizedHeight = rawSize.height / dpr;
+        }
+    }
+    return RotatedBox(
+      quarterTurns: widget.rotationQuarterTurns,
+      child: ColoredBox(
+        color: Colors.black,
+        child: SizedBox.expand(
+          child: FittedBox(
+            fit: fit,
+            clipBehavior: Clip.hardEdge,
+            child: SizedBox(
+              width: sizedWidth,
+              height: sizedHeight,
+              child: ColorAdjustFilter(
+                adjustments: widget.adjustments,
+                child: _ScrubPreviewFrameImage(bytes: frameBytes),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Duration _getMorphDuration(
+    NativeVideoController controller,
+    NativeVideoValue val,
+  ) {
+    final isFirstFrameThumbnail =
+        widget.thumbnailGenerationStrategy ==
+        ThumbnailGenerationStrategy.firstFrame;
+    final isFirstFramePlayback =
+        controller.initialPositionMs <= 1000 &&
+        val.position <= const Duration(seconds: 1);
+
+    if (isFirstFrameThumbnail && isFirstFramePlayback) {
+      return const Duration(milliseconds: 200);
+    }
+    return const Duration(milliseconds: 1500);
+  }
+
+  Curve _getMorphCurve(Duration duration) {
+    return duration.inMilliseconds > 500
+        ? Curves.easeInOutCubic
+        : Curves.easeOutCubic;
+  }
+
+  Widget _buildPoster(ColorScheme cs, {required bool isLoading}) {
+    final poster =
+        _localPosterBytes ??
+        widget.posterBytes ??
+        _thumbnailCache.peekMemory(widget.container, widget.fileName);
+
+    final posterCacheWidth =
+        (MediaQuery.of(context).size.width *
+                MediaQuery.of(context).devicePixelRatio)
+            .round()
+            .clamp(1, 1 << 20);
+
+    Widget? posterContent;
+    if (poster != null && poster.isNotEmpty) {
+      final mode = widget.videoAspectRatioMode;
+      final controller = _boundController;
+      final rawW = (controller != null && controller.value.size.width > 0)
+          ? controller.value.size.width
+          : _lastKnownVideoSize.width;
+      final rawH = (controller != null && controller.value.size.height > 0)
+          ? controller.value.size.height
+          : _lastKnownVideoSize.height;
+
+      final BoxFit fit;
+      switch (mode) {
+        case VideoAspectRatioMode.bestFit:
+          fit = BoxFit.contain;
+        case VideoAspectRatioMode.fill:
+          fit = BoxFit.fill;
+        case VideoAspectRatioMode.ratio16x9:
+        case VideoAspectRatioMode.ratio4x3:
+          fit = BoxFit.cover;
+        case VideoAspectRatioMode.centre:
+          fit = BoxFit.none;
+      }
+
+      Widget imageWidget = Image.memory(
+        poster,
+        fit: mode == VideoAspectRatioMode.centre ? BoxFit.fill : fit,
+        cacheWidth: posterCacheWidth,
+        errorBuilder: (context, error, stackTrace) {
+          return const SizedBox.expand();
+        },
+      );
+      // Filter the poster too, otherwise the picture flashes unfiltered when
+      // the poster hands over to live video. Audio cover art is not filtered.
+      if (!widget.isAudio) {
+        imageWidget = ColorAdjustFilter(
+          adjustments: widget.adjustments,
+          child: imageWidget,
+        );
+      }
+
+      if (mode == VideoAspectRatioMode.centre) {
+        final dpr = MediaQuery.of(context).devicePixelRatio;
+        if (rawW > 0 && rawH > 0 && dpr > 0) {
+          imageWidget = SizedBox(
+            width: rawW / dpr,
+            height: rawH / dpr,
+            child: imageWidget,
+          );
+        } else {
+          imageWidget = FittedBox(fit: BoxFit.contain, child: imageWidget);
+        }
+      }
+
+      if (widget.isAudio) {
+        posterContent = Center(
+          child: AspectRatio(
+            aspectRatio: 0.8,
+            child: RotatedBox(
+              quarterTurns: widget.rotationQuarterTurns,
+              child: Image.memory(
+                poster,
+                fit: BoxFit.cover,
+                cacheWidth: posterCacheWidth,
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox.expand(),
+              ),
+            ),
+          ),
+        );
+      } else {
+        posterContent = RotatedBox(
+          quarterTurns: widget.rotationQuarterTurns,
+          child: SizedBox.expand(
+            child: FittedBox(
+              fit: fit,
+              clipBehavior: Clip.hardEdge,
+              child: imageWidget,
+            ),
+          ),
+        );
+      }
+    }
+
+    return Container(
+      color: Colors.transparent,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (posterContent != null)
+            posterContent
+          else
+            const SizedBox.expand(),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    if (_playerError != null) {
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => widget.onToggleUI(!widget.showUI),
+        child: Center(
+          child: Container(
+            margin: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: cs.errorContainer.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: cs.error.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cs.errorContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.error_outline_rounded,
+                    color: cs.error,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  _playerError!,
+                  style: TextStyle(
+                    color: cs.onErrorContainer,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    final controller = _boundController;
+    final bool isVideoReady =
+        controller != null &&
+        _initialized &&
+        (widget.isAudio ||
+            (controller.value.size.width > 0 &&
+                controller.value.size.height > 0));
+    final isRotated = widget.rotationQuarterTurns % 2 != 0;
+    final double outerAspectRatio = widget.isAudio
+        ? 0.8
+        : (isVideoReady
+              ? (isRotated
+                    ? 1.0 / controller.value.aspectRatio
+                    : controller.value.aspectRatio)
+              : ((_knownAspectRatio != null && isRotated)
+                    ? 1.0 / _knownAspectRatio!
+                    : (_knownAspectRatio ?? 16 / 9)));
+    // Fill/Centre size the viewport to the full available space instead
+    // of a fixed ratio; 16:9/4:3 force a fixed ratio regardless of the
+    // source or its rotation (a landscape frame stays 16:9 on screen no
+    // matter how the source video itself is oriented); Best fit keeps the
+    // historical rotation-aware, source-shaped box.
+    final double? effectiveOuterAspectRatio = widget.isAudio
+        ? outerAspectRatio
+        : switch (widget.videoAspectRatioMode) {
+            VideoAspectRatioMode.bestFit => outerAspectRatio,
+            VideoAspectRatioMode.ratio16x9 => 16 / 9,
+            VideoAspectRatioMode.ratio4x3 => 4 / 3,
+            VideoAspectRatioMode.fill => null,
+            VideoAspectRatioMode.centre => null,
+          };
+    final Widget stackContent = Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned.fill(
+          child: Hero(
+            tag: 'media_hero_${widget.container.volId}_${widget.fileName}',
+            createRectTween: (begin, end) =>
+                MaterialRectArcTween(begin: begin, end: end),
+            child: Material(
+              color: Colors.transparent,
+              child: _buildPoster(cs, isLoading: _isActive),
+            ),
+          ),
+        ),
+        if (!widget.isAudio && controller != null && _isActive)
+          Positioned.fill(
+            child: ValueListenableBuilder<NativeVideoValue>(
+              valueListenable: controller,
+              builder: (context, val, _) {
+                final showVideo =
+                    val.isInitialized &&
+                    val.hasRenderedFirstFrame &&
+                    !controller.isDisposed;
+
+                final duration = _getMorphDuration(controller, val);
+                final curve = _getMorphCurve(duration);
+
+                return AnimatedScale(
+                  scale: showVideo ? 1.0 : 0.985,
+                  duration: duration,
+                  curve: curve,
+                  child: AnimatedOpacity(
+                    opacity: showVideo ? 1.0 : 0.0,
+                    duration: duration,
+                    curve: curve,
+                    child: _buildVideoTexture(controller),
+                  ),
+                );
+              },
+            ),
+          ),
+        if (!widget.isAudio &&
+            controller != null &&
+            _isActive &&
+            _swipeSeekPreview != null)
+          Positioned.fill(
+            child: ValueListenableBuilder<Uint8List?>(
+              valueListenable: _swipeSeekPreview!.frameNotifier,
+              builder: (context, frameBytes, _) {
+                final showFrame =
+                    (_isSwipeSeeking || _isSeeking) && frameBytes != null;
+                return IgnorePointer(
+                  child: AnimatedOpacity(
+                    opacity: showFrame ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 100),
+                    child: frameBytes != null
+                        ? _buildScrubPreviewFrame(frameBytes, controller)
+                        : const SizedBox.shrink(),
+                  ),
+                );
+              },
+            ),
+          ),
+        if (widget.isAudio)
+          controller != null
+              ? ValueListenableBuilder<NativeVideoValue>(
+                  valueListenable: controller,
+                  builder: (context, val, _) {
+                    return _buildAudioCenterVisual(cs, isPlaying: val.isPlaying);
+                  },
+                )
+              : _buildAudioCenterVisual(cs, isPlaying: false)
+        else if (!widget.isAudio && widget.subtitlesEnabled)
+          Positioned.fill(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxH = constraints.maxHeight;
+                const baseBottom = 25.0;
+                final maxUsable = (maxH - 70.0 > baseBottom)
+                    ? maxH - 70.0
+                    : baseBottom;
+                final effectiveBottom =
+                    (baseBottom +
+                            widget.subtitleVerticalPosition *
+                                (maxUsable - baseBottom))
+                        .clamp(baseBottom, maxUsable);
+
+                return Stack(
+                  children: [
+                    Positioned(
+                      left: 20,
+                      right: 20,
+                      bottom: effectiveBottom,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onVerticalDragUpdate: (details) {
+                          if (widget.onSubtitleVerticalPositionChanged == null)
+                            return;
+                          final delta = -details.primaryDelta!;
+                          final totalRange = maxUsable - baseBottom;
+                          if (totalRange <= 0) return;
+                          final newPos =
+                              (widget.subtitleVerticalPosition +
+                                      (delta / totalRange))
+                                  .clamp(0.0, 1.0);
+                          widget.onSubtitleVerticalPositionChanged!(newPos);
+                        },
+                        child: controller != null
+                            ? ValueListenableBuilder<NativeVideoValue>(
+                                valueListenable: controller,
+                                builder: (context, videoVal, _) {
+                                  return ValueListenableBuilder<
+                                    VideoPlaybackProgress
+                                  >(
+                                    valueListenable: widget.progressNotifier,
+                                    builder: (context, progress, _) {
+                                      final text =
+                                          videoVal.captionText.isNotEmpty
+                                          ? videoVal.captionText
+                                          : _captionTextAt(progress.position);
+                                      return _fadeWhileDismissing(
+                                        ClosedCaptionText(
+                                          text: text,
+                                          textStyle: TextStyle(
+                                            fontSize: widget.subtitleFontSize,
+                                            color: Colors.white,
+                                            shadows: const [
+                                              Shadow(
+                                                blurRadius: 4,
+                                                color: Colors.black,
+                                                offset: Offset(1, 1),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              )
+                            : ValueListenableBuilder<VideoPlaybackProgress>(
+                                valueListenable: widget.progressNotifier,
+                                builder: (context, progress, _) {
+                                  return _fadeWhileDismissing(
+                                    ClosedCaptionText(
+                                      text: _captionTextAt(progress.position),
+                                      textStyle: TextStyle(
+                                        fontSize: widget.subtitleFontSize,
+                                        color: Colors.white,
+                                        shadows: const [
+                                          Shadow(
+                                            blurRadius: 4,
+                                            color: Colors.black,
+                                            offset: Offset(1, 1),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        if (controller != null && _isActive)
+          _MediaLoadingFeedbackOverlay(
+            controller: controller,
+            colorScheme: cs,
+            isAudio: widget.isAudio,
+          ),
+        Positioned.fill(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerDown: (event) =>
+                    _onSkipPointerDown(event, constraints.maxWidth),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    if (_isSkipActive ||
+                        _isSwipeSeeking ||
+                        _showSwipeSeekHud ||
+                        _showLeftIndicator ||
+                        _showRightIndicator) {
+                      return;
+                    }
+                    widget.onToggleUI(!widget.showUI);
+                  },
+                  onDoubleTapDown: (d) => _videoDoubleTapDetails = d,
+                  onDoubleTap: () {
+                    if (widget.isAudio) {
+                      // The edges navigate on a single tap, so a double-tap
+                      // there must not also play/pause.
+                      final audioWidth = constraints.maxWidth;
+                      final audioDx =
+                          _videoDoubleTapDetails?.localPosition.dx ??
+                          audioWidth / 2;
+                      final audioEdge =
+                          audioWidth *
+                          MediaViewerConstants.tapToNavigateEdgeFraction;
+                      if (widget.tapEdgesToNavigate &&
+                          (audioDx <= audioEdge ||
+                              audioDx >= audioWidth - audioEdge)) {
+                        return;
+                      }
+                      if (widget.doubleTapPlayPause) _togglePlayPause();
+                      return;
+                    }
+                    // Strict check: if not default zoom, double-tap anywhere on
+                    // screen resets zoom. With double-tap play/pause the zoom
+                    // is reset from the zoom-level pill instead.
+                    if (_isZoomed && !widget.doubleTapPlayPause) {
+                      _handleVideoDoubleTap();
+                      return;
+                    }
+                    // At default zoom, left/right 30% skips (unless turned
+                    // off); center zooms in
+                    final width = constraints.maxWidth;
+                    final dx = _videoDoubleTapDetails?.localPosition.dx ?? 0;
+                    final edgeWidth =
+                        width * MediaViewerConstants.tapToNavigateEdgeFraction;
+                    if (widget.tapEdgesToNavigate &&
+                        (dx <= edgeWidth || dx >= width - edgeWidth)) {
+                      return;
+                    }
+                    // With skipping off (skipSeconds == 0) the sides act like
+                    // the middle.
+                    final canSkip = widget.skipSeconds > 0;
+                    if (canSkip && dx < width * 0.3) {
+                      _handleDoubleTapSkip(backwards: true);
+                    } else if (canSkip && dx > width * 0.7) {
+                      _handleDoubleTapSkip(backwards: false);
+                    } else if (widget.doubleTapPlayPause) {
+                      _togglePlayPause();
+                    } else {
+                      _handleVideoDoubleTap();
+                    }
+                  },
+                  onLongPressStart: _onSpeedHoldStart,
+                  onLongPressEnd: _onSpeedHoldEnd,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+    Widget corePlayerWidget = effectiveOuterAspectRatio != null
+        ? Center(
+            child: AspectRatio(
+              aspectRatio: effectiveOuterAspectRatio,
+              child: MediaSwipeDismissTarget(child: stackContent),
+            ),
+          )
+        : SizedBox.expand(child: MediaSwipeDismissTarget(child: stackContent));
+    if (!widget.isAudio && widget.enableZoom) {
+      final vpSize = MediaQuery.of(context).size;
+      corePlayerWidget = InteractiveViewer(
+        key: _interactiveViewerKey,
+        transformationController: _videoTransformationController,
+        maxScale: MediaViewerConstants.maxVideoZoom,
+        minScale: _effectiveMinZoomScale,
+        interactionEndFrictionCoefficient: 0.0005,
+        boundaryMargin: widget.pinchZoomOutEnabled
+            ? const EdgeInsets.all(double.infinity)
+            : EdgeInsets.zero,
+        panEnabled: _isZoomedIn,
+        clipBehavior: Clip.none,
+        onInteractionStart: (details) {
+          if (details.pointerCount >= 2) {
+            _zoomAnimationController?.stop();
+          }
+          widget.onZoomChanged(false);
+        },
+        onInteractionUpdate: (details) {
+          final s = _getMatrixScale(_videoTransformationController.value);
+          if (s != _videoScale) {
+            _videoScale = s;
+          }
+        },
+        onInteractionEnd: (details) {
+          final s = _getMatrixScale(_videoTransformationController.value);
+          final clampedS = s.clamp(
+            _effectiveMinZoomScale,
+            MediaViewerConstants.maxVideoZoom,
+          );
+          if (clampedS < 1.0 && vpSize.width > 0 && vpSize.height > 0) {
+            final dx = vpSize.width * (1.0 - clampedS) / 2.0;
+            final dy = vpSize.height * (1.0 - clampedS) / 2.0;
+            _isClampingMatrix = true;
+            _videoTransformationController.value = Matrix4.identity()
+              ..translateByDouble(dx, dy, 0.0, 1.0)
+              ..scaleByDouble(clampedS, clampedS, clampedS, 1.0);
+            _isClampingMatrix = false;
+          }
+          setState(() {
+            _videoScale = _getMatrixScale(_videoTransformationController.value);
+          });
+          widget.onZoomChanged(!_isZoomed);
+        },
+        child: corePlayerWidget,
+      );
+    }
+
+    // Capture this during build because the tap recognizer can finish after
+    // this playlist item is deactivated.
+    final tapViewportWidth = MediaQuery.sizeOf(context).width;
+
+    // Outer detector captures double-taps anywhere across the entire viewport
+    // (including the black letterbox bars and out-of-bounds space) to reset zoom.
+    corePlayerWidget = GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapUp: (details) {
+        if (_isSkipActive ||
+            _isSwipeSeeking ||
+            _showSwipeSeekHud ||
+            _showLeftIndicator ||
+            _showRightIndicator) {
+          return;
+        }
+        final width = tapViewportWidth;
+        final x = details.globalPosition.dx;
+        if (widget.tapEdgesToNavigate &&
+            !_isZoomed &&
+            width > 0 &&
+            (x <= width * MediaViewerConstants.tapToNavigateEdgeFraction ||
+                x >=
+                    width *
+                        (1 - MediaViewerConstants.tapToNavigateEdgeFraction))) {
+          return;
+        }
+        widget.onToggleUI(!widget.showUI);
+      },
+      onDoubleTap: () {
+        if (_isZoomed && !widget.doubleTapPlayPause) {
+          _handleVideoDoubleTap();
+        }
+      },
+      child: corePlayerWidget,
+    );
+
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: _onGlobalPointerDown,
+      onPointerMove: _onGlobalPointerMove,
+      onPointerUp: _onGlobalPointerUp,
+      onPointerCancel: _onGlobalPointerUp,
+      child: LayoutBuilder(
+        builder: (context, outerConstraints) {
+          _tapViewportWidth = outerConstraints.maxWidth;
+          final rawEdgeWidth =
+              outerConstraints.maxWidth * widget.edgeSwipeWidthFraction;
+          final edgeWidth = rawEdgeWidth.clamp(
+            outerConstraints.maxWidth * MediaViewerConstants.edgeSwipeWidthMin,
+            outerConstraints.maxWidth * MediaViewerConstants.edgeSwipeWidthMax,
+          );
+          return ClipRect(
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                corePlayerWidget,
+                // Lets a curved or L-shaped swipe be claimed for the playlist
+                // pager before the zoom viewer under it takes the touch. Audio
+                // has no zoom viewer, so nothing competes with the pager there.
+                if (!widget.isAudio && widget.enableZoom)
+                  const Positioned.fill(child: PlaylistSwipeClaimLayer()),
+                if (widget.swipeToSeekEnabled && !widget.isAudio)
+                  Positioned(
+                    left: math.min(
+                      MediaViewerConstants.swipeToSeekEdgeInset,
+                      outerConstraints.maxWidth * 0.2,
+                    ),
+                    right: math.min(
+                      MediaViewerConstants.swipeToSeekEdgeInset,
+                      outerConstraints.maxWidth * 0.2,
+                    ),
+                    top: 0,
+                    bottom: 0,
+                    child: _swipeToSeekStrip(
+                      onClaimCreated: (r) => _swipeToSeekClaim = r,
+                      onDragStart: _handleSwipeToSeekStart,
+                      onDragUpdate: (d) => _handleSwipeToSeekUpdate(
+                        d,
+                        outerConstraints.maxWidth,
+                      ),
+                      onDragEnd: _handleSwipeToSeekEnd,
+                      onDragCancel: _handleSwipeToSeekCancel,
+                    ),
+                  ),
+                if (widget.edgeSwipeBrightnessEnabled)
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: edgeWidth,
+                    child: _edgeSwipeStrip(
+                      onClaimCreated: (r) => _brightnessClaim = r,
+                      onDragStart: _handleBrightnessDragStart,
+                      onDragUpdate: _handleBrightnessDragUpdate,
+                      onDragEnd: _handleBrightnessDragEnd,
+                      onDragCancel: _handleBrightnessDragCancel,
+                    ),
+                  ),
+                if (widget.edgeSwipeVolumeEnabled)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: edgeWidth,
+                    child: _edgeSwipeStrip(
+                      onClaimCreated: (r) => _volumeClaim = r,
+                      onDragStart: _handleVolumeDragStart,
+                      onDragUpdate: _handleVolumeDragUpdate,
+                      onDragEnd: _handleVolumeDragEnd,
+                      onDragCancel: _handleVolumeDragCancel,
+                    ),
+                  ),
+                if (_showLeftIndicator)
+                  _buildIndicator(
+                    Icons.fast_rewind_rounded,
+                    '-${_accumulatedSkipSeconds}s',
+                    true,
+                  ),
+                if (_showRightIndicator)
+                  _buildIndicator(
+                    Icons.fast_forward_rounded,
+                    '+${_accumulatedSkipSeconds}s',
+                    false,
+                  ),
+                if (_isSpeedHeld)
+                  Positioned(
+                    top: 96,
+                    child: IgnorePointer(
+                      child: _fadeWhileDismissing(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${_formatSpeedMultiplier(_effectiveHoldSpeed)}x',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                _effectiveHoldSpeed < 1.0
+                                    ? Icons.play_arrow_rounded
+                                    : Icons.fast_forward_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                // The HUDs sit on the opposite side from the strip being
+                // dragged, so the finger never covers them.
+                if (widget.edgeSwipeHudEnabled && _showBrightnessHud)
+                  _buildEdgeGestureHud(
+                    isLeft: false,
+                    icon: Icons.wb_sunny_rounded,
+                    level: _brightnessLevel,
+                  ),
+                if (widget.edgeSwipeHudEnabled && _showVolumeHud)
+                  _buildEdgeGestureHud(
+                    isLeft: true,
+                    icon: _volumeLevel <= 0.01
+                        ? Icons.volume_off_rounded
+                        : Icons.volume_up_rounded,
+                    level: _volumeLevel,
+                  ),
+                if (_showSwipeSeekHud)
+                  _fadeWhileDismissing(_buildSwipeSeekHud()),
+                if (!widget.isAudio && widget.enableZoom)
+                  AnimatedPositioned(
+                    duration: MediaViewerConstants.animationDuration,
+                    curve: Curves.easeOutCubic,
+                    bottom: widget.zoomIndicatorBottomOffset,
+                    right: 16,
+                    child: _fadeWhileDismissing(
+                      AutoHideZoomIndicator(
+                        transform: _videoTransformationController,
+                        backgroundColor: Colors.white.withValues(alpha: 0.12),
+                        onReset: _resetVideoZoom,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  static String _formatSpeedMultiplier(double value) {
+    if (value % 1 == 0) return value.toInt().toString();
+    String s = value.toStringAsFixed(2);
+    if (s.endsWith('0')) s = s.substring(0, s.length - 1);
+    return s;
+  }
+
+  Widget _buildEdgeGestureHud({
+    required bool isLeft,
+    required IconData icon,
+    required double level,
+  }) {
+    final clampedLevel = level.clamp(0.0, 1.0);
+    final percent = (clampedLevel * 100).round();
+    return Positioned(
+      left: isLeft ? 40 : null,
+      right: isLeft ? null : 40,
+      child: IgnorePointer(
+        child: _fadeWhileDismissing(
+          Container(
+          width: 56,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 20),
+              const SizedBox(height: 8),
+              Container(
+                height: 72,
+                width: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FractionallySizedBox(
+                    widthFactor: 1.0,
+                    heightFactor: clampedLevel,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$percent%',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _canStartSwipeToSeek() {
+    if (!widget.swipeToSeekEnabled ||
+        widget.isAudio ||
+        !_isActive ||
+        _isZoomed) {
+      return false;
+    }
+    if (_activeTouchPointers.length > 1) return false;
+    final controller = _boundController;
+    if (controller == null || !controller.value.isInitialized) return false;
+    if (controller.value.duration <= Duration.zero) return false;
+    return true;
+  }
+
+  Widget _swipeToSeekStrip({
+    required void Function(SwipeToSeekClaimRecognizer) onClaimCreated,
+    required GestureDragStartCallback onDragStart,
+    required GestureDragUpdateCallback onDragUpdate,
+    required GestureDragEndCallback onDragEnd,
+    required VoidCallback onDragCancel,
+  }) {
+    return RawGestureDetector(
+      behavior: HitTestBehavior.translucent,
+      gestures: <Type, GestureRecognizerFactory>{
+        SwipeToSeekClaimRecognizer:
+            GestureRecognizerFactoryWithHandlers<SwipeToSeekClaimRecognizer>(
+              () {
+                final recognizer = SwipeToSeekClaimRecognizer(
+                  canClaim: _canStartSwipeToSeek,
+                );
+                onClaimCreated(recognizer);
+                return recognizer;
+              },
+              (recognizer) {
+                recognizer
+                  ..onStart = onDragStart
+                  ..onUpdate = onDragUpdate
+                  ..onEnd = onDragEnd
+                  ..onCancel = onDragCancel;
+              },
+            ),
+      },
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+
+  // The same conditions the strips' pointer-down handlers use to decide
+  // whether they'll act on a touch. The claim recognizer asks this when a touch
+  // lands, so a strip that wouldn't change anything (inactive video, zoomed in,
+  // multi-touch) never blocks the surrounding list or pager from scrolling.
+  bool _canStartEdgeSwipe() =>
+      _isActive && !_isZoomed && _activeTouchPointers.length <= 1;
+
+  Widget _edgeSwipeStrip({
+    required void Function(EdgeSwipeClaimRecognizer) onClaimCreated,
+    required GestureDragStartCallback onDragStart,
+    required GestureDragUpdateCallback onDragUpdate,
+    required GestureDragEndCallback onDragEnd,
+    required VoidCallback onDragCancel,
+  }) {
+    return RawGestureDetector(
+      behavior: HitTestBehavior.translucent,
+      gestures: <Type, GestureRecognizerFactory>{
+        EdgeSwipeClaimRecognizer:
+            GestureRecognizerFactoryWithHandlers<EdgeSwipeClaimRecognizer>(
+              () {
+                final recognizer = EdgeSwipeClaimRecognizer(
+                  canClaim: _canStartEdgeSwipe,
+                );
+                onClaimCreated(recognizer);
+                return recognizer;
+              },
+              (recognizer) {
+                recognizer
+                  ..gestureSettings = MediaQuery.maybeGestureSettingsOf(context)
+                  ..onStart = onDragStart
+                  ..onUpdate = onDragUpdate
+                  ..onEnd = onDragEnd
+                  ..onCancel = onDragCancel;
+              },
+            ),
+      },
+      // Listener with translucent behavior ensures the hit-test tree registers
+      // this strip across its entire bounds while allowing taps underneath.
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+
+  void _onGlobalPointerDown(PointerDownEvent event) {
+    if (event.kind != PointerDeviceKind.touch) return;
+    _lockController.scheduleAutoLock();
+    _activeTouchPointers.add(event.pointer);
+    if (_activeTouchPointers.length >= 2) {
+      _clearEdgeTapCandidates();
+      _abortEdgeGestures();
+      _abortSwipeToSeek();
+      return;
+    }
+    if (widget.tapEdgesToNavigate &&
+        !_isZoomed &&
+        _isActive &&
+        _tapViewportWidth > 0) {
+      final edgeWidth =
+          _tapViewportWidth * MediaViewerConstants.tapToNavigateEdgeFraction;
+      final x = event.localPosition.dx;
+      if (x <= edgeWidth) {
+        _edgeTapStartPositions[event.pointer] = event.localPosition;
+        _edgeTapDirections[event.pointer] = false;
+      } else if (x >= _tapViewportWidth - edgeWidth) {
+        _edgeTapStartPositions[event.pointer] = event.localPosition;
+        _edgeTapDirections[event.pointer] = true;
+      }
+    }
+  }
+
+  void _onGlobalPointerMove(PointerMoveEvent event) {
+    final start = _edgeTapStartPositions[event.pointer];
+    if (start == null) return;
+    final delta = event.localPosition - start;
+    final tolerance = MediaViewerConstants.tapToNavigateMovementTolerance;
+    if (delta.distanceSquared > tolerance * tolerance) {
+      _edgeTapStartPositions.remove(event.pointer);
+      _edgeTapDirections.remove(event.pointer);
+    }
+  }
+
+  void _onGlobalPointerUp(PointerEvent event) {
+    if (event.kind != PointerDeviceKind.touch) return;
+    _activeTouchPointers.remove(event.pointer);
+    final next = _edgeTapDirections.remove(event.pointer);
+    _edgeTapStartPositions.remove(event.pointer);
+    if (event is PointerUpEvent && next != null && mounted) {
+      widget.onEdgeTap?.call(next);
+    }
+  }
+
+  void _clearEdgeTapCandidates() {
+    _edgeTapStartPositions.clear();
+    _edgeTapDirections.clear();
+  }
+
+  void _abortEdgeGestures() {
+    _brightnessClaim?.abort();
+    _volumeClaim?.abort();
+    _handleBrightnessDragCancel();
+    _handleVolumeDragCancel();
+  }
+
+  void _handleBrightnessDragStart(DragStartDetails details) {
+    if (!_canStartEdgeSwipe()) return;
+    widget.onZoomChanged(
+      false,
+    ); // Freezes scroll physics so list/page cannot scroll
+    _brightnessDragStartLevel = ScreenBrightnessBridge.lastKnownLevel;
+    _brightnessLevel = _brightnessDragStartLevel!;
+    _isBrightnessDragging = true;
+    _brightnessHudTimer?.cancel();
+    setState(() => _showBrightnessHud = true);
+  }
+
+  void _handleBrightnessDragUpdate(DragUpdateDetails details) {
+    if (!_isBrightnessDragging) return;
+    if (_activeTouchPointers.length > 1) {
+      _abortEdgeGestures();
+      return;
+    }
+    final dy = details.primaryDelta ?? details.delta.dy;
+    final delta = -dy; // Dragging upward increases brightness
+    final change =
+        delta /
+        MediaViewerConstants.edgeSwipeFullRangeDistance *
+        widget.brightnessGestureSensitivity;
+    final newLevel = (_brightnessLevel + change).clamp(0.0, 1.0);
+    if ((newLevel - _brightnessLevel).abs() < 0.002) return;
+    setState(() => _brightnessLevel = newLevel);
+    unawaited(ScreenBrightnessBridge.setBrightness(newLevel));
+  }
+
+  void _handleBrightnessDragEnd(DragEndDetails details) {
+    if (_isBrightnessDragging) {
+      _isBrightnessDragging = false;
+      widget.onZoomChanged(
+        !_isZoomed,
+      ); // Restores scroll physics only if not zoomed
+      _hideBrightnessHudSoon();
+    }
+    _brightnessDragStartLevel = null;
+  }
+
+  void _handleBrightnessDragCancel() {
+    if (_isBrightnessDragging) {
+      _isBrightnessDragging = false;
+      widget.onZoomChanged(
+        !_isZoomed,
+      ); // Restores scroll physics only if not zoomed
+      _hideBrightnessHudSoon();
+    }
+    _brightnessDragStartLevel = null;
+  }
+
+  void _hideBrightnessHudSoon() {
+    _brightnessHudTimer?.cancel();
+    _brightnessHudTimer = Timer(MediaViewerConstants.edgeSwipeHudHideDelay, () {
+      if (mounted) setState(() => _showBrightnessHud = false);
+    });
+  }
+
+  void _handleVolumeDragStart(DragStartDetails details) {
+    if (!_canStartEdgeSwipe()) return;
+    widget.onZoomChanged(
+      false,
+    ); // Freezes scroll physics so list/page cannot scroll
+    _volumeDragStartLevel = widget.isMuted ? 0.0 : _volumeLevel;
+    _volumeLevel = _volumeDragStartLevel!;
+    _isVolumeDragging = true;
+    _volumeHudTimer?.cancel();
+    setState(() => _showVolumeHud = true);
+  }
+
+  void _handleVolumeDragUpdate(DragUpdateDetails details) {
+    if (!_isVolumeDragging) return;
+    if (_activeTouchPointers.length > 1) {
+      _abortEdgeGestures();
+      return;
+    }
+    final dy = details.primaryDelta ?? details.delta.dy;
+    final delta = -dy; // Dragging upward increases volume
+    final change =
+        delta /
+        MediaViewerConstants.edgeSwipeFullRangeDistance *
+        widget.volumeGestureSensitivity;
+    final newLevel = (_volumeLevel + change).clamp(0.0, 1.0);
+    if ((newLevel - _volumeLevel).abs() < 0.002) return;
+    setState(() => _volumeLevel = newLevel);
+    unawaited(DeviceVolumeBridge.setVolume(newLevel));
+
+    if (newLevel <= 0.01) {
+      if (!widget.isMuted) {
+        widget.onMuteChanged?.call(true);
+      }
+    } else {
+      if (widget.isMuted) {
+        widget.onMuteChanged?.call(false);
+      }
+      _boundController?.setVolume(100);
+    }
+  }
+
+  void _handleVolumeDragEnd(DragEndDetails details) {
+    if (_isVolumeDragging) {
+      _isVolumeDragging = false;
+      widget.onZoomChanged(
+        !_isZoomed,
+      ); // Restores scroll physics only if not zoomed
+      _hideVolumeHudSoon();
+    }
+    _volumeDragStartLevel = null;
+  }
+
+  void _handleVolumeDragCancel() {
+    if (_isVolumeDragging) {
+      _isVolumeDragging = false;
+      widget.onZoomChanged(
+        !_isZoomed,
+      ); // Restores scroll physics only if not zoomed
+      _hideVolumeHudSoon();
+    }
+    _volumeDragStartLevel = null;
+  }
+
+  void _hideVolumeHudSoon() {
+    _volumeHudTimer?.cancel();
+    _volumeHudTimer = Timer(MediaViewerConstants.edgeSwipeHudHideDelay, () {
+      if (mounted) setState(() => _showVolumeHud = false);
+    });
+  }
+
+  void _handleSwipeToSeekStart(DragStartDetails details) {
+    if (!_canStartSwipeToSeek()) return;
+    final controller = _boundController;
+    if (controller == null) return;
+
+    widget.onZoomChanged(false); // Freezes scroll physics
+    _isSwipeSeeking = true;
+    _seekDragStartPosition = controller.value.position;
+    _seekDragTotalDuration = controller.value.duration;
+    _seekDragAccumulatedDx = 0.0;
+    _swipeSeekTargetPosition = _seekDragStartPosition;
+    _swipeSeekDelta = Duration.zero;
+    _swipeSeekHudTimer?.cancel();
+    unawaited(HapticFeedback.selectionClick());
+
+    _wasPlayingBeforeSwipeSeek = controller.value.isPlaying;
+    if (_wasPlayingBeforeSwipeSeek) {
+      unawaited(controller.pause());
+    }
+
+    _cleanupSwipeSeekPreview();
+    final preview = VideoScrubPreviewController.forStyle(
+      controller,
+      ScrubPreviewStyle.fullscreen,
+      videoDuration: _seekDragTotalDuration,
+    );
+    _swipeSeekPreview = preview;
+    unawaited(
+      preview.begin().then((_) {
+        if (!mounted || _swipeSeekPreview != preview) return;
+        if (preview.available) {
+          preview.requestFrame(_swipeSeekTargetPosition);
+        }
+        setState(() {});
+      }),
+    );
+
+    widget.progressNotifier.value = widget.progressNotifier.value.copyWith(
+      isDragging: true,
+      position: _swipeSeekTargetPosition,
+    );
+
+    setState(() => _showSwipeSeekHud = true);
+  }
+
+  void _handleSwipeToSeekUpdate(DragUpdateDetails details, double screenWidth) {
+    if (!_isSwipeSeeking) return;
+    if (_activeTouchPointers.length > 1) {
+      _abortSwipeToSeek();
+      return;
+    }
+    final dx = details.primaryDelta ?? details.delta.dx;
+    _seekDragAccumulatedDx += dx;
+
+    final width = screenWidth > 0 ? screenWidth : 360.0;
+    final totalSec = _seekDragTotalDuration.inMilliseconds / 1000.0;
+
+    double seekRangeSeconds;
+    if (totalSec <= 60) {
+      seekRangeSeconds = totalSec;
+    } else if (totalSec <= 300) {
+      seekRangeSeconds = 90.0;
+    } else if (totalSec <= 1800) {
+      seekRangeSeconds = 180.0;
+    } else {
+      seekRangeSeconds = (totalSec * 0.1).clamp(180.0, 600.0);
+    }
+
+    final dragFraction = _seekDragAccumulatedDx / width;
+    final deltaSeconds =
+        dragFraction * seekRangeSeconds * widget.seekSensitivity;
+    final deltaMs = (deltaSeconds * 1000).round();
+
+    final startMs = _seekDragStartPosition.inMilliseconds;
+    final totalMs = _seekDragTotalDuration.inMilliseconds;
+    final targetMs = (startMs + deltaMs).clamp(0, totalMs);
+    final targetPosition = Duration(milliseconds: targetMs);
+    final delta = targetPosition - _seekDragStartPosition;
+
+    final sliderVal = totalMs > 0 ? (targetMs / totalMs).clamp(0.0, 1.0) : 0.0;
+
+    _swipeSeekTargetPosition = targetPosition;
+    _swipeSeekDelta = delta;
+
+    _swipeSeekPreview?.requestFrame(targetPosition);
+
+    widget.progressNotifier.value = widget.progressNotifier.value.copyWith(
+      isDragging: true,
+      position: targetPosition,
+      sliderValue: sliderVal,
+    );
+
+    setState(() {});
+  }
+
+  Future<void> _handleSwipeToSeekEnd(DragEndDetails details) async {
+    if (!_isSwipeSeeking) return;
+    _isSwipeSeeking = false;
+    widget.onZoomChanged(!_isZoomed);
+
+    final target = _swipeSeekTargetPosition;
+    final controller = _boundController;
+    if (controller != null && controller.value.isInitialized) {
+      _isSeeking = true;
+      try {
+        await controller.seekTo(target);
+        if (_wasPlayingBeforeSwipeSeek) {
+          await controller.play();
+        }
+      } catch (e) {
+        // seek error handled
+      }
+      _isSeeking = false;
+    }
+    unawaited(HapticFeedback.lightImpact());
+
+    final totalMs = _seekDragTotalDuration.inMilliseconds;
+    final sliderVal = totalMs > 0
+        ? (target.inMilliseconds / totalMs).clamp(0.0, 1.0)
+        : 0.0;
+
+    widget.progressNotifier.value = widget.progressNotifier.value.copyWith(
+      isDragging: false,
+      position: target,
+      sliderValue: sliderVal,
+    );
+
+    _cleanupSwipeSeekPreview();
+    _hideSwipeSeekHudSoon();
+  }
+
+  void _handleSwipeToSeekCancel() {
+    if (!_isSwipeSeeking) return;
+    _isSwipeSeeking = false;
+    widget.onZoomChanged(!_isZoomed);
+
+    if (_wasPlayingBeforeSwipeSeek && _boundController != null) {
+      unawaited(_boundController!.play());
+    }
+
+    final totalMs = _seekDragTotalDuration.inMilliseconds;
+    final sliderVal = totalMs > 0
+        ? (_seekDragStartPosition.inMilliseconds / totalMs).clamp(0.0, 1.0)
+        : 0.0;
+
+    widget.progressNotifier.value = widget.progressNotifier.value.copyWith(
+      isDragging: false,
+      position: _seekDragStartPosition,
+      sliderValue: sliderVal,
+    );
+
+    _cleanupSwipeSeekPreview();
+    _hideSwipeSeekHudSoon();
+  }
+
+  void _abortSwipeToSeek() {
+    _swipeToSeekClaim?.abort();
+    _handleSwipeToSeekCancel();
+  }
+
+  void _cleanupSwipeSeekPreview() {
+    final preview = _swipeSeekPreview;
+    _swipeSeekPreview = null;
+    if (preview != null) {
+      unawaited(preview.end());
+      if (mounted) setState(() {});
+    }
+  }
+
+  void _hideSwipeSeekHudSoon() {
+    _swipeSeekHudTimer?.cancel();
+    _swipeSeekHudTimer = Timer(MediaViewerConstants.edgeSwipeHudHideDelay, () {
+      if (mounted) setState(() => _showSwipeSeekHud = false);
+    });
+  }
+
+  Widget _buildSwipeSeekHud() {
+    return SwipeSeekHud(
+      targetPosition: _swipeSeekTargetPosition,
+      totalDuration: _seekDragTotalDuration,
+      delta: _swipeSeekDelta,
+    );
+  }
+
+  Widget _buildIndicator(IconData icon, String text, bool isLeft) {
+    return Positioned(
+      left: isLeft ? 40 : null,
+      right: isLeft ? null : 40,
+      child: IgnorePointer(
+        child: _fadeWhileDismissing(
+          Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.65),
+            shape: BoxShape.circle,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 28),
+              const SizedBox(height: 2),
+              Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAudioCenterVisual(ColorScheme cs, {required bool isPlaying}) {
+    final fileTitle = widget.fileName.split('/').last;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 130,
+          height: 130,
+          decoration: BoxDecoration(
+            color: cs.primaryContainer.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(
+              color: cs.primary.withValues(alpha: 0.3),
+              width: 2,
+            ),
+          ),
+          child: Center(
+            child: Icon(Icons.music_note_rounded, size: 56, color: cs.primary),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Text(
+            fileTitle,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(height: 24),
+        _AudioVisualizer(isPlaying: isPlaying),
+      ],
+    );
+  }
+}
+
+class _AudioVisualizer extends StatefulWidget {
+  final bool isPlaying;
+  const _AudioVisualizer({required this.isPlaying});
+  @override
+  State<_AudioVisualizer> createState() => _AudioVisualizerState();
+}
+
+class _AudioVisualizerState extends State<_AudioVisualizer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  final List<double> _heights = [0.2, 0.5, 0.8, 0.4, 0.9, 0.3, 0.7, 0.5, 0.2];
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    if (widget.isPlaying) _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant _AudioVisualizer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isPlaying && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (!widget.isPlaying && _controller.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SizedBox(
+      height: 50,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) => Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: List.generate(_heights.length, (index) {
+            double animValue = _controller.value;
+            double factor = (index % 3 == 0)
+                ? (animValue * 0.8 + 0.2)
+                : (index % 3 == 1)
+                ? ((1.0 - animValue) * 0.7 + 0.3)
+                : (((animValue + 0.5) % 1.0) * 0.6 + 0.4);
+            if (!widget.isPlaying) factor = 0.15;
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              width: 5,
+              height: 40 * factor * _heights[index],
+              decoration: BoxDecoration(
+                color: cs.primary,
+                borderRadius: BorderRadius.circular(100),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+
+class _MediaLoadingFeedbackOverlay extends StatefulWidget {
+  final NativeVideoController controller;
+  final ColorScheme colorScheme;
+  final bool isAudio;
+
+  const _MediaLoadingFeedbackOverlay({
+    required this.controller,
+    required this.colorScheme,
+    this.isAudio = false,
+  });
+
+  @override
+  State<_MediaLoadingFeedbackOverlay> createState() =>
+      _MediaLoadingFeedbackOverlayState();
+}
+
+class _MediaLoadingFeedbackOverlayState
+    extends State<_MediaLoadingFeedbackOverlay> {
+  Timer? _delayTimer;
+  bool _showFeedback = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_evaluateState);
+    _evaluateState();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MediaLoadingFeedbackOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller ||
+        oldWidget.isAudio != widget.isAudio) {
+      oldWidget.controller.removeListener(_evaluateState);
+      widget.controller.addListener(_evaluateState);
+      _showFeedback = false;
+      _delayTimer?.cancel();
+      _delayTimer = null;
+      _evaluateState();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_evaluateState);
+    _delayTimer?.cancel();
+    super.dispose();
+  }
+
+  void _evaluateState() {
+    final val = widget.controller.value;
+    // Feedback is needed if the video hasn't rendered its first frame yet
+    // (or audio hasn't initialized), or if it is rebuffering during playback.
+    final mediaStarted =
+        val.isInitialized && (widget.isAudio || val.hasRenderedFirstFrame);
+    final needsFeedback = !mediaStarted || val.isBuffering;
+
+    if (!needsFeedback) {
+      _delayTimer?.cancel();
+      _delayTimer = null;
+      if (_showFeedback) {
+        setState(() => _showFeedback = false);
+      }
+      return;
+    }
+
+    if (_showFeedback) {
+      // Already showing, trigger rebuild if downloading/buffering status changed
+      setState(() {});
+      return;
+    }
+
+    // Start 1-second delay timer so short loads (< 1s) never flicker
+    _delayTimer ??= Timer(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      final currentVal = widget.controller.value;
+      final stillNeedsFeedback =
+          (!currentVal.isInitialized ||
+              (!widget.isAudio && !currentVal.hasRenderedFirstFrame)) ||
+          currentVal.isBuffering;
+      if (stillNeedsFeedback) {
+        setState(() => _showFeedback = true);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_showFeedback) return const SizedBox.shrink();
+
+    final val = widget.controller.value;
+    final isDownloading = val.isMirrorDownloading;
+    final cs = widget.colorScheme;
+
+    return IgnorePointer(
+      child: Center(
+        child: AnimatedOpacity(
+          opacity: _showFeedback ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 200),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isDownloading ? 16 : 14,
+              vertical: isDownloading ? 10 : 14,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(isDownloading ? 24 : 100),
+              border: isDownloading
+                  ? Border.all(
+                      color: cs.primary.withValues(alpha: 0.5),
+                      width: 1.5,
+                    )
+                  : null,
+            ),
+            child: isDownloading
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(cs.primary),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Downloading...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  )
+                : SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(cs.primary),
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ScrubPreviewFrameImage extends StatefulWidget {
+  final Uint8List bytes;
+  const _ScrubPreviewFrameImage({required this.bytes});
+
+  @override
+  State<_ScrubPreviewFrameImage> createState() =>
+      _ScrubPreviewFrameImageState();
+}
+
+class _ScrubPreviewFrameImageState extends State<_ScrubPreviewFrameImage> {
+  static void _evict(Uint8List bytes) {
+    unawaited(MemoryImage(bytes).evict());
+  }
+
+  @override
+  void didUpdateWidget(_ScrubPreviewFrameImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.bytes, widget.bytes)) _evict(oldWidget.bytes);
+  }
+
+  @override
+  void dispose() {
+    _evict(widget.bytes);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.memory(
+      widget.bytes,
+      fit: BoxFit.fill,
+      filterQuality: FilterQuality.medium,
+      gaplessPlayback: true,
+      errorBuilder: (context, error, stackTrace) => const SizedBox.expand(),
+    );
+  }
+}

@@ -1,0 +1,968 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:vaultexplorer/core/theme/app_skin_tokens.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area_colors.dart';
+import 'package:vaultexplorer/data/models/app_skin_preset.dart';
+import 'package:vaultexplorer/data/models/custom_app_skin.dart';
+import 'package:vaultexplorer/data/models/file_manager_skin.dart';
+
+abstract final class AppRadius {
+  static const sm = 8.0;
+  static const md = 12.0;
+  static const lg = 20.0;
+  static const xl = 24.0;
+  static const sheet = 28.0;
+  static const full = 100.0;
+}
+
+abstract final class AppSystemUI {
+  static const transparentDark = SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.light,
+    systemNavigationBarContrastEnforced: false,
+    systemStatusBarContrastEnforced: false,
+  );
+
+  /// The overlay style a full-screen page should publish for [theme].
+  static SystemUiOverlayStyle forTheme(ThemeData theme) =>
+      theme.appBarTheme.systemOverlayStyle ??
+      (theme.brightness == Brightness.dark
+          ? transparentDark
+          : SystemUiOverlayStyle.dark);
+}
+
+abstract final class AppIconSize {
+  static const inline = 14.0;
+  static const small = 18.0;
+  static const standard = 20.0;
+  static const action = 24.0;
+  static const feature = 40.0;
+  static const hero = 56.0;
+}
+
+abstract final class AppSpacing {
+  static const xs = 4.0;
+  static const sm = 8.0;
+  static const md = 16.0;
+  static const lg = 24.0;
+  static const xl = 32.0;
+  static const pagePadding = EdgeInsets.fromLTRB(16, 12, 16, 32);
+  static const sheetPadding = EdgeInsets.fromLTRB(24, 8, 24, 24);
+  static const floatingStackClearance = 112.0;
+}
+
+abstract final class AppMotion {
+  static const short1 = Duration(milliseconds: 100);
+  static const short2 = Duration(milliseconds: 150);
+  static const medium1 = Duration(milliseconds: 250);
+  static const medium2 = Duration(milliseconds: 300);
+  static const long1 = Duration(milliseconds: 400);
+  static const long2 = Duration(milliseconds: 500);
+  static const emphasized = Curves.easeInOutCubicEmphasized;
+  static const standard = Curves.easeOutCubic;
+}
+
+/// Relays Android's predictive-back gesture callbacks to [route] so that
+/// `route`'s own transition controller (the same controller [buildTransitions]
+/// receives as `animation`) tracks the user's finger continuously instead of
+/// only jumping to its end value in [PageRoute.handleCommitBackGesture]/
+/// [PageRoute.handleCancelBackGesture] after the finger lifts.
+///
+/// Without this, `animation`/`secondaryAnimation` never change mid-gesture,
+/// so any [PageTransitionsBuilder] built purely from those two animations
+/// (like [CrossfadePageTransitionsBuilder]) only animates once the gesture
+/// commits or cancels on release - there's no live preview while dragging.
+class _PredictiveBackForwarder extends StatefulWidget {
+  const _PredictiveBackForwarder({required this.route, required this.child});
+
+  final PageRoute<dynamic> route;
+  final Widget child;
+
+  @override
+  State<_PredictiveBackForwarder> createState() =>
+      _PredictiveBackForwarderState();
+}
+
+class _PredictiveBackForwarderState extends State<_PredictiveBackForwarder>
+    with WidgetsBindingObserver {
+  bool get _canHandle =>
+      widget.route.isCurrent && widget.route.popGestureEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    if (backEvent.isButtonEvent || !_canHandle) return false;
+    widget.route.handleStartBackGesture(progress: 1 - backEvent.progress);
+    return true;
+  }
+
+  @override
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    widget.route.handleUpdateBackGestureProgress(
+      progress: 1 - backEvent.progress,
+    );
+  }
+
+  @override
+  void handleCancelBackGesture() => widget.route.handleCancelBackGesture();
+
+  @override
+  void handleCommitBackGesture() => widget.route.handleCommitBackGesture();
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Gesture-driven in-app crossfade matching Android's SociaLite predictive back navigation.
+class CrossfadePageTransitionsBuilder extends PageTransitionsBuilder {
+  const CrossfadePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final enterTransition = FadeTransition(
+      opacity: CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOut,
+        reverseCurve: Curves.easeIn,
+      ),
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 0.96, end: 1.0).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          ),
+        ),
+        child: child,
+      ),
+    );
+
+    final crossfade = FadeTransition(
+      opacity: Tween<double>(begin: 1.0, end: 0.0).animate(
+        CurvedAnimation(
+          parent: secondaryAnimation,
+          curve: Curves.easeOut,
+          reverseCurve: Curves.easeIn,
+        ),
+      ),
+      child: ScaleTransition(
+        scale: Tween<double>(begin: 1.0, end: 0.96).animate(
+          CurvedAnimation(
+            parent: secondaryAnimation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          ),
+        ),
+        child: enterTransition,
+      ),
+    );
+
+    // Feed live predictive-back progress into route's own controller so
+    // `animation`/`secondaryAnimation` above update on every frame of the
+    // drag, not just at commit/cancel.
+    return _PredictiveBackForwarder(route: route, child: crossfade);
+  }
+}
+
+@immutable
+class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
+  final Color success;
+  final Color onSuccess;
+  final Color successContainer;
+  final Color onSuccessContainer;
+  final Color warning;
+  final Color onWarning;
+  final Color warningContainer;
+  final Color onWarningContainer;
+  final Color bookmark;
+
+  const AppSemanticColors({
+    required this.success,
+    required this.onSuccess,
+    required this.successContainer,
+    required this.onSuccessContainer,
+    required this.warning,
+    required this.onWarning,
+    required this.warningContainer,
+    required this.onWarningContainer,
+    required this.bookmark,
+  });
+
+  static const dark = AppSemanticColors(
+    success: Color(0xFF7DDA91),
+    onSuccess: Color(0xFF00391A),
+    successContainer: Color(0xFF00522A),
+    onSuccessContainer: Color(0xFF98F8AC),
+    warning: Color(0xFFF7C654),
+    onWarning: Color(0xFF412D00),
+    warningContainer: Color(0xFF5D4200),
+    onWarningContainer: Color(0xFFFFDEA1),
+    bookmark: Color(0xFFFFC107),
+  );
+
+  static const light = AppSemanticColors(
+    success: Color(0xFF176B33),
+    onSuccess: Color(0xFFFFFFFF),
+    successContainer: Color(0xFFA6F5AF),
+    onSuccessContainer: Color(0xFF002107),
+    warning: Color(0xFF7A5700),
+    onWarning: Color(0xFFFFFFFF),
+    warningContainer: Color(0xFFFFDEA1),
+    onWarningContainer: Color(0xFF271900),
+    bookmark: Color(0xFF8F6300),
+  );
+
+  @override
+  AppSemanticColors copyWith({
+    Color? success,
+    Color? onSuccess,
+    Color? successContainer,
+    Color? onSuccessContainer,
+    Color? warning,
+    Color? onWarning,
+    Color? warningContainer,
+    Color? onWarningContainer,
+    Color? bookmark,
+  }) {
+    return AppSemanticColors(
+      success: success ?? this.success,
+      onSuccess: onSuccess ?? this.onSuccess,
+      successContainer: successContainer ?? this.successContainer,
+      onSuccessContainer: onSuccessContainer ?? this.onSuccessContainer,
+      warning: warning ?? this.warning,
+      onWarning: onWarning ?? this.onWarning,
+      warningContainer: warningContainer ?? this.warningContainer,
+      onWarningContainer: onWarningContainer ?? this.onWarningContainer,
+      bookmark: bookmark ?? this.bookmark,
+    );
+  }
+
+  @override
+  AppSemanticColors lerp(ThemeExtension<AppSemanticColors>? other, double t) {
+    if (other is! AppSemanticColors) return this;
+    return AppSemanticColors(
+      success: Color.lerp(success, other.success, t)!,
+      onSuccess: Color.lerp(onSuccess, other.onSuccess, t)!,
+      successContainer: Color.lerp(
+        successContainer,
+        other.successContainer,
+        t,
+      )!,
+      onSuccessContainer: Color.lerp(
+        onSuccessContainer,
+        other.onSuccessContainer,
+        t,
+      )!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      onWarning: Color.lerp(onWarning, other.onWarning, t)!,
+      warningContainer: Color.lerp(
+        warningContainer,
+        other.warningContainer,
+        t,
+      )!,
+      onWarningContainer: Color.lerp(
+        onWarningContainer,
+        other.onWarningContainer,
+        t,
+      )!,
+      bookmark: Color.lerp(bookmark, other.bookmark, t)!,
+    );
+  }
+}
+
+extension AppThemeX on BuildContext {
+  ColorScheme get colors => Theme.of(this).colorScheme;
+  TextTheme get typography => Theme.of(this).textTheme;
+  AppSemanticColors get semanticColors =>
+      Theme.of(this).extension<AppSemanticColors>() ?? AppSemanticColors.dark;
+}
+
+const Color _seedColor = Color(0xFF0B57D0);
+
+ColorScheme _darkColorScheme() => const ColorScheme(
+  brightness: Brightness.dark,
+  primary: Color(0xFFA8C7FA),
+  onPrimary: Color(0xFF062E6F),
+  primaryContainer: Color(0xFF0842A0),
+  onPrimaryContainer: Color(0xFFD3E3FD),
+  secondary: Color(0xFFBEC6DC),
+  onSecondary: Color(0xFF283141),
+  secondaryContainer: Color(0xFF3C4858),
+  onSecondaryContainer: Color(0xFFDAE2F9),
+  tertiary: Color(0xFFCFBCFF),
+  onTertiary: Color(0xFF34275B),
+  tertiaryContainer: Color(0xFF4B3D74),
+  onTertiaryContainer: Color(0xFFEADDFF),
+  error: Color(0xFFFFB4AB),
+  onError: Color(0xFF690005),
+  errorContainer: Color(0xFF93000A),
+  onErrorContainer: Color(0xFFFFDAD6),
+  surface: Color(0xFF111318),
+  onSurface: Color(0xFFE2E2E9),
+  onSurfaceVariant: Color(0xFFC2C7CF),
+  surfaceContainerLowest: Color(0xFF0C0E13),
+  surfaceContainerLow: Color(0xFF191C20),
+  surfaceContainer: Color(0xFF1D2024),
+  surfaceContainerHigh: Color(0xFF272A2F),
+  surfaceContainerHighest: Color(0xFF32353A),
+  outline: Color(0xFF8C9199),
+  outlineVariant: Color(0xFF42474E),
+  inverseSurface: Color(0xFFE2E2E9),
+  onInverseSurface: Color(0xFF2E3135),
+  inversePrimary: Color(0xFF3A5D92),
+  shadow: Color(0xFF000000),
+  scrim: Color(0xFF000000),
+  surfaceTint: Color(0xFFA8C7FA),
+);
+
+/// Overrides the neutral surface ramp of [cs] with true blacks for an
+/// OLED/AMOLED "pure black" look. Accent roles (primary, secondary,
+/// tertiary, error, and their "on"/container pairs) are left untouched so
+/// Material You dynamic colors still come through on top of the black
+/// background.
+ColorScheme _applyPureBlack(ColorScheme cs) => cs.copyWith(
+  surface: Colors.black,
+  surfaceContainerLowest: Colors.black,
+  surfaceContainerLow: const Color(0xFF0A0A0A),
+  surfaceContainer: const Color(0xFF121212),
+  surfaceContainerHigh: const Color(0xFF1C1C1C),
+  surfaceContainerHighest: const Color(0xFF242424),
+);
+
+/// [dynamicScheme] is the device's Material You palette (from
+/// `DynamicColorBuilder`'s `darkDynamic`), used in place of the hardcoded
+/// scheme when the user has enabled the "Use Material You" setting.
+///
+/// The OLED preset swaps the dark scheme's surfaces for true blacks, which
+/// saves battery and reduces glare on OLED panels.
+/// Material You colors blend with Default and OLED skins. Custom skins keep
+/// their authored accents so enabling dynamic color cannot wash out the
+/// selected palette.
+ThemeData buildDarkTheme({
+  ColorScheme? dynamicScheme,
+  AppSkinPreset appSkin = AppSkinPreset.defaultSkin,
+  CustomAppSkin customAppSkin = const CustomAppSkin(),
+  FileManagerSkin manualFileManagerSkin = FileManagerSkin.classic,
+  bool fileManagerFollowsAppSkin = true,
+  bool editorFollowsAppSkin = true,
+}) {
+  final useDynamicForSkin =
+      appSkin == AppSkinPreset.defaultSkin ||
+      appSkin == AppSkinPreset.oledPureBlack;
+  var cs = useDynamicForSkin && dynamicScheme != null
+      ? dynamicScheme
+      : appSkin == AppSkinPreset.custom
+      ? applyColorSchemeOverrides(
+          _skinColorScheme(AppSkinPreset.defaultSkin, Brightness.dark),
+          customAppSkin.darkColors,
+        )
+      : _skinColorScheme(appSkin, Brightness.dark);
+  if (appSkin == AppSkinPreset.oledPureBlack) {
+    cs = _applyPureBlack(cs);
+  }
+  return _buildTheme(
+    cs,
+    Brightness.dark,
+    appSkin: appSkin,
+    customAppSkin: customAppSkin,
+    manualFileManagerSkin: manualFileManagerSkin,
+    fileManagerFollowsAppSkin: fileManagerFollowsAppSkin,
+    editorFollowsAppSkin: editorFollowsAppSkin,
+  );
+}
+
+/// [dynamicScheme] is the device's Material You palette (from
+/// `DynamicColorBuilder`'s `lightDynamic`), used in place of the hardcoded
+/// seed-generated scheme when the user has enabled the "Use Material You"
+/// setting.
+ThemeData buildLightTheme({
+  ColorScheme? dynamicScheme,
+  AppSkinPreset appSkin = AppSkinPreset.defaultSkin,
+  CustomAppSkin customAppSkin = const CustomAppSkin(),
+  FileManagerSkin manualFileManagerSkin = FileManagerSkin.classic,
+  bool fileManagerFollowsAppSkin = true,
+  bool editorFollowsAppSkin = true,
+}) {
+  final useDynamicForSkin = appSkin == AppSkinPreset.defaultSkin;
+  final cs = useDynamicForSkin && dynamicScheme != null
+      ? dynamicScheme
+      : appSkin == AppSkinPreset.custom
+      ? applyColorSchemeOverrides(
+          _skinColorScheme(AppSkinPreset.defaultSkin, Brightness.light),
+          customAppSkin.lightColors,
+        )
+      : _skinColorScheme(appSkin, Brightness.light);
+  return _buildTheme(
+    cs,
+    Brightness.light,
+    appSkin: appSkin,
+    customAppSkin: customAppSkin,
+    manualFileManagerSkin: manualFileManagerSkin,
+    fileManagerFollowsAppSkin: fileManagerFollowsAppSkin,
+    editorFollowsAppSkin: editorFollowsAppSkin,
+  );
+}
+
+ColorScheme _skinColorScheme(AppSkinPreset skin, Brightness brightness) {
+  if (skin == AppSkinPreset.defaultSkin ||
+      skin == AppSkinPreset.oledPureBlack) {
+    return brightness == Brightness.dark
+        ? _darkColorScheme()
+        : ColorScheme.fromSeed(seedColor: _seedColor, brightness: brightness);
+  }
+  return ColorScheme.fromSeed(seedColor: _seedColor, brightness: brightness);
+}
+
+@Deprecated('Use buildDarkTheme() (or buildLightTheme()) instead.')
+ThemeData buildTheme() => buildDarkTheme();
+
+/// Builds the full app theme (component themes included) around an arbitrary
+/// [scheme], with light/dark chosen from `scheme.brightness`.
+///
+/// For screens that re-skin themselves independently of the app's own
+/// light/dark setting -- e.g. the text editor, whose background/syntax theme
+/// is user-selectable -- so every widget inside them (app bar, menus, input
+/// fields, list tiles, ...) picks up the same colors instead of only the
+/// ones a screen remembered to recolor by hand.
+ThemeData buildThemeFromColorScheme(
+  ColorScheme scheme, {
+  AppSkinTokens? appSkinTokens,
+  SkinAreaColors? area,
+}) => _buildTheme(
+  scheme,
+  scheme.brightness,
+  skinTokens: appSkinTokens,
+  area: area,
+);
+
+/// The theme a single page (a [SkinArea]) is built with.
+///
+/// [base] is the app's normal theme. The page's tokens are mapped onto the
+/// Material roles (see [applySkinAreaToScheme]) and every component theme --
+/// app bar, buttons, menus, dialogs, sheets, drawer -- is rebuilt from that
+/// scheme, so a page and everything it opens share one set of colors and
+/// nothing leaks in from another page.
+ThemeData buildSkinAreaTheme(ThemeData base, SkinAreaColors area) {
+  final scheme = applySkinAreaToScheme(base.colorScheme, area);
+  return _buildTheme(
+    scheme,
+    scheme.brightness,
+    skinTokens: base.extension<AppSkinTokens>(),
+    semanticColors: base.extension<AppSemanticColors>(),
+    area: area,
+  );
+}
+
+AppSemanticColors _semanticColors(
+  bool isDark,
+  AppSkinPreset preset,
+  CustomAppSkin customAppSkin,
+) {
+  final base = isDark ? AppSemanticColors.dark : AppSemanticColors.light;
+  if (preset != AppSkinPreset.custom) return base;
+  final values = isDark
+      ? customAppSkin.darkSemanticColors
+      : customAppSkin.lightSemanticColors;
+  Color? color(String key) => values[key] == null ? null : Color(values[key]!);
+  return base.copyWith(
+    success: color('success'),
+    onSuccess: color('onSuccess'),
+    successContainer: color('successContainer'),
+    onSuccessContainer: color('onSuccessContainer'),
+    warning: color('warning'),
+    onWarning: color('onWarning'),
+    warningContainer: color('warningContainer'),
+    onWarningContainer: color('onWarningContainer'),
+    bookmark: color('bookmark'),
+  );
+}
+
+ThemeData _buildTheme(
+  ColorScheme cs,
+  Brightness brightness, {
+  AppSkinPreset appSkin = AppSkinPreset.defaultSkin,
+  CustomAppSkin customAppSkin = const CustomAppSkin(),
+  FileManagerSkin manualFileManagerSkin = FileManagerSkin.classic,
+  bool fileManagerFollowsAppSkin = true,
+  bool editorFollowsAppSkin = true,
+  AppSkinTokens? skinTokens,
+  AppSemanticColors? semanticColors,
+  SkinAreaColors? area,
+}) {
+  final isDark = brightness == Brightness.dark;
+  final resolvedSkinTokens =
+      skinTokens ??
+      buildAppSkinTokens(
+        preset: appSkin,
+        customAppSkin: customAppSkin,
+        isDark: isDark,
+        colorScheme: cs,
+        manualFileManagerSkin: manualFileManagerSkin,
+        fileManagerFollowsAppSkin: fileManagerFollowsAppSkin,
+        editorFollowsAppSkin: editorFollowsAppSkin,
+      );
+  // Every component below reads its own token. Inside a page (`area`) those
+  // are the page's resolved tokens; outside one (the app theme itself) they are
+  // the shared palette's defaults, which equal the colors these components had
+  // before the tokens were split.
+  final t =
+      area ??
+      resolveSharedSkinColors(
+        scheme: cs,
+        appBar: resolvedSkinTokens.appBarBackground,
+        onAppBar: resolvedSkinTokens.appBarForeground,
+        fab: resolvedSkinTokens.fabBackground,
+        onFab: resolvedSkinTokens.fabForeground,
+      );
+  Color tk(SkinToken token) => t.color(token);
+  // The dim behind dialogs and sheets is only set when the skin picked one, so
+  // the platform's own barrier is untouched otherwise.
+  final scrim = t.isCustom(SkinToken.overlayScrim)
+      ? t.color(SkinToken.overlayScrim)
+      : null;
+  return ThemeData(
+    useMaterial3: true,
+    brightness: brightness,
+    colorScheme: cs,
+    scaffoldBackgroundColor: cs.surface,
+    visualDensity: VisualDensity.adaptivePlatformDensity,
+    splashFactory: InkSparkle.splashFactory,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {TargetPlatform.android: CrossfadePageTransitionsBuilder()},
+    ),
+    extensions: [
+      semanticColors ?? _semanticColors(isDark, appSkin, customAppSkin),
+      resolvedSkinTokens,
+    ],
+    appBarTheme: AppBarTheme(
+      backgroundColor: tk(SkinToken.chromeTopBar),
+      foregroundColor: tk(SkinToken.chromeOnTopBar),
+      elevation: 0,
+      scrolledUnderElevation: 3,
+      surfaceTintColor: cs.surfaceTint,
+      centerTitle: false,
+      titleTextStyle: TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w400,
+        color: tk(SkinToken.chromeOnTopBar),
+      ),
+      iconTheme: IconThemeData(
+        color: tk(SkinToken.chromeOnTopBar),
+        size: AppIconSize.action,
+      ),
+      actionsIconTheme: IconThemeData(color: tk(SkinToken.chromeOnTopBar)),
+      // Default for standard pages: matches cs.surface
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: cs.surfaceContainer,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
+        systemNavigationBarContrastEnforced: false,
+        systemStatusBarContrastEnforced: false,
+      ),
+    ),
+    cardTheme: CardThemeData(
+      color: tk(SkinToken.surfacePanel),
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      margin: EdgeInsets.zero,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: tk(SkinToken.surfaceField),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderSide: BorderSide(color: tk(SkinToken.borderFocus), width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderSide: BorderSide(color: tk(SkinToken.statusDanger), width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderSide: BorderSide(color: tk(SkinToken.statusDanger), width: 2),
+      ),
+      labelStyle: TextStyle(color: tk(SkinToken.contentSecondary), fontSize: 16),
+      floatingLabelStyle: TextStyle(
+        color: tk(SkinToken.borderFocus),
+        fontSize: 12,
+      ),
+      hintStyle: TextStyle(color: tk(SkinToken.contentSecondary), fontSize: 16),
+      prefixIconColor: tk(SkinToken.contentIcon),
+      suffixIconColor: tk(SkinToken.contentIcon),
+    ),
+    dividerTheme: DividerThemeData(
+      color: tk(SkinToken.borderDivider),
+      thickness: 1,
+      space: 1,
+    ),
+    listTileTheme: ListTileThemeData(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      iconColor: tk(SkinToken.contentIcon),
+      textColor: tk(SkinToken.contentPrimary),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      fillColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return tk(SkinToken.controlActive);
+        }
+        return Colors.transparent;
+      }),
+      checkColor: WidgetStateProperty.all(tk(SkinToken.controlOnActive)),
+      side: BorderSide(color: tk(SkinToken.controlInactive), width: 2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return tk(SkinToken.controlOnActive);
+        }
+        return tk(SkinToken.controlInactive);
+      }),
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return tk(SkinToken.controlActive);
+        }
+        return tk(SkinToken.controlTrack);
+      }),
+      trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) return Colors.transparent;
+        return tk(SkinToken.controlInactive);
+      }),
+    ),
+    radioTheme: RadioThemeData(
+      fillColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return tk(SkinToken.controlActive);
+        }
+        return tk(SkinToken.controlInactive);
+      }),
+    ),
+    sliderTheme: SliderThemeData(
+      activeTrackColor: tk(SkinToken.controlActive),
+      inactiveTrackColor: tk(SkinToken.controlTrack),
+      thumbColor: tk(SkinToken.controlActive),
+      overlayColor: tk(SkinToken.controlActive).withValues(alpha: 0.12),
+    ),
+     filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: tk(SkinToken.actionPrimary),
+        foregroundColor: tk(SkinToken.actionOnPrimary),
+        disabledBackgroundColor: tk(
+          SkinToken.contentPrimary,
+        ).withValues(alpha: 0.12),
+        disabledForegroundColor: tk(
+          SkinToken.contentPrimary,
+        ).withValues(alpha: 0.38),
+        textStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+        ),
+        shape: const StadiumBorder(),
+        minimumSize: const Size(0, 48),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: tk(SkinToken.actionTonal),
+        foregroundColor: tk(SkinToken.actionOnTonal),
+        elevation: 0,
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        shape: const StadiumBorder(),
+        minimumSize: const Size(0, 48),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: tk(SkinToken.actionText),
+        side: BorderSide(color: tk(SkinToken.borderOutline)),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        shape: const StadiumBorder(),
+        minimumSize: const Size(0, 48),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: tk(SkinToken.actionText),
+        textStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+        ),
+        shape: const StadiumBorder(),
+        minimumSize: const Size(0, 48),
+      ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: tk(SkinToken.contentIcon)),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: tk(SkinToken.floatingFab),
+      foregroundColor: tk(SkinToken.floatingOnFab),
+      elevation: 1,
+      focusElevation: 1,
+      hoverElevation: 2,
+      highlightElevation: 3,
+      extendedTextStyle: const TextStyle(
+        fontWeight: FontWeight.w600,
+        fontSize: 14,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: tk(SkinToken.choiceBackground),
+      selectedColor: tk(SkinToken.choiceSelected),
+      disabledColor: tk(SkinToken.contentPrimary).withValues(alpha: 0.12),
+      labelStyle: TextStyle(color: tk(SkinToken.contentPrimary), fontSize: 13),
+      secondaryLabelStyle: TextStyle(
+        color: tk(SkinToken.choiceOnSelected),
+        fontSize: 13,
+      ),
+      side: BorderSide(color: tk(SkinToken.choiceBorder)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+    ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: SegmentedButton.styleFrom(
+        backgroundColor: tk(SkinToken.choiceBackground),
+        foregroundColor: tk(SkinToken.contentSecondary),
+        selectedBackgroundColor: tk(SkinToken.choiceSelected),
+        selectedForegroundColor: tk(SkinToken.choiceOnSelected),
+        side: BorderSide(color: tk(SkinToken.choiceBorder)),
+      ),
+    ),
+    drawerTheme: DrawerThemeData(
+      backgroundColor: area?.area == SkinArea.drawer
+          ? area!.color(SkinToken.surfacePage)
+          : cs.surfaceContainerLow,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      height: 80,
+      elevation: 0,
+      backgroundColor: tk(SkinToken.chromeBar),
+      surfaceTintColor: Colors.transparent,
+      indicatorColor: tk(SkinToken.choiceSelected),
+      indicatorShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return TextStyle(
+          fontSize: 12,
+          fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+          color: selected ? cs.onSurface : cs.onSurfaceVariant,
+        );
+      }),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        final selected = states.contains(WidgetState.selected);
+        return IconThemeData(
+          color: selected ? cs.onSecondaryContainer : cs.onSurfaceVariant,
+          size: AppIconSize.action,
+        );
+      }),
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: tk(SkinToken.overlayMenu),
+      elevation: 3,
+      shadowColor: Colors.black,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.sm * 2),
+      ),
+      textStyle: TextStyle(color: tk(SkinToken.overlayOnMenu), fontSize: 14),
+    ),
+    menuTheme: MenuThemeData(
+      style: MenuStyle(
+        backgroundColor: WidgetStateProperty.all(tk(SkinToken.overlayMenu)),
+        elevation: WidgetStateProperty.all(3),
+        surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sm * 2),
+          ),
+        ),
+      ),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: tk(SkinToken.overlaySheet),
+      modalBackgroundColor: tk(SkinToken.overlaySheet),
+      modalBarrierColor: scrim,
+      surfaceTintColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.sheet),
+        ),
+      ),
+      showDragHandle: true,
+      dragHandleColor: tk(SkinToken.contentSecondary).withValues(alpha: 0.4),
+      elevation: 1,
+      modalElevation: 1,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      contentTextStyle: TextStyle(
+        color: tk(SkinToken.floatingOnToast),
+        fontSize: 14,
+      ),
+      actionTextColor: cs.inversePrimary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.full),
+      ),
+      behavior: SnackBarBehavior.floating,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: tk(SkinToken.overlayDialog),
+      barrierColor: scrim,
+      surfaceTintColor: Colors.transparent,
+      elevation: 6,
+      shadowColor: Colors.black45,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.sheet),
+      ),
+      titleTextStyle: TextStyle(
+        color: tk(SkinToken.overlayOnDialog),
+        fontSize: 24,
+        fontWeight: FontWeight.w400,
+      ),
+      contentTextStyle: TextStyle(
+        color: tk(SkinToken.contentSecondary),
+        fontSize: 14,
+      ),
+    ),
+    tooltipTheme: TooltipThemeData(
+      decoration: BoxDecoration(
+        color: tk(SkinToken.floatingTooltip),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+      ),
+      textStyle: TextStyle(color: tk(SkinToken.floatingOnTooltip), fontSize: 12),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: tk(SkinToken.controlActive),
+      linearTrackColor: tk(SkinToken.controlTrack),
+      circularTrackColor: tk(SkinToken.controlTrack),
+    ),
+    scrollbarTheme: ScrollbarThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.dragged)) {
+          return tk(SkinToken.controlActive);
+        }
+        return tk(SkinToken.controlActive).withValues(alpha: 0.5);
+      }),
+      trackColor: WidgetStateProperty.all(
+        tk(SkinToken.controlActive).withValues(alpha: 0.15),
+      ),
+      radius: const Radius.circular(AppRadius.full),
+    ),
+    textTheme: TextTheme(
+      headlineSmall: TextStyle(
+        color: tk(SkinToken.contentPrimary),
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        letterSpacing: -0.2,
+      ),
+      titleLarge: TextStyle(
+        color: tk(SkinToken.contentPrimary),
+        fontSize: 22,
+        fontWeight: FontWeight.w400,
+        letterSpacing: 0,
+      ),
+      bodyLarge: TextStyle(
+        color: tk(SkinToken.contentPrimary),
+        fontSize: 16,
+        height: 1.5,
+        letterSpacing: 0.5,
+      ),
+      bodyMedium: TextStyle(
+        color: tk(SkinToken.contentPrimary),
+        fontSize: 14,
+        height: 1.4,
+        letterSpacing: 0.25,
+      ),
+      bodySmall: TextStyle(
+        color: tk(SkinToken.contentSecondary),
+        fontSize: 12,
+        height: 1.3,
+        letterSpacing: 0.4,
+      ),
+      labelLarge: TextStyle(
+        color: tk(SkinToken.contentPrimary),
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      ),
+      labelMedium: TextStyle(
+        color: tk(SkinToken.contentSecondary),
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.5,
+      ),
+      labelSmall: TextStyle(
+        color: tk(SkinToken.contentSecondary),
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.5,
+      ),
+      titleMedium: TextStyle(
+        color: tk(SkinToken.contentPrimary),
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.15,
+      ),
+      titleSmall: TextStyle(
+        color: tk(SkinToken.contentPrimary),
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        letterSpacing: 0.1,
+      ),
+    ),
+  );
+}

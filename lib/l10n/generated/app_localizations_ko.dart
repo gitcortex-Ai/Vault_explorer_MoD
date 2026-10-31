@@ -1,0 +1,12415 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Korean (`ko`).
+class AppLocalizationsKo extends AppLocalizations {
+  AppLocalizationsKo([String locale = 'ko']) : super(locale);
+
+  @override
+  String get usbAttachPromptTitle => 'USB 연결 안내 표시';
+
+  @override
+  String get usbAttachPromptSubtitle =>
+      '켜져 있으면 USB 드라이브를 연결할 때 Android에서 VaultExplorer를 제안합니다. 안내를 표시하지 않으려면 끄세요. USB 드라이브는 계속 USB 드라이브 마운트에서 직접 열 수 있습니다.';
+
+  @override
+  String get usbAttachPromptUpdateErrorMessage => 'USB 연결 설정을 변경하지 못했습니다.';
+
+  @override
+  String get cancel => '취소';
+
+  @override
+  String get close => '닫기';
+
+  @override
+  String get search => '검색';
+
+  @override
+  String get goBack => '뒤로';
+
+  @override
+  String xOfYCounter(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String get pdfViewerGoToPageTitle => '페이지로 이동';
+
+  @override
+  String pdfViewerPageNumberHint(int pageCount) {
+    return '페이지 번호 (1~$pageCount)';
+  }
+
+  @override
+  String get pdfViewerPageLabel => '페이지';
+
+  @override
+  String get pdfViewerGoButton => '이동';
+
+  @override
+  String get pdfViewerSearchHint => '문서 내 검색';
+
+  @override
+  String get pdfViewerNoMatches => '일치하는 항목 없음';
+
+  @override
+  String get pdfViewerPreviousMatch => '이전 항목';
+
+  @override
+  String get pdfViewerNextMatch => '다음 항목';
+
+  @override
+  String get pdfViewerCloseSearch => '검색 닫기';
+
+  @override
+  String get pdfViewerPrintTooltip => '문서 인쇄';
+
+  @override
+  String get pdfViewerLoadingDocument => '문서 로드 중…';
+
+  @override
+  String get pdfViewerCannotOpenTitle => 'PDF를 열 수 없음';
+
+  @override
+  String get pdfViewerFailedToLoad => 'PDF 로드 실패';
+
+  @override
+  String get pdfViewerEditTooltip => '편집';
+
+  @override
+  String get pdfViewerDoneEditingTooltip => '편집 완료';
+
+  @override
+  String get pdfViewerSaveFailed => '이 PDF의 변경 사항을 저장할 수 없습니다';
+
+  @override
+  String get pdfViewerEditUnavailable => '이 문서는 편집을 사용할 수 없습니다';
+
+  @override
+  String get paste => '붙여넣기';
+
+  @override
+  String get clear => '지우기';
+
+  @override
+  String get clipboardVerbMove => '이동';
+
+  @override
+  String get clipboardVerbCopy => '복사';
+
+  @override
+  String clipboardTooltipInteractive(String verb, int count) {
+    return '$verb ($count) — 탭하면 세부정보, 길게 누르면 붙여넣기';
+  }
+
+  @override
+  String clipboardTooltipViewOnly(String verb, int count) {
+    return '$verb ($count) — 클립보드 세부정보';
+  }
+
+  @override
+  String clipboardSourceLabel(String source) {
+    return '출처: $source';
+  }
+
+  @override
+  String get clipboardDefaultSourceName => '볼트';
+
+  @override
+  String clipboardHeaderCount(String verb, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개',
+    );
+    return '$verb $_temp0';
+  }
+
+  @override
+  String clipboardMoreItems(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '+$count개 더보기',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get advancedParametersTitle => '고급 매개변수';
+
+  @override
+  String get pimFieldLabel => 'PIM (기본값을 사용하려면 비워 두세요)';
+
+  @override
+  String get encryptionAlgorithmLabel => '암호화 알고리즘';
+
+  @override
+  String get hashAlgorithmLabel => '해시 알고리즘';
+
+  @override
+  String get clipboardVerbMoving => '이동 중';
+
+  @override
+  String get clipboardVerbCopying => '복사 중';
+
+  @override
+  String clipboardPillTitle(String verb, num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개',
+    );
+    return '$verb $_temp0';
+  }
+
+  @override
+  String clipboardFromSourceSuffix(String source) {
+    return ' \"$source\"에서';
+  }
+
+  @override
+  String get clipboardOpenContainerToPaste => '붙여넣으려면 컨테이너를 여세요';
+
+  @override
+  String get keyfilesOptionalLabel => '키파일 (선택 사항)';
+
+  @override
+  String get addFile => '파일 추가';
+
+  @override
+  String get noKeyfilesAttached => '첨부된 키파일 없음';
+
+  @override
+  String get completed => '완료됨';
+
+  @override
+  String get dismiss => '닫기';
+
+  @override
+  String byteProgressText(String transferred, String total, int pct) {
+    return '$transferred / $total  ($pct%)';
+  }
+
+  @override
+  String countProgressText(int done, int total, int pct) {
+    return '$done / $total  ($pct%)';
+  }
+
+  @override
+  String multiOpLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '전송 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String multiOpSublabel(String summary) {
+    return '$summary · 탭하여 전체 보기';
+  }
+
+  @override
+  String get thumbnailSizeResolutionLabel => '썸네일 크기 (해상도)';
+
+  @override
+  String get jpegCompressionQualityLabel => 'JPEG 압축 품질';
+
+  @override
+  String get done => '완료';
+
+  @override
+  String get confirm => '확인';
+
+  @override
+  String get couldNotPickKeyfiles => '키파일을 선택할 수 없습니다';
+
+  @override
+  String get filesystemLabelEncryptedVault => '이 암호화된 볼트';
+
+  @override
+  String get filesystemLabelThisContainer => '이 컨테이너';
+
+  @override
+  String get nounFile => '파일';
+
+  @override
+  String get nounFolder => '폴더';
+
+  @override
+  String get nounFileCapitalized => '파일';
+
+  @override
+  String get nounFolderCapitalized => '폴더';
+
+  @override
+  String get unitBytes => '바이트';
+
+  @override
+  String get unitCharacters => '자';
+
+  @override
+  String get validationEmptyName => '이름은 비워 둘 수 없습니다.';
+
+  @override
+  String validationReservedNavName(String name, String noun) {
+    return '\"$name\"은(는) 예약된 탐색 이름이므로 $noun 이름으로 사용할 수 없습니다.';
+  }
+
+  @override
+  String validationIllegalChar(String char, int position, String fsLabel) {
+    return '$fsLabel에서는 위치 $position의 \"$char\"을(를) 이름에 사용할 수 없습니다.';
+  }
+
+  @override
+  String validationControlChar(int position, String code, String fsLabel) {
+    return '위치 $position에 인쇄할 수 없는 제어 문자(코드 $code)가 포함되어 있으며, $fsLabel에서는 허용되지 않습니다.';
+  }
+
+  @override
+  String validationReservedDeviceName(String name, String fsLabel) {
+    return '\"$name\"은(는) $fsLabel의 예약된 장치 이름(CON, PRN, AUX, NUL, COM0–9, LPT0–9 중 하나)에 해당하므로 확장자 유무와 관계없이 사용할 수 없습니다.';
+  }
+
+  @override
+  String validationTrailingSpace(String noun, String fsLabel) {
+    return '$fsLabel에서 $noun 이름은 공백으로 끝날 수 없습니다';
+  }
+
+  @override
+  String validationTrailingDot(String noun, String fsLabel) {
+    return '$fsLabel에서 $noun 이름은 \".\"으로 끝날 수 없습니다';
+  }
+
+  @override
+  String validationNameTooLong(
+    int length,
+    String unit,
+    String fsLabel,
+    int maxLength,
+    String noun,
+  ) {
+    return '이 이름은 $length$unit입니다. $fsLabel에서는 $noun 이름당 최대 $maxLength$unit까지 허용됩니다.';
+  }
+
+  @override
+  String validationPathTooLong(int length, String fsLabel, int maxLength) {
+    return '전체 경로는 $length자입니다. $fsLabel에서는 최대 $maxLength자까지 허용됩니다.';
+  }
+
+  @override
+  String conflictSameType(String noun, String name) {
+    return '\"$name\"(이)라는 이름의 $noun이(가) 이미 여기에 있습니다.';
+  }
+
+  @override
+  String conflictCrossType(
+    String existingNoun,
+    String name,
+    String candidateNoun,
+  ) {
+    return '\"$name\"(이)라는 이름의 $existingNoun이(가) 이미 여기에 있습니다 — $candidateNoun과(와) 같은 이름을 사용할 수 없습니다.';
+  }
+
+  @override
+  String get readOnlyContainerWarning => '이 컨테이너는 읽기 전용으로 마운트되었습니다.';
+
+  @override
+  String get hiddenVolumeProtectionTriggeredWarning =>
+      '이 외부 볼륨에 쓰기 작업을 하면 숨김 볼륨이 손상될 수 있어 차단되었습니다. 이 컨테이너는 이번 세션이 끝날 때까지 읽기 전용으로 전환되었습니다.';
+
+  @override
+  String get protectHiddenVolumeToggleTitle => '숨김 볼륨 보호';
+
+  @override
+  String get protectHiddenVolumeToggleSubtitle => '외부 볼륨에 쓰기로 인한 손상 방지';
+
+  @override
+  String get protectHiddenVolumeCredentialsRequired =>
+      '숨김 볼륨을 보호하려면 숨김 볼륨의 비밀번호 또는 키파일이 필요합니다';
+
+  @override
+  String deleteItemsTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개를 삭제할까요?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteFoldersWarning => '선택한 폴더의 모든 내용을 포함하여 이 항목들이 영구적으로 삭제됩니다.';
+
+  @override
+  String get deleteFilesWarning => '이 항목들은 암호화된 볼륨에서 영구적으로 삭제됩니다.';
+
+  @override
+  String get delete => '삭제';
+
+  @override
+  String get remove => '제거';
+
+  @override
+  String get create => '만들기';
+
+  @override
+  String get rename => '이름 변경';
+
+  @override
+  String renameMultipleTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개의 이름 변경',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newFolderTitle => '새 폴더';
+
+  @override
+  String get newTextFileTitle => '새 텍스트 파일';
+
+  @override
+  String get folderNameHint => '폴더 이름';
+
+  @override
+  String get filenameHint => '파일이름.txt';
+
+  @override
+  String get newNameHint => '새 이름';
+
+  @override
+  String get baseNameHint => '기본 이름';
+
+  @override
+  String couldntCreateItem(String name) {
+    return '\"$name\"을(를) 만들 수 없습니다 — 컨테이너가 계속 마운트되어 있는지 확인하세요';
+  }
+
+  @override
+  String couldntRenameSingle(String name) {
+    return '\"$name\"의 이름을 변경할 수 없습니다 — 같은 이름의 항목이 이미 있을 수 있습니다';
+  }
+
+  @override
+  String couldntRenameMultiWithReason(num count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개의 이름을 변경할 수 없습니다: $reason',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String couldntRenameMultiNoReason(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개의 이름을 변경할 수 없습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hiddenVolumeErrorInvalidSize => '0보다 큰 유효한 숨김 크기를 입력하세요';
+
+  @override
+  String get hiddenVolumeErrorTooLargeVsOuter => '숨김 볼륨 크기는 외부 볼륨 크기보다 작아야 합니다';
+
+  @override
+  String get hiddenVolumeErrorTooLargeForContainer =>
+      '숨김 볼륨 크기가 이 컨테이너 크기에 비해 너무 큽니다';
+
+  @override
+  String get hiddenVolumeErrorCredentialsRequired =>
+      '숨김 볼륨을 만들려면 숨김 비밀번호 또는 키파일이 필요합니다';
+
+  @override
+  String get hiddenVolumeErrorCredentialsMustDiffer =>
+      '숨김 볼륨 자격 증명(비밀번호, PIM, 키파일)은 외부 볼륨 자격 증명과 동일할 수 없습니다.';
+
+  @override
+  String get vaultItemTypePassword => '비밀번호';
+
+  @override
+  String get vaultItemTypePaymentCard => '결제 카드';
+
+  @override
+  String get vaultItemTypeIdentity => '신분증';
+
+  @override
+  String get vaultItemTypeSecureNote => '보안 메모';
+
+  @override
+  String get vaultItemTypeBankAccount => '은행 계좌';
+
+  @override
+  String get vaultItemTypeSoftwareLicense => '소프트웨어 라이선스';
+
+  @override
+  String get fieldUsernameEmail => '사용자 이름 / 이메일';
+
+  @override
+  String get fieldPassword => '비밀번호';
+
+  @override
+  String get fieldWebsiteUrl => '웹사이트 URL';
+
+  @override
+  String get fieldTotpSecret => 'TOTP 비밀 키 (2FA)';
+
+  @override
+  String get fieldNotes => '메모';
+
+  @override
+  String get fieldCardholderName => '카드 소유자 이름';
+
+  @override
+  String get fieldCardNumber => '카드 번호';
+
+  @override
+  String get fieldExpiryMMYY => '유효 기간 (MM/YY)';
+
+  @override
+  String get fieldCvvCvc => 'CVV / CVC';
+
+  @override
+  String get fieldPin => 'PIN';
+
+  @override
+  String get fieldIssuingBank => '발급 은행';
+
+  @override
+  String get fieldFullName => '성명';
+
+  @override
+  String get fieldDateOfBirth => '생년월일';
+
+  @override
+  String get fieldNationality => '국적';
+
+  @override
+  String get fieldPassportNumber => '여권 번호';
+
+  @override
+  String get fieldPassportExpiry => '여권 만료일';
+
+  @override
+  String get fieldNationalIdSsn => '주민등록번호 / 국민 ID';
+
+  @override
+  String get fieldDriversLicense => '운전면허증';
+
+  @override
+  String get fieldAddress => '주소';
+
+  @override
+  String get fieldPhone => '전화번호';
+
+  @override
+  String get fieldEmail => '이메일';
+
+  @override
+  String get fieldNote => '메모';
+
+  @override
+  String get fieldBankName => '은행명';
+
+  @override
+  String get fieldAccountHolder => '예금주';
+
+  @override
+  String get fieldAccountNumber => '계좌번호';
+
+  @override
+  String get fieldRoutingSortCode => '은행 코드 / 지점 코드';
+
+  @override
+  String get fieldIban => 'IBAN';
+
+  @override
+  String get fieldSwiftBic => 'SWIFT / BIC';
+
+  @override
+  String get fieldAccountType => '계좌 유형';
+
+  @override
+  String get fieldProductName => '제품명';
+
+  @override
+  String get fieldLicenseKey => '라이선스 키';
+
+  @override
+  String get fieldRegisteredTo => '등록 대상';
+
+  @override
+  String get fieldPurchaseDate => '구매일';
+
+  @override
+  String get fieldExpiryRenewalDate => '만료일 / 갱신일';
+
+  @override
+  String get fieldDownloadUrl => '다운로드 URL';
+
+  @override
+  String get fieldRegistrationEmail => '등록 이메일';
+
+  @override
+  String get titleRequired => '제목은 필수입니다';
+
+  @override
+  String newTypeTitle(String typeLabel) {
+    return '새 $typeLabel';
+  }
+
+  @override
+  String editItemTitle(String title) {
+    return '$title 편집';
+  }
+
+  @override
+  String get save => '저장';
+
+  @override
+  String typeNameHint(String typeLabel) {
+    return '$typeLabel 이름';
+  }
+
+  @override
+  String get titleSectionLabel => '제목';
+
+  @override
+  String get fieldsSectionLabel => '필드';
+
+  @override
+  String get encryptedStorageHint => '모든 필드는 컨테이너 내부에 암호화되어 저장됩니다.';
+
+  @override
+  String copiedSuffix(String fieldLabel) {
+    return '$fieldLabel 복사됨';
+  }
+
+  @override
+  String get copy => '복사';
+
+  @override
+  String get failedToSaveCheckMounted =>
+      '저장하지 못했습니다 — 컨테이너가 계속 마운트되어 있는지 확인하세요';
+
+  @override
+  String get discardChangesTitle => '변경 사항을 취소할까요?';
+
+  @override
+  String get discardChangesMessage => '저장하지 않은 변경 사항이 사라집니다.';
+
+  @override
+  String get discard => '취소';
+
+  @override
+  String get keepEditing => '계속 편집';
+
+  @override
+  String get deleteItemTitle => '항목을 삭제할까요?';
+
+  @override
+  String deleteItemMessage(String title) {
+    return '\"$title\"이(가) 볼트에서 영구적으로 삭제됩니다.';
+  }
+
+  @override
+  String get removeFromBookmarks => '북마크에서 제거';
+
+  @override
+  String get addToBookmarks => '북마크에 추가';
+
+  @override
+  String get edit => '편집';
+
+  @override
+  String labelCopiedToClipboard(String label) {
+    return '$label이(가) 클립보드에 복사되었습니다';
+  }
+
+  @override
+  String get noFieldsFilledIn => '입력된 필드가 없습니다.\n편집을 눌러 세부 정보를 추가하세요.';
+
+  @override
+  String get sectionLabelDetails => '세부 정보';
+
+  @override
+  String get sectionLabelInfo => '정보';
+
+  @override
+  String get metaLabelType => '유형';
+
+  @override
+  String get metaLabelCreated => '생성일';
+
+  @override
+  String get metaLabelModified => '수정일';
+
+  @override
+  String copyFieldTooltip(String fieldLabel) {
+    return '$fieldLabel 복사';
+  }
+
+  @override
+  String get readOnlyCantAddItemsTooltip => '읽기 전용 — 항목을 추가할 수 없습니다';
+
+  @override
+  String get extractArchive => '압축 풀기';
+
+  @override
+  String get verbArchive => '압축';
+
+  @override
+  String get verbExtract => '압축 풀기';
+
+  @override
+  String get verbArchived => '압축됨';
+
+  @override
+  String get verbExtracted => '압축 풀림';
+
+  @override
+  String get verbArchiving => '압축 중';
+
+  @override
+  String get verbExtracting => '압축 푸는 중';
+
+  @override
+  String get fileOpExtractingArchive => '압축 푸는 중…';
+
+  @override
+  String fileOpExtractingArchiveName(String name) {
+    return '$name 압축 푸는 중…';
+  }
+
+  @override
+  String fileOpArchivingBytes(String bytes) {
+    return '압축 중… ($bytes)';
+  }
+
+  @override
+  String get newItemTooltip => '새 항목';
+
+  @override
+  String get camera => '카메라';
+
+  @override
+  String get importFiles => '파일 가져오기';
+
+  @override
+  String get importFolder => '폴더 가져오기';
+
+  @override
+  String get secureItem => '보안 항목';
+
+  @override
+  String get appNameVaultExplorer => 'Vault Explorer';
+
+  @override
+  String get appNameZipExplorer => 'Archive Explorer';
+
+  @override
+  String get archiveExplorerPermissionTitle => '저장소 접근 권한 필요';
+
+  @override
+  String get archiveExplorerPermissionMessage =>
+      '다운로드 폴더의 .zip 압축 파일을 찾아보고 압축을 풀려면 파일 접근을 허용하세요.';
+
+  @override
+  String get archiveExplorerGrantAccess => '접근 허용';
+
+  @override
+  String get archiveExplorerEmptyTitle => '압축 파일을 찾을 수 없음';
+
+  @override
+  String get archiveExplorerEmptyMessage => '다운로드한 zip 파일이 여기에 표시됩니다.';
+
+  @override
+  String get archiveExplorerRefreshTooltip => '새로고침';
+
+  @override
+  String archiveExplorerEntryCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get archiveExplorerExtractAll => '모두 압축 풀기';
+
+  @override
+  String get archiveExplorerExtracting => '압축 푸는 중…';
+
+  @override
+  String archiveExplorerExtractSuccess(int count, String name) {
+    return '$count개 파일을 Download/Extracted/$name에 압축 풀었습니다';
+  }
+
+  @override
+  String get archiveExplorerExtractFailed => '해당 압축 파일을 풀 수 없습니다.';
+
+  @override
+  String get archiveExplorerOpenFailed => '해당 압축 파일을 열 수 없습니다.';
+
+  @override
+  String get archiveExplorerOpenArchive => '압축 파일 열기…';
+
+  @override
+  String get archiveExplorerUnresolvedPath =>
+      '해당 파일에 직접 접근할 수 없습니다. 대신 다운로드에서 선택해 보세요.';
+
+  @override
+  String get archiveExplorerExtractTo => '다음 위치로 압축 풀기…';
+
+  @override
+  String get archiveExplorerPreview => '미리보기';
+
+  @override
+  String get archiveExplorerChoosingDestination => '대상 위치 선택 중…';
+
+  @override
+  String get archiveExplorerNoDestinationChosen => '대상 위치가 선택되지 않았습니다.';
+
+  @override
+  String archiveExplorerExtractSuccessTo(int count, String path) {
+    return '$count개 파일을 $path에 압축 풀었습니다';
+  }
+
+  @override
+  String get archiveBrowserEmptyTitle => '빈 폴더';
+
+  @override
+  String get archiveBrowserEmptyMessage => '이 폴더에는 파일이 없습니다.';
+
+  @override
+  String get archiveBrowserRoot => '압축 파일';
+
+  @override
+  String get archiveBrowserOpenFileFailed => '해당 파일을 열 수 없습니다.';
+
+  @override
+  String get fileAssocInAppTextEditor => '앱 내장 텍스트 편집기';
+
+  @override
+  String get fileAssocInAppMediaViewer => '앱 내장 미디어 뷰어';
+
+  @override
+  String fileAssocAppPrefix(String name) {
+    return '앱: $name';
+  }
+
+  @override
+  String get fileAssocExternalApp => '외부 앱';
+
+  @override
+  String get appSettingsTitle => '앱 설정';
+
+  @override
+  String get sectionSecurityPrivacy => '보안 및 개인정보 보호';
+
+  @override
+  String get sectionAppearanceInterface => '화면 및 인터페이스';
+
+  @override
+  String get sectionVaultFileHandling => '볼트 및 파일 처리';
+
+  @override
+  String get masterPasswordTitle => '마스터 비밀번호';
+
+  @override
+  String get masterPasswordActiveSubtitle => '활성화됨 — 탭하여 제거';
+
+  @override
+  String get masterPasswordInactiveSubtitle => '앱을 열 때 비밀번호 요구';
+
+  @override
+  String get newPasswordLabel => '새 비밀번호';
+
+  @override
+  String get masterPasswordFieldLabel => '마스터 비밀번호';
+
+  @override
+  String get confirmPasswordLabel => '비밀번호 확인';
+
+  @override
+  String get update => '업데이트';
+
+  @override
+  String get setPassword => '비밀번호 설정';
+
+  @override
+  String get biometricUnlockTitle => '생체 인식 잠금 해제';
+
+  @override
+  String get biometricUnlockSubtitle => '인증하여 컨테이너를 안전하게 마운트하세요';
+
+  @override
+  String get changeMasterPasswordTitle => '마스터 비밀번호 변경';
+
+  @override
+  String get changeMasterPasswordSubtitle => '마스터 비밀번호 자격 증명 업데이트';
+
+  @override
+  String get autoLockContainersTitle => '컨테이너 자동 잠금';
+
+  @override
+  String get autoLockContainersSubtitle => '비활성 상태가 지속되면 열려 있는 볼트를 자동으로 잠급니다';
+
+  @override
+  String get autoLockTimeoutLabel => '자동 잠금 시간';
+
+  @override
+  String get immediately => '즉시';
+
+  @override
+  String nMinutes(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count분',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nHours(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count시간',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get customDurationOption => '사용자 지정…';
+
+  @override
+  String get customDurationDialogTitle => '사용자 지정 시간';
+
+  @override
+  String get blockScreenshotsTitle => '스크린샷 차단';
+
+  @override
+  String get blockScreenshotsSubtitle => '스크린샷을 방지하고 최근 앱 미리보기를 숨깁니다';
+
+  @override
+  String get keepVaultsRunningInBackgroundTitle => '백그라운드에서 볼트 유지';
+
+  @override
+  String get keepVaultsRunningInBackgroundSubtitle =>
+      '알림을 표시하고 앱을 나간 후에도 열려 있는 볼트를 계속 사용할 수 있게 합니다. 볼트 키는 잠글 때까지 메모리에 남아 있습니다.';
+
+  @override
+  String get notificationPermissionDeniedMessage =>
+      '알림 권한이 거부되었습니다. 볼트는 계속 열려 있지만, 지속 알림은 표시되지 않습니다.';
+
+  @override
+  String get discreteModeTitle => '마스크 모드';
+
+  @override
+  String get discreteModeActiveSubtitle =>
+      '활성화됨 — 앱이 현재 \"Archive Explorer\"로 표시됩니다';
+
+  @override
+  String get discreteModeInactiveSubtitle => '홈 화면에서 이 앱을 zip 압축 파일 탐색기로 위장합니다';
+
+  @override
+  String get enableDiscreteModeTitle => '마스크 모드를 활성화할까요?';
+
+  @override
+  String get disableDiscreteModeTitle => '마스크 모드를 비활성화할까요?';
+
+  @override
+  String get enableDiscreteModeMessage =>
+      '홈 화면의 앱 아이콘과 이름이 \"Archive Explorer\"로 변경됩니다. zip 압축 파일 탐색기 겸 압축 해제 도구로 작동합니다.\n\n볼트에 접근하려면 Archive Explorer를 열고 제목을 2초간 길게 누르세요.';
+
+  @override
+  String get disableDiscreteModeMessage =>
+      '홈 화면의 앱 아이콘과 이름이 다시 \"Vault Explorer\"로 돌아갑니다.';
+
+  @override
+  String get enable => '활성화';
+
+  @override
+  String get disable => '비활성화';
+
+  @override
+  String get discreteModeEnabledSnack =>
+      '마스크 모드가 활성화되었습니다. 앱이 종료됩니다 — 새 런처 아이콘에서 다시 여세요.';
+
+  @override
+  String get discreteModeDisabledSnack =>
+      '마스크 모드가 비활성화되었습니다. 앱이 종료됩니다 — 새 런처 아이콘에서 다시 여세요.';
+
+  @override
+  String get failedToChangeDiscreteMode => '마스크 모드 변경에 실패했습니다';
+
+  @override
+  String get cacheDerivedKeysTitle => '파생 키를 기본적으로 캐시';
+
+  @override
+  String get cacheDerivedKeysSubtitle => '더 빠른 잠금 해제를 위해 파생된 키 자료를 키스토어에 저장합니다';
+
+  @override
+  String get appThemeLabel => '앱 테마';
+
+  @override
+  String get systemDefault => '시스템 기본값';
+
+  @override
+  String get lightTheme => '라이트 테마';
+
+  @override
+  String get darkTheme => '다크 테마';
+
+  @override
+  String get useMaterialYouTitle => 'Material You 사용';
+
+  @override
+  String get useMaterialYouSubtitle => '앱 색상을 배경화면에 맞춥니다 (Android 12 이상)';
+
+  @override
+  String get pureBlackThemeTitle => '순수한 검정색 (OLED)';
+
+  @override
+  String get pureBlackThemeSubtitle =>
+      '배터리 소모를 줄이고 OLED 화면의 반사광을 줄이기 위한 진한 검은색 배경 (다크 테마만 사용 가능)';
+
+  @override
+  String get sortContainersByLabel => '컨테이너 정렬 기준';
+
+  @override
+  String get swapCardSwipeActionsTitle => '카드 스와이프 동작 바꾸기';
+
+  @override
+  String get swapCardSwipeActionsSubtitle =>
+      '카드를 스와이프할 때 왼쪽에 편집, 오른쪽에 제거를 표시합니다';
+
+  @override
+  String get swipeGestureHintTitle => '스와이프 동작 안내';
+
+  @override
+  String get swipeGestureHintSubtitle => '첫 번째 컨테이너에서 카드 미리보기 애니메이션을 표시합니다';
+
+  @override
+  String get autoOpenOnUnlockTitle => '잠금 해제 시 자동으로 열기';
+
+  @override
+  String get autoOpenOnUnlockActiveSubtitle => '볼트 잠금 해제 후 자동으로 엽니다';
+
+  @override
+  String get autoOpenOnUnlockInactiveSubtitle => '볼트만 잠금 해제하고 대시보드에 머무릅니다';
+
+  @override
+  String get enableJsHtmlTitle => 'HTML 뷰어에서 자바스크립트 활성화';
+
+  @override
+  String get jsEnabledSubtitle => '로컬 HTML 파일에 자바스크립트가 활성화되어 있습니다';
+
+  @override
+  String get jsDisabledSubtitle => '로컬 HTML 파일에 자바스크립트가 비활성화되어 있습니다';
+
+  @override
+  String get fastStorageAccessTitle => '빠른 저장소 접근';
+
+  @override
+  String get fastStorageAccessGrantedSubtitle => '모든 파일 접근 권한이 부여됨 (최대 속도)';
+
+  @override
+  String get fastStorageAccessNotGrantedSubtitle =>
+      '최적의 속도를 위해 시스템 설정에서 모든 파일 접근 권한을 부여하세요';
+
+  @override
+  String get showStorageLocationsTitle => '사이드바에 저장소 위치 표시';
+
+  @override
+  String get showStorageLocationsSubtitle =>
+      '로컬 저장소와 추가한 저장 위치를 표시합니다. 로컬 저장소를 열려면 모든 파일 접근 권한이 필요합니다.';
+
+  @override
+  String get localStorageCardTitle => '로컬 저장소';
+
+  @override
+  String get localStorageCardSubtitle => '암호화되지 않음 — 보관함과의 빠른 전송용';
+
+  @override
+  String get enableFastStorageAccessTitle => '빠른 저장소 접근 활성화';
+
+  @override
+  String get enableFastStorageAccessMessage =>
+      '\"모든 파일 접근\" 권한을 부여하면 Vault Explorer가 POSIX 파일 작업을 직접 수행할 수 있어, 폴더 볼트 성능이 최대 1000배 향상됩니다.';
+
+  @override
+  String get disableStorageAccessTitle => '저장소 접근 비활성화';
+
+  @override
+  String get disableStorageAccessMessage =>
+      'Android에서는 시스템 설정에서 \"모든 파일 접근\"을 꺼야 합니다. 설정을 열어 끄시겠습니까?';
+
+  @override
+  String get enableStoragePermissionLegacyTitle => '저장소 접근 허용';
+
+  @override
+  String get enableStoragePermissionLegacyMessage =>
+      'Vault Explorer는 폴더 볼트 성능을 높이기 위해 직접 파일 작업을 수행하려면 저장소 권한이 필요합니다. 이제 Android에서 확인을 요청합니다.';
+
+  @override
+  String get disableStoragePermissionLegacyMessage =>
+      'Android에서는 시스템 설정에서 저장소 권한을 꺼야 합니다. 설정을 열어 끄시겠습니까?';
+
+  @override
+  String get openSettings => '설정 열기';
+
+  @override
+  String get useThisPasswordButton => '이 비밀번호 사용';
+
+  @override
+  String get quickPasswordGeneratorSheetTitle => '비밀번호 생성기';
+
+  @override
+  String get androidFileProviderTitle => 'Android 파일 제공자';
+
+  @override
+  String get androidFileProviderSubtitle => '새 컨테이너를 기본적으로 Android 파일 선택기에 노출';
+
+  @override
+  String get thumbnailCachingDefaultLabel => '썸네일 캐싱 (기본값)';
+
+  @override
+  String get thumbnailQualityDefaultLabel => '썸네일 품질 (기본값)';
+
+  @override
+  String get fileAssociationsHeader => '파일 연결';
+
+  @override
+  String get noFileAssociationsYet => '아직 저장된 파일 연결이 없습니다. 파일을 열 때 안내가 표시됩니다.';
+
+  @override
+  String get defaultActionsHeader => '비표준 파일을 열 때의 기본 동작:';
+
+  @override
+  String get removeAssociationTooltip => '연결 제거';
+
+  @override
+  String get sectionBackupRestore => '백업';
+
+  @override
+  String get exportSettingsTitle => '설정 내보내기';
+
+  @override
+  String get exportSettingsSubtitle =>
+      '앱, 파일 관리자, 미디어 플레이어, 텍스트 편집기 설정을 파일로 저장. 사용자 지정 스킨은 선택 사항입니다.';
+
+  @override
+  String get importSettingsTitle => '설정 가져오기';
+
+  @override
+  String get importSettingsSubtitle =>
+      '파일에서 앱, 파일 관리자, 미디어 플레이어, 텍스트 편집기 설정을 복원';
+
+  @override
+  String get importSettingsConfirmTitle => '설정을 가져올까요?';
+
+  @override
+  String get importSettingsConfirmMessage =>
+      '현재 앱 설정이 대체됩니다. 스킨과 인터페이스 레이아웃은 영향을 받지 않습니다. 이 작업은 되돌릴 수 없습니다.';
+
+  @override
+  String get exportSettingsOnlyTitle => '설정만';
+
+  @override
+  String get exportSettingsOnlySubtitle => '앱, 파일 관리자, 미디어 플레이어, 텍스트 편집기 설정';
+
+  @override
+  String get exportSettingsWithSkinsTitle => '설정 및 스킨';
+
+  @override
+  String get exportSettingsWithSkinsSubtitle => '사용자 지정 앱 스킨도 함께 저장합니다';
+
+  @override
+  String get importSettingsConfirmFullMessage =>
+      '현재 앱, 파일 관리자, 미디어 플레이어, 텍스트 편집기 설정이 레이아웃을 포함해 대체됩니다. 스킨은 영향을 받지 않습니다. 이 작업은 되돌릴 수 없습니다.';
+
+  @override
+  String get importSettingsConfirmFullSkinsMessage =>
+      '현재 앱, 파일 관리자, 미디어 플레이어, 텍스트 편집기 설정이 레이아웃을 포함해 대체되고, 이 파일의 스킨이 추가됩니다. 이미 있는 스킨은 파일의 버전으로 대체됩니다. 이 작업은 되돌릴 수 없습니다.';
+
+  @override
+  String get exportSettingsSuccessMessage => '설정을 내보냈습니다';
+
+  @override
+  String get importSettingsSuccessMessage => '설정을 가져왔습니다';
+
+  @override
+  String get exportSettingsErrorMessage => '설정을 내보낼 수 없습니다';
+
+  @override
+  String get importSettingsInvalidFileMessage => '해당 파일은 유효한 설정 내보내기 파일이 아닙니다';
+
+  @override
+  String get sectionDebug => '디버그';
+
+  @override
+  String get debugLoggingTitle => '디버그 로깅';
+
+  @override
+  String get debugLoggingSubtitle => '컨테이너 작업에 대한 자세한 진단 로그를 기록합니다';
+
+  @override
+  String get logcatTitle => 'Logcat';
+
+  @override
+  String get logcatSubtitle => '기기 로그 보기 및 저장';
+
+  @override
+  String logcatSavedMessage(String path) {
+    return '로그가 $path에 저장되었습니다';
+  }
+
+  @override
+  String get logcatSaveErrorMessage => '로그 저장에 실패했습니다';
+
+  @override
+  String get logcatCopiedMessage => '로그가 클립보드에 복사되었습니다';
+
+  @override
+  String get logcatUnavailableMessage => '이 기기에서는 Logcat을 사용할 수 없습니다';
+
+  @override
+  String get logcatEmptyMessage => '로그 줄을 기다리는 중…';
+
+  @override
+  String get logcatClearTooltip => '로그 지우기';
+
+  @override
+  String get logcatSaveTooltip => '로그 저장';
+
+  @override
+  String get logcatFilterAppOnly => '앱만';
+
+  @override
+  String get logcatFilterAll => '모든 로그';
+
+  @override
+  String get logcatSearchHint => '로그 검색…';
+
+  @override
+  String get logcatClearedMessage => '로그가 지워졌습니다';
+
+  @override
+  String get logcatCopyTooltip => '로그 복사';
+
+  @override
+  String get retryButton => '다시 시도';
+
+  @override
+  String get aboutAppTitle => 'VaultExplorer 정보';
+
+  @override
+  String versionInfoSubtitle(String version) {
+    return '버전 $version · 오픈 소스 라이선스 및 세부정보';
+  }
+
+  @override
+  String get failedToSaveSettings => '설정 저장에 실패했습니다';
+
+  @override
+  String get masterPasswordSetSnack => '마스터 비밀번호가 설정되었습니다';
+
+  @override
+  String get passwordCannotBeEmpty => '비밀번호는 비워 둘 수 없습니다';
+
+  @override
+  String get atLeast4CharsRequired => '4자 이상 필요합니다';
+
+  @override
+  String get passwordsDoNotMatch => '비밀번호가 일치하지 않습니다';
+
+  @override
+  String get failedToHashPassword => '비밀번호 해시 생성에 실패했습니다 — 다시 시도해 주세요';
+
+  @override
+  String get languageLabel => '언어';
+
+  @override
+  String get biometricNotAvailable => '이 기기에서는 생체 인식을 사용할 수 없습니다';
+
+  @override
+  String get biometricsChangedFallbackMessage =>
+      '기기의 생체 정보가 변경되어 생체 인식 잠금 해제가 꺼졌습니다. 비밀번호를 사용하세요.';
+
+  @override
+  String get unlockVaultExplorerReason => 'VaultExplorer 잠금 해제';
+
+  @override
+  String biometricErrorWithCode(String code) {
+    return '생체 인식 오류: $code';
+  }
+
+  @override
+  String tooManyFailedAttempts(num seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds초',
+    );
+    return '실패 횟수가 너무 많습니다. $_temp0 후 다시 시도하세요.';
+  }
+
+  @override
+  String get enterMasterPasswordPrompt => '마스터 비밀번호를 입력하세요';
+
+  @override
+  String incorrectPasswordLockedFor(int seconds, num attempts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '$attempts회',
+    );
+    return '비밀번호가 올바르지 않습니다. $_temp0 실패하여 $seconds초 동안 잠깁니다.';
+  }
+
+  @override
+  String incorrectPasswordAttempts(num attempts) {
+    String _temp0 = intl.Intl.pluralLogic(
+      attempts,
+      locale: localeName,
+      other: '실패 $attempts회',
+    );
+    return '비밀번호가 올바르지 않습니다 ($_temp0).';
+  }
+
+  @override
+  String get brandNameNoSpace => 'VaultExplorer';
+
+  @override
+  String get enterPasswordSubtitle => '계속하려면 마스터 비밀번호를 입력하세요';
+
+  @override
+  String get masterPasswordFieldLabelTitleCase => '마스터 비밀번호';
+
+  @override
+  String get unlock => '잠금 해제';
+
+  @override
+  String get useBiometric => '생체 인식 사용';
+
+  @override
+  String get connectAtLeast4Dots => '점을 4개 이상 연결하세요';
+
+  @override
+  String get patternsDontMatch => '패턴이 일치하지 않습니다 — 다시 시도하세요';
+
+  @override
+  String get drawUnlockPatternTitle => '잠금 해제 패턴 그리기';
+
+  @override
+  String get confirmPatternTitle => '패턴을 확인하세요';
+
+  @override
+  String get drawSamePatternAgain => '같은 패턴을 다시 그리세요';
+
+  @override
+  String get enterAtLeast4Digits => '4자리 이상의 숫자를 입력하세요';
+
+  @override
+  String get pinsDontMatch => 'PIN이 일치하지 않습니다 — 다시 시도하세요';
+
+  @override
+  String get createUnlockPinTitle => '잠금 해제 PIN을 만드세요';
+
+  @override
+  String get confirmPinTitle => 'PIN을 확인하세요';
+
+  @override
+  String get enterSamePinAgain => '같은 PIN을 다시 입력하세요';
+
+  @override
+  String get enterUnlockPinTitle => '잠금 해제 PIN 입력';
+
+  @override
+  String get wrongPinTryAgain => '잘못된 PIN — 다시 시도하세요';
+
+  @override
+  String get enterYourPinSequence => 'PIN을 입력하세요';
+
+  @override
+  String get enterPinToMount => '마운트하려면 PIN을 입력하세요';
+
+  @override
+  String get noPinConfiguredMessage => '설정된 PIN이 없습니다. 비밀번호를 수동으로 입력하세요.';
+
+  @override
+  String pinLockedForSeconds(int seconds) {
+    return '실패 횟수가 너무 많습니다. $seconds초 동안 잠깁니다.';
+  }
+
+  @override
+  String get initSecureCredsPinMessage =>
+      '보안 자격 증명을 초기화하는 중입니다. PIN 접근을 승인하려면 한 번 수동으로 잠금을 해제하세요.';
+
+  @override
+  String get setPinButton => 'PIN 설정';
+
+  @override
+  String get changePinButton => 'PIN 변경';
+
+  @override
+  String get pinSetupRequiredBeforeSaving => '저장하기 전에 PIN을 설정하세요.';
+
+  @override
+  String get pinSetupRequiredAboveBeforeSaving => '저장하기 전에 위에서 PIN을 설정하세요.';
+
+  @override
+  String get verifyPinTitle => 'PIN 확인';
+
+  @override
+  String get incorrectPinError => 'PIN이 올바르지 않습니다';
+
+  @override
+  String removedFromListSnack(String name) {
+    return '\"$name\"을(를) 목록에서 제거했습니다';
+  }
+
+  @override
+  String get clearRecentHistoryTitle => '최근 기록을 지울까요?';
+
+  @override
+  String get clearRecentHistoryMessage =>
+      '목록에서 모든 최근 문서가 제거됩니다. 기기의 실제 파일은 영향을 받지 않습니다.';
+
+  @override
+  String get clearAll => '모두 지우기';
+
+  @override
+  String get recentHistoryClearedSnack => '최근 기록이 지워졌습니다';
+
+  @override
+  String get moreOptionsTooltip => '더보기';
+
+  @override
+  String get clearHistoryMenuItem => '기록 지우기';
+
+  @override
+  String get openPdfFile => 'PDF 파일 열기';
+
+  @override
+  String get noDocumentsYetTitle => '아직 문서가 없습니다';
+
+  @override
+  String get openPdfToStartMessage => '기기에서 PDF를 열어 읽기를 시작하세요.';
+
+  @override
+  String get removeFromListMenuItem => '목록에서 제거';
+
+  @override
+  String get justNow => '방금 전';
+
+  @override
+  String minutesAgo(int count) {
+    return '$count분 전';
+  }
+
+  @override
+  String hoursAgo(int count) {
+    return '$count시간 전';
+  }
+
+  @override
+  String daysAgo(int count) {
+    return '$count일 전';
+  }
+
+  @override
+  String get usbDriveDisconnectedLocked => 'USB 드라이브 연결 끊김 — 컨테이너가 잠겼습니다';
+
+  @override
+  String get containerAlreadyMounted => '이 컨테이너는 이미 마운트되어 있습니다.';
+
+  @override
+  String get noVaultFolderFormatDetected =>
+      '해당 폴더에서 masterkey.cryptomator, gocryptfs.conf, cryfs.config 파일을 찾을 수 없습니다.';
+
+  @override
+  String get savedContainerSettingsNotFound => '이 컨테이너의 저장된 설정을 찾을 수 없습니다.';
+
+  @override
+  String couldNotUpdateContainerLocation(String error) {
+    return '컨테이너 위치를 업데이트할 수 없습니다: $error';
+  }
+
+  @override
+  String filePickerFailed(String error) {
+    return '파일 선택기 실패: $error';
+  }
+
+  @override
+  String get selectContainerFirst => '먼저 컨테이너를 선택하세요';
+
+  @override
+  String get passwordOrKeyfilesRequired => '비밀번호 또는 키파일이 필요합니다';
+
+  @override
+  String get slowPerformanceWarningTitle => '느린 성능 경고';
+
+  @override
+  String get slowPerformanceWarningMessage =>
+      '빠른 저장소 접근이 현재 비활성화되어 있습니다.\n\nCryFS는 파일을 수천 개의 작은 블록으로 나누어 저장합니다. Android SAF를 통해 비어 있지 않은 CryFS 볼트를 열면 매우 느려집니다.\n\n빠른 속도를 위해 설정을 열어 \"모든 파일 접근\"을 허용하시겠습니까?';
+
+  @override
+  String get unlockAnyway => '그래도 잠금 해제';
+
+  @override
+  String get defaultVaultName => '볼트';
+
+  @override
+  String get defaultContainerName => '컨테이너';
+
+  @override
+  String get incorrectPasswordOrInvalidVault => '비밀번호가 잘못되었거나 유효하지 않은 볼트입니다';
+
+  @override
+  String get incorrectPasswordOrInvalidContainer =>
+      '비밀번호가 잘못되었거나 유효하지 않은 컨테이너입니다';
+
+  @override
+  String get genericUnknownError => '알 수 없는 오류';
+
+  @override
+  String get decryptingLabel => '복호화 중…';
+
+  @override
+  String get loadingContainerFromStorage =>
+      '저장소에서 컨테이너를 불러오는 중… 용량이 크거나 클라우드에 저장된 경우 시간이 걸릴 수 있습니다.';
+
+  @override
+  String luksKeyslotProgress(int attempted, int total) {
+    return '키 슬롯 $attempted/$total 시도 중…';
+  }
+
+  @override
+  String get luksKeyslotProgressUnknown => '키 슬롯 시도 중…';
+
+  @override
+  String bitlockerCredentialProgress(int attempted, int total) {
+    return '자격 증명 $attempted/$total 확인 중…';
+  }
+
+  @override
+  String get bitlockerCredentialProgressUnknown => '자격 증명 확인 중…';
+
+  @override
+  String veracryptAlgoProgress(String algo, String slotName) {
+    return '$algo($slotName) 시도 중…';
+  }
+
+  @override
+  String get unlockContainerLabel => '컨테이너 잠금 해제';
+
+  @override
+  String get mountContainerTitle => '컨테이너 마운트';
+
+  @override
+  String get containerFileSegmentLabel => '컨테이너 파일';
+
+  @override
+  String get folderVaultSegmentLabel => '폴더 볼트';
+
+  @override
+  String formatContainerLabel(String format) {
+    return '$format 컨테이너';
+  }
+
+  @override
+  String formatVaultLabel(String format) {
+    return '$format 볼트';
+  }
+
+  @override
+  String formatDriveLabel(String format) {
+    return '$format 드라이브';
+  }
+
+  @override
+  String get encryptedContainerLabel => '암호화된 컨테이너';
+
+  @override
+  String get tapToSelectVaultFolder => '탭하여 볼트 폴더 선택…';
+
+  @override
+  String get tapToSelectContainerFile => '탭하여 컨테이너 파일 선택…';
+
+  @override
+  String get containerMissingTitle => '컨테이너 없음';
+
+  @override
+  String get filePathCouldNotBeResolved => '파일 경로를 확인할 수 없습니다';
+
+  @override
+  String get containerMissingExplanation =>
+      '컨테이너 파일이 이동되었거나 삭제되었을 수 있으며, 저장소 연결이 끊어져 있을 수도 있습니다.';
+
+  @override
+  String get retryButtonLabel => '다시 시도';
+
+  @override
+  String get locateFileButtonLabel => '파일 찾기';
+
+  @override
+  String get authenticateToMountSubtitle => '인증하여 컨테이너를 안전하게 마운트하세요';
+
+  @override
+  String get usePasswordButtonLabel => '비밀번호 사용';
+
+  @override
+  String get authenticateButtonLabel => '인증';
+
+  @override
+  String get drawUnlockPatternCardTitle => '잠금 해제 패턴 그리기';
+
+  @override
+  String get wrongPatternTryAgain => '잘못된 패턴 — 다시 시도하세요';
+
+  @override
+  String get connectYourPatternSequence => '패턴 순서를 연결하세요';
+
+  @override
+  String get usePasswordInsteadButtonLabel => '대신 비밀번호 사용';
+
+  @override
+  String get passwordHintFolderVault => '볼트 비밀번호 입력';
+
+  @override
+  String get passwordHintBitlocker => '비밀번호 또는 복구 키 입력';
+
+  @override
+  String get passwordHintContainer => '컨테이너 비밀번호 입력';
+
+  @override
+  String get usingSavedPasswordTooltip => '저장된 비밀번호 사용 중';
+
+  @override
+  String get luksKeyfileReplacesPasswordNote =>
+      'LUKS 컨테이너에서는 키파일이 비밀번호를 대체합니다.';
+
+  @override
+  String get readOnlyModeUsbSubtitle => '이 드라이브 변경을 허용하지 않고 마운트합니다';
+
+  @override
+  String get readOnlyModeContainerSubtitle => '이 컨테이너 변경을 허용하지 않고 마운트합니다';
+
+  @override
+  String get rememberContainerLabel => '컨테이너 기억';
+
+  @override
+  String get rememberContainerSubtitle => '빠른 접근을 위해 대시보드에 고정';
+
+  @override
+  String get cancelUnlockButtonLabel => '잠금 해제 취소';
+
+  @override
+  String get biometricSubjectContainer => '컨테이너';
+
+  @override
+  String get biometricSubjectUsbDrive => 'USB 드라이브';
+
+  @override
+  String get usbNoSavedCredentialsMessage => '저장된 비밀번호를 찾을 수 없습니다. 수동으로 입력하세요.';
+
+  @override
+  String get decryptingDriveLabel => '드라이브 복호화 중…';
+
+  @override
+  String get usbDeviceAlreadyActiveMounted => '이 USB 장치는 이미 활성화되어 마운트되어 있습니다.';
+
+  @override
+  String reconnectUsbDriveTitle(String label) {
+    return '\"$label\" 다시 연결';
+  }
+
+  @override
+  String get unlockUsbDriveTitle => 'USB 드라이브 잠금 해제';
+
+  @override
+  String get noUsbStorageDetectedTitle => 'USB 저장소가 감지되지 않음';
+
+  @override
+  String authenticateToUnlockPrompt(String subject) {
+    return '$subject 잠금 해제를 위해 인증하세요';
+  }
+
+  @override
+  String get noPatternConfiguredMessage => '설정된 패턴이 없습니다. 비밀번호를 수동으로 입력하세요.';
+
+  @override
+  String patternLockedForSeconds(int seconds) {
+    return '실패 횟수가 너무 많습니다. $seconds초 동안 잠깁니다.';
+  }
+
+  @override
+  String get initSecureCredsBiometricMessage =>
+      '보안 자격 증명을 초기화하는 중입니다. 생체 인식 접근을 승인하려면 한 번 수동으로 잠금을 해제하세요.';
+
+  @override
+  String get initSecureCredsPatternMessage =>
+      '보안 자격 증명을 초기화하는 중입니다. 패턴 접근을 승인하려면 한 번 수동으로 잠금을 해제하세요.';
+
+  @override
+  String get mountExistingContainerTitle => '기존 컨테이너 마운트';
+
+  @override
+  String get mountExistingContainerSubtitle => '이미 가지고 있는 파일 컨테이너의 잠금을 해제합니다';
+
+  @override
+  String get mountSplitContainerTitle => '분할 컨테이너 마운트';
+
+  @override
+  String get mountSplitContainerSubtitle => '먼저 결합하지 않고 분할 컨테이너를 직접 잠금 해제합니다';
+
+  @override
+  String get mountUsbDriveTitle => 'USB 드라이브 마운트';
+
+  @override
+  String get mountUsbDriveSubtitle => 'OTG 플래시 드라이브의 컨테이너 잠금을 해제합니다';
+
+  @override
+  String get formatUsbDriveTitle => 'USB 드라이브 포맷';
+
+  @override
+  String get formatUsbDriveSubtitle => '드라이브를 지우고 새 암호화 컨테이너를 만듭니다';
+
+  @override
+  String get createNewContainerTitle => '새 컨테이너 만들기';
+
+  @override
+  String get createNewContainerSubtitle => '완전히 새로운 암호화 볼트를 포맷합니다';
+
+  @override
+  String get lockBeforeRemovingWarning => '제거하기 전에 컨테이너를 잠그세요.';
+
+  @override
+  String get settingsTooltip => '설정';
+
+  @override
+  String get addVaultFabLabel => '볼트 추가';
+
+  @override
+  String removedLabelUndo(String label) {
+    return '\"$label\" 제거됨';
+  }
+
+  @override
+  String get undo => '실행 취소';
+
+  @override
+  String get pdfViewerNoSourceProvided => 'PDF 소스가 제공되지 않았습니다.';
+
+  @override
+  String get pdfViewerFileEmpty => 'PDF 파일이 비어 있거나 읽을 수 없습니다.';
+
+  @override
+  String pdfViewerFailedToInspectSize(String error) {
+    return 'PDF 파일 크기 확인에 실패했습니다: $error';
+  }
+
+  @override
+  String get pdfViewerErrorLoadingTitle => 'PDF 로드 오류';
+
+  @override
+  String get pdfViewerNoDocumentLoaded => '로드된 PDF 문서가 없습니다.';
+
+  @override
+  String get add => '추가';
+
+  @override
+  String get reset => '재설정';
+
+  @override
+  String couldNotExpose(String name) {
+    return '\"$name\"을(를) 노출할 수 없습니다.';
+  }
+
+  @override
+  String nowAvailableToOtherApps(String name) {
+    return '\"$name\"이(가) 이제 다른 앱에서 사용할 수 있습니다.';
+  }
+
+  @override
+  String couldNotUnmount(String name) {
+    return '\"$name\"을(를) 마운트 해제할 수 없습니다.';
+  }
+
+  @override
+  String pinnedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개 고정됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unpinnedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개 고정 해제됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get readOnlyThumbnailWarning =>
+      '읽기 전용 마운트 — 썸네일이 표시되지만 이번 세션에서는 컨테이너 내부에 저장되지 않습니다.';
+
+  @override
+  String failedLoadingFolder(String type) {
+    return '폴더 로드 실패: $type';
+  }
+
+  @override
+  String failedToReadArchive(String type) {
+    return '압축 파일 읽기 실패: $type';
+  }
+
+  @override
+  String archiveFormatNotSupported(String ext) {
+    return '.$ext 압축 형식은 아직 지원되지 않습니다';
+  }
+
+  @override
+  String get archivePasswordPromptTitle => '비밀번호로 보호됨';
+
+  @override
+  String get archivePasswordPromptMessage =>
+      '이 압축 파일은 비밀번호로 보호되어 있습니다. 내용을 보려면 비밀번호를 입력하세요.';
+
+  @override
+  String get archiveSolidWarning =>
+      '솔리드 압축 파일입니다 — 특히 끝부분의 파일을 열 때 속도가 느려질 수 있습니다.';
+
+  @override
+  String get failedToReadFileFromArchive => '압축 파일에서 파일을 읽지 못했습니다';
+
+  @override
+  String failedToExtractFile(String type) {
+    return '파일 압축 풀기 실패: $type';
+  }
+
+  @override
+  String get failedToReadSecureItem => '보안 항목 읽기 실패';
+
+  @override
+  String get openFileDialogTitle => '파일 열기';
+
+  @override
+  String chooseHowToOpen(String name) {
+    return '\"$name\"을(를) 여는 방법을 선택하세요:';
+  }
+
+  @override
+  String get playVideoAudioViewImageInApp => '앱 내에서 동영상/오디오 재생 또는 이미지 보기';
+
+  @override
+  String get viewEditTextMarkdownCode => '텍스트, 마크다운, 코드 보기/편집';
+
+  @override
+  String get sendFileToThirdPartyApp => '파일을 타사 앱으로 전송';
+
+  @override
+  String get openAsEllipsis => '다른 형식으로 열기…';
+
+  @override
+  String get chooseFileTypeToOpenAs => '열 파일 형식을 선택하세요';
+
+  @override
+  String alwaysRememberChoiceExt(String ext) {
+    return '.$ext 파일에 대해 항상 선택 항목 기억';
+  }
+
+  @override
+  String get alwaysRememberChoiceNoExt => '확장자 없는 파일에 대해 항상 선택 항목 기억';
+
+  @override
+  String get openAsDialogTitle => '다른 형식으로 열기';
+
+  @override
+  String get mimeTypeText => '텍스트';
+
+  @override
+  String get mimeTypeImage => '이미지';
+
+  @override
+  String get mimeTypeVideo => '동영상';
+
+  @override
+  String get mimeTypeAudio => '오디오';
+
+  @override
+  String get mimeTypeArchive => '압축 파일';
+
+  @override
+  String get mimeTypeOther => '기타';
+
+  @override
+  String get scanningSubfoldersForMedia => '하위 폴더에서 미디어를 검색하는 중…';
+
+  @override
+  String get noMediaFilesFoundRecursive => '이 폴더 또는 하위 폴더에서 미디어 파일을 찾을 수 없습니다';
+
+  @override
+  String failedToScanSubfolders(String error) {
+    return '하위 폴더 검색 실패: $error';
+  }
+
+  @override
+  String scanningSubfoldersForMediaProgress(int count) {
+    return '하위 폴더에서 미디어 검색 중… $count개 확인함';
+  }
+
+  @override
+  String get mediaScanCancelled => '미디어 검색이 취소되었습니다';
+
+  @override
+  String get mediaScanLimitReached => '많은 폴더를 확인한 후 검색을 중단했습니다. 미디어를 찾지 못했습니다.';
+
+  @override
+  String get noAppFoundForFileType => '이 파일 형식을 처리할 앱을 찾을 수 없습니다';
+
+  @override
+  String couldNotOpenFile(String name) {
+    return '\"$name\"을(를) 열 수 없습니다';
+  }
+
+  @override
+  String get couldNotShareFiles => '선택한 파일을 공유할 수 없습니다';
+
+  @override
+  String get readOnlyCantMove =>
+      '이 컨테이너는 읽기 전용으로 마운트되어 있습니다 — 여기서 항목을 이동할 수 없습니다.';
+
+  @override
+  String get readOnlyCantPaste =>
+      '이 컨테이너는 읽기 전용으로 마운트되어 있습니다 — 여기에 항목을 붙여넣을 수 없습니다.';
+
+  @override
+  String get clipboardSourceInvalid => '클립보드 소스가 유효하지 않습니다';
+
+  @override
+  String get crossContainerPasteNotConfigured => '컨테이너 간 붙여넣기가 설정되어 있지 않습니다.';
+
+  @override
+  String get crossContainerPasteRequiresBothMounted =>
+      '컨테이너 간 붙여넣기는 두 컨테이너가 모두 마운트된 상태여야 합니다.';
+
+  @override
+  String get readOnlyCantDelete =>
+      '이 컨테이너는 읽기 전용으로 마운트되어 있습니다 — 항목을 삭제할 수 없습니다.';
+
+  @override
+  String deletedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개 삭제됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deletedWithFailures(int deleted, int failed) {
+    return '$deleted개 삭제됨 · $failed개 실패';
+  }
+
+  @override
+  String exportedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 내보내기 완료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportCancelledOrFailed => '내보내기가 취소되었거나 실패했습니다';
+
+  @override
+  String exportError(String type) {
+    return '내보내기 오류: $type';
+  }
+
+  @override
+  String get deleteOriginalTitle => '원본을 삭제할까요?';
+
+  @override
+  String get deleteOriginalFolderMessage =>
+      '가져오기가 완료되었습니다. 기기에서 원본 폴더를 삭제하시겠습니까?';
+
+  @override
+  String get deleteOriginalFilesMessage =>
+      '가져오기가 완료되었습니다. 기기에서 원본 파일을 삭제하시겠습니까?';
+
+  @override
+  String get keepOriginal => '원본 유지';
+
+  @override
+  String get deleteOriginalButton => '원본 삭제';
+
+  @override
+  String deletedOriginalCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '원본 항목 $count개 삭제됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get couldNotDeleteOriginals => '원본을 삭제할 수 없습니다';
+
+  @override
+  String get videoCapturedEncrypted => '동영상이 저장되었습니다';
+
+  @override
+  String get photoCapturedEncrypted => '사진이 저장되었습니다';
+
+  @override
+  String cameraCaptureFailed(String type) {
+    return '카메라 촬영 실패: $type';
+  }
+
+  @override
+  String extractAllFilesToFolder(String folder) {
+    return '모든 파일을 \"$folder\" 폴더에 압축 풀까요?';
+  }
+
+  @override
+  String get extract => '압축 풀기';
+
+  @override
+  String extractedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 압축 풀기 완료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToExtractGeneric(String type) {
+    return '압축 풀기 실패: $type';
+  }
+
+  @override
+  String get archiveSelectionAction => '압축';
+
+  @override
+  String get createArchiveTitle => '압축 파일 만들기';
+
+  @override
+  String get archiveNameHint => '압축파일.zip';
+
+  @override
+  String archivedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 압축 완료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String failedToArchiveGeneric(String type) {
+    return '압축 실패: $type';
+  }
+
+  @override
+  String get createArchivePasswordHint => '선택적 비밀번호 (AES-256)';
+
+  @override
+  String get createArchivePasswordUnavailableForFormat =>
+      '비밀번호 보호는 ZIP 및 7-Zip 형식에서만 사용할 수 있습니다';
+
+  @override
+  String get createArchiveEncryptFilenames => '파일 이름 암호화';
+
+  @override
+  String get createArchiveEncryptFilenamesHint =>
+      '비밀번호가 필요합니다. 내용을 보는 데에도 비밀번호가 필요해집니다.';
+
+  @override
+  String get closeSearchTooltip => '검색 닫기';
+
+  @override
+  String get searchInThisFolderTooltip => '이 폴더에서 검색';
+
+  @override
+  String get playMediaHereTooltip => '여기서 미디어 재생';
+
+  @override
+  String get rootFolderLabel => '루트';
+
+  @override
+  String folderPickerFailed(String error) {
+    return '폴더 선택기 실패: $error';
+  }
+
+  @override
+  String get addAVaultTitle => '볼트 추가';
+
+  @override
+  String get selectEmptyDestinationFolderFirst => '먼저 빈 대상 폴더를 선택하세요';
+
+  @override
+  String get passwordRequired => '비밀번호가 필요합니다';
+
+  @override
+  String get vaultCreatedSuccessfully => '볼트가 성공적으로 생성되었습니다.';
+
+  @override
+  String get vaultCreationFailedEmptyFolder =>
+      '볼트 생성에 실패했습니다 — 선택한 폴더가 비어 있는지 확인하세요.';
+
+  @override
+  String get unknownErrorOccurred => '알 수 없는 오류가 발생했습니다';
+
+  @override
+  String get containerNameRequired => '컨테이너 이름이 필요합니다';
+
+  @override
+  String get enterValidSizeGreaterThanZero => '0보다 큰 유효한 크기를 입력하세요';
+
+  @override
+  String get passwordOrKeyfileRequired => '비밀번호 또는 최소 1개의 키파일이 필요합니다';
+
+  @override
+  String get standardVolumePasswordsDoNotMatch => '표준 볼륨 비밀번호가 일치하지 않습니다';
+
+  @override
+  String get hiddenVolumePasswordsDoNotMatch => '숨김 볼륨 비밀번호가 일치하지 않습니다';
+
+  @override
+  String get containerFileCreatedSuccessfully => '컨테이너 파일이 성공적으로 생성되었습니다.';
+
+  @override
+  String get containerCreationCancelledOrFailed => '컨테이너 생성이 취소되었거나 실패했습니다.';
+
+  @override
+  String insufficientSpaceForContainer(String needed, String available) {
+    return '대상 위치에 여유 공간이 부족합니다. 필요 용량: $needed, 사용 가능: $available뿐입니다.';
+  }
+
+  @override
+  String get vaultKindContainerFile => '컨테이너 파일';
+
+  @override
+  String get vaultKindFolderVault => '폴더 볼트';
+
+  @override
+  String get formatFileSystemLabel => '파일 시스템 포맷';
+
+  @override
+  String get standardVolumeHeader => '표준 볼륨';
+
+  @override
+  String get containerFormatLabel => '컨테이너 형식';
+
+  @override
+  String get fileNameLabel => '파일 이름';
+
+  @override
+  String get containerSizeLabel => '컨테이너 크기';
+
+  @override
+  String get unitLabel => '단위';
+
+  @override
+  String get passwordFieldLabel => '비밀번호';
+
+  @override
+  String get confirmPasswordFieldLabelTitleCase => '비밀번호 확인';
+
+  @override
+  String get hiddenVolumeHeader => '숨김 볼륨';
+
+  @override
+  String get createHiddenVolumeToggleTitle => '숨김 볼륨 만들기';
+
+  @override
+  String get createInvisibleSecondaryVolume => '보이지 않는 보조 볼륨을 만듭니다';
+
+  @override
+  String get setOuterPasswordFirstToEnable => '활성화하려면 먼저 외부 비밀번호 또는 키파일을 설정하세요';
+
+  @override
+  String get hiddenPasswordLabel => '숨김 비밀번호';
+
+  @override
+  String get confirmHiddenPasswordLabel => '숨김 비밀번호 확인';
+
+  @override
+  String get hiddenSizeLabel => '숨김 크기';
+
+  @override
+  String get unitMbMegabytes => 'MB(메가바이트)';
+
+  @override
+  String get unitGbGigabytes => 'GB(기가바이트)';
+
+  @override
+  String get hiddenFileSystemLabel => '숨김 파일 시스템';
+
+  @override
+  String get vaultFormatLabel => '볼트 형식';
+
+  @override
+  String get gocryptfsCipherLabel => '콘텐츠 암호화 방식';
+
+  @override
+  String get cryfsCipherLabel => '콘텐츠 암호화 방식';
+
+  @override
+  String get cryfsBlockSizeLabel => '블록 크기';
+
+  @override
+  String get destinationFolderLabel => '대상 폴더';
+
+  @override
+  String get selectEmptyFolderLabel => '빈 폴더를 선택하세요';
+
+  @override
+  String get tapToChooseVaultLocation => '탭하여 볼트가 생성될 위치 선택…';
+
+  @override
+  String get folderVaultLimitationsNote =>
+      '폴더 볼트는 키파일, PIM, 숨김 볼륨, VeraCrypt/LUKS 암호화 방식 선택을 지원하지 않습니다.';
+
+  @override
+  String get createVaultButton => '볼트 만들기';
+
+  @override
+  String get createContainerButton => '컨테이너 만들기';
+
+  @override
+  String get vaultCreationInProgressWait => '볼트를 만드는 중입니다. 잠시 기다려 주세요.';
+
+  @override
+  String get containerCreationInProgressWait => '컨테이너를 만드는 중입니다. 잠시 기다려 주세요.';
+
+  @override
+  String get createEncryptedVaultTitle => '암호화된 볼트 만들기';
+
+  @override
+  String get createEncryptedContainerTitle => '암호화된 컨테이너 만들기';
+
+  @override
+  String get unitMbShort => 'MB';
+
+  @override
+  String get unitGbShort => 'GB';
+
+  @override
+  String failedToListUsbDevices(String error) {
+    return 'USB 장치 목록 가져오기 실패: $error';
+  }
+
+  @override
+  String get usbPermissionDenied => 'USB 권한이 거부되었습니다';
+
+  @override
+  String get couldNotReadDriveCapacity =>
+      '드라이브 용량을 읽을 수 없습니다 — 크기를 수동으로 입력하세요.';
+
+  @override
+  String get selectUsbDriveFirst => '먼저 USB 드라이브를 선택하세요';
+
+  @override
+  String eraseDeviceTitle(String name) {
+    return '\"$name\"을(를) 지울까요?';
+  }
+
+  @override
+  String get eraseDeviceMessage =>
+      '이 USB 드라이브의 현재 모든 데이터가 영구적으로 지워지고 새 암호화 컨테이너로 대체됩니다. 이 작업은 되돌릴 수 없습니다.';
+
+  @override
+  String get eraseAndCreateButton => '지우고 만들기';
+
+  @override
+  String get usbPermissionRequiredToContinue => '계속하려면 USB 권한이 필요합니다';
+
+  @override
+  String get usbContainerCreatedSnack =>
+      'USB 컨테이너가 생성되었습니다. 잠금을 해제하려면 \"USB 드라이브 마운트\"를 사용하세요.';
+
+  @override
+  String get usbContainerCreationFailed => 'USB 컨테이너 생성에 실패했습니다.';
+
+  @override
+  String get usbStandardVolumeSectionHeader => 'USB 드라이브 및 표준 볼륨';
+
+  @override
+  String get formattingErasesEverythingWarning =>
+      '포맷하면 선택한 드라이브에 있는 모든 데이터가 지워집니다.';
+
+  @override
+  String get selectUsbDriveLabel => 'USB 드라이브 선택';
+
+  @override
+  String get noUsbStorageDetected => 'USB 저장소가 감지되지 않음';
+
+  @override
+  String get connectOtgDriveToFormat => '포맷하려면 OTG 드라이브를 연결하세요';
+
+  @override
+  String get refreshListButton => '목록 새로고침';
+
+  @override
+  String get readyToFormat => '포맷 준비 완료';
+
+  @override
+  String get permissionRequired => '권한 필요';
+
+  @override
+  String get readingDriveCapacity => '드라이브 용량을 읽는 중…';
+
+  @override
+  String get mustNotExceedDriveCapacity => '드라이브의 실제 용량을 초과할 수 없습니다.';
+
+  @override
+  String get quickFormatTitle => '빠른 포맷';
+
+  @override
+  String get quickFormatDescription =>
+      '드라이브 0채우기를 건너뜁니다. 더 빠르지만 이전 데이터를 안전하게 지우지는 않습니다.';
+
+  @override
+  String get eraseAndCreateContainerButton => '지우고 컨테이너 만들기';
+
+  @override
+  String get usbContainerCreationInProgressWait =>
+      '컨테이너를 만드는 중입니다. 잠시 기다려 주세요.';
+
+  @override
+  String get formatUsbDriveScreenTitle => 'USB 드라이브 포맷';
+
+  @override
+  String get playlistTransitionAnimationLabel => '재생 목록 전환 애니메이션';
+
+  @override
+  String get playlistTransitionSlideLabel => '슬라이드(기본값)';
+
+  @override
+  String get playlistTransitionFadeLabel => '페이드';
+
+  @override
+  String get playlistTransitionZoomLabel => '확대/축소';
+
+  @override
+  String get playlistTransitionDepthLabel => '깊이 스택';
+
+  @override
+  String get playlistTransitionCubeLabel => '3D 큐브';
+
+  @override
+  String get playlistTransitionFlipLabel => '3D 플립';
+
+  @override
+  String get unlockVaultTitle => '볼트 잠금 해제';
+
+  @override
+  String get openContainerTitle => '컨테이너 열기';
+
+  @override
+  String get selectContainerFileOrFolder => '파일 또는 폴더 선택';
+
+  @override
+  String get readOnlyModeLabel => '읽기 전용 모드';
+
+  @override
+  String get readOnlyModeSubtitle => '볼트에 대한 쓰기 또는 수정 작업을 방지합니다';
+
+  @override
+  String get alwaysOpenReadOnlyLabel => '항상 읽기 전용';
+
+  @override
+  String get alwaysOpenReadOnlySubtitle => '새 세션은 읽기 전용으로 시작합니다.';
+
+  @override
+  String get selectUsbDeviceLabel => 'USB 장치 선택';
+
+  @override
+  String get noUsbDevicesFound => '호환되는 USB 저장 장치를 찾을 수 없습니다';
+
+  @override
+  String get containerConfigTitle => '볼트 구성';
+
+  @override
+  String get changePasswordTitle => '비밀번호 변경';
+
+  @override
+  String get confirmNewPasswordLabel => '새 비밀번호 확인';
+
+  @override
+  String get cameraCaptureTitle => '볼트 카메라';
+
+  @override
+  String get takingPhoto => '사진 촬영 중…';
+
+  @override
+  String get noVaultSelected => '선택된 볼트가 없습니다';
+
+  @override
+  String get mediaDiagnosticsTitle => '미디어 진단';
+
+  @override
+  String get advancedViewerSettingsTitle => '뷰어 설정';
+
+  @override
+  String get textEditorSwitchToReadModeTooltip => '읽기 전용 모드로 전환';
+
+  @override
+  String get textEditorSwitchToEditModeTooltip => '편집 모드로 전환';
+
+  @override
+  String get textEditorReadOnlyIndicatorLabel => '읽기 전용';
+
+  @override
+  String get textEditorMoveCursorLeftTooltip => '커서를 왼쪽으로 이동';
+
+  @override
+  String get textEditorMoveCursorRightTooltip => '커서를 오른쪽으로 이동';
+
+  @override
+  String get textEditorSelectWordTooltip => '단어 선택';
+
+  @override
+  String get textEditorSwitchToHorizontalScrollTooltip => '가로 스크롤로 전환';
+
+  @override
+  String get textEditorSwitchToSoftWrapTooltip => '자동 줄 바꿈으로 전환';
+
+  @override
+  String get textEditorCaretScrubberLabel => '커서를 이동하려면 좌우로 드래그하세요';
+
+  @override
+  String get textEditorFindTooltip => '파일에서 찾기';
+
+  @override
+  String get textEditorFindHint => '찾기';
+
+  @override
+  String get textEditorReplaceHint => '바꾸기';
+
+  @override
+  String get textEditorToggleReplaceTooltip => '바꾸기 전환';
+
+  @override
+  String get textEditorPreviousMatchTooltip => '이전 일치 항목';
+
+  @override
+  String get textEditorNextMatchTooltip => '다음 일치 항목';
+
+  @override
+  String get textEditorCaseSensitiveTooltip => '대/소문자 구분';
+
+  @override
+  String get textEditorRegexTooltip => '정규식 사용';
+
+  @override
+  String get textEditorCloseFindTooltip => '찾기 닫기';
+
+  @override
+  String get textEditorNoMatches => '결과 없음';
+
+  @override
+  String get textEditorReplaceButton => '바꾸기';
+
+  @override
+  String get textEditorReplaceAllButton => '모두 바꾸기';
+
+  @override
+  String get textEditorMoreActionsTooltip => '추가 작업';
+
+  @override
+  String get textEditorGoToLineMenuItem => '줄로 이동…';
+
+  @override
+  String get textEditorGoToStartMenuItem => '처음으로 이동';
+
+  @override
+  String get textEditorGoToEndMenuItem => '끝으로 이동';
+
+  @override
+  String get textEditorFormatDocumentMenuItem => '문서 서식 지정';
+
+  @override
+  String get textEditorMinifyJsonMenuItem => 'JSON 축소';
+
+  @override
+  String get textEditorFormatFailedMessage =>
+      '이 파일의 서식을 지정할 수 없습니다. 먼저 유효한지 확인하세요';
+
+  @override
+  String get textEditorGoToLineDialogTitle => '줄로 이동';
+
+  @override
+  String get textEditorGoToLineFieldLabel => '줄 번호';
+
+  @override
+  String textEditorGoToLineHelperText(int maxLine) {
+    return '1–$maxLine';
+  }
+
+  @override
+  String textEditorGoToLineInvalidNumber(int maxLine) {
+    return '1에서 $maxLine 사이의 줄 번호를 입력하세요';
+  }
+
+  @override
+  String get goToLineButton => '이동';
+
+  @override
+  String get textEditorSaveConfirmTitle => '저장되지 않은 변경 사항';
+
+  @override
+  String get textEditorSaveConfirmMessage => '닫기 전에 변경 사항을 저장하시겠습니까?';
+
+  @override
+  String get saveAndClose => '저장 후 닫기';
+
+  @override
+  String get discardChanges => '변경 사항 취소';
+
+  @override
+  String selectionBarSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목 선택됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectAll => '모두 선택';
+
+  @override
+  String get deselectAll => '모두 선택 해제';
+
+  @override
+  String get sortOptionsTitle => '파일 정렬';
+
+  @override
+  String get layoutModeList => '목록 보기';
+
+  @override
+  String get layoutModeGrid => '그리드 보기';
+
+  @override
+  String get layoutModeMasonry => '매스너리';
+
+  @override
+  String get fileOperationsTitle => '파일 작업';
+
+  @override
+  String get conflictResolutionTitle => '파일 충돌';
+
+  @override
+  String get replaceExistingFile => '기존 파일 바꾸기';
+
+  @override
+  String get keepBothFiles => '둘 다 유지 (새 파일 이름 변경)';
+
+  @override
+  String get skipFile => '이 파일 건너뛰기';
+
+  @override
+  String get noVaultsFoundTitle => '볼트를 찾을 수 없음';
+
+  @override
+  String get noVaultsFoundSubtitle => '시작하려면 새 암호화 컨테이너를 만들거나 기존 볼트를 추가하세요.';
+
+  @override
+  String get addExistingVaultButton => '기존 볼트 추가';
+
+  @override
+  String get sortContainersModeManual => '수동 (드래그하여 순서 변경)';
+
+  @override
+  String get sortContainersModeUnlockStatus => '잠금 해제 상태 (해제된 항목 먼저)';
+
+  @override
+  String get sortContainersModeNameAZ => '이름 (A–Z)';
+
+  @override
+  String get sortContainersModeNameZA => '이름 (Z–A)';
+
+  @override
+  String get sortContainersModeNewest => '최신순';
+
+  @override
+  String get sortContainersModeOldest => '오래된순';
+
+  @override
+  String get thumbnailCacheAppCacheLabel => '앱 캐시';
+
+  @override
+  String get thumbnailCacheAppCacheDesc =>
+      '앱 캐시에 암호화되어 저장됩니다. 빠르지만, 저장 공간이 부족하면 자동으로 지워집니다.';
+
+  @override
+  String get thumbnailCacheInContainerLabel => '컨테이너 내부';
+
+  @override
+  String get thumbnailCacheInContainerDesc =>
+      '암호화된 컨테이너 내부에 저장됩니다. 컨테이너 자체로 보호되지만 쓰기 속도가 느립니다.';
+
+  @override
+  String get thumbnailCacheHiddenFolderLabel => '숨김 폴더';
+
+  @override
+  String get thumbnailCacheHiddenFolderDesc =>
+      '루트에 있는 숨김 .thumbcache 폴더에 저장됩니다. 앱 캐시와 달리 자동으로 지워지지 않습니다.';
+
+  @override
+  String get thumbnailCacheDisabledLabel => '비활성화됨';
+
+  @override
+  String get thumbnailCacheDisabledDesc =>
+      '디스크 캐시가 없습니다. 썸네일은 로드할 때마다 다시 생성됩니다.';
+
+  @override
+  String get unlockContainerTitle => '컨테이너 잠금 해제';
+
+  @override
+  String get containerFileSegment => '컨테이너 파일';
+
+  @override
+  String get folderVaultSegment => '폴더 볼트';
+
+  @override
+  String get enableButtonLabel => '활성화';
+
+  @override
+  String get retryButtonLabelShort => '다시 시도';
+
+  @override
+  String get locateFileButton => '파일 찾기';
+
+  @override
+  String get authenticateButton => '인증';
+
+  @override
+  String get cancelUnlockButton => '잠금 해제 취소';
+
+  @override
+  String tryingKeyslotProgress(int attempted, int total) {
+    return '키 슬롯 $attempted/$total 시도 중…';
+  }
+
+  @override
+  String get tryingKeyslotSingle => '키 슬롯 시도 중…';
+
+  @override
+  String verifyingCredentialProgress(int attempted, int total) {
+    return '자격 증명 $attempted/$total 확인 중…';
+  }
+
+  @override
+  String get verifyingCredentialSingle => '자격 증명 확인 중…';
+
+  @override
+  String tryingAlgoSlot(String algo, String slotName) {
+    return '$algo($slotName) 시도 중…';
+  }
+
+  @override
+  String get hiddenVolumeSlotName => '숨김 볼륨';
+
+  @override
+  String get standardVolumeSlotName => '표준 볼륨';
+
+  @override
+  String get containerMissingSubtitle => '파일 경로를 확인할 수 없습니다';
+
+  @override
+  String get containerMissingBody =>
+      '컨테이너 파일이 이동되었거나 삭제되었을 수 있으며, 저장소 연결이 끊어져 있을 수도 있습니다.';
+
+  @override
+  String get connectPatternSequence => '패턴 순서를 연결하세요';
+
+  @override
+  String get passwordLabel => '비밀번호';
+
+  @override
+  String get enterVaultPasswordHint => '볼트 비밀번호 입력';
+
+  @override
+  String get enterBitlockerPasswordHint => '비밀번호 또는 복구 키 입력';
+
+  @override
+  String get enterContainerPasswordHint => '컨테이너 비밀번호 입력';
+
+  @override
+  String get readOnlyModeUsbSubtitleDrive => '이 드라이브 변경을 허용하지 않고 마운트합니다';
+
+  @override
+  String get rememberDriveLabel => '드라이브 기억';
+
+  @override
+  String get rememberDriveSubtitle => '빠른 접근을 위해 대시보드에 고정';
+
+  @override
+  String get unlockVaultButtonLabel => '볼트 잠금 해제';
+
+  @override
+  String get cryfsStorageAccessWarning =>
+      'CryFS 볼트는 수천 개의 작은 블록 파일을 사용합니다. 빠른 저장소 접근이 없으면 성능이 크게 느려집니다.';
+
+  @override
+  String get folderVaultStorageAccessWarning =>
+      '빠른 저장소 접근이 비활성화되어 있습니다. 폴더 볼트에서 파일을 열고 읽는 속도가 느려질 수 있습니다.';
+
+  @override
+  String get requestingPermission => '권한 요청 중…';
+
+  @override
+  String get unlockAndMountButton => '잠금 해제 및 마운트';
+
+  @override
+  String get unlockDriveButton => '드라이브 잠금 해제';
+
+  @override
+  String couldntFindDevice(String deviceName) {
+    return '\"$deviceName\"을(를) 찾을 수 없습니다';
+  }
+
+  @override
+  String get plugDriveBackInRetry =>
+      '드라이브를 다시 연결하고 다시 시도를 탭하거나, 다른 이름으로 표시되면 아래에서 선택하세요.';
+
+  @override
+  String get retryConnectionButton => '연결 다시 시도';
+
+  @override
+  String get refreshDevicesButton => '장치 새로고침';
+
+  @override
+  String get connectOtgDriveToMount => '마운트하려면 OTG 플래시 드라이브를 연결하세요';
+
+  @override
+  String get alreadyActive => '이미 활성화됨';
+
+  @override
+  String get active => '활성';
+
+  @override
+  String get readyToUnlock => '잠금 해제 준비 완료';
+
+  @override
+  String get enterUsbPartitionPassword => 'USB 파티션 비밀번호 입력';
+
+  @override
+  String get biometricAuthenticationTitle => '생체 인식';
+
+  @override
+  String get biometricAuthUsbSubtitle => '이 USB 장치의 잠금을 해제하고 마운트하려면 인증하세요';
+
+  @override
+  String get connectPatternSequenceToMount => '마운트하려면 패턴 순서를 연결하세요';
+
+  @override
+  String get selectAllAction => '모두 선택';
+
+  @override
+  String get clearSelectionAction => '선택 해제';
+
+  @override
+  String get clearSelectionTooltip => '선택 해제';
+
+  @override
+  String get selectionOptionsTooltip => '선택 옵션';
+
+  @override
+  String get readOnlyContainerTooltip => '읽기 전용 컨테이너';
+
+  @override
+  String get copyAction => '복사';
+
+  @override
+  String get moveAction => '이동';
+
+  @override
+  String get renameAction => '이름 변경';
+
+  @override
+  String get exportToDeviceAction => '기기로 내보내기';
+
+  @override
+  String get openWithAppAction => '앱으로 열기';
+
+  @override
+  String get shareAction => '공유';
+
+  @override
+  String get pinAction => '고정';
+
+  @override
+  String get pinSelectedAction => '선택 항목 고정';
+
+  @override
+  String get unpinAction => '고정 해제';
+
+  @override
+  String get unpinSelectedAction => '선택 항목 고정 해제';
+
+  @override
+  String get documentProviderSettingsMenu => '문서 제공자 설정';
+
+  @override
+  String get exposeAsDocumentProviderMenu => '문서 제공자로 노출';
+
+  @override
+  String get moreOptionsTooltipShort => '더보기';
+
+  @override
+  String get copyTooltip => '복사';
+
+  @override
+  String get searchInThisFolderHint => '이 폴더에서 검색…';
+
+  @override
+  String get clearTooltip => '지우기';
+
+  @override
+  String get backToDashboardTooltip => '대시보드로 돌아가기';
+
+  @override
+  String get cancelPasteButton => '붙여넣기 취소';
+
+  @override
+  String get cancelImportButton => '가져오기 취소';
+
+  @override
+  String get continueButton => '계속';
+
+  @override
+  String get skipButton => '건너뛰기';
+
+  @override
+  String get keepBothButton => '둘 다 유지';
+
+  @override
+  String get clearAllButton => '모두 지우기';
+
+  @override
+  String get autoMountWhenUnlocksTitle => '컨테이너 잠금 해제 시 자동 마운트';
+
+  @override
+  String get autoMountWhenUnlocksSubtitle => '다음에도 이 폴더를 자동으로 다시 노출';
+
+  @override
+  String get unmountButton => '마운트 해제';
+
+  @override
+  String get filtersMenuItem => '필터';
+
+  @override
+  String get settingsMenuItem => '설정';
+
+  @override
+  String get sortOptionsTooltip => '정렬 옵션';
+
+  @override
+  String get layoutOptionsTooltip => '레이아웃 옵션';
+
+  @override
+  String get lockContainerTooltip => '컨테이너 잠금';
+
+  @override
+  String get renameTooltip => '이름 변경';
+
+  @override
+  String get cancelUpdatingPasswordTooltip => '비밀번호 업데이트 취소';
+
+  @override
+  String get unlockSettingsButton => '잠금 해제 설정';
+
+  @override
+  String get updateSavedCredentialsButton => '저장된 자격 증명 업데이트';
+
+  @override
+  String get verifyCredentialsTitle => '자격 증명 확인';
+
+  @override
+  String get verifyButton => '확인';
+
+  @override
+  String get displayNameTitle => '표시 이름';
+
+  @override
+  String get containerNameHint => '컨테이너 이름';
+
+  @override
+  String get deleteFileDialogTitle => '파일을 삭제할까요?';
+
+  @override
+  String get deleteFilePermanentWarning => '이 작업은 영구적이며 되돌릴 수 없습니다.';
+
+  @override
+  String get unsavedChangesTitle => '저장되지 않은 변경 사항';
+
+  @override
+  String get unsavedChangesMessage => '저장되지 않은 변경 사항이 있습니다. 닫기 전에 저장하시겠습니까?';
+
+  @override
+  String get discardButton => '취소';
+
+  @override
+  String get decryptingFileContent => '파일 내용을 복호화하는 중...';
+
+  @override
+  String get cannotOpenFile => '파일을 열 수 없습니다';
+
+  @override
+  String get changesSavedSuccessfully => '변경 사항이 성공적으로 저장되었습니다';
+
+  @override
+  String saveFailedWithError(String error) {
+    return '저장 실패: $error';
+  }
+
+  @override
+  String linesCount(int count) {
+    return '줄 수: $count';
+  }
+
+  @override
+  String charsCount(int count) {
+    return '글자 수: $count';
+  }
+
+  @override
+  String get unsavedChangesLabel => '저장되지 않은 변경 사항';
+
+  @override
+  String get savedToVault => '볼트에 저장됨';
+
+  @override
+  String get saveChangesTooltip => '변경 사항 저장';
+
+  @override
+  String get textEditorDecryptFailedMessage => '볼트에서 파일을 복호화하지 못했습니다.';
+
+  @override
+  String get textEditorInvalidTextFileMessage => '이 파일은 유효한 텍스트 파일이 아닌 것 같습니다.';
+
+  @override
+  String get textEditorWriteBackFailedMessage => '볼트에 파일을 다시 쓰지 못했습니다.';
+
+  @override
+  String get markdownViewerEditTooltip => '편집';
+
+  @override
+  String get markdownViewerPreviewTooltip => '미리보기';
+
+  @override
+  String get markdownEmptyPreviewMessage => '아직 미리 볼 내용이 없습니다.';
+
+  @override
+  String get backTooltip => '뒤로';
+
+  @override
+  String get forwardTooltip => '앞으로';
+
+  @override
+  String get reloadTooltip => '새로고침';
+
+  @override
+  String get optionsTooltip => '옵션';
+
+  @override
+  String get htmlViewerErrorTitle => '이 페이지를 표시할 수 없습니다';
+
+  @override
+  String get htmlViewerLoadFailedMessage => '파일 로드에 실패했습니다';
+
+  @override
+  String get enableJavaScriptDialogTitle => '자바스크립트를 활성화할까요?';
+
+  @override
+  String get enableJavaScriptDialogMessage =>
+      '이 페이지는 자체 로컬 스크립트를 실행할 수 있게 됩니다. 여전히 네트워크 접근 권한은 없습니다 — 이 볼트의 어떤 것도 인터넷으로 전송되거나 수신될 수 없습니다.';
+
+  @override
+  String get disableJavaScriptMenu => '자바스크립트 비활성화';
+
+  @override
+  String get enableJavaScriptMenu => '자바스크립트 활성화';
+
+  @override
+  String get enterFullscreenMenu => '전체 화면으로 전환';
+
+  @override
+  String failedToOpenExternalApp(String error) {
+    return '외부 앱에서 열기 실패: $error';
+  }
+
+  @override
+  String get thisFolderMenu => '이 폴더';
+
+  @override
+  String get allInclSubfoldersMenu => '전체(하위 폴더 포함)';
+
+  @override
+  String get disableShuffleMenu => '셔플 비활성화';
+
+  @override
+  String get shufflePlaylistMenu => '재생 목록 셔플';
+
+  @override
+  String get playlistOptionsTooltip => '재생 목록 옵션';
+
+  @override
+  String get enablePlaylistTooltip => '재생 목록 활성화';
+
+  @override
+  String get moreActionsTooltip => '더 많은 작업';
+
+  @override
+  String get forcePortraitMenu => '세로 모드 강제 적용';
+
+  @override
+  String get forceLandscapeMenu => '가로 모드 강제 적용';
+
+  @override
+  String get autoRotateSensorMenu => '자동 회전(센서)';
+
+  @override
+  String get screenOrientationMenu => '화면 방향';
+
+  @override
+  String get playlistTransitionMenu => '재생 목록 전환';
+
+  @override
+  String get renameFileMenu => '파일 이름 변경';
+
+  @override
+  String get deleteFileMenu => '파일 삭제';
+
+  @override
+  String get thumbnailCarouselTooltip => '썸네일 캐러셀';
+
+  @override
+  String get advancedSettingsTooltip => '고급 설정';
+
+  @override
+  String get previousTooltip => '이전';
+
+  @override
+  String get nextTooltip => '다음';
+
+  @override
+  String get diagnosticsCopiedToClipboard => '진단 정보가 클립보드에 복사되었습니다';
+
+  @override
+  String get diagnosticsTitle => '진단';
+
+  @override
+  String get copyDiagnosticsTooltip => '진단 정보 복사';
+
+  @override
+  String get closeTooltip => '닫기';
+
+  @override
+  String get diagnosticsPlaybackSection => '재생';
+
+  @override
+  String get diagnosticsEngineSection => '엔진';
+
+  @override
+  String get diagnosticsStateLabel => '상태';
+
+  @override
+  String get diagnosticsResolutionLabel => '해상도';
+
+  @override
+  String get diagnosticsAspectRatioLabel => '화면 비율';
+
+  @override
+  String get diagnosticsPositionLabel => '재생 위치';
+
+  @override
+  String get diagnosticsDurationLabel => '길이';
+
+  @override
+  String get diagnosticsErrorLabel => '오류';
+
+  @override
+  String get diagnosticsPlayerLabel => '플레이어';
+
+  @override
+  String get diagnosticsDecodingLabel => '디코딩';
+
+  @override
+  String get diagnosticsExoPlayerValue => 'ExoPlayer(Android)';
+
+  @override
+  String get diagnosticsHardwareAcceleratedValue => '하드웨어 가속';
+
+  @override
+  String get diagnosticsUnknownValue => '알 수 없음';
+
+  @override
+  String get diagnosticsStateBuffering => '버퍼링 중';
+
+  @override
+  String get diagnosticsStatePlaying => '재생 중';
+
+  @override
+  String get diagnosticsStatePaused => '일시 중지됨';
+
+  @override
+  String get diagnosticsDurationUnavailable => '--:--';
+
+  @override
+  String get rotate90Label => '90° 회전';
+
+  @override
+  String get imageFitModeLabel => '이미지 맞춤 모드';
+
+  @override
+  String get slideshowDelayLabel => '슬라이드쇼 지연 시간';
+
+  @override
+  String get playbackSpeedLabel => '재생 속도';
+
+  @override
+  String get subtitlesLabel => '자막';
+
+  @override
+  String get imageSettingsTitle => '이미지 설정';
+
+  @override
+  String get playbackSettingsTitle => '재생 설정';
+
+  @override
+  String get imageFitContain => '전체 맞춤';
+
+  @override
+  String get imageFitWidth => '너비에 맞춤';
+
+  @override
+  String get imageFitHeight => '높이에 맞춤';
+
+  @override
+  String nSecondsDelay(int n) {
+    return '$n초';
+  }
+
+  @override
+  String playbackSpeedNormal(String speed) {
+    return '$speed배(표준)';
+  }
+
+  @override
+  String playbackSpeedValue(String speed) {
+    return '$speed배';
+  }
+
+  @override
+  String slideshowDelaySecondsValue(int seconds) {
+    return '$seconds초';
+  }
+
+  @override
+  String rotationDegreesValue(int degrees) {
+    return '$degrees°';
+  }
+
+  @override
+  String get settingsTooltipShort => '설정';
+
+  @override
+  String get sourceCodeTooltip => '소스 코드';
+
+  @override
+  String get donateTooltip => '기부';
+
+  @override
+  String get shareAppTooltip => '앱 공유';
+
+  @override
+  String get resetToDefaultsTooltip => '기본값으로 재설정';
+
+  @override
+  String get usbUnlockContainerTitle => 'USB 컨테이너 잠금 해제';
+
+  @override
+  String get usbMountContainerTitle => 'USB 드라이브 마운트';
+
+  @override
+  String get staticLabel => '정지';
+
+  @override
+  String get unmuteTooltip => '음소거 해제';
+
+  @override
+  String get muteTooltip => '음소거';
+
+  @override
+  String get playOnceDisabledTooltip => '한 번만 재생(자동 넘김 비활성화)';
+
+  @override
+  String get playAndAdvanceTooltip => '재생 후 다음으로 넘기기';
+
+  @override
+  String get loopCurrentVideoTooltip => '현재 동영상 반복 재생';
+
+  @override
+  String get clearThumbnailCacheDialogTitle => '썸네일 캐시를 지울까요?';
+
+  @override
+  String get clearThumbnailCacheDialogMessage =>
+      '이 볼트의 캐시된 썸네일이 삭제됩니다. 다음에 미디어를 탐색할 때 다시 생성됩니다.';
+
+  @override
+  String get clearCacheButton => '캐시 지우기';
+
+  @override
+  String get appCacheClearedUnlockMessage =>
+      '앱 캐시가 지워졌습니다. 내부 캐시를 지우려면 컨테이너의 잠금을 해제하세요.';
+
+  @override
+  String get allThumbnailCachesClearedMessage => '모든 썸네일 캐시가 성공적으로 지워졌습니다.';
+
+  @override
+  String get appCacheClearedContainerFailedMessage =>
+      '앱 캐시는 지워졌지만 컨테이너 내부는 지우지 못했습니다.';
+
+  @override
+  String get failedToClearThumbnailCachesMessage => '썸네일 캐시를 지우지 못했습니다.';
+
+  @override
+  String get authenticateToModifySettingsPrompt => '설정을 변경하려면 인증하세요';
+
+  @override
+  String get usbVaultSettingsTitle => 'USB 볼트 설정';
+
+  @override
+  String get vaultSettingsTitle => '볼트 설정';
+
+  @override
+  String get generalSectionHeader => '일반';
+
+  @override
+  String get securityCredentialsSectionHeader => '보안 및 자격 증명';
+
+  @override
+  String get securityOptionsLockedTitle => '보안 옵션 잠김';
+
+  @override
+  String get authenticateOriginalCredentialsMessage =>
+      '보안 설정을 변경하려면 원래 컨테이너 자격 증명으로 인증하세요.';
+
+  @override
+  String get unlockCredentialsLabel => '잠금 해제 자격 증명';
+
+  @override
+  String get unavailableSuffixLabel => '(사용 불가)';
+
+  @override
+  String get patternSetupRequiredBeforeSaving => '저장하기 전에 패턴을 설정하세요.';
+
+  @override
+  String get passwordKeystoreEncryptedHelperText =>
+      '비밀번호는 Android 키스토어를 사용해 암호화됩니다. 키파일만 사용하는 경우 비워 두세요.';
+
+  @override
+  String get changePatternButton => '패턴 변경';
+
+  @override
+  String get setPatternButton => '패턴 설정';
+
+  @override
+  String get cacheDerivedKeyLabel => '파생 키 캐시';
+
+  @override
+  String get cryfsSkipScryptKdfSubtitle =>
+      '다음부터 CryFS의 scrypt KDF 건너뛰기(키는 Android 키스토어에 보관)';
+
+  @override
+  String get reuseKeyMaterialKeystoreSubtitle => 'Android 키스토어의 키 자료를 재사용';
+
+  @override
+  String nDays(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count일',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cacheDerivedKeyLifetimeTitle => '캐시된 키 보관 기간';
+
+  @override
+  String get cacheDerivedKeyLifetimeNever => '끌 때까지';
+
+  @override
+  String cacheDerivedKeyLifetimeExpiresOn(String date) {
+    return '$date에 자동으로 삭제됨';
+  }
+
+  @override
+  String get pinAlgorithmSkipAutoDetectSubtitle =>
+      '잠금 해제 시 자동 감지를 건너뛰도록 알고리즘을 고정합니다.';
+
+  @override
+  String get changeContainerPasswordTitle => '컨테이너 비밀번호 변경';
+
+  @override
+  String get bitlockerCredentialsChangeNotSupportedMessage =>
+      'BitLocker 자격 증명은 앱 내에서 변경할 수 없습니다. Windows에서 \"BitLocker 관리\"를 사용하세요.';
+
+  @override
+  String get systemIntegrationSectionHeader => '시스템 및 통합';
+
+  @override
+  String get autoLockDurationLabel => '자동 잠금 시간';
+
+  @override
+  String get neverAutoLockOption => '안 함';
+
+  @override
+  String get neverAutoLockOptionSubtitle => '앱이 잠기거나 화면이 꺼져도 열려 있는 상태를 유지합니다';
+
+  @override
+  String get defaultAutoLockOptionSubtitle => '앱의 자동 잠금 및 화면 잠금 설정을 따릅니다';
+
+  @override
+  String get exposeContentToFilePickerSubtitle => '잠금 해제 시 시스템 파일 선택기에 콘텐츠 노출';
+
+  @override
+  String get thumbnailStorageSectionHeader => '썸네일 저장소';
+
+  @override
+  String get cacheModeLabel => '캐시 모드';
+
+  @override
+  String get useGlobalDefaultSubtitle => '전역 기본값 사용';
+
+  @override
+  String get thumbnailQualityLabel => '썸네일 품질';
+
+  @override
+  String get clearThumbnailCacheTitle => '썸네일 캐시 지우기';
+
+  @override
+  String get removeCachedThumbnailsSubtitle => '캐시된 이미지 및 동영상 썸네일 제거';
+
+  @override
+  String get vaultInformationSectionHeader => '볼트 정보';
+
+  @override
+  String get vaultInformationTileTitle => '볼트 세부정보 보기';
+
+  @override
+  String get vaultInformationTileSubtitle => '암호화 방식, 형식 및 기타 기술 세부정보';
+
+  @override
+  String get vaultInfoLocationLabel => '위치';
+
+  @override
+  String get vaultInfoRequiresUnlockTitle => '잠금 해제 필요';
+
+  @override
+  String get vaultInfoRequiresUnlockMessage => '기술 세부정보를 보려면 이 볼트의 잠금을 해제하세요.';
+
+  @override
+  String get vaultInfoLoadFailedTitle => '볼트 정보를 불러올 수 없습니다';
+
+  @override
+  String get vaultInfoLoadFailedMessage => '이 볼트의 세부정보를 읽는 중 문제가 발생했습니다.';
+
+  @override
+  String get vaultInfoVolumeSizeLabel => '볼륨 크기';
+
+  @override
+  String get vaultInfoFileSystemLabel => '파일 시스템';
+
+  @override
+  String get vaultInfoHiddenVolumeLabel => '숨김 볼륨';
+
+  @override
+  String get vaultInfoReadOnlyLabel => '읽기 전용';
+
+  @override
+  String get vaultInfoLuksVersionLabel => 'LUKS 버전';
+
+  @override
+  String get vaultInfoSectorSizeLabel => '섹터 크기';
+
+  @override
+  String get vaultInfoVaultFormatLabel => '볼트 형식';
+
+  @override
+  String get vaultInfoCipherComboLabel => '암호화 방식 조합';
+
+  @override
+  String get vaultInfoShorteningThresholdLabel => '파일명 축약 기준';
+
+  @override
+  String get vaultInfoFormatVersionLabel => '형식 버전';
+
+  @override
+  String get vaultInfoContentCipherLabel => '콘텐츠 암호화 방식';
+
+  @override
+  String get vaultInfoFilenameEncryptionLabel => '파일명';
+
+  @override
+  String get vaultInfoPlaintextNamesValue => '평문';
+
+  @override
+  String get vaultInfoEncryptedNamesValue => '암호화됨';
+
+  @override
+  String get vaultInfoBlockCipherLabel => '블록 암호화 방식';
+
+  @override
+  String get vaultInfoBlockSizeLabel => '블록 크기';
+
+  @override
+  String get vaultInfoCreatedWithVersionLabel => '생성 시 버전';
+
+  @override
+  String get vaultInfoLastOpenedWithVersionLabel => '마지막 사용 버전';
+
+  @override
+  String get vaultInfoYesValue => '예';
+
+  @override
+  String get vaultInfoNoValue => '아니요';
+
+  @override
+  String get vaultInfoBitlockerNote =>
+      '이 앱은 BitLocker 자체의 헤더 메타데이터를 분석하지 않으므로, 암호화 방식 및 버전 세부정보는 여기에서 확인할 수 없습니다.';
+
+  @override
+  String get patternSetupRequiredAboveBeforeSaving => '저장하기 전에 위에서 패턴을 설정하세요.';
+
+  @override
+  String get passwordOrCacheDerivedKeyRequiredMessage =>
+      '이 잠금 해제 방법에는 비밀번호 또는 키파일을 사용한 \"파생 키 캐시\"가 필요합니다.';
+
+  @override
+  String get saveConfigurationButton => '구성 저장';
+
+  @override
+  String get incorrectPatternError => '잘못된 패턴';
+
+  @override
+  String get verifyPatternTitle => '패턴 확인';
+
+  @override
+  String get incorrectPasswordError => '잘못된 비밀번호';
+
+  @override
+  String get verificationFailedError => '확인 실패';
+
+  @override
+  String get incorrectCredentialsError => '잘못된 자격 증명';
+
+  @override
+  String get containerPasswordOptionalLabel => '컨테이너 비밀번호(키파일만 사용 시 선택 사항)';
+
+  @override
+  String get pimOptionalLabel => 'PIM(선택 사항)';
+
+  @override
+  String get usbDriveLockedLabel => 'USB 드라이브 · 잠김';
+
+  @override
+  String get lockedContainerLabel => '잠긴 컨테이너';
+
+  @override
+  String get operationInProgressWaitMessage => '작업이 진행 중입니다. 잠그기 전에 기다려 주세요.';
+
+  @override
+  String get reconnectUsbTooltip => 'USB 다시 연결';
+
+  @override
+  String get unlockContainerTooltip => '컨테이너 잠금 해제';
+
+  @override
+  String lockFailedMessage(String errorType) {
+    return '잠금 실패: $errorType';
+  }
+
+  @override
+  String get newPasswordOrKeyfilesRequired => '새 비밀번호 또는 키파일이 필요합니다.';
+
+  @override
+  String get newPasswordsDoNotMatch => '새 비밀번호가 일치하지 않습니다.';
+
+  @override
+  String get passwordChangedSuccessfullyMessage => '비밀번호가 성공적으로 변경되었습니다.';
+
+  @override
+  String get failedToChangePasswordMessage =>
+      '비밀번호 변경에 실패했습니다. 이전 자격 증명을 확인하세요.';
+
+  @override
+  String get currentCredentialsSectionHeader => '현재 자격 증명';
+
+  @override
+  String get oldPasswordLabel => '이전 비밀번호';
+
+  @override
+  String get oldPimOptionalLabel => '이전 PIM(선택 사항)';
+
+  @override
+  String get newCredentialsSectionHeader => '새 자격 증명';
+
+  @override
+  String get newPimOptionalLabel => '새 PIM(선택 사항)';
+
+  @override
+  String get noContainersYetTitle => '아직 컨테이너가 없습니다';
+
+  @override
+  String get dashboardEmptyStateMessage =>
+      '시작하려면 VeraCrypt 컨테이너를 마운트하거나, USB 드라이브를 연결하거나, 완전히 새로운 암호화 볼트를 만드세요.';
+
+  @override
+  String get sortFieldName => '이름';
+
+  @override
+  String get sortFieldSize => '크기';
+
+  @override
+  String get sortFieldType => '유형';
+
+  @override
+  String get sortFieldDate => '날짜';
+
+  @override
+  String get layoutModeDetailedList => '자세한 목록';
+
+  @override
+  String get layoutModeCompactList => '간단한 목록';
+
+  @override
+  String get layoutModeGalleryGrid => '갤러리 그리드';
+
+  @override
+  String get readOnlyCantDeleteTooltip => '읽기 전용 — 삭제할 수 없음';
+
+  @override
+  String get readOnlyCantMoveTooltip => '읽기 전용 — 이동할 수 없음';
+
+  @override
+  String get readOnlyCantRenameTooltip => '읽기 전용 — 이름을 변경할 수 없음';
+
+  @override
+  String sizeCalculatingWithBytesLabel(String bytes) {
+    return '$bytes(계산 중…)';
+  }
+
+  @override
+  String get sizeCalculatingLabel => '계산 중…';
+
+  @override
+  String get editSecureItemsToRenameMessage => '이름을 변경하려면 보안 항목을 편집하세요';
+
+  @override
+  String get vaultItemsCannotBeOpenedExternallyMessage =>
+      '볼트 항목은 외부 앱에서 열 수 없습니다';
+
+  @override
+  String get itemsCannotBeSharedMessage => '이 항목은 다른 앱과 공유할 수 없습니다';
+
+  @override
+  String get mountedReadOnlyTooltip => '읽기 전용으로 마운트됨';
+
+  @override
+  String get readOnlyBadgeAbbreviation => 'RO';
+
+  @override
+  String freeSpaceLabel(String bytes) {
+    return '여유 공간 $bytes';
+  }
+
+  @override
+  String get filteredLabel => '필터링됨';
+
+  @override
+  String get statsStorageSectionHeader => '저장소';
+
+  @override
+  String statsFolderCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '폴더 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String statsFileCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filterAllFilesOption => '모든 파일';
+
+  @override
+  String get filterImagesOption => '이미지';
+
+  @override
+  String get filterVideosOption => '동영상';
+
+  @override
+  String get filterAudioOption => '오디오';
+
+  @override
+  String get filterDocumentsOption => '문서';
+
+  @override
+  String get folderExposedAsStorageExplanation =>
+      '이 폴더는 독립적인 저장 위치로 노출되므로 다른 앱이 해당 파일을 직접 탐색하고 열 수 있습니다.';
+
+  @override
+  String conflictItemsAlreadyExistTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '이미 존재하는 항목 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get conflictResolutionSubtitle =>
+      '각 항목에 대해 어떻게 처리할지 선택하거나, 하나의 선택을 모두에 적용하세요.';
+
+  @override
+  String get skipAllChipLabel => '모두 건너뛰기';
+
+  @override
+  String get overwriteAllChipLabel => '모두 덮어쓰기';
+
+  @override
+  String get overwriteItemDropdownLabel => '덮어쓰기';
+
+  @override
+  String get overwriteFolderDropdownLabel => '폴더 덮어쓰기';
+
+  @override
+  String get fileOpsTransfersInProgressTitle => '진행 중인 전송';
+
+  @override
+  String get fileOpsRecentTransfersTitle => '최근 전송';
+
+  @override
+  String get fileOpsNoRecentTransfersMessage => '최근 전송 없음';
+
+  @override
+  String get fileOpsNoRecentTransfersSubtitle =>
+      '복사, 이동, 삭제 작업이 실행되는 동안 여기에 표시됩니다.';
+
+  @override
+  String fileOpsShowDetailsLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fileOpsCancelTooltip => '취소';
+
+  @override
+  String get fileOpsDismissTooltip => '닫기';
+
+  @override
+  String get fileOpsRootDestinationLabel => '루트';
+
+  @override
+  String get fileOpsCancelledStatusLabel => '취소됨';
+
+  @override
+  String fileOpsItemsFailedLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목 실패:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpsMoreItemsLabel(num count) {
+    return '+$count개 더 보기';
+  }
+
+  @override
+  String get transferActivityTooltip => '전송';
+
+  @override
+  String fileOpsSpeedLabel(String speed) {
+    return '$speed/초';
+  }
+
+  @override
+  String fileOpsEtaLabel(String time) {
+    return '약 $time 남음';
+  }
+
+  @override
+  String archiveErrorReadingFile(String error) {
+    return '파일 읽기 오류: $error';
+  }
+
+  @override
+  String get archivePreviewNotAvailableMessage => '이 파일 형식은 미리보기를 사용할 수 없습니다.';
+
+  @override
+  String get avifFailedToRenderMessage => 'AVIF 렌더링에 실패했습니다';
+
+  @override
+  String get encryptedImageLoadFailedMessage => '암호화된 이미지를 불러오지 못했습니다';
+
+  @override
+  String encryptedImageLoadFailedWithReasonMessage(String error) {
+    return '암호화된 이미지를 불러오지 못했습니다: $error';
+  }
+
+  @override
+  String get imagePreviewTooLargeMessage => '이 이미지는 너무 커서 미리 볼 수 없습니다';
+
+  @override
+  String get imagePreviewOutOfMemoryMessage =>
+      '이 이미지를 미리 볼 수 있는 여유 메모리가 부족합니다. 다른 앱을 닫고 다시 시도해 주세요.';
+
+  @override
+  String get invalidOrCorruptedImageMessage => '잘못되었거나 손상된 이미지 형식입니다.';
+
+  @override
+  String mediaViewerPlaylistPositionLabel(num current, num total) {
+    return '$total개 중 $current번째';
+  }
+
+  @override
+  String mediaViewerPlaylistPositionScanningLabel(num current, num total) {
+    return '$total개 중 $current번째  ·  검색 중…';
+  }
+
+  @override
+  String get mediaViewerScanningLabel => '검색 중…';
+
+  @override
+  String get mediaFileDeletedMessage => '파일이 성공적으로 삭제되었습니다';
+
+  @override
+  String get mediaFileDeleteFailedMessage => '파일 삭제에 실패했습니다';
+
+  @override
+  String get mediaFileRenamedMessage => '파일 이름이 성공적으로 변경되었습니다';
+
+  @override
+  String get aboutScreenTitle => '정보';
+
+  @override
+  String get couldNotOpenLinkMessage => '링크를 열 수 없습니다';
+
+  @override
+  String get fileManagerSettingsTitle => '파일 관리자 설정';
+
+  @override
+  String get showMediaThumbnailsLabel => '미디어 썸네일 표시';
+
+  @override
+  String get showMediaThumbnailsDesc => '목록 보기에서 이미지 및 동영상의 썸네일 미리보기를 표시합니다';
+
+  @override
+  String get showFileNamesLabel => '파일 이름 표시';
+
+  @override
+  String get showFileNamesDesc => '그리드 레이아웃에서 항목 아래에 텍스트 라벨을 표시합니다';
+
+  @override
+  String get showBreadcrumbBarLabel => '경로 표시줄 표시';
+
+  @override
+  String get showBreadcrumbBarDesc => '탐색기 상단의 경로 탐색 표시줄';
+
+  @override
+  String get showStatsBarLabel => '통계 표시줄 표시';
+
+  @override
+  String get showStatsBarDesc => '파일 수 및 여유 공간 정보 배너';
+
+  @override
+  String get autoStartPlaylistModeLabel => '재생 목록 모드 자동 시작';
+
+  @override
+  String get autoStartPlaylistModeDesc => '미디어 항목을 열 때 자동으로 재생 목록 모드로 시작합니다';
+
+  @override
+  String get showPlaylistCarouselLabel => '재생 목록 캐러셀 표시';
+
+  @override
+  String get showPlaylistCarouselDesc => '미디어 재생 목록을 볼 때 썸네일 캐러셀 버튼을 표시합니다';
+
+  @override
+  String get videoPlaybackSliderLabel => '동영상 재생 위치 슬라이더';
+
+  @override
+  String get longPressPlaybackDiagnosticsHint => '길게 눌러 재생 진단 보기';
+
+  @override
+  String get staticImageModeLabel => '정지 이미지 모드';
+
+  @override
+  String slideshowModeActiveLabel(int seconds) {
+    return '슬라이드쇼 모드 활성화됨($seconds초 간격)';
+  }
+
+  @override
+  String videoPlaybackModeLabel(String mode) {
+    return '동영상 재생 모드: $mode';
+  }
+
+  @override
+  String get pauseLabel => '일시 정지';
+
+  @override
+  String get playLabel => '재생';
+
+  @override
+  String get emptyFolderTitle => '빈 폴더';
+
+  @override
+  String get emptyFolderMessage => '추가 작업을 사용해 파일을 만들거나 기기에서 가져오세요.';
+
+  @override
+  String get noResultsTitle => '결과 없음';
+
+  @override
+  String noResultsForQueryMessage(String query) {
+    return '이 폴더에 \"$query\"와(과) 일치하는 항목이 없습니다.';
+  }
+
+  @override
+  String get closeCarouselTooltip => '캐러셀 닫기';
+
+  @override
+  String get playlistScrollModeMenu => '재생 목록 스크롤 모드';
+
+  @override
+  String get playlistScrollHorizontalLabel => '가로';
+
+  @override
+  String get playlistScrollVerticalPageLabel => '세로 페이지 넘김';
+
+  @override
+  String get playlistScrollVerticalContinuousLabel => '세로 연속 스크롤';
+
+  @override
+  String get undoTooltip => '실행 취소';
+
+  @override
+  String get redoTooltip => '다시 실행';
+
+  @override
+  String get autosavingLabel => '자동 저장 중…';
+
+  @override
+  String get savingLabel => '저장 중…';
+
+  @override
+  String autosavedAtLabel(String time) {
+    return '$time에 자동 저장됨';
+  }
+
+  @override
+  String cameraDisconnectedError(String message) {
+    return '카메라 연결 끊김: $message';
+  }
+
+  @override
+  String get unknownErrorFallback => '알 수 없는 오류';
+
+  @override
+  String get cameraPermissionsRequiredMessage =>
+      '카메라를 사용하려면 카메라 및 마이크 권한이 필요합니다.';
+
+  @override
+  String cameraErrorMessage(String error) {
+    return '카메라 오류: $error';
+  }
+
+  @override
+  String get cameraPhotoCaptureFailedMessage => '사진 촬영에 실패했습니다';
+
+  @override
+  String get cameraRecordingFailedMessage => '녹화에 실패했습니다';
+
+  @override
+  String cameraRecordingFailedWithReasonMessage(String error) {
+    return '녹화에 실패했습니다: $error';
+  }
+
+  @override
+  String get cameraRecordingTooShortMessage => '녹화 시간이 너무 짧아 저장할 수 없습니다';
+
+  @override
+  String get cameraCouldNotSaveRecordingMessage => '녹화 내용을 저장할 수 없습니다';
+
+  @override
+  String get cameraCouldNotSaveCaptureMessage =>
+      '촬영한 파일을 저장할 수 없습니다. 다시 시도할 수 있도록 파일은 그대로 남아 있습니다.';
+
+  @override
+  String get cameraNotEnoughVaultSpaceMessage =>
+      '금고에 여유 공간이 부족합니다. 공간을 확보한 후 다시 시도하세요.';
+
+  @override
+  String cameraCouldNotSaveRecordingWithReasonMessage(String error) {
+    return '녹화 내용을 저장할 수 없습니다: $error';
+  }
+
+  @override
+  String get cameraCouldNotSwitchLensMessage => '렌즈를 전환할 수 없습니다';
+
+  @override
+  String get cameraEncryptingPhotoLabel => '사진 암호화 중…';
+
+  @override
+  String get cameraEncryptingVideoLabel => '동영상 암호화 중…';
+
+  @override
+  String get aboutApplicationSectionHeader => '애플리케이션';
+
+  @override
+  String get aboutTagline => '무료 · 오픈 소스 · 오프라인 암호화 볼트';
+
+  @override
+  String get aboutVersionTitle => '버전';
+
+  @override
+  String aboutVersionSubtitle(String version) {
+    return 'v$version';
+  }
+
+  @override
+  String get aboutWhatsNewTitle => '새로운 기능';
+
+  @override
+  String get aboutWhatsNewSubtitle => '최근 변경 사항 및 릴리스 노트 보기';
+
+  @override
+  String get aboutPrivacySecurityTitle => '개인정보 보호 및 보안';
+
+  @override
+  String get aboutPrivacySecuritySubtitle => '네트워크 접근 없음, 복호화는 메모리에서 이루어짐';
+
+  @override
+  String get aboutSupportedFormatsSectionHeader => '지원되는 형식';
+
+  @override
+  String get aboutVeraCryptLuksTitle => 'VeraCrypt 및 LUKS1/2';
+
+  @override
+  String get aboutVeraCryptLuksSubtitle =>
+      '표준 및 숨김 볼륨, 사용자 지정 PIM, 키파일, xts-plain64, Argon2id/i';
+
+  @override
+  String get aboutBitLockerTitle => 'BitLocker 및 BitLocker To Go';
+
+  @override
+  String get aboutBitLockerSubtitle => '사용자 암호 및 48자리 숫자 복구 키 지원';
+
+  @override
+  String get aboutDirectoryVaultsTitle => '폴더 볼트';
+
+  @override
+  String get aboutDirectoryVaultsSubtitle =>
+      'Cryptomator(v7/v8 SIV_GCM 및 SIV_CTRMAC), gocryptfs(v2 AES-GCM 및 XChaCha20), CryFS(v0.10+ XChaCha20 및 AES)';
+
+  @override
+  String get aboutVhdTitle => '가상 하드 디스크(VHD / VHDX)';
+
+  @override
+  String get aboutVhdSubtitle => '고정 및 동적 확장 디스크 이미지를 위한 BAT 변환';
+
+  @override
+  String get aboutNativeCoreEngineSectionHeader => '네이티브 코어 엔진';
+
+  @override
+  String get aboutCompiledLibrariesTitle => '컴파일된 C++ 라이브러리';
+
+  @override
+  String get aboutCompiledLibrariesBody =>
+      '• mbedTLS v3.6.7(ARMv8 하드웨어 암호화 및 SHA-2)\n• libavif 및 libgav1(네이티브 AVIF 이미지 디코더)\n• libarchive v3.8.9(ZIP, 7-Zip, RAR 및 TAR 압축 엔진)\n• ChaN FatFs v4.0.4(FAT12/16/32 및 exFAT)\n• Tuxera NTFS-3G 및 내장 mkntfs\n• e2fsprogs v1.47.4 libext2fs(ext2/ext3/ext4)\n• Dislocker Virtual I/O(BitLocker FVE / To Go)\n• VeraCrypt 1.26.29(Twofish, Serpent, Camellia, Kuznyechik, Whirlpool, Streebog, BLAKE2s, Argon2id/i)\n• cJSON v1.7.18(LUKS2 및 Cryptomator 메타데이터)';
+
+  @override
+  String get aboutCommunitySectionHeader => '커뮤니티 및 오픈 소스';
+
+  @override
+  String get aboutReportIssueTitle => '문제 신고';
+
+  @override
+  String get aboutReportIssueSubtitle => '버그를 발견하셨나요? GitHub에 이슈를 제출하세요';
+
+  @override
+  String get reportIssueSheetTitle => '문제 신고';
+
+  @override
+  String get reportIssueSheetSubtitle =>
+      '문제와 가장 일치하는 항목을 선택하세요 — 미리 채워진 GitHub 양식이 열립니다';
+
+  @override
+  String get reportIssueBugTitle => '버그 신고';
+
+  @override
+  String get reportIssueBugSubtitle => '충돌이 발생했거나 제대로 작동하지 않음';
+
+  @override
+  String get reportIssueContainerTitle => '컨테이너/볼트 문제';
+
+  @override
+  String get reportIssueContainerSubtitle => '잠금 해제, 마운트 또는 형식별 문제';
+
+  @override
+  String get reportIssueFeatureTitle => '기능 요청';
+
+  @override
+  String get reportIssueFeatureSubtitle => '아이디어나 개선 사항 제안';
+
+  @override
+  String get reportIssueOtherTitle => '기타';
+
+  @override
+  String get reportIssueOtherSubtitle => 'GitHub에서 모든 템플릿 찾아보기';
+
+  @override
+  String get aboutContributorsTitle => '기여자';
+
+  @override
+  String get aboutContributorsSubtitle => 'VaultExplorer 개발에 도움을 준 사람들';
+
+  @override
+  String get aboutLicensesTitle => '오픈 소스 라이선스';
+
+  @override
+  String get aboutLicensesSubtitle => '이 앱에서 사용된 타사 라이브러리';
+
+  @override
+  String get aboutFooterMadeWithLove => '프라이버시를 위해 ❤로 만들었습니다.';
+
+  @override
+  String get aboutVersionCopiedMessage => '버전 정보가 복사되었습니다 — 버그 신고에 유용합니다';
+
+  @override
+  String aboutVersionClipboardText(String version) {
+    return 'VaultExplorer v$version (Android)';
+  }
+
+  @override
+  String aboutShareText(String url) {
+    return 'VaultExplorer — Android용 무료 오픈 소스 오프라인 볼트입니다.\n\n암호화된 컨테이너(VeraCrypt, LUKS, BitLocker, Cryptomator, Gocryptfs, CryFS) 안에 비밀번호, 메모, 파일을 저장하세요.\n\n$url';
+  }
+
+  @override
+  String get aboutShareLinkCopiedMessage => '공유 가능한 링크가 클립보드에 복사되었습니다';
+
+  @override
+  String get aboutPrivacySheetTitle => '개인정보 보호 및 데이터 보안';
+
+  @override
+  String get aboutPrivacySheetSubtitle => '100% 오프라인, 로컬 메모리 기반 보안 설계';
+
+  @override
+  String get privacyPointNoNetworkTitle => '네트워크 접근 불필요';
+
+  @override
+  String get privacyPointNoNetworkBody =>
+      'VaultExplorer는 Android에서 android.permission.INTERNET 권한을 요청하지 않습니다. 어떤 네트워크와도 통신할 수 없습니다.';
+
+  @override
+  String get privacyPointNoDiskLeaksTitle => '메모리에서 복호화';
+
+  @override
+  String get privacyPointNoDiskLeaksBody =>
+      '복호화 및 재암호화는 시스템 메모리에서 이루어집니다. 동영상 녹화나 내보내기처럼 임시 파일이 필요한 일부 작업은 앱 전용 저장소에 임시 파일을 두었다가 완료 후 0으로 덮어씁니다.';
+
+  @override
+  String get privacyPointNoAnalyticsTitle => '분석 또는 원격 측정 없음';
+
+  @override
+  String get privacyPointNoAnalyticsBody =>
+      '충돌 보고, 사용 추적, 또는 사용자나 기기에 대한 데이터를 수집하는 타사 SDK가 전혀 없습니다.';
+
+  @override
+  String get privacyPointKeystoreTitle => '비밀 정보는 Android 키스토어에 보관됨';
+
+  @override
+  String get privacyPointKeystoreBody =>
+      '기억된 비밀번호, 패턴, 캐시된 파생 키는 Android 키스토어에 보관된 키를 사용해 AES-GCM으로 암호화됩니다(지원되는 기기에서는 하드웨어 기반).';
+
+  @override
+  String get privacyPointPosixTitle => 'POSIX 가속 및 저장소 접근';
+
+  @override
+  String get privacyPointPosixBody =>
+      '폴더 볼트 내부의 파일은 가능한 경우 직접 읽고 쓰며, 큰 폴더의 경우 Android의 느린 SAF 계층을 우회합니다.';
+
+  @override
+  String get privacyPointScreenClipboardTitle => '화면 및 클립보드 보호';
+
+  @override
+  String get privacyPointScreenClipboardBody =>
+      '작업 전환기 미리보기 차단과 선택적 스크린샷 차단(FLAG_SECURE)과 함께, 창이 포커스될 때 손상된 클립보드를 자동으로 정리합니다. 항목 볼트에서 복사된 비밀번호는 Android 13 이상에서 민감한 정보로 표시되며, 사용하지 않으면 30초 후 자동으로 지워집니다.';
+
+  @override
+  String get privacyPointMaskModeTitle => '마스크 모드';
+
+  @override
+  String get privacyPointMaskModeBody =>
+      '선택적으로 앱을 다른 아이콘과 이름을 가진 실제로 작동하는 로컬 파일 관리자로 위장합니다. 제목을 2초간 길게 누르면 실제 볼트에 접근할 수 있습니다.';
+
+  @override
+  String get privacyPointExternalLinksTitle => '외부 링크는 브라우저에서 열립니다';
+
+  @override
+  String get privacyPointExternalLinksBody =>
+      '링크를 탭하면 기본 브라우저 앱으로 전달되어 요청을 처리합니다.';
+
+  @override
+  String get truncatedListingWarning =>
+      '처음 50,000개 항목을 표시 중입니다 — 이 폴더에는 더 많은 파일이 있습니다.';
+
+  @override
+  String get gridCornerStyleLabel => '썸네일 모서리';
+
+  @override
+  String get gridCornerRoundedLabel => '둥글게';
+
+  @override
+  String get gridCornerSquareLabel => '직각';
+
+  @override
+  String get gridSpacingLabel => '썸네일 간격';
+
+  @override
+  String get gridSpacingNone => '없음';
+
+  @override
+  String gridSpacingValue(int value) {
+    return '$value dp';
+  }
+
+  @override
+  String get thumbnailAutoSizeLabel => '그리드 셀 크기에 맞춤';
+
+  @override
+  String get thumbnailAutoSizeDescription =>
+      '그리드 및 메이슨리 썸네일은 각 셀의 화면 크기에 맞게 생성되므로 열 수가 적을수록 더 선명한 썸네일이 제공됩니다. 아래 크기는 그 외 모든 곳에 사용됩니다.';
+
+  @override
+  String thumbnailQualityAutoSummary(int quality) {
+    return '자동 크기 · 품질 $quality%';
+  }
+
+  @override
+  String thumbnailQualitySummary(int size, int quality) {
+    return '${size}px · 품질 $quality%';
+  }
+
+  @override
+  String holdToSpeedIndicatorLabel(String speed) {
+    return '$speed배속';
+  }
+
+  @override
+  String get toolbarLayoutSectionHeader => '도구 모음 레이아웃';
+
+  @override
+  String get listViewOptionsSectionHeader => '목록 보기 옵션';
+
+  @override
+  String get detailedListViewColumnsSectionHeader => '자세한 목록 보기 열';
+
+  @override
+  String get galleryGridViewSectionHeader => '갤러리 그리드 보기';
+
+  @override
+  String get browserLayoutSectionHeader => '탐색기 레이아웃';
+
+  @override
+  String get mediaViewerSectionHeader => '미디어 뷰어';
+
+  @override
+  String get viewModeAction => '보기 모드';
+
+  @override
+  String get sortAction => '정렬';
+
+  @override
+  String get playMediaAction => '미디어 재생';
+
+  @override
+  String containerSpaceSummary(String free, String total) {
+    return '$free 여유 / $total';
+  }
+
+  @override
+  String volMountedSummary(int volId) {
+    return '볼륨 $volId · 마운트됨';
+  }
+
+  @override
+  String vaultOccupiedSpaceSummary(String used) {
+    return '$used 사용됨';
+  }
+
+  @override
+  String get incorrectPasswordOrKeyfilesDriveError =>
+      '비밀번호/키파일이 잘못되었거나 지원되지 않는 드라이브입니다';
+
+  @override
+  String driveUsableCapacity(int mb) {
+    return '드라이브 사용 가능 용량: ${mb}MB. 이를 초과할 수 없습니다.';
+  }
+
+  @override
+  String get unlockMethodManualPassword => '수동 비밀번호';
+
+  @override
+  String get unlockMethodRememberPassword => '비밀번호 기억';
+
+  @override
+  String get unlockMethodBiometrics => '생체 인식 잠금 해제';
+
+  @override
+  String get unlockMethodPattern => '패턴 잠금 해제';
+
+  @override
+  String get unlockMethodPin => 'PIN 잠금 해제';
+
+  @override
+  String get unlockMethodSubtitlePassword => '매번 비밀번호 입력';
+
+  @override
+  String get unlockMethodSubtitleRememberPassword => 'Android 키스토어에 안전하게 저장됨';
+
+  @override
+  String get unlockMethodSubtitleBiometrics => '지문 또는 얼굴로 잠금 해제';
+
+  @override
+  String get unlockMethodSubtitlePattern => '패턴을 그려 잠금 해제';
+
+  @override
+  String get unlockMethodSubtitlePin => 'PIN을 입력해 잠금 해제';
+
+  @override
+  String selectionSummaryCombined(String filePart, String folderPart) {
+    return '$filePart + $folderPart';
+  }
+
+  @override
+  String get videoDecoderUnavailableError => '동영상 디코더를 사용할 수 없음 — 하드웨어 코덱 충돌';
+
+  @override
+  String get mediaStreamInitFailedError => '미디어 스트림 초기화에 실패했습니다';
+
+  @override
+  String get invalidAvifImage => '잘못된 AVIF 이미지';
+
+  @override
+  String get verbImport => '가져오기';
+
+  @override
+  String get verbExport => '내보내기';
+
+  @override
+  String get verbMove => '이동';
+
+  @override
+  String get verbCopy => '복사';
+
+  @override
+  String get verbDelete => '삭제';
+
+  @override
+  String get verbImported => '가져옴';
+
+  @override
+  String get verbExported => '내보내기 완료';
+
+  @override
+  String get verbMoved => '이동됨';
+
+  @override
+  String get verbCopied => '복사됨';
+
+  @override
+  String get verbDeleted => '삭제됨';
+
+  @override
+  String get verbImporting => '가져오는 중';
+
+  @override
+  String get verbExporting => '내보내는 중';
+
+  @override
+  String get verbMoving => '이동 중';
+
+  @override
+  String get verbCopying => '복사 중';
+
+  @override
+  String get verbDeleting => '삭제 중';
+
+  @override
+  String fileOpItemsCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpSummaryCount(num count, String verb) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개 $verb',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileOpSummarySkipped(num count) {
+    return '$count개 건너뜀';
+  }
+
+  @override
+  String fileOpSummaryFailed(num count) {
+    return '$count개 실패';
+  }
+
+  @override
+  String get statusCancelled => '취소됨';
+
+  @override
+  String get statusFailed => '실패';
+
+  @override
+  String get statusCompleted => '완료됨';
+
+  @override
+  String get fileOpCheckingSpace => '사용 가능한 공간 확인 중…';
+
+  @override
+  String get fileOpResolvingConflicts => '충돌 해결 중…';
+
+  @override
+  String fileOpNotEnoughSpace(String required, String free) {
+    return '공간 부족 — $required 필요, $free만 사용 가능';
+  }
+
+  @override
+  String get fileOpDiskFullPartialRemoved => '디스크 가득 참 — 부분 파일이 제거되었습니다';
+
+  @override
+  String get fileOpMoveFailed => '이동 실패';
+
+  @override
+  String get fileOpCopyFailed => '복사 실패';
+
+  @override
+  String get fileOpDeleteFailed => '삭제 실패';
+
+  @override
+  String get fileOpDiskFull => '디스크 가득 참';
+
+  @override
+  String get fileOpImporting => '가져오는 중…';
+
+  @override
+  String get fileOpExporting => '내보내는 중…';
+
+  @override
+  String fileOpImportingName(String name) {
+    return '$name 가져오는 중…';
+  }
+
+  @override
+  String fileOpExportingName(String name) {
+    return '$name 내보내는 중…';
+  }
+
+  @override
+  String fileOpMovingName(String name) {
+    return '$name 이동 중…';
+  }
+
+  @override
+  String fileOpCopyingName(String name) {
+    return '$name 복사 중…';
+  }
+
+  @override
+  String get fileOpDeleting => '삭제하는 중…';
+
+  @override
+  String fileOpDeletingName(String name) {
+    return '$name 삭제하는 중…';
+  }
+
+  @override
+  String fileOpDeletedSoFar(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개 제거됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get searchInSubfoldersHint => '모든 하위 폴더 검색…';
+
+  @override
+  String get deepSearchEnabledTooltip => '하위 폴더 검색 중 — 현재 폴더만 검색하려면 탭하세요';
+
+  @override
+  String get deepSearchDisabledTooltip => '현재 폴더 검색 중 — 하위 폴더도 검색하려면 탭하세요';
+
+  @override
+  String get filterAction => '필터';
+
+  @override
+  String get bookmarkAction => '북마크';
+
+  @override
+  String get unbookmarkAction => '북마크 해제';
+
+  @override
+  String get bookmarkSelectedAction => '선택 항목 북마크';
+
+  @override
+  String get unbookmarkSelectedAction => '선택 항목 북마크 해제';
+
+  @override
+  String bookmarkedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개 북마크됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String unbookmarkedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개 북마크 해제됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get showBookmarkBarLabel => '북마크 표시줄 표시';
+
+  @override
+  String get showBookmarkBarDesc => '북마크 표시줄 또는 사이드바에 북마크된 항목 표시';
+
+  @override
+  String get bookmarkBarSectionHeader => '북마크 표시줄';
+
+  @override
+  String get noBookmarksYet => '아직 북마크된 항목이 없습니다';
+
+  @override
+  String get reorderBookmarksTitle => '북마크 재정렬';
+
+  @override
+  String get reorderBookmarksDesc => '항목을 드래그하여 북마크 표시줄의 순서를 변경하세요';
+
+  @override
+  String get drawerBookmarksSectionTitle => '북마크';
+
+  @override
+  String get openAction => '열기';
+
+  @override
+  String get bookmarkTargetMissing => '북마크한 항목이 더 이상 존재하지 않습니다';
+
+  @override
+  String get navBarVaultsLabel => '볼트';
+
+  @override
+  String get navBarToolsLabel => '도구';
+
+  @override
+  String get toolsScreenTitle => '도구';
+
+  @override
+  String get toolsSectionContainerUtilities => '컨테이너 유틸리티';
+
+  @override
+  String get toolsSectionFileCryptography => '파일 암호화';
+
+  @override
+  String get toolsSectionStorageDiagnostics => '저장소 및 진단';
+
+  @override
+  String get toolContainerSplitterTitle => '분할 및 결합';
+
+  @override
+  String get toolContainerSplitterSubtitle => '컨테이너를 여러 조각으로 분할하거나 다시 결합합니다';
+
+  @override
+  String get toolContainerRepairTitle => '확인 및 복구';
+
+  @override
+  String get toolContainerRepairSubtitle => '헤더 또는 파일 시스템 문제 진단';
+
+  @override
+  String get toolSingleFileCryptoTitle => '파일 암호화 / 복호화';
+
+  @override
+  String get toolSingleFileCryptoSubtitle => '전체 컨테이너 없이 하나 이상의 파일을 보호합니다';
+
+  @override
+  String get toolStorageAnalyzerTitle => '저장소 분석기';
+
+  @override
+  String get toolStorageAnalyzerSubtitle => '마운트된 볼트에서 무엇이 공간을 차지하는지 확인합니다';
+
+  @override
+  String get toolDuplicateFinderTitle => '중복 파일 찾기';
+
+  @override
+  String get toolDuplicateFinderSubtitle =>
+      '바이트 단위로 동일한 중복 파일을 찾아 제거하여 공간을 확보합니다';
+
+  @override
+  String get toolHashVerifierTitle => '파일 체크섬 및 해시 검증기';
+
+  @override
+  String get toolHashVerifierSubtitle => 'MD5/SHA 체크섬으로 큰 파일이 손상되지 않았는지 확인합니다';
+
+  @override
+  String get hashVerifierModeCompute => '계산';
+
+  @override
+  String get hashVerifierModeVerify => '검증';
+
+  @override
+  String get hashVerifierSelectSourceTitle => '파일 소스 선택';
+
+  @override
+  String get hashVerifierAlgorithmsLabel => '알고리즘';
+
+  @override
+  String get hashVerifierNoAlgorithmSelected => '알고리즘을 하나 이상 선택하세요';
+
+  @override
+  String get hashVerifierFilesLabel => '해시할 파일';
+
+  @override
+  String hashVerifierFilesQueuedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 선택됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierComputeButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '해시 $count개 계산',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierCancelButton => '취소';
+
+  @override
+  String hashVerifierBatchProgressLabel(Object current, Object total) {
+    return '파일 $current/$total';
+  }
+
+  @override
+  String get hashVerifierCancelledMessage => '취소되었습니다.';
+
+  @override
+  String hashVerifierComputeErrorsMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 파일의 해시 계산에 실패했습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierCopiedMessage => '클립보드에 복사됨';
+
+  @override
+  String get hashVerifierExportManifestButton => '매니페스트로 내보내기';
+
+  @override
+  String get hashVerifierExportAlgorithmLabel => '매니페스트 알고리즘';
+
+  @override
+  String hashVerifierExportSuccessMessage(Object path) {
+    return '$path에 저장됨';
+  }
+
+  @override
+  String hashVerifierExportFailedMessage(Object error) {
+    return '내보내기 실패: $error';
+  }
+
+  @override
+  String get hashVerifierLoadManifestButton => '매니페스트 불러오기';
+
+  @override
+  String get hashVerifierChangeManifestButton => '변경';
+
+  @override
+  String get hashVerifierManifestLabel => '매니페스트 파일';
+
+  @override
+  String hashVerifierManifestEntryCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '항목 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierAutoAddFolderButton => '이 폴더의 모든 파일 추가';
+
+  @override
+  String get hashVerifierAddFilesToVerifyButton => '검증할 파일 추가';
+
+  @override
+  String get hashVerifierVerifyAllButton => '모두 검증';
+
+  @override
+  String hashVerifierVerifyProgressLabel(Object current, Object total) {
+    return '파일 $current/$total 검증 중';
+  }
+
+  @override
+  String hashVerifierSummaryMessage(
+    Object ok,
+    Object mismatch,
+    Object missing,
+  ) {
+    return '일치 $ok개, 불일치 $mismatch개, 누락 $missing개';
+  }
+
+  @override
+  String get hashVerifierStatusMatch => '일치';
+
+  @override
+  String get hashVerifierStatusMismatch => '불일치';
+
+  @override
+  String get hashVerifierStatusMissing => '파일이 추가되지 않음';
+
+  @override
+  String get hashVerifierStatusPending => '아직 검증되지 않음';
+
+  @override
+  String get hashVerifierExpectedLabel => '예상값';
+
+  @override
+  String get hashVerifierActualLabel => '실제값';
+
+  @override
+  String hashVerifierExtraFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '매니페스트에 없는 추가 파일 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierNoManifestLoadedMessage => '시작하려면 매니페스트 파일을 불러오세요';
+
+  @override
+  String get hashVerifierManifestParseEmptyMessage =>
+      '이 파일에서 체크섬 항목을 찾을 수 없습니다';
+
+  @override
+  String hashVerifierLoadManifestFailedMessage(Object error) {
+    return '매니페스트를 읽을 수 없습니다: $error';
+  }
+
+  @override
+  String hashVerifierAutoAddedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '볼트 폴더에서 파일 $count개를 추가했습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierModeVault => '볼트';
+
+  @override
+  String get hashVerifierVaultPickerLabel => '볼트';
+
+  @override
+  String get hashVerifierVaultNoVaultsMessage => '현재 마운트된 볼트가 없습니다';
+
+  @override
+  String get hashVerifierCheckEntireVaultButton => '전체 볼트 확인';
+
+  @override
+  String get hashVerifierVaultScanningLabel => '볼트 검색 중…';
+
+  @override
+  String hashVerifierVaultFilesDiscoveredLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 발견됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierVaultConfirmTitle => '전체 볼트를 확인할까요?';
+
+  @override
+  String hashVerifierVaultConfirmFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hashVerifierVaultConfirmWarning => '이 볼트의 모든 파일을 읽습니다.';
+
+  @override
+  String get hashVerifierVaultEmptyMessage => '이 볼트에는 확인할 파일이 없습니다';
+
+  @override
+  String get hashVerifierVaultStartButton => '확인 시작';
+
+  @override
+  String hashVerifierVaultHashingProgressLabel(Object current, Object total) {
+    return '확인 중 $current / $total';
+  }
+
+  @override
+  String get hashVerifierVaultCompleteTitle => '볼트 확인 완료';
+
+  @override
+  String hashVerifierVaultCompleteFilesLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 확인됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultCompleteBytesLabel(Object size) {
+    return '$size 처리됨';
+  }
+
+  @override
+  String hashVerifierVaultCompleteSucceededLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '성공 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultCompleteFailedLabel(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '실패 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hashVerifierVaultElapsedLabel(Object time) {
+    return '경과 시간: $time';
+  }
+
+  @override
+  String get hashVerifierVaultCancelledMessage => '볼트 확인이 취소되었습니다.';
+
+  @override
+  String hashVerifierVaultFailedMessage(Object error) {
+    return '볼트 확인 실패: $error';
+  }
+
+  @override
+  String get hashVerifierVaultNewCheckButton => '새 확인';
+
+  @override
+  String get hashVerifierVaultActionComputeTitle => '전체 볼트 계산';
+
+  @override
+  String get hashVerifierVaultActionComputeSubtitle => '볼트의 모든 파일을 해시합니다';
+
+  @override
+  String get hashVerifierVaultActionVerifyTitle => '전체 볼트 검증';
+
+  @override
+  String get hashVerifierVaultActionVerifySubtitle =>
+      '불러온 매니페스트와 볼트의 모든 파일을 대조합니다';
+
+  @override
+  String get hashVerifierVaultChangeActionButton => '변경';
+
+  @override
+  String get hashVerifierVaultVerifyButton => '전체 볼트 검증';
+
+  @override
+  String get hashVerifierVaultVerifyRequiresVaultManifestMessage =>
+      '전체 볼트를 검증하려면 볼트 내부에서 불러온 매니페스트가 필요합니다.';
+
+  @override
+  String get duplicateFinderTargetLabel => '대상 볼트';
+
+  @override
+  String get duplicateFinderTargetAllVaults => '열려 있는 모든 볼트';
+
+  @override
+  String get duplicateFinderStartScan => '검사 시작';
+
+  @override
+  String get duplicateFinderCancelScan => '검사 취소';
+
+  @override
+  String get duplicateFinderRescan => '다시 검사';
+
+  @override
+  String get duplicateFinderScanningStage1 => '1단계: 색인 생성 및 크기별 그룹화...';
+
+  @override
+  String get duplicateFinderScanningStage2 => '2단계: 부분 파일 헤더 확인...';
+
+  @override
+  String get duplicateFinderScanningStage3 => '3단계: 전체 바이트 해시 검증...';
+
+  @override
+  String get duplicateFinderScanComplete => '검사 완료';
+
+  @override
+  String get duplicateFinderNoDuplicatesTitle => '중복 파일을 찾지 못했습니다';
+
+  @override
+  String get duplicateFinderNoDuplicatesMessage =>
+      '검사한 볼트의 모든 파일이 고유한 바이트 내용을 포함하고 있습니다.';
+
+  @override
+  String get duplicateFinderSelectRedundant => '중복 항목 선택';
+
+  @override
+  String get duplicateFinderSelectAll => '모두 선택';
+
+  @override
+  String get duplicateFinderDeselectAll => '모두 선택 해제';
+
+  @override
+  String get duplicateFinderOriginalLabel => '원본';
+
+  @override
+  String get duplicateFinderDuplicateLabel => '중복';
+
+  @override
+  String get duplicateFinderConfirmDeleteTitle => '중복 파일을 삭제할까요?';
+
+  @override
+  String get duplicateFinderSearchHint => '파일 이름 또는 경로로 중복 항목 검색...';
+
+  @override
+  String get toolNotImplementedYetMessage =>
+      '이 도구는 아직 네이티브 엔진에 연결되어 있지 않습니다 — 향후 업데이트를 확인해 주세요.';
+
+  @override
+  String get splitJoinModeSplit => '분할';
+
+  @override
+  String get splitJoinModeJoin => '결합';
+
+  @override
+  String get splitSourceFileLabel => '원본 파일';
+
+  @override
+  String get splitDestinationFolderLabel => '대상 폴더';
+
+  @override
+  String get splitChunkSizeLabel => '조각 크기';
+
+  @override
+  String get splitChunkSizeCustomLabel => '사용자 지정 크기(MB)';
+
+  @override
+  String get splitChunkSizeFourMb => '4MB';
+
+  @override
+  String get splitChunkSizeCloud8mb => '8MB';
+
+  @override
+  String get splitChunkSizeCloud32mb => '32MB';
+
+  @override
+  String get splitChunkSizeCloud => '100MB';
+
+  @override
+  String get splitChunkSizeFat32 => '2GB';
+
+  @override
+  String get splitChunkSizeFourGb => '4GB';
+
+  @override
+  String get splitChunkSizeCustom => '사용자 지정';
+
+  @override
+  String get splitContainerButton => '컨테이너 분할';
+
+  @override
+  String get joinFirstPartLabel => '첫 번째 조각';
+
+  @override
+  String get joinOutputFileNameLabel => '출력 파일 이름';
+
+  @override
+  String get joinContainerButton => '파일 결합';
+
+  @override
+  String get chooseFileButton => '파일 선택';
+
+  @override
+  String get chooseFolderButton => '폴더 선택';
+
+  @override
+  String get noFileSelectedLabel => '선택된 파일 없음';
+
+  @override
+  String get noFolderSelectedLabel => '선택된 폴더 없음';
+
+  @override
+  String splitJoinOperationProgress(String done, String total) {
+    return '$done / $total';
+  }
+
+  @override
+  String get splitContainerSuccessMessage => '컨테이너가 성공적으로 분할되었습니다';
+
+  @override
+  String get joinContainerSuccessMessage => '파일이 성공적으로 결합되었습니다';
+
+  @override
+  String get cryptoDirectionEncrypt => '암호화';
+
+  @override
+  String get cryptoDirectionDecrypt => '복호화';
+
+  @override
+  String get singleFileCryptoInputFileLabel => '입력 파일';
+
+  @override
+  String get singleFileCryptoCipherLabel => '암호화 방식';
+
+  @override
+  String get singleFileCryptoDeleteOriginalLabel => '암호화 후 원본 파일 삭제';
+
+  @override
+  String singleFileCryptoEncryptButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 암호화',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoDecryptButton(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 복호화',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoSuccessMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '완료 — 파일 $count개 처리됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoPartialFailureMessage(
+    Object succeeded,
+    Object total,
+    Object failed,
+  ) {
+    return '$total개 중 $succeeded개 파일 처리됨 — $failed개 실패';
+  }
+
+  @override
+  String get singleFileCryptoAddFilesButton => '파일 추가';
+
+  @override
+  String get singleFileCryptoClearFilesButton => '지우기';
+
+  @override
+  String singleFileCryptoFilesQueuedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '파일 $count개 선택됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String singleFileCryptoBatchProgressLabel(Object current, Object total) {
+    return '파일 $current/$total';
+  }
+
+  @override
+  String get repairTargetStepTitle => '대상 선택';
+
+  @override
+  String get repairTargetUnmountedFileOption => '마운트되지 않은 파일';
+
+  @override
+  String get repairTargetUnmountedFileSubtitle => '열지 않은 컨테이너의 백업 헤더를 복원합니다';
+
+  @override
+  String get repairTargetMountedVolumeSubtitle =>
+      '이미 열려 있는 볼트에서 파일 시스템 검사를 실행합니다';
+
+  @override
+  String get repairNoMountedVolumes => '현재 마운트된 볼트가 없습니다';
+
+  @override
+  String get repairScanButton => '진단 스캔 실행';
+
+  @override
+  String get repairChangeTargetButton => '대상 변경';
+
+  @override
+  String get repairDiagnosisHealthy => '문제가 발견되지 않았습니다';
+
+  @override
+  String get repairDiagnosisHeaderCorrupted => '헤더가 손상됨';
+
+  @override
+  String get repairDiagnosisFilesystemDirty => '파일 시스템 불안정 / 비정상 마운트 해제';
+
+  @override
+  String get repairRestoreBackupHeaderButton => '백업 헤더 복원';
+
+  @override
+  String get repairRunFilesystemCheckButton => '파일 시스템 검사 및 수정 실행';
+
+  @override
+  String get repairActionSucceededMessage => '복구가 성공적으로 완료되었습니다';
+
+  @override
+  String get repairActionFailedMessage => '복구 작업이 성공하지 못했습니다';
+
+  @override
+  String get storageAnalyzerTargetLabel => '볼륨';
+
+  @override
+  String get storageAnalyzerNoTargetsTitle => '분석할 항목 없음';
+
+  @override
+  String get storageAnalyzerNoTargetsMessage =>
+      '먼저 볼트를 마운트한 후, 여기로 돌아와 저장소 세부 내역을 확인하세요.';
+
+  @override
+  String storageAnalyzerUsedOfTotal(String used, String total) {
+    return '$total 중 $used 사용됨';
+  }
+
+  @override
+  String get storageAnalyzerHeaviestFilesHeader => '용량이 큰 파일';
+
+  @override
+  String get storageAnalyzerBreakdownHeader => '파일 형식별';
+
+  @override
+  String get storageAnalyzerScanningMessage => '볼륨 검색 중…';
+
+  @override
+  String storageAnalyzerScanTruncatedNotice(String count) {
+    return '$count개 파일 이후 스캔이 조기 중단되었습니다 — 결과가 불완전할 수 있습니다.';
+  }
+
+  @override
+  String get storageAnalyzerNoFilesFound => '파일을 찾을 수 없습니다';
+
+  @override
+  String get storageCategoryImages => '이미지';
+
+  @override
+  String get storageCategoryVideos => '동영상';
+
+  @override
+  String get storageCategoryAudio => '오디오';
+
+  @override
+  String get storageCategoryDocuments => '문서';
+
+  @override
+  String get storageCategoryArchives => '압축 파일';
+
+  @override
+  String get storageCategoryOther => '기타';
+
+  @override
+  String get keyfilePassphraseGeneratorTitle => '키파일 및 패스프레이즈 생성기';
+
+  @override
+  String get keyfilePassphraseGeneratorSubtitle =>
+      'Diceware 패스프레이즈, 사용자 지정 비밀번호, 고엔트로피 키파일을 생성합니다';
+
+  @override
+  String get tabPassphrase => '패스프레이즈';
+
+  @override
+  String get tabKeyfile => '키파일';
+
+  @override
+  String get modeDiceware => 'Diceware 패스프레이즈';
+
+  @override
+  String get modeCustomPassword => '사용자 지정 비밀번호';
+
+  @override
+  String get keyfileTypeBinary => '바이너리 키파일(.key)';
+
+  @override
+  String get keyfileTypeImage => '노이즈 이미지 키파일(.png)';
+
+  @override
+  String get copyPassphraseSuccess => '패스프레이즈가 보안 클립보드에 복사되었습니다';
+
+  @override
+  String get copyFingerprintSuccess => 'SHA-256 지문이 클립보드에 복사되었습니다';
+
+  @override
+  String get saveKeyfileToVault => '마운트된 볼트에 저장';
+
+  @override
+  String get exportKeyfileToStorage => '기기 저장소로 내보내기';
+
+  @override
+  String get keyfileNoOpenVaultsMessage => '열려 있는 볼트가 없습니다. 먼저 볼트를 마운트하세요.';
+
+  @override
+  String get keyfileSelectDestinationVaultTitle => '대상 볼트 선택';
+
+  @override
+  String keyfileVolumeIdLabel(Object volId) {
+    return '볼륨 ID: $volId';
+  }
+
+  @override
+  String keyfileExportSuccessMessage(Object path) {
+    return '키파일을 $path에 내보냈습니다';
+  }
+
+  @override
+  String keyfileExportFailedMessage(Object error) {
+    return '내보내기 실패: $error';
+  }
+
+  @override
+  String keyfileSavedToVaultMessage(Object vaultName, Object path) {
+    return '키파일이 $vaultName에 저장되었습니다: $path';
+  }
+
+  @override
+  String get keyfileWriteFailedMessage => '볼트에 키파일을 쓰지 못했습니다';
+
+  @override
+  String keyfileSaveErrorMessage(Object error) {
+    return '볼트에 저장하는 중 오류 발생: $error';
+  }
+
+  @override
+  String get passphraseGeneratedSecretLabel => '생성된 비밀 값';
+
+  @override
+  String get copyToClipboardTooltip => '클립보드에 복사';
+
+  @override
+  String get generateNewTooltip => '새로 생성';
+
+  @override
+  String get passphraseStrengthWeak => '약함';
+
+  @override
+  String get passphraseStrengthGood => '좋음';
+
+  @override
+  String get passphraseStrengthStrong => '강함';
+
+  @override
+  String get passphraseStrengthUnbreakable => '해독 불가';
+
+  @override
+  String get passphraseCrackTimeInstant => '1초 미만';
+
+  @override
+  String get passphraseCrackTimeShort => '며칠 ~ 몇 달';
+
+  @override
+  String get passphraseCrackTimeCenturies => '수 세기';
+
+  @override
+  String get passphraseCrackTimeMillionsOfYears => '수백만 년';
+
+  @override
+  String passphraseStrengthLabel(Object label) {
+    return '강도: $label';
+  }
+
+  @override
+  String passphraseEntropyBitsLabel(Object bits) {
+    return '엔트로피 $bits비트';
+  }
+
+  @override
+  String passphraseCrackTimeLabel(Object crackTime) {
+    return '예상 해독 시간: $crackTime';
+  }
+
+  @override
+  String get dicewareOptionsTitle => 'EFF Diceware 옵션';
+
+  @override
+  String dicewareWordCountLabel(Object count) {
+    return '단어 수: $count개';
+  }
+
+  @override
+  String dicewareWordCountBitsLabel(Object bits) {
+    return '$bits비트';
+  }
+
+  @override
+  String dicewareWordCountSliderLabel(Object count) {
+    return '$count개 단어';
+  }
+
+  @override
+  String get dicewareWordSeparatorLabel => '단어 구분 기호';
+
+  @override
+  String get dicewareSeparatorHyphen => '하이픈( - )';
+
+  @override
+  String get dicewareSeparatorSpace => '공백(   )';
+
+  @override
+  String get dicewareSeparatorUnderscore => '밑줄( _ )';
+
+  @override
+  String get dicewareSeparatorDot => '마침표( . )';
+
+  @override
+  String get dicewareSeparatorSlash => '슬래시( / )';
+
+  @override
+  String get dicewareWordCasingLabel => '단어 대소문자';
+
+  @override
+  String get dicewareCasingLowercase => '소문자';
+
+  @override
+  String get dicewareCasingTitleCase => '타이틀 케이스';
+
+  @override
+  String get dicewareCasingUppercase => '대문자';
+
+  @override
+  String get dicewareAppendDigitLabel => '임의의 숫자 추가(0-9)';
+
+  @override
+  String get dicewareAppendSymbolLabel => '임의의 기호 추가(!@#\$%)';
+
+  @override
+  String get customPasswordOptionsTitle => '사용자 지정 비밀번호 옵션';
+
+  @override
+  String customPasswordLengthLabel(Object length) {
+    return '길이: $length자';
+  }
+
+  @override
+  String customPasswordLengthSliderLabel(Object length) {
+    return '$length자';
+  }
+
+  @override
+  String get customPasswordUppercaseLabel => '대문자(A-Z)';
+
+  @override
+  String get customPasswordLowercaseLabel => '소문자(a-z)';
+
+  @override
+  String get customPasswordNumbersLabel => '숫자(0-9)';
+
+  @override
+  String get customPasswordSymbolsLabel => '기호(!@#\$%^&*)';
+
+  @override
+  String get customPasswordExcludeAmbiguousLabel => '혼동되는 문자 제외(1, l, I, 0, O)';
+
+  @override
+  String get keyfileBinarySizeTitle => '바이너리 키파일 크기';
+
+  @override
+  String get keyfileImageResolutionTitle => '노이즈 이미지 해상도';
+
+  @override
+  String get keyfilePresetBytes64 => '64바이트(VeraCrypt 표준)';
+
+  @override
+  String get keyfilePresetBytes256 => '256바이트';
+
+  @override
+  String get keyfilePresetBytes2048 => '2KB';
+
+  @override
+  String get keyfilePresetBytes64kb => '64KB';
+
+  @override
+  String get keyfilePresetBytes1mb => '1MB(최대 한도)';
+
+  @override
+  String get keyfilePresetRes64 => '64x64픽셀(~16KB)';
+
+  @override
+  String get keyfilePresetRes256 => '256x256픽셀(~256KB)';
+
+  @override
+  String get keyfilePresetRes512 => '512x512픽셀(~1MB)';
+
+  @override
+  String get keyfileGenerateNewTooltip => '새 키파일 생성';
+
+  @override
+  String keyfileSizeLabel(Object size) {
+    return '크기: $size';
+  }
+
+  @override
+  String get keyfileFingerprintLabel => 'SHA-256 지문';
+
+  @override
+  String get keyfileCopyFingerprintTooltip => '지문 복사';
+
+  @override
+  String get duplicateFinderNoVaultsTitle => '마운트된 볼트 없음';
+
+  @override
+  String get duplicateFinderNoVaultsMessage =>
+      '중복 파일을 검사하려면 볼트 컨테이너를 최소 하나 이상 잠금 해제하고 마운트하세요.';
+
+  @override
+  String duplicateFinderConfirmDeleteMessage(Object count, Object size) {
+    return '볼트에서 중복 파일 $count개($size)를 영구적으로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
+  }
+
+  @override
+  String get duplicateFinderDeletePermanentlyButton => '영구 삭제';
+
+  @override
+  String duplicateFinderDeleteSuccessMessage(Object count) {
+    return '중복 파일 $count개를 성공적으로 삭제했습니다.';
+  }
+
+  @override
+  String get duplicateFinderIntroTitle => '3단계 바이트 일치 검색기';
+
+  @override
+  String get duplicateFinderIntroSubtitle => '파일 이름과 관계없이 정확히 동일한 내용을 감지합니다.';
+
+  @override
+  String get duplicateFinderStagesDescription =>
+      '• 1단계: 크기별 그룹화(즉시 메타데이터 탐색)\n• 2단계: 부분 헤더 확인(16KB SHA-256 헤더)\n• 3단계: 전체 해시 검증(정확한 SHA-256 바이트 일치)';
+
+  @override
+  String get duplicateFinderScanningVaultFallback => '볼트 검색 중...';
+
+  @override
+  String duplicateFinderProcessingFileLabel(Object fileName) {
+    return '처리 중: $fileName';
+  }
+
+  @override
+  String duplicateFinderScanStatsLabel(
+    Object scanned,
+    Object groups,
+    Object saved,
+  ) {
+    return '검사한 파일: $scanned개 | 발견된 중복: $groups개 그룹($saved)';
+  }
+
+  @override
+  String duplicateFinderGroupsFoundLabel(Object count) {
+    return '중복 그룹 $count개 발견됨';
+  }
+
+  @override
+  String duplicateFinderGroupsSummaryLabel(Object copies, Object saved) {
+    return '$copies개 사본 발견 • $saved 저장 공간 절약 가능';
+  }
+
+  @override
+  String duplicateFinderVaultsSelectedLabel(Object count) {
+    return '볼트 $count개 선택됨';
+  }
+
+  @override
+  String duplicateFinderGroupTitleLabel(
+    Object groupIndex,
+    Object size,
+    Object count,
+  ) {
+    return '그룹 $groupIndex: $size($count개 사본 발견)';
+  }
+
+  @override
+  String duplicateFinderRecoverableSpaceLabel(Object size) {
+    return '복구 가능한 공간: $size';
+  }
+
+  @override
+  String get duplicateFinderPreviewFileTooltip => '파일 미리보기';
+
+  @override
+  String duplicateFinderPreviewFailedMessage(Object fileName) {
+    return '$fileName의 파일 미리보기를 열 수 없습니다';
+  }
+
+  @override
+  String duplicateFinderPreviewErrorMessage(Object error) {
+    return '파일 미리보기 오류: $error';
+  }
+
+  @override
+  String duplicateFinderFilesSelectedLabel(Object count) {
+    return '파일 $count개 선택됨';
+  }
+
+  @override
+  String duplicateFinderBytesToBeFreedLabel(Object size) {
+    return '$size 확보 예정';
+  }
+
+  @override
+  String duplicateFinderDeleteSelectedButton(Object count) {
+    return '선택 항목 삭제($count)';
+  }
+
+  @override
+  String get vaultBrowserSwitchVaultTooltip => '볼트 전환';
+
+  @override
+  String get vaultBrowserRootFolderLabel => '루트 폴더';
+
+  @override
+  String vaultFilePickerTitle(Object vaultName) {
+    return '파일 선택($vaultName)';
+  }
+
+  @override
+  String get vaultFilePickerEmptyMessage => '폴더가 비어 있습니다';
+
+  @override
+  String vaultFilePickerConfirmButton(Object count) {
+    return '파일 $count개 선택';
+  }
+
+  @override
+  String vaultFolderPickerTitle(Object vaultName) {
+    return '폴더 선택($vaultName)';
+  }
+
+  @override
+  String get vaultFolderPickerEmptyMessage => '여기에는 하위 폴더가 없습니다';
+
+  @override
+  String get vaultFolderPickerRootLabel => '루트';
+
+  @override
+  String get vaultFolderPickerConfirmRootButton => '루트 폴더 선택';
+
+  @override
+  String vaultFolderPickerConfirmNamedButton(Object folderName) {
+    return '\"$folderName\" 선택';
+  }
+
+  @override
+  String get singleFileCryptoSelectInputTitle => '입력 파일 선택';
+
+  @override
+  String get singleFileCryptoFromDeviceTitle => '기기 저장소에서';
+
+  @override
+  String get singleFileCryptoFromDeviceSubtitle => '시스템 파일 선택기로 기기에서 파일 선택';
+
+  @override
+  String get singleFileCryptoFromVaultTitle => '마운트된 볼트에서';
+
+  @override
+  String get singleFileCryptoFromVaultSubtitle => '열려 있는 암호화된 컨테이너에서 파일 선택';
+
+  @override
+  String get singleFileCryptoSelectDestinationTitle => '대상 폴더 선택';
+
+  @override
+  String get singleFileCryptoDeviceFolderTitle => '기기 저장소 폴더';
+
+  @override
+  String get singleFileCryptoDeviceFolderSubtitle => '출력을 기기 저장소의 폴더에 저장합니다';
+
+  @override
+  String get singleFileCryptoVaultFolderTitle => '마운트된 볼트 폴더';
+
+  @override
+  String get singleFileCryptoVaultFolderSubtitle =>
+      '출력을 열려 있는 암호화된 컨테이너 안에 저장합니다';
+
+  @override
+  String get toolsSectionBackupSync => '백업 및 동기화';
+
+  @override
+  String get toolVaultSyncTitle => '볼트 동기화';
+
+  @override
+  String get toolVaultSyncSubtitle => '두 볼트를 비교하고 누락되었거나 더 최신인 항목을 복사합니다';
+
+  @override
+  String get vaultSyncNoVaultsTitle => '마운트된 볼트 없음';
+
+  @override
+  String get vaultSyncNoVaultsMessage => '파일을 비교하고 동기화하려면 최소 하나의 볼트를 마운트하세요.';
+
+  @override
+  String get vaultSyncLeftLabel => '왼쪽';
+
+  @override
+  String get vaultSyncRightLabel => '오른쪽';
+
+  @override
+  String get vaultSyncTapToSelect => '탭하여 볼트 및 폴더 선택';
+
+  @override
+  String get vaultSyncSwapTooltip => '왼쪽/오른쪽 바꾸기';
+
+  @override
+  String get vaultSyncSameLocationWarning => '왼쪽과 오른쪽은 서로 다른 폴더여야 합니다.';
+
+  @override
+  String get vaultSyncIntroTitle => '두 볼트 비교';
+
+  @override
+  String get vaultSyncIntroSubtitle =>
+      '왼쪽 및 오른쪽 볼트(또는 같은 볼트 내 두 폴더)를 선택하면 각 쪽에서 누락, 수정 또는 최신 항목을 확인할 수 있습니다.';
+
+  @override
+  String get vaultSyncCompareButton => '비교';
+
+  @override
+  String get vaultSyncComparingLabel => '볼트 비교 중…';
+
+  @override
+  String vaultSyncCompareStatsLabel(Object dirs, Object entries) {
+    return '검사한 폴더: $dirs | 발견된 차이점: $entries';
+  }
+
+  @override
+  String get vaultSyncCancelCompareButton => '취소';
+
+  @override
+  String get vaultSyncInSyncTitle => '이미 동기화됨';
+
+  @override
+  String vaultSyncInSyncMessage(Object count) {
+    return '일치하는 $count개 파일이 양쪽에서 모두 동일합니다.';
+  }
+
+  @override
+  String get vaultSyncRecompareButton => '다시 비교';
+
+  @override
+  String vaultSyncDifferencesFoundLabel(Object count) {
+    return '차이점 $count개 발견됨';
+  }
+
+  @override
+  String vaultSyncInSyncCountLabel(Object count) {
+    return '$count개 파일이 이미 양쪽에서 일치합니다';
+  }
+
+  @override
+  String vaultSyncBadgeOnlyLeft(Object count) {
+    return '왼쪽에만 $count개';
+  }
+
+  @override
+  String vaultSyncBadgeOnlyRight(Object count) {
+    return '오른쪽에만 $count개';
+  }
+
+  @override
+  String vaultSyncBadgeLeftNewer(Object count) {
+    return '왼쪽이 더 최신인 $count개';
+  }
+
+  @override
+  String vaultSyncBadgeRightNewer(Object count) {
+    return '오른쪽이 더 최신인 $count개';
+  }
+
+  @override
+  String vaultSyncBadgeConflicts(Object count) {
+    return '검토가 필요한 $count개';
+  }
+
+  @override
+  String get vaultSyncDirectionLabel => '동기화 방향';
+
+  @override
+  String get vaultSyncDirectionTwoWay => '양방향(권장)';
+
+  @override
+  String get vaultSyncDirectionTwoWaySubtitle =>
+      '각 파일을 없거나 이전 사본만 있는 쪽으로 복사합니다';
+
+  @override
+  String get vaultSyncDirectionLeftToRight => '왼쪽 → 오른쪽(단방향)';
+
+  @override
+  String get vaultSyncDirectionLeftToRightSubtitle =>
+      '새 파일과 업데이트된 파일을 왼쪽에서 오른쪽으로 보냅니다. 왼쪽은 변경되지 않습니다';
+
+  @override
+  String get vaultSyncDirectionRightToLeft => '오른쪽 → 왼쪽(단방향)';
+
+  @override
+  String get vaultSyncDirectionRightToLeftSubtitle =>
+      '새 파일과 업데이트된 파일을 오른쪽에서 왼쪽으로 보냅니다. 오른쪽은 변경되지 않습니다';
+
+  @override
+  String get vaultSyncSearchHint => '차이점 검색';
+
+  @override
+  String get vaultSyncStatusOnlyLeft => '왼쪽에만 있음';
+
+  @override
+  String get vaultSyncStatusOnlyRight => '오른쪽에만 있음';
+
+  @override
+  String get vaultSyncStatusLeftNewer => '왼쪽이 더 최신';
+
+  @override
+  String get vaultSyncStatusRightNewer => '오른쪽이 더 최신';
+
+  @override
+  String get vaultSyncStatusConflict => '검토 필요';
+
+  @override
+  String get vaultSyncStatusTypeMismatch => '유형 불일치';
+
+  @override
+  String get vaultSyncFolderOnlyLeftDetail => '폴더 — 왼쪽에만 있음';
+
+  @override
+  String get vaultSyncFolderOnlyRightDetail => '폴더 — 오른쪽에만 있음';
+
+  @override
+  String vaultSyncBothSidesDetail(
+    Object leftSize,
+    Object leftDate,
+    Object rightSize,
+    Object rightDate,
+  ) {
+    return '왼쪽: $leftSize · $leftDate  →  오른쪽: $rightSize · $rightDate';
+  }
+
+  @override
+  String get vaultSyncTypeMismatchTooltip =>
+      '한쪽은 파일, 다른 쪽은 폴더입니다 — 파일 탐색기에서 수동으로 해결하세요';
+
+  @override
+  String get vaultSyncChangeActionTooltip => '동기화 작업 변경';
+
+  @override
+  String get vaultSyncActionCopyToRight => '복사 → 오른쪽';
+
+  @override
+  String get vaultSyncActionCopyToLeft => '복사 → 왼쪽';
+
+  @override
+  String get vaultSyncActionSkip => '건너뛰기';
+
+  @override
+  String vaultSyncChangesQueuedLabel(Object count) {
+    return '변경 사항 $count개 대기 중';
+  }
+
+  @override
+  String get vaultSyncSyncNowButton => '지금 동기화';
+
+  @override
+  String get vaultSyncConfirmTitle => '동기화를 시작할까요?';
+
+  @override
+  String vaultSyncConfirmMessage(Object count, Object bytes) {
+    return '이 작업은 양쪽 간에 $count개 항목(총 $bytes)을 복사합니다. 같은 이름의 기존 파일은 덮어쓰기됩니다.';
+  }
+
+  @override
+  String vaultSyncStartedMessage(Object count) {
+    return '동기화가 시작되었습니다 — $count개 항목 대기 중';
+  }
+
+  @override
+  String vaultSyncPickLocationTitle(Object side) {
+    return '$side 볼트 및 폴더 선택';
+  }
+
+  @override
+  String get vaultSyncOverlapWarning =>
+      'Left and Right must not be the same folder or nested inside each other.';
+
+  @override
+  String vaultSyncPlaintextWarning(Object targets) {
+    return 'Files copied out of a vault to $targets will be stored unencrypted.';
+  }
+
+  @override
+  String get vaultSyncStorageSelectorLabel => 'Storage';
+
+  @override
+  String get vaultSyncTargetKindVault => 'Encrypted vault';
+
+  @override
+  String get vaultSyncTargetKindDevice => 'Device storage · not encrypted';
+
+  @override
+  String get vaultSyncTargetKindProvider => 'Document provider · not encrypted';
+
+  @override
+  String get vaultSyncAddStorageTooltip => 'Add storage location';
+
+  @override
+  String get vaultSyncEnableLocalStorageTooltip =>
+      'Enable Local Storage access';
+
+  @override
+  String get vaultSyncNoStoragesTitle => 'No storage to sync yet';
+
+  @override
+  String get vaultSyncNoStoragesMessage =>
+      'Add a folder or document provider with the + button, or mount a vault.';
+
+  @override
+  String get vaultSyncReadOnlyBadge => '읽기 전용';
+
+  @override
+  String get vaultSyncReadOnlyTooltip =>
+      '이 볼트는 읽기 전용으로 마운트되어 있어 파일을 복사할 수 없습니다';
+
+  @override
+  String get vaultSyncSyncingButton => '동기화 중…';
+
+  @override
+  String get vaultSyncNotEnoughSpaceTitle => '공간 부족';
+
+  @override
+  String vaultSyncNotEnoughSpaceMessage(
+    Object side,
+    Object required,
+    Object free,
+  ) {
+    return '$side에 공간이 부족합니다 — $required 필요, $free만 사용 가능.';
+  }
+
+  @override
+  String get removeMasterPasswordTitle => '마스터 비밀번호 제거';
+
+  @override
+  String get confirmRemoveMasterPasswordMessage =>
+      '제거를 확인하려면 현재 마스터 비밀번호를 입력하세요:';
+
+  @override
+  String get authenticateToRemoveMasterPassword => '마스터 비밀번호를 제거하려면 인증하세요';
+
+  @override
+  String get incorrectPassword => '잘못된 비밀번호';
+
+  @override
+  String get rememberPerFolderLayoutLabel => '폴더별 레이아웃 및 정렬 기억';
+
+  @override
+  String get rememberPerFolderLayoutDesc =>
+      '각 폴더의 보기 레이아웃(목록, 그리드, 메이슨리)과 정렬 순서를 별도로 저장';
+
+  @override
+  String get defaultFolderLayoutLabel => '기본 폴더 레이아웃';
+
+  @override
+  String get fileInfoAction => '정보';
+
+  @override
+  String get goToLocationAction => '위치로 이동';
+
+  @override
+  String get copyPathAction => '경로 복사';
+
+  @override
+  String get automationSectionHeader => '자동화';
+
+  @override
+  String get automationTileTitle => '자동화';
+
+  @override
+  String get automationTileSubtitle =>
+      '자동화가 이 볼트를 잠금 해제, 잠금, 파일 가져오기 또는 내보내기를 하도록 허용합니다';
+
+  @override
+  String get automationScreenTitle => '자동화(Tasker / MacroDroid)';
+
+  @override
+  String get automationUsbUnsupportedMessage =>
+      'USB로 연결된 볼트에는 아직 자동화를 사용할 수 없습니다.';
+
+  @override
+  String get automationThisVaultSectionHeader => '이 볼트';
+
+  @override
+  String get automationAccessLabel => '자동화 접근 권한';
+
+  @override
+  String get automationPasswordSectionHeader => '자동화 비밀번호';
+
+  @override
+  String get automationPasswordStoredHint =>
+      '무인 UNLOCK_VAULT 호출을 위해 비밀번호가 저장되어 있습니다. 새 비밀번호를 저장하면 교체되고, 빈 값을 저장하면 지워집니다 — 자동화는 이에 의존하는 대신 브로드캐스트에 직접 비밀번호를 제공할 수도 있습니다.';
+
+  @override
+  String get automationPasswordNotStoredHint =>
+      '선택 사항입니다. 저장된 비밀번호가 없으면 자동화는 UNLOCK_VAULT 브로드캐스트마다 비밀번호를 제공해야 합니다.';
+
+  @override
+  String get automationNewPasswordFieldLabel => '새 비밀번호';
+
+  @override
+  String get automationPasswordFieldLabel => '비밀번호';
+
+  @override
+  String get automationClearPasswordButton => '저장된 비밀번호 지우기';
+
+  @override
+  String get automationSavePasswordButton => '비밀번호 저장';
+
+  @override
+  String get automationTokenSectionHeader => 'API 토큰';
+
+  @override
+  String get automationTokenDescription =>
+      '자동화 접근 권한이 활성화된 모든 볼트가 공유합니다. 자동화는 매 브로드캐스트마다 이를 다시 전송합니다. 토큰이 잘못되었거나 누락된 경우 오류 없이 조용히 무시됩니다.';
+
+  @override
+  String get automationRegenerateTokenButton => '토큰 재생성';
+
+  @override
+  String get automationRegenerateTokenDialogTitle => '토큰을 재생성할까요?';
+
+  @override
+  String get automationRegenerateTokenDialogMessage =>
+      '현재 토큰을 사용하는 모든 Tasker 프로필이나 MacroDroid 매크로는 새 토큰으로 업데이트할 때까지 조용히 작동을 멈춥니다.';
+
+  @override
+  String get automationRegenerateConfirmLabel => '재생성';
+
+  @override
+  String get automationTokenRegeneratedMessage => '토큰이 재생성되었습니다.';
+
+  @override
+  String get automationRegenerateTokenFailedMessage => '토큰을 재생성할 수 없습니다.';
+
+  @override
+  String get automationUpdateSettingsFailedMessage => '자동화 설정을 업데이트할 수 없습니다.';
+
+  @override
+  String get automationSavePasswordFailedMessage => '자동화 비밀번호를 저장할 수 없습니다.';
+
+  @override
+  String get automationPasswordClearedMessage => '자동화 비밀번호가 지워졌습니다.';
+
+  @override
+  String get automationPasswordSavedMessage => '자동화 비밀번호가 저장되었습니다.';
+
+  @override
+  String get automationConfigSectionHeader => '구성 문자열';
+
+  @override
+  String get automationConfigIntro =>
+      '아래 값을 탭하여 복사하세요. Tasker에서는 \"Send Intent\" 작업을 사용하세요. MacroDroid에서는 Intent Type을 Broadcast로 설정한 \"Intent\" 작업을 사용하세요 — Activity나 Service는 \"unable to find explicit activity class\" 오류로 실패합니다.';
+
+  @override
+  String get automationConfigPackageLabel => '패키지 이름';
+
+  @override
+  String get automationConfigClassLabel => '리시버 클래스';
+
+  @override
+  String get automationConfigVaultUriLabel => '이 볼트의 URI';
+
+  @override
+  String get automationConfigActionsSectionHeader => '브로드캐스트 작업';
+
+  @override
+  String get automationActionUnlockLabel => '볼트 잠금 해제';
+
+  @override
+  String get automationActionLockLabel => '볼트 잠금';
+
+  @override
+  String get automationActionImportLabel => '파일 가져오기';
+
+  @override
+  String get automationActionExportLabel => '파일 내보내기';
+
+  @override
+  String get automationActionWipeLabel => '파일 삭제';
+
+  @override
+  String get automationActionEmergencyLockLabel => '비상 잠금 (1단계)';
+
+  @override
+  String get automationActionEmergencyPurgeLabel => '비상 퍼지';
+
+  @override
+  String get automationDocCommentFootnote =>
+      '전체 추가 항목 및 결과 브로드캐스트 계약은 VaultAutomationReceiver.kt에 문서화되어 있습니다.';
+
+  @override
+  String get automationTierOffLabel => '끄기';
+
+  @override
+  String get automationTierOffSubtitle => '자동화가 이 볼트에 접근할 수 없습니다';
+
+  @override
+  String get automationTierLifecycleLabel => '잠금 해제/잠금만';
+
+  @override
+  String get automationTierLifecycleSubtitle => '자동화는 이 볼트를 잠금 해제하고 잠글 수만 있습니다';
+
+  @override
+  String get automationTierFullLabel => '잠금 해제/잠금 + 파일 가져오기-내보내기 + 동기화';
+
+  @override
+  String get automationTierFullSubtitle =>
+      '자동화는 이 볼트가 잠금 해제된 동안 설정된 폴더를 동기화하고 파일을 가져오거나 내보낼 수도 있습니다';
+
+  @override
+  String get automationTutorialLinkLabel => '전체 단계별 튜토리얼 읽기';
+
+  @override
+  String get showHiddenFilesLabel => '숨김 파일 표시';
+
+  @override
+  String get showHiddenFilesDesc => '점 파일 및 시스템 폴더를 표시합니다';
+
+  @override
+  String get dontAskAgain => '다시 묻지 않기';
+
+  @override
+  String get deleteAfterImportLabel => '가져온 후 파일 삭제';
+
+  @override
+  String get deleteAfterImportModeAsk => '매번 묻기';
+
+  @override
+  String get deleteAfterImportModeAskSubtitle => '가져오기 후 원본 파일을 삭제할지 묻습니다';
+
+  @override
+  String get deleteAfterImportModeKeep => '원본 유지(삭제하지 않음)';
+
+  @override
+  String get deleteAfterImportModeKeepSubtitle => '원본 파일을 절대 삭제하지 않으며 묻지 않습니다';
+
+  @override
+  String get deleteAfterImportModeDelete => '원본 자동 삭제';
+
+  @override
+  String get deleteAfterImportModeDeleteSubtitle =>
+      '가져오기 후 기기에서 원본 파일을 자동으로 삭제합니다';
+
+  @override
+  String get deleteAfterImportVaultSettingLabel => '이 보관함의 가져오기 후 파일 삭제';
+
+  @override
+  String get deleteAfterImportInheritGlobal => '전역 기본값 상속';
+
+  @override
+  String deleteAfterImportInheritGlobalSubtitle(String mode) {
+    return '전역 기본값 사용 중: $mode';
+  }
+
+  @override
+  String get deleteAfterImportVaultAsk => '매번 묻기';
+
+  @override
+  String get deleteAfterImportVaultKeep => '원본 파일 항상 유지';
+
+  @override
+  String get deleteAfterImportVaultDelete => '원본 파일 항상 삭제';
+
+  @override
+  String get wizardBackButton => '뒤로';
+
+  @override
+  String get wizardNextButton => '다음';
+
+  @override
+  String get wizardStepTypeTitle => '유형';
+
+  @override
+  String get wizardStepBasicInfoTitle => '기본 정보';
+
+  @override
+  String get wizardStepAdvancedTitle => '고급';
+
+  @override
+  String get wizardStepReviewTitle => '검토';
+
+  @override
+  String get wizardCreateTypePrompt => '무엇을 만드시겠습니까?';
+
+  @override
+  String get wizardChooseFormatPrompt => '컨테이너 형식을 선택하세요';
+
+  @override
+  String get wizardEncryptionDetailsRowTitle => '암호화 세부정보';
+
+  @override
+  String get wizardHiddenVolumeRowSubtitleConfigured => '구성됨 — 탭하여 검토';
+
+  @override
+  String get wizardHiddenVolumeRowSubtitleNeedsSetup => '탭하여 설정';
+
+  @override
+  String get wizardSummaryTitle => '요약';
+
+  @override
+  String get wizardSummaryPasswordLabel => '비밀번호';
+
+  @override
+  String get wizardPasswordSetValue => '설정됨';
+
+  @override
+  String get wizardPasswordNotSetValue => '설정 안 됨(키파일 사용)';
+
+  @override
+  String get wizardSummaryKeyfilesLabel => '키파일';
+
+  @override
+  String get wizardSummaryPimDefaultValue => '기본값';
+
+  @override
+  String get wizardSummaryPimLabel => 'PIM';
+
+  @override
+  String get wizardSummaryDriveLabel => 'USB 드라이브';
+
+  @override
+  String get sectionKeyStorageIntegration => '키 저장소 및 시스템 접근';
+
+  @override
+  String get sectionMaskMode => '마스크 모드';
+
+  @override
+  String get advancedOptionsTitle => '고급 옵션';
+
+  @override
+  String get audioTrackTitle => '오디오 트랙';
+
+  @override
+  String get noAudioTracksAvailable => '사용 가능한 오디오 트랙이 없습니다';
+
+  @override
+  String trackNumberLabel(int number) {
+    return '트랙 $number';
+  }
+
+  @override
+  String subtitleTrackNumberLabel(int number) {
+    return '자막 $number';
+  }
+
+  @override
+  String get offLabel => '끄기';
+
+  @override
+  String get externalSubtitlesLabel => '외부 자막 (.srt/.vtt)';
+
+  @override
+  String get externalLabel => '외부';
+
+  @override
+  String get subtitleSizeLabel => '크기';
+
+  @override
+  String get subtitleSizeSmall => '소';
+
+  @override
+  String get subtitleSizeMedium => '중';
+
+  @override
+  String get subtitleSizeLarge => '대';
+
+  @override
+  String get subtitleSizeExtraLarge => '특대';
+
+  @override
+  String get subtitlePositionLabel => '위치';
+
+  @override
+  String get subtitlePositionBottom => '하단';
+
+  @override
+  String get subtitlePositionLower => '하단 근처';
+
+  @override
+  String get subtitlePositionCenter => '중앙';
+
+  @override
+  String get subtitlePositionTop => '상단';
+
+  @override
+  String get editImageAction => '이미지 편집';
+
+  @override
+  String get imageEditorUnsupportedFormatMessage => '이 이미지 형식은 편집을 지원하지 않습니다.';
+
+  @override
+  String get cropToolLabel => '자르기';
+
+  @override
+  String get drawToolLabel => '그리기';
+
+  @override
+  String get textToolLabel => '텍스트';
+
+  @override
+  String get redactToolLabel => '가리기';
+
+  @override
+  String get rotateLeftTooltip => '왼쪽으로 회전';
+
+  @override
+  String get rotateRightTooltip => '오른쪽으로 회전';
+
+  @override
+  String get cropAspectFreeLabel => '자유';
+
+  @override
+  String get cropAspectSquareLabel => '정사각형';
+
+  @override
+  String get cropAspectOriginalLabel => '원본';
+
+  @override
+  String get applyCropTooltip => '자르기 적용';
+
+  @override
+  String get annotationColorTooltip => '색상';
+
+  @override
+  String get annotationStrokeWidthTooltip => '선 굵기';
+
+  @override
+  String get clearAnnotationsTooltip => '모든 주석 지우기';
+
+  @override
+  String get resetImageTooltip => '원본으로 재설정';
+
+  @override
+  String get resetImageConfirmTitle => '이미지를 재설정할까요?';
+
+  @override
+  String get resetImageConfirmMessage =>
+      '이 세션에서 수행한 모든 자르기 및 그리기 변경 사항이 취소됩니다.';
+
+  @override
+  String get addTextAnnotationTitle => '텍스트 추가';
+
+  @override
+  String get addTextAnnotationHint => '내용을 입력하세요…';
+
+  @override
+  String get textToolHint => '이미지를 탭하여 텍스트 추가';
+
+  @override
+  String get saveImageSheetTitle => '변경 사항 저장';
+
+  @override
+  String get saveAsNewFileOption => '새 파일로 저장';
+
+  @override
+  String get saveAsNewFileDescription => '원본은 그대로 유지됩니다';
+
+  @override
+  String get overwriteOriginalOption => '원본 덮어쓰기';
+
+  @override
+  String get overwriteOriginalDescription => '원본 파일을 대체합니다';
+
+  @override
+  String get newFileNameLabel => '파일 이름';
+
+  @override
+  String get imageEditorPngNoteMessage => '편집한 이미지는 PNG로 저장됩니다.';
+
+  @override
+  String get imageSavedMessage => '이미지가 저장되었습니다';
+
+  @override
+  String imageSaveFailedMessage(String error) {
+    return '이미지를 저장할 수 없습니다: $error';
+  }
+
+  @override
+  String get advancedRenameButton => '고급';
+
+  @override
+  String get advancedRenameBatchTitle => '일괄 이름 변경';
+
+  @override
+  String get advancedRenameRulesTab => '규칙';
+
+  @override
+  String advancedRenamePreviewTab(int count) {
+    return '미리보기 ($count)';
+  }
+
+  @override
+  String get advancedRenameSearchReplaceTitle => '찾기 및 바꾸기';
+
+  @override
+  String get advancedRenameFindTextLabel => '찾을 텍스트';
+
+  @override
+  String get advancedRenameFindTextHint => '일치시킬 텍스트나 패턴 입력...';
+
+  @override
+  String get advancedRenameReplaceWithLabel => '바꿀 텍스트';
+
+  @override
+  String get advancedRenameReplaceWithHint => '새 텍스트 또는 변수...';
+
+  @override
+  String get advancedRenameInsertVariableTooltip => '동적 변수 토큰 삽입';
+
+  @override
+  String get advancedRenameDateTimeTokens => '날짜 및 시간 토큰';
+
+  @override
+  String advancedRenameStandardDate(String token) {
+    return '표준 날짜 ($token)';
+  }
+
+  @override
+  String advancedRenameYearFourDigit(String token) {
+    return '4자리 연도 ($token)';
+  }
+
+  @override
+  String advancedRenameMonth(String token) {
+    return '월 ($token)';
+  }
+
+  @override
+  String advancedRenameDayOfMonth(String token) {
+    return '일 ($token)';
+  }
+
+  @override
+  String advancedRenameTime(String token) {
+    return '시간 ($token)';
+  }
+
+  @override
+  String get advancedRenameDynamicIdentifiers => '동적 식별자';
+
+  @override
+  String advancedRenameUniqueUuid(String token) {
+    return '고유 UUID v4 ($token)';
+  }
+
+  @override
+  String get advancedRenameRandomAlphanumeric => '무작위 영숫자(8자)';
+
+  @override
+  String get advancedRenameRandomDigits => '무작위 숫자(6자리)';
+
+  @override
+  String get advancedRenameEmbeddedCounter => '내장 카운터';
+
+  @override
+  String advancedRenamePaddedCounter(String token) {
+    return '자릿수 맞춤 카운터 ($token)';
+  }
+
+  @override
+  String get advancedRenameRegex => '정규식';
+
+  @override
+  String get advancedRenameMatchCase => '대소문자 구분';
+
+  @override
+  String get advancedRenameAllOccurrences => '모든 항목';
+
+  @override
+  String get advancedRenameScopeFormatting => '범위 및 서식';
+
+  @override
+  String get advancedRenameApplyChangesTo => '변경 적용 대상';
+
+  @override
+  String get advancedRenameFilename => '파일 이름';
+
+  @override
+  String get advancedRenameExtension => '확장자';
+
+  @override
+  String get advancedRenameBoth => '둘 다';
+
+  @override
+  String get advancedRenameCaseTransformation => '대소문자 변환';
+
+  @override
+  String get advancedRenameNoChange => '변경 없음';
+
+  @override
+  String get advancedRenameLowercase => '소문자';
+
+  @override
+  String get advancedRenameUppercase => '대문자';
+
+  @override
+  String get advancedRenameTitleCase => '제목 표기';
+
+  @override
+  String get advancedRenameCapitalize => '첫 글자 대문자';
+
+  @override
+  String get advancedRenameSequentialCounter => '순차 카운터';
+
+  @override
+  String get advancedRenameCounterDescription => '순서대로 번호를 앞이나 뒤에 추가합니다';
+
+  @override
+  String get advancedRenameSuffix => '접미사(끝)';
+
+  @override
+  String get advancedRenamePrefix => '접두사(시작)';
+
+  @override
+  String get advancedRenameStartAt => '시작 값';
+
+  @override
+  String get advancedRenameDigits => '자릿수';
+
+  @override
+  String get advancedRenameDigitsHint => '예: 2 (01)';
+
+  @override
+  String get advancedRenameSeparator => '구분 기호';
+
+  @override
+  String get advancedRenameSeparatorHint => '_ or -';
+
+  @override
+  String get advancedRenameLivePreview => '실시간 미리보기';
+
+  @override
+  String get advancedRenameDeselect => '선택 해제';
+
+  @override
+  String get advancedRenameSelectAll => '모두 선택';
+
+  @override
+  String get advancedRenameNoFilesSelected => '선택된 파일이 없습니다';
+
+  @override
+  String get advancedRenameNameConflictDetected => '이름 충돌이 감지됨';
+
+  @override
+  String get advancedRenameCheckPreviewToFix => '수정하려면 미리보기 탭을 확인하세요';
+
+  @override
+  String get advancedRenameReadyToRename => '이름 변경 준비 완료';
+
+  @override
+  String get advancedRenameErrorsDetected => '오류 감지됨';
+
+  @override
+  String advancedRenameApply(int count) {
+    return '적용 ($count)';
+  }
+
+  @override
+  String get advancedRenameNameCollisionWithinBatch => '배치 내 이름 충돌.';
+
+  @override
+  String get advancedRenameCollidesWithUnselectedFile => '선택하지 않은 파일과 충돌합니다.';
+
+  @override
+  String advancedRenameReadyCount(int valid, int total) {
+    return '이름 변경 준비됨 $valid개(전체 $total개)';
+  }
+
+  @override
+  String advancedRenameReadyOfTotal(int valid, int total) {
+    return '$total개 중 $valid개 준비됨';
+  }
+
+  @override
+  String advancedRenameRenamedItems(int succeeded, int failed) {
+    return '$succeeded개 이름 변경됨($failed개 실패).';
+  }
+
+  @override
+  String advancedRenameSuccessfullyRenamed(int count) {
+    return '$count개 항목의 이름을 성공적으로 변경했습니다.';
+  }
+
+  @override
+  String get advancedRenameMonthsFull =>
+      '1월|2월|3월|4월|5월|6월|7월|8월|9월|10월|11월|12월';
+
+  @override
+  String get advancedRenameMonthsAbbr =>
+      '1월|2월|3월|4월|5월|6월|7월|8월|9월|10월|11월|12월';
+
+  @override
+  String get advancedRenameDaysFull => '월요일|화요일|수요일|목요일|금요일|토요일|일요일';
+
+  @override
+  String get advancedRenameDaysAbbr => '월|화|수|목|금|토|일';
+
+  @override
+  String get advancedRenameResolveConflicts => '적용하기 전에 이름 충돌을 해결하세요';
+
+  @override
+  String advancedRenameChangedCount(int changed, int total) {
+    return '$total개 중 $changed개';
+  }
+
+  @override
+  String get automationKeyfilesPimSectionHeader => '키파일 및 PIM';
+
+  @override
+  String get automationKeyfilesPimDescription =>
+      '위의 자동화 비밀번호와 함께 저장되며 UNLOCK_VAULT 호출에 동일하게 사용됩니다. 비밀번호만이 아니라 키파일 및/또는 기본값이 아닌 PIM으로 잠금 해제하는 VeraCrypt/LUKS 볼트용입니다.';
+
+  @override
+  String get automationSavePimButton => 'PIM 저장';
+
+  @override
+  String get automationCameraSectionHeader => '카메라 자동화';
+
+  @override
+  String get automationCameraDescription =>
+      '자동화가 이 볼트에 대해 TAKE_PHOTO / START_RECORDING / STOP_RECORDING / START_AUDIO_RECORDING / STOP_AUDIO_RECORDING을 실행하도록 허용합니다. 전체 액세스에서도 기본적으로 꺼져 있습니다. 파일 가져오기/내보내기와 달리 사진 촬영은 화면 표시가 전혀 필요 없으므로 별도의 명시적 동의 항목입니다.';
+
+  @override
+  String get automationAllowCameraCapture => '카메라 캡처 허용';
+
+  @override
+  String get automationOverlayPermissionTitle => '다른 앱 위에 표시';
+
+  @override
+  String get automationOverlayPermissionMessage =>
+      'Android 14+에서 백그라운드 카메라 캡처를 실행하려면 \'다른 앱 위에 표시\' 권한이 필요합니다. 화면이 잠겨 있거나 앱이 백그라운드에 있을 때 자동 캡처를 허용하려면 이 권한을 부여하세요.';
+
+  @override
+  String get automationPimSavedMessage => 'PIM이 저장되었습니다';
+
+  @override
+  String get automationActionImportFolderLabel => '폴더 가져오기';
+
+  @override
+  String get automationActionExportFolderLabel => '폴더 내보내기';
+
+  @override
+  String get automationActionTakePhotoLabel => '사진 촬영';
+
+  @override
+  String get automationActionStartRecordingLabel => '녹화 시작';
+
+  @override
+  String get automationActionStopRecordingLabel => '녹화 중지';
+
+  @override
+  String get automationActionStartAudioRecordingLabel => '오디오 녹음 시작';
+
+  @override
+  String get automationActionStopAudioRecordingLabel => '오디오 녹음 중지';
+
+  @override
+  String get filePropertiesSectionHeader => '파일 속성';
+
+  @override
+  String get fullPathLabel => '전체 경로';
+
+  @override
+  String get sizeLabel => '크기';
+
+  @override
+  String get modifiedLabel => '수정됨';
+
+  @override
+  String get vaultLabel => '볼트';
+
+  @override
+  String get mediaDimensionsSectionHeader => '미디어 및 크기';
+
+  @override
+  String get resolutionLabel => '해상도';
+
+  @override
+  String get aspectRatioLabel => '화면 비율';
+
+  @override
+  String get formatLabel => '형식';
+
+  @override
+  String get exifCameraDataSectionHeader => 'EXIF 및 카메라 데이터';
+
+  @override
+  String get cameraLabel => '카메라';
+
+  @override
+  String get lensLabel => '렌즈';
+
+  @override
+  String get dateTakenLabel => '촬영 날짜';
+
+  @override
+  String get shutterSpeedLabel => '셔터 속도';
+
+  @override
+  String get apertureLabel => '조리개';
+
+  @override
+  String get isoLabel => 'ISO';
+
+  @override
+  String get focalLengthLabel => '초점 거리';
+
+  @override
+  String get flashLabel => '플래시';
+
+  @override
+  String get softwareLabel => '소프트웨어';
+
+  @override
+  String get gpsLocationLabel => 'GPS 위치';
+
+  @override
+  String get integrityChecksumSectionHeader => '무결성 및 체크섬';
+
+  @override
+  String get computingHashMessage => '해시 계산 중…';
+
+  @override
+  String get tapCalculateToVerifyMessage => '확인하려면 계산을 탭하세요';
+
+  @override
+  String get calculateButton => '계산';
+
+  @override
+  String get copyDiagnosticsButton => '진단 정보 복사';
+
+  @override
+  String get closeButton => '닫기';
+
+  @override
+  String get hwAcceleratedBadge => 'HW 가속';
+
+  @override
+  String get swDecoderBadge => 'SW 디코더';
+
+  @override
+  String get videoDecoderHardwareSection => '비디오 디코더 및 하드웨어';
+
+  @override
+  String get decoderNameLabel => '디코더 이름';
+
+  @override
+  String get accelerationLabel => '가속';
+
+  @override
+  String get hardwareGpuDirect => '하드웨어(GPU 다이렉트)';
+
+  @override
+  String get softwareCpuFallback => '소프트웨어(CPU 대체)';
+
+  @override
+  String get unknownValue => '알 수 없음';
+
+  @override
+  String get framerateLabel => '프레임 속도';
+
+  @override
+  String get variableOrUnknown => '가변/알 수 없음';
+
+  @override
+  String get videoCodecLabel => '비디오 코덱';
+
+  @override
+  String get autoDetected => '자동 감지됨';
+
+  @override
+  String get colorFormatLabel => '색상 형식';
+
+  @override
+  String get initLatencyLabel => '초기화 지연 시간';
+
+  @override
+  String get audioEngineSection => '오디오 엔진';
+
+  @override
+  String get audioDecoderLabel => '오디오 디코더';
+
+  @override
+  String get audioCodecLabel => '오디오 코덱';
+
+  @override
+  String get pipelineHealthSection => '파이프라인 및 상태';
+
+  @override
+  String get playbackStateLabel => '재생 상태';
+
+  @override
+  String get decryptedBufferLabel => '복호화된 버퍼';
+
+  @override
+  String secondsCached(String seconds) {
+    return '$seconds초 캐시됨';
+  }
+
+  @override
+  String get droppedFramesLabel => '드롭된 프레임';
+
+  @override
+  String nFrames(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '프레임 $count개',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sourceStorageLabel => '원본 저장소';
+
+  @override
+  String directJniStreamSource(int volId) {
+    return '직접 C++ JNI 스트림(volId=$volId)';
+  }
+
+  @override
+  String get archivesTabLabel => '압축 파일';
+
+  @override
+  String get filesTabLabel => '파일';
+
+  @override
+  String get filesPermissionMessage => '기기의 파일을 탐색하려면 접근을 허용하세요.';
+
+  @override
+  String get filesEmptyTitle => '파일이 없습니다';
+
+  @override
+  String get filesEmptyMessage => '이 폴더는 비어 있습니다.';
+
+  @override
+  String get filesNewFolderTooltip => '새 폴더';
+
+  @override
+  String get filesNewFolderDialogTitle => '새 폴더';
+
+  @override
+  String get filesNameHint => '이름';
+
+  @override
+  String get filesCreate => '만들기';
+
+  @override
+  String get filesRename => '이름 변경';
+
+  @override
+  String get filesDelete => '삭제';
+
+  @override
+  String get filesShare => '공유';
+
+  @override
+  String get filesCopy => '복사';
+
+  @override
+  String get filesMove => '이동';
+
+  @override
+  String get filesDeleteConfirmTitle => '영구적으로 삭제할까요?';
+
+  @override
+  String get filesChooseDestinationTitle => '폴더 선택';
+
+  @override
+  String get filesMoveHere => '여기로 이동';
+
+  @override
+  String get filesCopyHere => '여기에 복사';
+
+  @override
+  String get filesSelectAllTooltip => '모두 선택';
+
+  @override
+  String get filesCloseSelectionTooltip => '닫기';
+
+  @override
+  String get filesFolderCreated => '폴더가 생성되었습니다';
+
+  @override
+  String get filesCreateFolderFailed => '폴더를 만들 수 없습니다';
+
+  @override
+  String get filesRenamed => '이름이 변경되었습니다';
+
+  @override
+  String get filesRenameFailed => '이름을 변경할 수 없습니다';
+
+  @override
+  String get filesNameAlreadyExists => '이미 사용 중인 이름입니다';
+
+  @override
+  String get filesDeleted => '삭제되었습니다';
+
+  @override
+  String get filesDeleteFailed => '삭제할 수 없습니다';
+
+  @override
+  String get filesMoved => '이동되었습니다';
+
+  @override
+  String get filesMoveFailed => '이동할 수 없습니다';
+
+  @override
+  String get filesCopied => '복사되었습니다';
+
+  @override
+  String get filesCopyFailed => '복사할 수 없습니다';
+
+  @override
+  String get filesOpenFailed => '이 파일을 열 수 없습니다';
+
+  @override
+  String get filesShareFailed => '이 파일을 공유할 수 없습니다';
+
+  @override
+  String get filesFilterTooltip => '필터';
+
+  @override
+  String get filesFilterAll => '모든 파일';
+
+  @override
+  String get filesFilterImages => '이미지';
+
+  @override
+  String get filesFilterVideos => '동영상';
+
+  @override
+  String get filesFilterAudio => '오디오';
+
+  @override
+  String get filesFilterDocuments => '문서';
+
+  @override
+  String get filesTextTooLarge => '이 파일은 너무 커서 여기서 미리 볼 수 없습니다.';
+
+  @override
+  String get filesTextSaved => '저장됨';
+
+  @override
+  String get filesTextSaveFailed => '저장할 수 없습니다';
+
+  @override
+  String get toolHeaderBackupTitle => '헤더 백업';
+
+  @override
+  String get toolHeaderBackupSubtitle => '컨테이너 헤더 및 볼트 설정 백업 또는 복원';
+
+  @override
+  String get headerBackupModeExport => '백업 저장';
+
+  @override
+  String get headerBackupModeRestore => '백업 복원';
+
+  @override
+  String get headerBackupPickExportTarget => '백업할 대상을 선택하세요.';
+
+  @override
+  String get headerBackupPickRestoreTarget => '백업을 복원할 대상을 선택하세요.';
+
+  @override
+  String get headerBackupTargetContainerSubtitle => 'VeraCrypt, LUKS1 또는 LUKS2';
+
+  @override
+  String get headerBackupTargetFolderSubtitle =>
+      'gocryptfs, CryFS 또는 Cryptomator';
+
+  @override
+  String get headerBackupExportInfoBanner =>
+      '컨테이너 헤더에는 핵심 키 자료가 포함되어 있습니다 — 불량 섹터나 쓰기 오류 등으로 이를 잃어버리면 온전한 데이터 영역조차 복구할 수 없습니다. 폴더 볼트도 루트의 작은 설정 파일에 동일한 정보를 보관합니다. 이 백업은 컨테이너 자체와 별도의 장소에 보관하세요.';
+
+  @override
+  String get headerBackupRestoreInfoBanner =>
+      '복원하면 대상의 현재 헤더(또는 설정 파일)를 백업 파일로 덮어씁니다 — 백업이 해당 형식에 적합한지 먼저 검증하지만, 올바른 대상을 선택했는지 확인하세요.';
+
+  @override
+  String headerBackupUnhealthyExportWarning(String diagnosis) {
+    return '이 컨테이너는 정상적인 상태가 아닙니다 ($diagnosis). 지금 백업하면 백업 파일에도 동일한 문제가 포함됩니다. 가능한 경우 먼저 확인 및 복구를 실행하세요 — 지금이 백업을 남길 수 있는 유일한 기회라면 그대로 진행하세요.';
+  }
+
+  @override
+  String get headerBackupBackUpAnyway => '그래도 백업';
+
+  @override
+  String get headerBackupExportHeader => '헤더 내보내기';
+
+  @override
+  String get headerBackupSavedBanner => '백업이 저장되었습니다. 이 컨테이너와 분리된 곳에 보관하세요.';
+
+  @override
+  String get headerBackupSaveBackupFile => '백업 파일 저장';
+
+  @override
+  String get headerBackupPickBackupFile => '백업 파일 선택';
+
+  @override
+  String get headerBackupMismatchFolderVaultError =>
+      '이 백업은 폴더 볼트용이지만 선택한 대상은 컨테이너 파일입니다.';
+
+  @override
+  String get headerBackupMismatchContainerFileError =>
+      '이 백업은 컨테이너 파일용이지만 선택한 대상은 폴더 볼트입니다.';
+
+  @override
+  String get headerBackupRestoredSuccess => '헤더가 복원되었습니다.';
+
+  @override
+  String get headerBackupRestore => '복원';
+
+  @override
+  String headerBackupBackedUpAt(String date) {
+    return '백업 일시: $date';
+  }
+
+  @override
+  String get headerBackupLogIdle => '콘솔 로그 출력이 대기 상태입니다...';
+
+  @override
+  String get compositeCreateScreenTitle => '복합 컨테이너 생성';
+
+  @override
+  String get compositeProcessingStatus => '처리 중…';
+
+  @override
+  String compositeCarrierFilesCountHeader(int count) {
+    return '캐리어 파일 ($count)';
+  }
+
+  @override
+  String get compositeAddCarrierFilesTitle => '캐리어 파일 추가';
+
+  @override
+  String get compositeAddCarrierFilesSubtitle => '이미지, 동영상, 오디오 또는 문서 선택';
+
+  @override
+  String get compositeBrowseButtonLabel => '찾아보기';
+
+  @override
+  String compositeCarrierAllocatableSubtitle(String format, String size) {
+    return '$format • 할당 가능: $size';
+  }
+
+  @override
+  String get compositeCarrierAnalyzingStatus => '분석 중…';
+
+  @override
+  String get compositeTotalUsableCapacityHeader => '총 사용 가능 용량';
+
+  @override
+  String compositeCapacityDistributedSubtitle(int count) {
+    return '$count개 파일에 분산 (512B 섹터 정렬)';
+  }
+
+  @override
+  String get compositePimFieldLabel => 'PIM (개인 반복 승수)';
+
+  @override
+  String get compositePimFieldHelper => '기본 반복 횟수를 사용하려면 비워두거나 0을 입력하세요';
+
+  @override
+  String get compositeRememberContainerTitle => '이 컨테이너 기억하기';
+
+  @override
+  String get compositeRememberContainerSubtitle =>
+      '대시보드에 고정하여 다음번에 이 파일들을 다시 선택하지 않도록 합니다. 연결된 파일 정보를 이 기기에 암호화하여 저장합니다.';
+
+  @override
+  String get compositeEncryptionAndFilesystemHeader => '암호화 및 파일 시스템';
+
+  @override
+  String get compositeEncryptionAlgorithmLabel => '암호화 알고리즘';
+
+  @override
+  String get compositeHashAlgorithmLabel => '해시 알고리즘 (KDF)';
+
+  @override
+  String get compositeFilesystemTypeLabel => '파일 시스템 종류';
+
+  @override
+  String get compositeQuickFormatTitle => '빠른 포맷';
+
+  @override
+  String get compositeQuickFormatSubtitle => '캐리어 할당 공간의 0 채우기 건너뛰기';
+
+  @override
+  String get compositeCreateContainerButton => '컨테이너 생성';
+
+  @override
+  String get compositeCreateSuccessMessage => '복합 컨테이너가 성공적으로 생성되었습니다!';
+
+  @override
+  String compositeDefaultContainerName(int count) {
+    return '복합 컨테이너 ($count개 파일)';
+  }
+
+  @override
+  String get compositeAlreadyHaveUnlockPrompt =>
+      '이미 복합 컨테이너가 있습니까? 잠금 해제 및 마운트';
+
+  @override
+  String compositeBadgeMultipleCarriers(int count) {
+    return '복합 ($count개 캐리어)';
+  }
+
+  @override
+  String get compositeBadgeSingleCarrier => '복합 캐리어 (1개 선택됨)';
+
+  @override
+  String get compositeBadgeDefault => '복합 컨테이너';
+
+  @override
+  String get compositeSingleCarrierWarningBanner =>
+      '복합 캐리어가 감지되었습니다. 복합 컨테이너의 잠금을 해제하려면 모든 캐리어 파일이 필요합니다.';
+
+  @override
+  String get compositeSelectAllCarriersButton => '모든 캐리어 선택';
+
+  @override
+  String get compositeCarriersMissingTitle => '복합 캐리어 누락됨';
+
+  @override
+  String get compositeCarriersMissingExplanation =>
+      '하나 이상의 캐리어 파일에 접근할 수 없거나 이동되었습니다.';
+
+  @override
+  String get compositeRelocateCarriersButton => '캐리어 파일 위치 재지정';
+
+  @override
+  String get passwordOptionalFieldLabel => '비밀번호 (선택사항)';
+
+  @override
+  String get plainDiskImagePasswordHint => '비밀번호 불필요 — 이 디스크 이미지는 암호화되지 않았습니다';
+
+  @override
+  String get compositePasswordHint => '복합 컨테이너 비밀번호 입력';
+
+  @override
+  String get generateStrongPasswordTooltip => '강력한 비밀번호 생성';
+
+  @override
+  String get cryfsBlockSizeDefaultLabel => '32 KiB (기본값)';
+
+  @override
+  String get hiddenVolumeConfiguredInNextStepNotice =>
+      '숨겨진 볼륨 매개변수는 다음 단계에서 설정됩니다.';
+
+  @override
+  String get hiddenVolumeExplanationBanner =>
+      '숨겨진 볼륨은 외부 볼륨의 여유 공간 내에 존재합니다. 비밀번호와 키파일은 반드시 외부 볼륨과 달라야 합니다.';
+
+  @override
+  String get hiddenVolumeCredentialsSectionHeader => '숨겨진 볼륨 자격 증명';
+
+  @override
+  String get hiddenVolumeSizeAndFormatSectionHeader => '숨겨진 볼륨 크기 및 포맷';
+
+  @override
+  String get shareSheetIntegrationTitle => '공유 시트 통합';
+
+  @override
+  String get shareSheetIntegrationSubtitle =>
+      'Android 공유 메뉴를 통해 다른 앱에서 볼트로 파일을 직접 공유할 수 있도록 허용합니다.';
+
+  @override
+  String get shareSheetIntegrationUpdateErrorMessage =>
+      '공유 시트 통합을 업데이트할 수 없습니다.';
+
+  @override
+  String get autoLockOnShareImportTitle => '공유 파일 가져온 후 자동 잠금';
+
+  @override
+  String get autoLockOnShareImportSubtitle =>
+      '공유 파일을 가져오기 위해 잠금 해제된 경우 보관함을 자동으로 다시 잠급니다';
+
+  @override
+  String get shareImportExpiredMessage => '가져올 항목이 없습니다. 공유 요청이 만료되었습니다.';
+
+  @override
+  String get sharedFileDefaultDisplayName => '공유된 파일';
+
+  @override
+  String importingSharedFilesMessage(int count, String destination) {
+    return '$count개 파일을 $destination(으)로 가져오는 중';
+  }
+
+  @override
+  String sharedFileSavedMessage(int count, String destination) {
+    return '$count개 파일을 $destination에 저장했습니다';
+  }
+
+  @override
+  String get sharedFileSaveFailedMessage => '공유된 파일을 저장하지 못했습니다.';
+
+  @override
+  String get saveToVaultTitle => '볼트에 저장';
+
+  @override
+  String get noVaultsAvailableAddFromDashboardPrompt =>
+      '아직 볼트가 없습니다. 대시보드에서 먼저 추가하세요.';
+
+  @override
+  String get vaultStatusUnlocked => '잠금 해제됨';
+
+  @override
+  String get vaultStatusLocked => '잠김';
+
+  @override
+  String get compositeCarrierGrowthSectionHeader => '은폐성 및 용량';
+
+  @override
+  String get compositeCarrierGrowthSliderTitle => '캐리어 파일 크기 증가';
+
+  @override
+  String compositeCarrierGrowthPercentLabel(int percent) {
+    return '파일당 +$percent%';
+  }
+
+  @override
+  String get compositeCarrierGrowthUltraStealthDesc =>
+      '최대 은폐 (~5%): 파일 크기가 거의 증가하지 않습니다. 카메라 센서의 자연스러운 편차와 구별할 수 없습니다.';
+
+  @override
+  String get compositeCarrierGrowthRecommendedDesc =>
+      '권장 (~10%): 은폐성과 유용한 보관소 용량 간의 균형을 맞춥니다.';
+
+  @override
+  String get compositeCarrierGrowthHighCapacityDesc =>
+      '대용량 (~20%+): 보관소 공간을 극대화하지만, 캐리어 파일 크기가 눈에 띄게 증가합니다.';
+
+  @override
+  String get emergencyPanicTitle => '비상 패닉 및 강요 대응';
+
+  @override
+  String get emergencyPanicSubtitle => '패닉 트리거, 빠른 설정 타일, PanicKit 및 강요 해제';
+
+  @override
+  String get sectionPanicTiers => '패닉 초기화 레벨';
+
+  @override
+  String get panicTierSessionLabel => '레벨 1: 세션 초기화';
+
+  @override
+  String get panicTierSessionSubtitle =>
+      '볼트 마운트 해제, 메모리 제로화, 저장된 볼트 비밀번호/자격 증명 삭제';
+
+  @override
+  String get panicTierCredentialLabel => '레벨 2: 자격 증명 초기화';
+
+  @override
+  String get panicTierCredentialSubtitle =>
+      '대시보드 볼트 목록 삭제, 마스터 잠금 및 앱 설정 초기화, Keystore 비우기';
+
+  @override
+  String get panicTierNuclearLabel => '레벨 3: 완전 삭제 (Nuclear Wipe)';
+
+  @override
+  String get panicTierNuclearSubtitle => '모든 앱 저장공간을 0으로 덮어쓰고 파쇄한 뒤 시스템 삭제 요청';
+
+  @override
+  String get panicQuickTileTitle => '빠른 설정 타일';
+
+  @override
+  String get panicQuickTileSubtitle => '설정된 패닉 레벨을 즉시 실행하는 빠른 설정 타일 활성화';
+
+  @override
+  String get triggerPanicNowTitle => '지금 패닉 실행';
+
+  @override
+  String get triggerPanicNowSubtitle => '설정된 패닉 초기화 레벨을 즉시 실행합니다';
+
+  @override
+  String get triggerPanicConfirmTitle => '비상 패닉을 실행하시겠습니까?';
+
+  @override
+  String triggerPanicConfirmMessage(String tier) {
+    return '즉시 $tier을(를) 실행합니다. 열려 있는 컨테이너와 자격 증명이 해당 레벨에 따라 삭제됩니다.';
+  }
+
+  @override
+  String get triggerPanicButton => '패닉 실행';
+
+  @override
+  String get sectionPanicBootTrigger => 'Wipe on Reboot';
+
+  @override
+  String get panicBootTriggerLevelLabel => '재부팅 시 실행할 레벨';
+
+  @override
+  String get panicBootTriggerArmTitle => '다음 부팅을 위해 가동';
+
+  @override
+  String panicBootTriggerArmedSubtitle(Object tier) {
+    return '가동됨 — 다음 부팅 시 $tier이(가) 자동으로 실행된 후 해제됩니다';
+  }
+
+  @override
+  String get panicBootTriggerDisarmedSubtitle => '꺼짐 — 기기가 정상적으로 재부팅됩니다';
+
+  @override
+  String get panicBootTriggerConfirmTitle => '재부팅 시 초기화를 가동할까요?';
+
+  @override
+  String panicBootTriggerConfirmMessage(Object tier) {
+    return '일반적인 재시작이나 자동 업데이트를 포함하여 다음 번에 기기가 부팅될 때, 앱을 열기 전에 $tier이(가) 자동으로 실행됩니다. 이 작업은 한 번만 실행된 후 해제됩니다.';
+  }
+
+  @override
+  String get panicBootTriggerArmButton => '가동';
+
+  @override
+  String get panicBootTriggerArmedSuccessMessage => '부팅 트리거 가동됨';
+
+  @override
+  String get panicBootTriggerDisarmedSuccessMessage => '부팅 트리거 해제됨';
+
+  @override
+  String get sectionPanicKit => 'PanicKit 응답기';
+
+  @override
+  String get panicKitEnableTitle => 'PanicKit 응답기';
+
+  @override
+  String get panicKitEnableSubtitle =>
+      '페어링된 외부 패닉 앱(예: Ripple, Wasted)의 트리거 허용';
+
+  @override
+  String get panicKitEnforcePairingTitle => '앱 페어링 강제 적용';
+
+  @override
+  String get panicKitEnforcePairingSubtitle =>
+      '트리거 브로드캐스트마다 패키지 ID 및 SHA-256 인증서 다이제스트 검증';
+
+  @override
+  String get panicKitPairedAppLabel => '페어링된 트리거 앱';
+
+  @override
+  String get panicKitNoAppPaired => '페어링된 트리거 앱 없음';
+
+  @override
+  String get panicKitUnpairButton => '페어링 해제';
+
+  @override
+  String get panicKitUnpairSuccess => 'PanicKit 트리거 페어링이 해제되었습니다';
+
+  @override
+  String get sectionDuressUnlock => '마스터 잠금 강요 해제';
+
+  @override
+  String get duressMasterPasswordRequired =>
+      '강요 해제를 설정하려면 먼저 보안 설정에서 마스터 비밀번호를 활성화해야 합니다.';
+
+  @override
+  String get duressPasswordTitle => '강요 비밀번호';
+
+  @override
+  String get duressPasswordConfiguredSubtitle =>
+      '활성 — 잠금 화면에서 이 비밀번호를 입력하면 강요 액션이 실행됩니다';
+
+  @override
+  String get duressPasswordNotConfiguredSubtitle =>
+      '잠금 화면에서 비상 액션을 실행할 별도의 비밀번호 입력';
+
+  @override
+  String get removeDuressPasswordButton => '강요 비밀번호 삭제';
+
+  @override
+  String get duressPasswordSetSuccess => '강요 비밀번호가 설정되었습니다';
+
+  @override
+  String get duressPasswordRemovedSuccess => '강요 비밀번호가 삭제되었습니다';
+
+  @override
+  String get duressPinConfiguredTitle => '강요 PIN';
+
+  @override
+  String get duressPinConfiguredSubtitle =>
+      '활성 — 키패드에서 이 PIN을 입력하면 강요 액션이 실행됩니다';
+
+  @override
+  String get duressPinNotConfiguredSubtitle => '키패드에서 비상 액션을 실행할 별도의 PIN 입력';
+
+  @override
+  String get removeDuressPinButton => '강요 PIN 삭제';
+
+  @override
+  String get duressPinSetSuccess => '강요 PIN이 설정되었습니다';
+
+  @override
+  String get duressPinRemovedSuccess => '강요 PIN이 삭제되었습니다';
+
+  @override
+  String get duressPatternTitle => '강요 패턴';
+
+  @override
+  String get duressPatternConfiguredSubtitle => '활성 — 이 패턴을 그리면 강요 액션이 실행됩니다';
+
+  @override
+  String get duressPatternNotConfiguredSubtitle =>
+      '잠금 화면에서 비상 액션을 실행할 별도의 패턴 그리기';
+
+  @override
+  String get removeDuressPatternButton => '강요 패턴 삭제';
+
+  @override
+  String get duressPatternSetSuccess => '강요 패턴이 설정되었습니다';
+
+  @override
+  String get duressPatternRemovedSuccess => '강요 패턴이 삭제되었습니다';
+
+  @override
+  String get duressMatchesMasterPasswordError =>
+      '듀레스 비밀번호는 마스터 비밀번호와 일치할 수 없습니다';
+
+  @override
+  String get duressMatchesMasterPinError => '마스터 PIN과 일치할 수 없습니다';
+
+  @override
+  String get duressMatchesMasterPatternError => '마스터 패턴과 일치할 수 없습니다';
+
+  @override
+  String get masterMatchesDuressPasswordError =>
+      '마스터 비밀번호는 듀레스 비밀번호와 일치할 수 없습니다';
+
+  @override
+  String get masterMatchesDuressPinError => '듀레스 PIN과 일치할 수 없습니다';
+
+  @override
+  String get masterMatchesDuressPatternError => '듀레스 패턴과 일치할 수 없습니다';
+
+  @override
+  String get toolCompositeContainerTitle => '복합 컨테이너';
+
+  @override
+  String get toolCompositeContainerSubtitle =>
+      '여러 미디어 파일에 걸쳐 암호화된 보관함을 분산 삽입 및 마운트';
+
+  @override
+  String get compositePasswordChangeNotSupportedMessage =>
+      '복합 컨테이너는 비밀번호 변경을 지원하지 않습니다';
+
+  @override
+  String get compositeNoCarrierFilesFoundError => '복합 컨테이너용 캐리어 파일을 찾을 수 없습니다';
+
+  @override
+  String get compositeIncorrectCredentialsOrCarrierMismatchError =>
+      '인증 정보가 올바르지 않거나 캐리어 파일 세트가 일치하지 않습니다';
+
+  @override
+  String get incorrectCredentialsOrInvalidContainer =>
+      '인증 정보가 올바르지 않거나 유효하지 않은 컨테이너입니다';
+
+  @override
+  String get repairTargetFolderVaultOption => '폴더 보관함';
+
+  @override
+  String get repairTargetFolderVaultSubtitle =>
+      'gocryptfs, CryFS 또는 Cryptomator';
+
+  @override
+  String get repairFolderVaultHealthyDeepScan =>
+      '문제가 발견되지 않았습니다 -- 모든 파일의 내용이 검증되었습니다.';
+
+  @override
+  String get repairFolderVaultHealthyStructureOnly =>
+      '구조적 문제가 발견되지 않았습니다. 파일 내용도 확인하려면 비밀번호를 입력하여 정밀 검사를 실행하세요.';
+
+  @override
+  String repairFolderVaultIssuesCount(num count) {
+    return '$count개의 문제 발견';
+  }
+
+  @override
+  String get repairFolderVaultStructureOnlySuffix =>
+      ' (구조만 확인됨 -- 전체 내용 검사를 위해 정밀 검사를 실행하세요)';
+
+  @override
+  String get repairDeepScanWithPasswordButton => '비밀번호로 정밀 검사';
+
+  @override
+  String repairFolderVaultSummary(
+    Object fixed,
+    Object recovered,
+    Object removed,
+  ) {
+    return '복구 요약: $fixed개 수정됨, $recovered개 /LOST+FOUND에 복구됨, $removed개 정리됨.';
+  }
+
+  @override
+  String get repairAndRecoverVaultButton => '보관함 복구 및 복원';
+
+  @override
+  String get repairScanAgainButton => '다시 검사';
+
+  @override
+  String panicPurgeCompletedMessage(Object count) {
+    return '긴급 제거 완료 ($count개 잠김).';
+  }
+
+  @override
+  String get usbPermissionRequiredError => 'USB 권한이 필요합니다';
+
+  @override
+  String get logcatScrollToBottomTooltip => '맨 아래로 스크롤';
+
+  @override
+  String logcatLinesCount(num count) {
+    return '$count줄';
+  }
+
+  @override
+  String get compositeSpaceTooSmallError => '할당 가능한 공간이 너무 작습니다 (최소 300KB 필요)';
+
+  @override
+  String get compositeInitializingStatusMessage => '복합 VeraCrypt 볼륨 초기화 중…';
+
+  @override
+  String get compositeCreationFailedError => '복합 컨테이너 생성 실패';
+
+  @override
+  String get compositeSelectCarriersFirstError => '캐리어 파일을 먼저 선택하세요';
+
+  @override
+  String get compositePasswordOrKeyfileRequiredError => '비밀번호 또는 키 파일이 필요합니다';
+
+  @override
+  String get compositeMountingStatusMessage => '복합 볼륨 마운트 중…';
+
+  @override
+  String get compositeAuthFailedOrCarrierMismatchError =>
+      '인증 실패 또는 캐리어 파일 세트 불일치';
+
+  @override
+  String get layoutModeColumnedList => '열 목록';
+
+  @override
+  String get longFileNameDisplayLabel => '긴 파일 이름 표시';
+
+  @override
+  String get longFileNameDisplayDesc => '공간을 초과하는 파일 이름 생략 방식 선택';
+
+  @override
+  String get longFileNameEllipsizeStartLabel => '앞부분 생략';
+
+  @override
+  String get longFileNameEllipsizeStartDesc => '이름 앞부분을 줄이고 확장자와 뒷부분을 표시합니다.';
+
+  @override
+  String get longFileNameEllipsizeMiddleLabel => '가운데 생략';
+
+  @override
+  String get longFileNameEllipsizeMiddleDesc => '이름 가운데를 줄이고 앞부분과 확장자를 표시합니다.';
+
+  @override
+  String get longFileNameEllipsizeEndLabel => '끝부분 생략';
+
+  @override
+  String get longFileNameEllipsizeEndDesc => '이름 끝부분을 줄이고 앞부분을 표시합니다.';
+
+  @override
+  String get longFileNameMarqueeLabel => '스크롤 (마키)';
+
+  @override
+  String get longFileNameMarqueeDesc => '전체 이름을 좌우로 천천히 스크롤합니다.';
+
+  @override
+  String get showItemActionsMenuLabel => '항목 더보기(3개 점) 메뉴 표시';
+
+  @override
+  String get showItemActionsMenuDesc => '목록 보기에서 파일 및 폴더에 3개 점 작업 버튼을 표시합니다';
+
+  @override
+  String get gridAspectRatioLabel => '그리드 가로세로 비율';
+
+  @override
+  String get gridAspectSquareLabel => '1:1 (정사각형)';
+
+  @override
+  String get gridAspectLandscapeLabel => '16:9 (가로)';
+
+  @override
+  String get gridAspectPortraitLabel => '9:16 (세로)';
+
+  @override
+  String get fileFolderDisplaySectionHeader => '파일 및 폴더 표시';
+
+  @override
+  String get navigationBarsSectionHeader => '탐색 및 표시줄';
+
+  @override
+  String get columnedListViewColumnsSectionHeader => '열 목록의 열 설정';
+
+  @override
+  String get autoHideAppBarLabel => '스크롤 시 앱 바 자동 숨김';
+
+  @override
+  String get autoHideAppBarDesc => '아래로 스크롤할 때 상단 표시줄을 숨겨 화면 공간을 최대화';
+
+  @override
+  String get useFabForToolbarLabel => '도구 모음에 플로팅 버튼 사용';
+
+  @override
+  String get useFabForToolbarDesc => '하단 표시줄을 플로팅 버튼으로 대체하여 화면 공간 최대화';
+
+  @override
+  String get bottomSelectionBarLabel => '선택 표시줄을 하단에 표시';
+
+  @override
+  String get bottomSelectionBarDesc => '선택 도구 모음을 상단 대신 하단에 표시';
+
+  @override
+  String get clipboardFabTapToPaste => '탭하여 붙여넣기, 길게 눌러 세부정보';
+
+  @override
+  String get storageLocationsTitle => '저장소 위치';
+
+  @override
+  String get storageLocationsSubtitle => '내부 저장소, SD 카드 및 문서 제공자';
+
+  @override
+  String get storageLocationsSelectPrompt => '활성 저장소 선택';
+
+  @override
+  String get addStorageLocationTitle => '저장소 위치 추가';
+
+  @override
+  String get addStorageLocationSubtitle => '외부 SD 카드, USB 드라이브 또는 폴더 추가';
+
+  @override
+  String get documentProviderSafLabel => '문서 제공자 (SAF)';
+
+  @override
+  String get externalStorageLabel => '외부 저장소';
+
+  @override
+  String get renameStorageLocationTitle => '위치 이름 변경';
+
+  @override
+  String get removeStorageLocationTitle => '위치 제거';
+
+  @override
+  String removeStorageLocationConfirm(String name) {
+    return '저장소 위치에서 \"$name\"을(를) 제거하시겠습니까? 파일은 삭제되지 않습니다.';
+  }
+
+  @override
+  String get storageLocationAddedSnack => '저장소 위치가 추가되었습니다';
+
+  @override
+  String get storageLocationUnresolvedError =>
+      '해당 위치에 직접 접근할 수 없습니다. 저장소 권한을 확인하세요.';
+
+  @override
+  String get storageLocationSelfReferenceError =>
+      '이미 이 앱의 볼트 저장소이므로 외부 위치로 다시 추가할 수 없습니다. 대신 볼트 목록에서 여세요.';
+
+  @override
+  String get internalStorageSubtitle => '내부 저장소';
+
+  @override
+  String get mediaViewerActionPlayPause => '재생 / 일시 정지';
+
+  @override
+  String get mediaViewerActionPlaybackMode => '재생 모드';
+
+  @override
+  String get mediaViewerActionBookmark => '북마크';
+
+  @override
+  String get mediaViewerActionDiagnostics => '진단';
+
+  @override
+  String get mediaViewerCustomizeControls => '컨트롤 사용자 정의...';
+
+  @override
+  String get mediaViewerControlsTitle => '미디어 플레이어 컨트롤';
+
+  @override
+  String get mediaViewerControlsReset => '미디어 컨트롤이 기본값으로 초기화되었습니다';
+
+  @override
+  String get mediaViewerTransportDisplay => '전송 및 디스플레이';
+
+  @override
+  String get mediaViewerShowScrubberTitle => '진행률 표시줄 표시';
+
+  @override
+  String get mediaViewerShowScrubberDesc => '위치 및 재생 시간 타임라인 슬라이더 표시';
+
+  @override
+  String get mediaViewerShowCenterTransportTitle => '중앙 전송 컨트롤 표시';
+
+  @override
+  String get mediaViewerShowCenterTransportDesc => '중앙에 큰 원형 재생/일시 정지 버튼 표시';
+
+  @override
+  String get mediaViewerShowPrevNextTitle => '다음 및 이전 버튼 표시';
+
+  @override
+  String get mediaViewerShowPrevNextDesc => '단일 재생 버튼만 유지하려면 끄기';
+
+  @override
+  String get mediaViewerShowStatusBadgeTitle => '상태 배지 표시';
+
+  @override
+  String get mediaViewerShowStatusBadgeDesc => '슬라이드쇼 지연 및 정적 이미지 표시기 표시';
+
+  @override
+  String get mediaViewerTopBarSection => '상단 바';
+
+  @override
+  String get mediaViewerBottomBarSection => '하단 바';
+
+  @override
+  String get mediaViewerUnpinnedSection => '고정 해제됨 (오버플로)';
+
+  @override
+  String get mediaViewerAllControlsPinned => '모든 컨트롤이 이미 고정되어 있습니다.';
+
+  @override
+  String get mediaPlayerControlsTitle => '미디어 플레이어 컨트롤';
+
+  @override
+  String get resumePlaybackTitle => '재생 이어보기';
+
+  @override
+  String get resumePlaybackAskEveryTime => '매번 묻기';
+
+  @override
+  String get resumePlaybackNever => '안 함';
+
+  @override
+  String get resumePlaybackAlways => '항상';
+
+  @override
+  String get resumePlaybackPromptTitle => '이어서 재생하시겠습니까?';
+
+  @override
+  String resumePlaybackPromptMessage(String position) {
+    return '$position부터 계속하시겠습니까?';
+  }
+
+  @override
+  String get resumePlaybackStartOver => '처음부터';
+
+  @override
+  String get resumePlaybackResume => '이어보기';
+
+  @override
+  String get pictureInPictureTitle => '자동 화면 속 화면';
+
+  @override
+  String get pictureInPictureSubtitle => '동영상 재생 중 앱을 나가면 화면 속 화면으로 전환합니다';
+
+  @override
+  String get pictureInPictureAction => '화면 속 화면';
+
+  @override
+  String get mediaViewerActionLockControls => '컨트롤 잠금';
+
+  @override
+  String get mediaViewerHoldToUnlock => '길게 눌러 잠금 해제';
+
+  @override
+  String get keepAudioPlayingTitle => '닫은 후에도 오디오 계속 재생';
+
+  @override
+  String get keepAudioPlayingSubtitle =>
+      '플레이어를 나가도 오디오가 백그라운드에서 계속 재생되며 알림에서 제어할 수 있습니다';
+
+  @override
+  String get mediaControlsResetSuccess => '미디어 컨트롤을 기본값으로 초기화했습니다';
+
+  @override
+  String get playbackAndDisplayHeader => '재생 및 디스플레이';
+
+  @override
+  String get showProgressBarTitle => '진행률 표시줄(스크러버) 표시';
+
+  @override
+  String get showProgressBarSubtitle => '비디오 및 오디오용 타임라인 슬라이더';
+
+  @override
+  String get scrubPreviewStyleTitle => '탐색 미리보기 스타일';
+
+  @override
+  String get scrubPreviewMiniBoxLabel => '미니 박스';
+
+  @override
+  String get scrubPreviewMiniBoxDesc => '진행률 표시줄 위에 작은 썸네일 표시';
+
+  @override
+  String get scrubPreviewFullscreenLabel => '전체 화면';
+
+  @override
+  String get scrubPreviewFullscreenDesc =>
+      '진행률 표시줄을 드래그하는 동안 큰 프레임이 화면을 가득 채웁니다';
+
+  @override
+  String get showTransportControlsOnPhotosTitle => '사진에 탐색 컨트롤 표시';
+
+  @override
+  String get showTransportControlsOnPhotosSubtitle =>
+      '이미지 슬라이드쇼 컨트롤 활성화(미니멀 뷰는 해제)';
+
+  @override
+  String get statusBadgeTitle => '상태 배지';
+
+  @override
+  String get statusBadgeSubtitle => '슬라이드쇼 타이머 또는 정적 사진 표시기 표시';
+
+  @override
+  String get topBarActionsHeader => '상단 표시줄 작업';
+
+  @override
+  String get topBarActionsEmptyHint => '상단 표시줄에 고정하려면 작업을 여기로 드래그하세요';
+
+  @override
+  String get bottomDockActionsHeader => '하단 도크 작업';
+
+  @override
+  String get bottomDockActionsEmptyHint => '하단 도크에 고정하려면 작업을 여기로 드래그하세요';
+
+  @override
+  String get moreMenuActionsHeader => '더보기 메뉴(•••) 작업';
+
+  @override
+  String get moreMenuActionsEmptyHint => '상단 표시줄 드롭다운 메뉴용 작업을 여기로 드래그하세요';
+
+  @override
+  String get advancedSettingsActionsHeader => '고급 설정 작업(더보기)';
+
+  @override
+  String get advancedSettingsActionsEmptyHint => '고급 설정 시트용 작업을 여기로 드래그하세요';
+
+  @override
+  String get dropHereAtEnd => '끝에 드롭';
+
+  @override
+  String get dragItemsHereToAdd => '+ 이 섹션에 추가하려면 항목을 여기로 드래그하세요';
+
+  @override
+  String get moveToAdvancedSettingsTooltip => '고급 설정으로 이동';
+
+  @override
+  String get noVaultsMounted => '마운트된 보관함 없음';
+
+  @override
+  String get vaultsMountedSummary => '개 보관함 마운트됨';
+
+  @override
+  String get dashboardNavLabel => '대시보드';
+
+  @override
+  String get vaultsSectionTitle => '보관함';
+
+  @override
+  String get vaultStatusMounted => '마운트됨';
+
+  @override
+  String get lockVaultTooltip => '보관함 잠금';
+
+  @override
+  String get lockAllVaultsTitle => '모두 잠그기';
+
+  @override
+  String get safProviderLabel => 'SAF 공급자';
+
+  @override
+  String get singleFileCryptoTitle => '단일 파일 암호화';
+
+  @override
+  String get singleFileCryptoSubtitle => '보관함 외부에서 암호화/복호화';
+
+  @override
+  String get passwordGeneratorTitle => '비밀번호 생성기';
+
+  @override
+  String get contentsLabel => '콘텐츠';
+
+  @override
+  String get totalSizeLabel => '총 크기';
+
+  @override
+  String folderItemCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목',
+      zero: '비어 있음',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calculatingFolderStats => '계산 중…';
+
+  @override
+  String get videoGesturesHeader => '동영상 제스처 및 줌';
+
+  @override
+  String get swipeToSeekTitle => '스와이프하여 탐색';
+
+  @override
+  String get swipeToSeekSubtitle =>
+      '화면을 가로로 스와이프하여 탐색합니다. 재생목록에서는 항목 간 이동 시 스와이프 대신 탐색 버튼을 사용해야 합니다';
+
+  @override
+  String get swipeToDismissTitle => '스와이프하여 닫기';
+
+  @override
+  String get swipeToDismissSubtitle =>
+      '아래로 스와이프하면 뷰어가 닫힙니다. 재생목록이 세로로 스크롤되면 옆으로 스와이프하세요';
+
+  @override
+  String get edgeSwipeBrightnessTitle => '밝기 조절 스와이프 제스처';
+
+  @override
+  String get edgeSwipeBrightnessSubtitle => '화면 왼쪽 가장자리를 스와이프하여 밝기를 조절합니다';
+
+  @override
+  String get edgeSwipeVolumeTitle => '볼륨 조절 스와이프 제스처';
+
+  @override
+  String get edgeSwipeVolumeSubtitle => '화면 오른쪽 가장자리를 스와이프하여 볼륨을 조절합니다';
+
+  @override
+  String get edgeSwipeHudTitle => '제스처 표시기 표시';
+
+  @override
+  String get edgeSwipeHudSubtitle => '스와이프하는 동안 화면에 백분율을 표시합니다';
+
+  @override
+  String get edgeSwipeWidthTitle => '가장자리 영역 너비';
+
+  @override
+  String get pinchZoomOutTitle => '축소 허용';
+
+  @override
+  String get pinchZoomOutSubtitle => '핀치 동작으로 동영상을 기본 크기보다 작게 축소합니다';
+
+  @override
+  String get minZoomTitle => '최소 줌 배율';
+
+  @override
+  String get holdSpeedMultiplierTitle => '길게 눌러 빨리감기 속도';
+
+  @override
+  String get holdSpeedMultiplierSubtitle => '동영상을 길게 누르는 동안의 재생 속도';
+
+  @override
+  String get defaultAspectRatioTitle => '기본 화면 비율';
+
+  @override
+  String get defaultAspectRatioSubtitle => '동영상이 열릴 때 자동으로 적용됩니다';
+
+  @override
+  String get aspectRatioModeLabel => '화면 비율';
+
+  @override
+  String get aspectRatioBestFit => '최적 맞춤';
+
+  @override
+  String get aspectRatioFill => '화면 채우기';
+
+  @override
+  String get aspectRatio16x9 => '16:9';
+
+  @override
+  String get aspectRatio4x3 => '4:3';
+
+  @override
+  String get aspectRatioCentre => '가운데 정렬';
+
+  @override
+  String get autoSyncMenuAction => '자동 동기화…';
+
+  @override
+  String get autoSyncSheetTitle => '자동 동기화';
+
+  @override
+  String get autoSyncSheetIntro =>
+      '이 폴더와 다른 폴더를 자동으로 같은 상태로 유지합니다. 같은 파일이 양쪽에서 변경된 경우, 아래에서 다르게 선택하지 않는 한 두 버전이 모두 보존됩니다.';
+
+  @override
+  String get autoSyncTargetSection => '동기화 대상';
+
+  @override
+  String get autoSyncChooseFolder => '폴더 선택';
+
+  @override
+  String get autoSyncTargetNotSetHere =>
+      '이 규칙은 다른 기기에서 설정되었습니다. 이 기기에서 사용할 폴더를 선택하세요.';
+
+  @override
+  String get autoSyncPickerSideLabel => '동기화 대상';
+
+  @override
+  String get autoSyncDirectionSection => '방향';
+
+  @override
+  String get autoSyncDirectionTwoWay => '양방향';
+
+  @override
+  String get autoSyncDirectionTwoWayHint => '어느 한쪽의 변경 사항이 다른 쪽으로 복사됩니다.';
+
+  @override
+  String get autoSyncDirectionVaultToTarget => '볼트에서 폴더로';
+
+  @override
+  String get autoSyncDirectionVaultToTargetHint =>
+      '백업용: 폴더가 볼트를 따릅니다. 폴더에서 한 변경 사항은 다시 복사되지 않습니다.';
+
+  @override
+  String get autoSyncDirectionTargetToVault => '폴더에서 볼트로';
+
+  @override
+  String get autoSyncDirectionTargetToVaultHint =>
+      '가져오기용: 볼트가 폴더를 따릅니다. 볼트에서 한 변경 사항은 다시 복사되지 않습니다.';
+
+  @override
+  String get autoSyncConflictSection => '양쪽에서 파일이 변경된 경우';
+
+  @override
+  String get autoSyncConflictKeepBoth => '두 버전 모두 유지';
+
+  @override
+  String get autoSyncConflictKeepBothHint => '다른 버전은 이름이 바뀐 사본으로 양쪽에 보존됩니다.';
+
+  @override
+  String get autoSyncConflictKeepNewer => '최신 버전 유지';
+
+  @override
+  String get autoSyncConflictKeepNewerHint => '어느 쪽이 더 최신인지 알 수 없으면 둘 다 유지합니다.';
+
+  @override
+  String get autoSyncConflictVaultWins => '볼트 버전 우선';
+
+  @override
+  String get autoSyncConflictVaultWinsHint => '폴더의 버전이 대체됩니다.';
+
+  @override
+  String get autoSyncConflictTargetWins => '폴더 버전 우선';
+
+  @override
+  String get autoSyncConflictTargetWinsHint => '볼트의 버전이 대체됩니다.';
+
+  @override
+  String get autoSyncOptionsSection => '옵션';
+
+  @override
+  String get autoSyncOnUnlockTitle => '볼트 잠금 해제 시 동기화';
+
+  @override
+  String get autoSyncLiveTitle => '잠금 해제 중 동기화 유지';
+
+  @override
+  String get autoSyncLiveSubtitle =>
+      '볼트가 열려 있는 동안 가끔 변경 사항을 확인합니다. 모든 변경 사항이 즉시 감지되지는 않습니다.';
+
+  @override
+  String get autoSyncDeleteTitle => '삭제도 함께 반영';
+
+  @override
+  String get autoSyncDeleteSubtitle =>
+      '한쪽에서 삭제한 파일은 다른 쪽에서도 삭제됩니다. 폴더가 예상치 않게 비어 있는 것처럼 보이면 삭제가 일시 중지됩니다.';
+
+  @override
+  String get autoSyncDeleteSourceAfterImportTitle => '가져온 후 원본 파일 삭제';
+
+  @override
+  String get autoSyncDeleteSourceAfterImportSubtitle =>
+      '폴더에서 볼트로 동기화할 때만 적용됩니다. 볼트에 저장한 후 SHA-256 체크섬이 일치하는지 확인하고 원본 파일을 삭제합니다.';
+
+  @override
+  String get autoSyncIgnoreLabel => '다음과 일치하는 파일 및 폴더 건너뛰기';
+
+  @override
+  String get autoSyncIgnoreHelper =>
+      '한 줄에 하나의 패턴을 입력하세요. *.tmp는 모든 위치의 이름에 일치하고, node_modules는 해당 폴더와 내용을 모두 건너뛰며, Projects/old는 동기화 루트 기준 해당 경로와 그 안의 모든 항목을 건너뜁니다.';
+
+  @override
+  String get autoSyncNeverSynced => '아직 동기화되지 않음';
+
+  @override
+  String autoSyncLastSynced(String time) {
+    return '마지막 동기화: $time';
+  }
+
+  @override
+  String autoSyncReportSummary(int copied, int deleted, int kept) {
+    return '복사 $copied개 · 삭제 $deleted개 · 충돌 보존 $kept개';
+  }
+
+  @override
+  String autoSyncReportFailed(int count) {
+    return '동기화하지 못한 파일: $count';
+  }
+
+  @override
+  String get autoSyncReportDeletionsPaused =>
+      '폴더가 예상치 않게 비어 있는 것처럼 보였거나 너무 많은 파일이 삭제될 예정이어서 삭제를 일시 중지했습니다.';
+
+  @override
+  String get autoSyncReportIncomplete => '폴더의 일부를 읽을 수 없어 해당 파일은 그대로 두었습니다.';
+
+  @override
+  String get autoSyncSyncNow => '지금 동기화';
+
+  @override
+  String get autoSyncRemove => '자동 동기화 제거';
+
+  @override
+  String get autoSyncRemoveTitle => '자동 동기화를 제거할까요?';
+
+  @override
+  String get autoSyncRemoveMessage => '이 폴더의 동기화가 중지됩니다. 두 폴더의 파일은 그대로 유지됩니다.';
+
+  @override
+  String get autoSyncSaved => '자동 동기화가 저장되었습니다';
+
+  @override
+  String get autoSyncStarted => '동기화를 시작했습니다';
+
+  @override
+  String get autoSyncRemoved => '자동 동기화가 제거되었습니다';
+
+  @override
+  String get autoSyncSaveFailed => '자동 동기화 설정을 저장할 수 없습니다';
+
+  @override
+  String get autoSyncUnavailable => '지금은 이 볼트에서 동기화를 사용할 수 없습니다.';
+
+  @override
+  String get autoSyncProblemNoTarget => '동기화할 폴더를 선택하세요.';
+
+  @override
+  String get autoSyncProblemOverlapsTarget =>
+      '동기화할 폴더는 이 폴더 안에 있거나 이 폴더를 포함할 수 없습니다.';
+
+  @override
+  String get autoSyncProblemOverlapsOtherRule =>
+      '이 폴더 또는 상위·하위 폴더에 이미 자동 동기화가 설정되어 있습니다.';
+
+  @override
+  String get autoSyncProblemTargetIsVault =>
+      '이 폴더에는 볼트의 암호화된 데이터가 들어 있습니다. 볼트를 잠금 해제한 다음 볼트 목록에서 선택하세요.';
+
+  @override
+  String get autoSyncReadOnlyNotice => '이 볼트는 읽기 전용이므로 자동 동기화를 저장할 수 없습니다.';
+
+  @override
+  String get autoSyncConfigUnreadable => '이 볼트에 저장된 자동 동기화 설정을 읽을 수 없습니다.';
+
+  @override
+  String autoSyncBannerRunning(String target, int done, int total) {
+    return '$target과(와) 동기화 중 · $done/$total';
+  }
+
+  @override
+  String get autoSyncBannerAttention =>
+      '일부 폴더를 완전히 동기화하지 못했습니다. 자세한 내용은 폴더의 자동 동기화 설정에서 확인하세요.';
+
+  @override
+  String get autoSyncNotificationTitle => '폴더 동기화 중';
+
+  @override
+  String autoSyncNotificationProgress(int done, int total) {
+    return '$done/$total개 파일';
+  }
+
+  @override
+  String get sectionQuickCapture => '빠른 캡처';
+
+  @override
+  String get quickCaptureSettingsTitle => '빠른 캡처';
+
+  @override
+  String get quickCaptureSettingsSubtitle =>
+      '볼트로 바로 캡처하기 위한 빠른 설정 타일 및 홈 화면 바로가기';
+
+  @override
+  String get quickCaptureTileToggleTitle => '빠른 설정 타일';
+
+  @override
+  String get quickCaptureTileToggleSubtitle =>
+      'PIN이나 패턴 입력 없이 빠른 설정에서 바로 카메라를 엽니다. 저장하기 전에는 여전히 볼트를 선택하고 잠금 해제해야 합니다.';
+
+  @override
+  String get quickCaptureAddShortcutTitle => '홈 화면에 추가';
+
+  @override
+  String get quickCaptureAddShortcutSubtitle =>
+      '런처가 지원하는 경우 빠른 캡처 아이콘을 홈 화면에 고정합니다';
+
+  @override
+  String get quickCaptureShortcutRequestedMessage => '요청됨 — 홈 화면을 확인하세요';
+
+  @override
+  String get quickCaptureShortcutUnsupportedMessage => '런처가 바로가기 고정을 지원하지 않습니다';
+
+  @override
+  String quickCaptureSavedToast(String name, String destination) {
+    return '$name을(를) $destination에 저장했습니다';
+  }
+
+  @override
+  String get cardSwipeActionsTitle => '카드 스와이프 제스처';
+
+  @override
+  String get cardSwipeActionsSubtitle => '볼트 카드를 스와이프하여 편집 및 삭제 동작을 빠르게 표시합니다';
+
+  @override
+  String get cameraQualitySd => '480p (SD)';
+
+  @override
+  String get cameraQualityHd => '720p (HD)';
+
+  @override
+  String get cameraQualityFhd => '1080p (FHD)';
+
+  @override
+  String get cameraQualityUhd => '4K (UHD)';
+
+  @override
+  String get cameraPhotoResMax => '전체 (최대 해상도)';
+
+  @override
+  String get cameraPhotoResHigh => '5 MP (높음)';
+
+  @override
+  String get cameraPhotoResMedium => '2 MP (중간)';
+
+  @override
+  String get cameraPhotoResLow => '1.2 MP (낮음)';
+
+  @override
+  String get cameraLensWide => '광각';
+
+  @override
+  String get cameraLensInfrared => '적외선';
+
+  @override
+  String get cameraLensFront => '전면';
+
+  @override
+  String get appLockBehaviorTitle => '앱 잠금 동작';
+
+  @override
+  String get lockAppOnScreenOffTitle => '화면이 꺼질 때 앱 잠금';
+
+  @override
+  String get lockAppOnScreenOffSubtitle => '화면이 꺼지는 즉시 잠금 화면을 표시합니다';
+
+  @override
+  String get settingsHubSecuritySubtitle => '마스터 잠금, 생체 인식 및 자동 잠금';
+
+  @override
+  String get settingsHubStorageSubtitle => '저장소 접근, 백그라운드 서비스 및 공유 메뉴';
+
+  @override
+  String get settingsHubFileHandlingSubtitle => '자동 열기, 섬네일 및 파일 연결';
+
+  @override
+  String get settingsHubAppearanceSubtitle => '테마, OLED 트루 블랙 및 언어';
+
+  @override
+  String get settingsHubAdvancedSubtitle => '설정 백업, 디버그 로그 및 로그캣';
+
+  @override
+  String get toolPasswordInterchangeTitle => '비밀번호 가져오기 / 내보내기';
+
+  @override
+  String get toolPasswordInterchangeSubtitle =>
+      'KeePass, Bitwarden 및 기타 비밀번호 관리자와 로그인, 카드, 메모를 주고받기';
+
+  @override
+  String get toolsSectionPasswordManager => '비밀번호 관리자';
+
+  @override
+  String get passwordInterchangeExportTab => '내보내기';
+
+  @override
+  String get passwordInterchangeImportTab => '가져오기';
+
+  @override
+  String get passwordInterchangeSourceHeader => '보낼 위치';
+
+  @override
+  String get passwordInterchangeChooseFolder => '보관함 폴더 선택';
+
+  @override
+  String get passwordInterchangeIncludeSubfolders => '하위 폴더 포함';
+
+  @override
+  String get passwordInterchangeFormatHeader => '형식';
+
+  @override
+  String get passwordInterchangeFormatLabel => '파일 형식';
+
+  @override
+  String get passwordInterchangeMasterPassword => '마스터 비밀번호';
+
+  @override
+  String get passwordInterchangeConfirmPassword => '비밀번호 확인';
+
+  @override
+  String get passwordInterchangePasswordsDontMatch => '비밀번호가 일치하지 않습니다';
+
+  @override
+  String get passwordInterchangeRunExport => '내보내기';
+
+  @override
+  String passwordInterchangeExportReady(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목 내보내기 준비 완료',
+      one: '1개 항목 내보내기 준비 완료',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeSaveToDevice => '기기에 저장…';
+
+  @override
+  String get passwordInterchangeSaved => '저장되었습니다.';
+
+  @override
+  String get passwordInterchangeFileHeader => '파일';
+
+  @override
+  String get passwordInterchangeChooseFile => '파일 선택…';
+
+  @override
+  String get passwordInterchangeReadFile => '파일 읽기';
+
+  @override
+  String passwordInterchangeFoundItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목 발견',
+      one: '1개 항목 발견',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeSelectAll => '모두 선택';
+
+  @override
+  String get passwordInterchangeSelectNone => '선택 해제';
+
+  @override
+  String passwordInterchangeWarningsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 행을 읽을 수 없습니다',
+      one: '1개 행을 읽을 수 없습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passwordInterchangeDestinationHeader => '저장 위치';
+
+  @override
+  String get passwordInterchangeMirrorFolders => '폴더 재구성';
+
+  @override
+  String passwordInterchangeRunImport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목 가져오기',
+      one: '1개 항목 가져오기',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String passwordInterchangeImportedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목을 가져왔습니다',
+      one: '1개 항목을 가져왔습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String passwordInterchangeSkippedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 항목을 건너뛰었습니다',
+      one: '1개 항목을 건너뛰었습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String autoLockIndicatorLocksAfter(String duration) {
+    return '비활동 잠금: $duration';
+  }
+
+  @override
+  String get autoLockIndicatorLocksOnScreenOff => '화면 꺼짐 시 잠금';
+
+  @override
+  String get autoLockIndicatorNeverLocks => '자동 잠금 안 함';
+
+  @override
+  String autoLockIndicatorLocksAfterTooltip(String duration) {
+    return '$duration 동안 활동이 없으면 잠김 (사용 중에는 초기화됨)';
+  }
+
+  @override
+  String get badgeExperimental => '실험적';
+
+  @override
+  String get createCompositeHintPrompt => '볼트 조각을 일반 파일에 첨부하여 숨기시겠습니까?';
+
+  @override
+  String get createCompositeHintAction => '복합 볼륨 마법사 열기';
+
+  @override
+  String get plainDiskImageNotice =>
+      '암호화되지 않은 디스크 이미지가 감지되었습니다. 볼륨을 마운트하는 데 비밀번호가 필요하지 않습니다.';
+
+  @override
+  String storageLocationUnavailable(String name) {
+    return '저장 위치 \"$name\"을(를) 사용할 수 없거나 연결이 끊어졌습니다.';
+  }
+
+  @override
+  String get cameraEditPhotoTooltip => '사진 편집';
+
+  @override
+  String get cameraTrimVideoTooltip => '동영상 자르기';
+
+  @override
+  String get cameraDiscardMediaTooltip => '삭제';
+
+  @override
+  String get cameraSaveMediaTooltip => '보관함에 저장';
+
+  @override
+  String get cameraContinueCaptureTooltip => '다른 사진 촬영';
+
+  @override
+  String cameraBatchCount(int count) {
+    return '사진 $count장';
+  }
+
+  @override
+  String get cameraReviewPhotosTooltip => '촬영한 사진 검토';
+
+  @override
+  String get vaultItemTypeAuthenticator => 'Authenticator';
+
+  @override
+  String get fieldIssuer => 'Issuer';
+
+  @override
+  String get fieldAuthenticatorAccount => 'Account';
+
+  @override
+  String get fieldSecretKey => 'Secret Key';
+
+  @override
+  String get fieldTotpAlgorithm => 'Algorithm (default: SHA1)';
+
+  @override
+  String get fieldTotpDigits => 'Digits (default: 6)';
+
+  @override
+  String get fieldTotpPeriod => 'Refresh Interval, seconds (default: 30)';
+
+  @override
+  String get authenticatorScreenTitle => 'Authenticator';
+
+  @override
+  String get authenticatorAppBarTooltip => 'Authenticator codes';
+
+  @override
+  String get authenticatorEmptyStateTitle => 'No authenticator codes yet';
+
+  @override
+  String get authenticatorEmptyStateMessage =>
+      'Add a TOTP secret to a password item, or create a standalone Authenticator item, in any unlocked vault to see live codes here.';
+
+  @override
+  String get authenticatorNoVaultsUnlockedMessage =>
+      'Unlock a vault to see its authenticator codes here.';
+
+  @override
+  String get authenticatorCodeLabel => 'Code';
+
+  @override
+  String get authenticatorInvalidSecretError => 'Invalid secret';
+
+  @override
+  String get authenticatorAddButtonTooltip => 'Add authenticator';
+
+  @override
+  String get authenticatorChooseVaultTitle => 'Choose a vault';
+
+  @override
+  String get authenticatorOpenItemTooltip => 'Open item';
+
+  @override
+  String get authenticatorNextCodeLabel => '다음 코드';
+
+  @override
+  String get authenticatorNextCodePrefix => '다음';
+
+  @override
+  String get authenticatorCopyNextCodeTooltip => '다음 코드 복사';
+
+  @override
+  String get authenticatorSettingsTitle => '인증기 설정';
+
+  @override
+  String get authenticatorEnableTitle => '인증기 활성화';
+
+  @override
+  String get authenticatorEnableSubtitle => '열린 금고를 자동으로 검색하여 2FA 코드 찾기';
+
+  @override
+  String get authenticatorShowCodesTitle => '인증 코드 표시';
+
+  @override
+  String get authenticatorShowCodesSubtitle => '개인정보 보호를 위해 마스킹하는 대신 숫자를 표시';
+
+  @override
+  String get authenticatorSearchPlacementLabel => '검색창 위치';
+
+  @override
+  String get authenticatorPlacementBottom => '하단';
+
+  @override
+  String get authenticatorPlacementTop => '상단';
+
+  @override
+  String get authenticatorInterchangeSection => '가져오기 및 내보내기';
+
+  @override
+  String get scanQrCodeTooltip => 'QR 코드 스캔';
+
+  @override
+  String get qrScannerTitle => 'QR 코드 스캔';
+
+  @override
+  String get qrScannerHint => '프레임 안에 QR 코드를 맞춰주세요';
+
+  @override
+  String get qrCodeScannedSuccess => 'QR 코드를 성공적으로 스캔했습니다';
+
+  @override
+  String get invalidQrCodeError => '올바른 2FA QR 코드가 아닙니다';
+
+  @override
+  String get immediateAutoLockOptionSubtitle =>
+      '화면이 꺼지거나 앱이 백그라운드로 전환되는 즉시 잠깁니다';
+
+  @override
+  String get autoLockIndicatorLocksImmediately => '즉시 잠금';
+
+  @override
+  String get quickActionLockModeTitle => '빠른 작업 후 잠금';
+
+  @override
+  String get quickActionLockModeSubtitle => '빠른 캡처 또는 공유 메뉴에서 저장할 때의 보관함 잠금 동작';
+
+  @override
+  String get quickActionLockModeLeaveAsFoundLabel => '이전 상태 유지';
+
+  @override
+  String get quickActionLockModeLeaveAsFoundSubtitle =>
+      '저장 전에 보관함이 잠겨 있던 경우에만 잠금';
+
+  @override
+  String get quickActionLockModeAlwaysLockLabel => '항상 잠금';
+
+  @override
+  String get quickActionLockModeAlwaysLockSubtitle => '저장 직후 보관함을 즉시 잠금';
+
+  @override
+  String get quickActionLockModeLeaveOpenLabel => '잠금 해제 상태 유지';
+
+  @override
+  String get quickActionLockModeLeaveOpenSubtitle => '보관함을 열어두고 자동 잠금 타이머를 따름';
+
+  @override
+  String get textEditorThemeMenuItem => '편집기 모양…';
+
+  @override
+  String get textEditorThemeSheetTitle => '편집기 모양';
+
+  @override
+  String get textEditorBackgroundSectionTitle => '배경';
+
+  @override
+  String get textEditorSyntaxThemeSectionTitle => '구문 테마';
+
+  @override
+  String get textEditorBackgroundMatchTheme => '테마 배경 사용';
+
+  @override
+  String get textEditorBackgroundAmoledBlack => 'AMOLED 블랙';
+
+  @override
+  String get textEditorBackgroundDarkSlate => '다크 슬레이트';
+
+  @override
+  String get textEditorBackgroundClassicLight => '클래식 라이트';
+
+  @override
+  String get textEditorBackgroundSepia => '세피아';
+
+  @override
+  String get textEditorSyntaxThemeAuto => '자동';
+
+  @override
+  String get textEditorSyntaxThemeOneDark => 'One Dark';
+
+  @override
+  String get textEditorSyntaxThemeDracula => 'Dracula';
+
+  @override
+  String get textEditorSyntaxThemeGithubLight => 'GitHub Light';
+
+  @override
+  String get textEditorSyntaxThemeMonokai => 'Monokai';
+
+  @override
+  String get textEditorSyntaxThemeNord => 'Nord';
+
+  @override
+  String get textEditorRelativeLineNumbersLabel => '상대 줄 번호';
+
+  @override
+  String get textEditorRelativeLineNumbersDescription =>
+      '절대 줄 번호 대신 커서로부터의 거리 표시';
+
+  @override
+  String get textEditorAutoSaveLabel => '자동 저장';
+
+  @override
+  String get textEditorAutoSaveDescription => '입력을 멈추면 변경 사항을 자동으로 저장합니다';
+
+  @override
+  String get cutTooltip => '잘라내기';
+
+  @override
+  String get textEditorShowLineNumbersLabel => '줄 번호 표시';
+
+  @override
+  String get textEditorShowLineNumbersDescription => '왼쪽 가장자리에 줄 번호를 표시합니다';
+
+  @override
+  String get textEditorShowAccessoryBarLabel => '키보드 단축키 모음 표시';
+
+  @override
+  String get textEditorShowAccessoryBarDescription =>
+      '키보드 위에 기호 및 편집 도구를 표시합니다';
+
+  @override
+  String textEditorFontSizeLabel(int size) {
+    return '글꼴 크기: $size pt';
+  }
+
+  @override
+  String get textEditorCustomizeKeyBarLabel => '단축 기호 사용자 지정';
+
+  @override
+  String get textEditorCustomizeKeyBarDescription => '표시되는 기호 편집 및 재정렬';
+
+  @override
+  String get textEditorCustomizeKeyBarTitle => '기호 사용자 지정';
+
+  @override
+  String get textEditorCustomizeKeyBarHint => '공백으로 구분된 기호';
+
+  @override
+  String get textEditorSaveAsMenuItem => '다른 이름으로 저장…';
+
+  @override
+  String get textEditorSaveAsDialogTitle => '다른 이름으로 저장';
+
+  @override
+  String get textEditorSaveAsFileNameLabel => '파일 이름';
+
+  @override
+  String get textEditorSaveAsButton => '저장';
+
+  @override
+  String get textEditorFileAlreadyExistsError => '해당 이름의 파일이 이미 존재합니다';
+
+  @override
+  String get textEditorProjectFilesTitle => '프로젝트 파일';
+
+  @override
+  String get textEditorCloseTabTooltip => '탭 닫기';
+
+  @override
+  String get textEditorResetToDefault => '기본값으로 재설정';
+
+  @override
+  String get textEditorLivePreviewTitle => '실시간 미리보기';
+
+  @override
+  String get textEditorWordWrap => '자동 줄바꿈';
+
+  @override
+  String get textEditorReadOnly => '읽기 전용';
+
+  @override
+  String get selectImageTitle => '이미지 선택';
+
+  @override
+  String get noImagesFoundMessage => '이 폴더에서 이미지를 찾을 수 없습니다.';
+
+  @override
+  String get textEditorShowSymbolsBarLabel => '기호 바 표시';
+
+  @override
+  String get textEditorShowSymbolsBarDescription => '특수 문자 및 기호 바로가기 표시';
+
+  @override
+  String get textEditorShowActionsBarLabel => '동작 바 표시';
+
+  @override
+  String get textEditorShowActionsBarDescription => '편집기 동작 바로가기 버튼 표시';
+
+  @override
+  String get textEditorCustomizeActionsLabel => '동작 버튼 맞춤설정';
+
+  @override
+  String get textEditorCustomizeActionsDescription => '편집기 동작 선택 및 순서 변경';
+
+  @override
+  String get textEditorCustomizeActionsTitle => '동작 맞춤설정';
+
+  @override
+  String get actionUndo => '실행 취소';
+
+  @override
+  String get actionRedo => '다시 실행';
+
+  @override
+  String get actionCursorLeft => '커서 왼쪽 이동';
+
+  @override
+  String get actionCursorRight => '커서 오른쪽 이동';
+
+  @override
+  String get actionSelectWord => '단어 선택';
+
+  @override
+  String get actionCopy => '복사';
+
+  @override
+  String get actionCut => '잘라내기';
+
+  @override
+  String get actionPaste => '붙여넣기';
+
+  @override
+  String get actionFind => '찾기 및 바꾸기';
+
+  @override
+  String get actionWordWrap => '자동 줄바꿈';
+
+  @override
+  String get actionGoToLine => '줄로 이동';
+
+  @override
+  String get actionGoToStart => '문서 시작으로 이동';
+
+  @override
+  String get actionGoToEnd => '문서 끝으로 이동';
+
+  @override
+  String get actionIndent => '들여쓰기';
+
+  @override
+  String get actionOutdent => '내어쓰기';
+
+  @override
+  String get actionFormat => '코드 서식 지정';
+
+  @override
+  String get actionReadOnly => '읽기 전용';
+
+  @override
+  String get screenLockOnlyAutoLockOption => '화면 잠금만';
+
+  @override
+  String get screenLockOnlyAutoLockOptionSubtitle =>
+      '화면이 꺼질 때만 잠김 — 앱이 백그라운드로 이동할 때는 잠기지 않음';
+
+  @override
+  String get authenticatorScanQrSubtitle => '단일 코드 또는 Google OTP 전송 QR 코드 스캔';
+
+  @override
+  String get authenticatorImportBackupsSubtitle =>
+      'Aegis, 2FAS, Bitwarden, Ente, Proton 또는 andOTP 백업에서 가져오기';
+
+  @override
+  String authenticatorGoogleAuthImportSuccess(int count) {
+    return 'Google OTP에서 $count개의 계정을 가져왔습니다';
+  }
+
+  @override
+  String get authenticatorMultiQrTitle => '추가 QR 코드 감지됨';
+
+  @override
+  String get authenticatorMultiQrMessage =>
+      'Google OTP에서 이 내보내기를 여러 QR 코드로 분할했습니다. 지금 다음 코드를 스캔하시겠습니까?';
+
+  @override
+  String get authenticatorScanNextQr => '다음 스캔';
+
+  @override
+  String authenticatorGoogleAuthImportError(String error) {
+    return 'Google OTP QR 코드를 가져오지 못했습니다: $error';
+  }
+
+  @override
+  String get passwordInterchangeOptionalPasswordHelper =>
+      '이 백업이 비밀번호로 보호되어 있는 경우에만 필요합니다';
+
+  @override
+  String authenticatorSingleAccountImportedHint(String title) {
+    return '첫 번째 계정($title)으로 입력되었습니다. 모든 계정을 가져오려면 OTP 화면에서 스캔하세요.';
+  }
+
+  @override
+  String get authenticatorHotpReadOnlyError =>
+      '이 보관함은 읽기 전용이므로 HOTP 카운터를 증가시킬 수 없습니다.';
+
+  @override
+  String get authenticatorHotpSaveError => '새 HOTP 카운터를 저장할 수 없습니다.';
+
+  @override
+  String get authenticatorGenerateNextCode => '다음 코드 생성';
+
+  @override
+  String get actionSelectAll => '모두 선택';
+
+  @override
+  String get textEditorSelectAllMenuItem => '모두 선택';
+
+  @override
+  String get textEditorShowCaretScrubberLabel => '커서 스크러버 표시';
+
+  @override
+  String get textEditorShowCaretScrubberDescription => '정밀한 커서 이동을 위한 드래그 바';
+
+  @override
+  String get textEditorShowStatusBarLabel => '상태 표시줄 표시';
+
+  @override
+  String get textEditorShowStatusBarDescription => '하단에 줄 및 문자 수 표시';
+
+  @override
+  String textEditorCursorPosition(int line, int column) {
+    return '줄 $line, 열 $column';
+  }
+
+  @override
+  String get textEditorNewFileTooltip => '새 파일';
+
+  @override
+  String get textEditorCloseTab => '닫기';
+
+  @override
+  String get textEditorCloseOtherTabs => '나머지 닫기';
+
+  @override
+  String get textEditorCloseAllTabs => '모두 닫기';
+
+  @override
+  String get textEditorRevertToSaved => '저장된 상태로 되돌리기';
+
+  @override
+  String get textEditorRevertDialogTitle => '변경 사항을 취소하시겠습니까?';
+
+  @override
+  String get textEditorRevertDialogMessage =>
+      '저장되지 않은 모든 편집 내용을 취소하고 보관소에서 파일을 다시 로드하시겠습니까?';
+
+  @override
+  String get revertButton => '되돌리기';
+
+  @override
+  String get textEditorNewFolderTooltip => '새 폴더';
+
+  @override
+  String get textEditorNewFolderDialogTitle => '새 폴더';
+
+  @override
+  String get textEditorNewFolderFieldLabel => '폴더 이름';
+
+  @override
+  String get textEditorRenameMenuItem => '이름 바꾸기';
+
+  @override
+  String get textEditorRenameDialogTitle => '이름 바꾸기';
+
+  @override
+  String get textEditorMoveToMenuItem => '이동...';
+
+  @override
+  String get textEditorMoveToDialogTitle => '폴더로 이동';
+
+  @override
+  String get textEditorMoveHereButton => '여기로 이동';
+
+  @override
+  String get textEditorDeleteMenuItem => '삭제';
+
+  @override
+  String textEditorDeleteConfirmTitle(String name) {
+    return '$name 삭제?';
+  }
+
+  @override
+  String textEditorDeleteConfirmMessage(String name) {
+    return '\"$name\"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.';
+  }
+
+  @override
+  String get videoEditorEditAction => 'Edit video';
+
+  @override
+  String get videoEditorExportAction => 'Export';
+
+  @override
+  String get videoEditorTimelineLabel => 'Video timeline';
+
+  @override
+  String get videoEditorSetStart => 'Set start';
+
+  @override
+  String get videoEditorSetEnd => 'Set end';
+
+  @override
+  String get videoEditorAddSegment => 'Add';
+
+  @override
+  String get videoEditorSplit => 'Split';
+
+  @override
+  String get videoEditorDeleteSegment => 'Delete';
+
+  @override
+  String get videoEditorModeKeep => 'Keep';
+
+  @override
+  String get videoEditorModeCutOut => 'Cut out';
+
+  @override
+  String get videoEditorNoSegments =>
+      'No segments yet. Move the playhead and tap Add.';
+
+  @override
+  String videoEditorOutputSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Output: $count clips · $duration',
+      one: 'Output: 1 clip · $duration',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String videoEditorSnapNote(String start, String end) {
+    return 'Lossless cut starts on a keyframe: $start – $end';
+  }
+
+  @override
+  String get videoEditorBoundaryInvalid =>
+      'That would leave the segment too short.';
+
+  @override
+  String get videoEditorNoRoom => 'There is no room for a segment here.';
+
+  @override
+  String get videoEditorNothingToExport => 'Nothing to export.';
+
+  @override
+  String get videoEditorReadOnly =>
+      'This vault is read-only, so the edited video can\'t be saved.';
+
+  @override
+  String videoEditorLoadFailed(String message) {
+    return 'Couldn\'t open this video: $message';
+  }
+
+  @override
+  String get videoEditorZoomIn => 'Zoom in';
+
+  @override
+  String get videoEditorZoomOut => 'Zoom out';
+
+  @override
+  String get videoEditorZoomFit => 'Fit to screen';
+
+  @override
+  String get videoEditorPrevFrame => '이전 프레임';
+
+  @override
+  String get videoEditorNextFrame => '다음 프레임';
+
+  @override
+  String get videoEditorPrevKeyframe => 'Previous keyframe';
+
+  @override
+  String get videoEditorNextKeyframe => 'Next keyframe';
+
+  @override
+  String get videoEditorExporting => 'Exporting video';
+
+  @override
+  String videoEditorCutting(int current, int total) {
+    return 'Cutting clip $current of $total';
+  }
+
+  @override
+  String get videoEditorCuttingOne => 'Cutting…';
+
+  @override
+  String get videoEditorSaving => 'Saving…';
+
+  @override
+  String videoEditorSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Saved $count videos',
+      one: 'Saved 1 video',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorAudioDropped =>
+      'Some audio tracks couldn\'t be copied.';
+
+  @override
+  String videoEditorExportFailed(String message) {
+    return 'Export failed: $message';
+  }
+
+  @override
+  String get videoEditorExportCancelled => 'Export cancelled';
+
+  @override
+  String get videoEditorExportTitle => 'Export';
+
+  @override
+  String videoEditorExportSummary(int count, String duration) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count clips · $duration',
+      one: '1 clip · $duration',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorExportSingle => 'Save as new video';
+
+  @override
+  String get videoEditorExportSingleHint => 'The original stays untouched.';
+
+  @override
+  String get videoEditorExportMerge => 'Merge into one video';
+
+  @override
+  String get videoEditorExportMergeHint =>
+      'Clips are joined in timeline order.';
+
+  @override
+  String get videoEditorExportSeparate => 'Save as separate videos';
+
+  @override
+  String videoEditorExportSeparateHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new files',
+      one: 'One new file',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoEditorLosslessNote =>
+      'Cuts are lossless, so nothing is re-encoded. Each clip starts at the nearest keyframe before your start point and ends at the next keyframe after your end point. The thin bars under the timeline show exactly what will be saved.';
+
+  @override
+  String get videoEditorAnalyzing => '동영상 분석 중…';
+
+  @override
+  String get videoEditorDiscardTitle => '편집 내용을 취소하시겠습니까?';
+
+  @override
+  String get videoEditorDiscardMessage => '저장되지 않은 변경사항이 있습니다. 정말 삭제하시겠습니까?';
+
+  @override
+  String get videoEditorDiscardAction => '삭제';
+
+  @override
+  String get videoEditorPreviewCut => '컷 미리보기';
+
+  @override
+  String get videoEditorSegments => '구간';
+
+  @override
+  String get videoEditorReplaceOriginal => '원본 동영상 대체';
+
+  @override
+  String get videoEditorReplaceOriginalHint => '원본 동영상이 내보낸 컷으로 대체됩니다.';
+
+  @override
+  String get videoEditorCustomFileName => '출력 파일 이름';
+
+  @override
+  String get videoEditorSubtitlesWarning =>
+      '참고: 무손실 내보내기에서는 내장된 자막 트랙을 유지할 수 없습니다.';
+
+  @override
+  String get videoEditorRemoveSection => '구간 삭제';
+
+  @override
+  String get fileSkinScreenTitle => '파일 관리자 스킨';
+
+  @override
+  String get fileSkinSectionHeader => '모양';
+
+  @override
+  String get fileSkinEntryTitle => '스킨';
+
+  @override
+  String get fileSkinPreviewHeader => '미리보기';
+
+  @override
+  String get fileSkinPresetsHeader => '스킨';
+
+  @override
+  String get fileSkinFoldersHeader => '폴더';
+
+  @override
+  String get fileSkinFilesHeader => '파일';
+
+  @override
+  String get fileSkinTextHeader => '텍스트';
+
+  @override
+  String get fileSkinIconStyleLabel => '아이콘 스타일';
+
+  @override
+  String get fileSkinContainerLabel => '아이콘 배경';
+
+  @override
+  String get fileSkinIconColorLabel => '아이콘 색상';
+
+  @override
+  String get fileSkinCustomIconColorLabel => '사용자 지정 아이콘 색상';
+
+  @override
+  String get fileSkinNameColorLabel => '이름 색상';
+
+  @override
+  String get fileSkinDetailsColorLabel => '세부 정보 색상';
+
+  @override
+  String get fileSkinMonospaceLabel => '고정폭 이름';
+
+  @override
+  String get fileSkinMonospaceDesc => '파일 및 폴더 이름에 고정폭 글꼴을 사용합니다';
+
+  @override
+  String get fileSkinIconFamilyDefault => '기본값';
+
+  @override
+  String get fileSkinIconFamilyFilled => '채움';
+
+  @override
+  String get fileSkinIconFamilyRounded => '둥근';
+
+  @override
+  String get fileSkinIconFamilyOutlined => '윤곽선';
+
+  @override
+  String get fileSkinIconFamilySharp => '각진';
+
+  @override
+  String get fileSkinContainerFilled => '채움';
+
+  @override
+  String get fileSkinContainerOutlined => '윤곽선';
+
+  @override
+  String get fileSkinContainerNone => '없음';
+
+  @override
+  String get fileSkinColorAuto => '자동';
+
+  @override
+  String get fileSkinColorAccent => '테마 강조색';
+
+  @override
+  String get fileSkinColorNeutral => '중립';
+
+  @override
+  String get fileSkinColorCustom => '사용자 지정';
+
+  @override
+  String get fileSkinColorDefault => '기본값';
+
+  @override
+  String get fileSkinColorHexLabel => '16진수 색상';
+
+  @override
+  String get fileSkinPresetClassic => '클래식';
+
+  @override
+  String get fileSkinPresetMinimalOutline => '미니멀 윤곽선';
+
+  @override
+  String get fileSkinPresetFrames => '프레임';
+
+  @override
+  String get fileSkinPresetVivid => '선명한';
+
+  @override
+  String get fileSkinPresetTerminal => '터미널';
+
+  @override
+  String get fileSkinPresetCustom => '사용자 지정';
+
+  @override
+  String get compositeArchiveCarrierBlockingWarning =>
+      '계속하려면 선택 항목에서 압축 파일을 제거하세요. 볼트를 추가하면 손상될 수 있으므로 압축 파일을 복합 볼트의 캐리어로 사용할 수 없습니다.';
+
+  @override
+  String get compositeArchiveCarrierRowWarning =>
+      '지원되지 않는 압축 파일입니다. 선택 항목에서 제거하세요.';
+
+  @override
+  String videoEditorSelectedSegmentSummary(
+    int current,
+    int total,
+    String start,
+    String end,
+    String duration,
+  ) {
+    return '세그먼트 $current/$total: $start – $end ($duration)';
+  }
+
+  @override
+  String get videoEditorKeepModeDescription => '선택한 세그먼트만 내보내고 나머지는 제외합니다.';
+
+  @override
+  String get videoEditorCutOutModeDescription =>
+      '선택한 세그먼트를 제거하고 나머지 영상을 내보냅니다.';
+
+  @override
+  String get tapEdgesToNavigateTitle => '화면 가장자리를 눌러 이동';
+
+  @override
+  String get tapEdgesToNavigateSubtitle =>
+      '왼쪽 또는 오른쪽 가장자리를 눌러 이전 또는 다음 미디어를 표시합니다.';
+
+  @override
+  String get doubleTapPlayPauseTitle => '두 번 탭하여 재생/일시정지';
+
+  @override
+  String get doubleTapPlayPauseSubtitle =>
+      '동영상 또는 오디오 화면 중앙을 두 번 탭하면 확대 대신 재생 또는 일시정지합니다. 확대 중에 표시되는 확대 수준을 탭하면 보기가 초기화됩니다.';
+
+  @override
+  String get doubleTapSkipTitle => '두 번 탭하여 건너뛰기';
+
+  @override
+  String get doubleTapSkipSubtitle =>
+      '동영상의 왼쪽 또는 오른쪽을 두 번 탭하면 뒤로 또는 앞으로 이동합니다. 계속 탭하면 더 건너뜁니다.';
+
+  @override
+  String get doubleTapSkipDurationTitle => '건너뛰기 시간';
+
+  @override
+  String get loopPlaylistTitle => '재생목록 반복';
+
+  @override
+  String get loopPlaylistSubtitle => '이동하거나 재생할 때 마지막 항목 다음에 첫 항목으로 돌아갑니다.';
+
+  @override
+  String get showFileNamesInMediaNotificationTitle => '미디어 알림에 파일 이름 표시';
+
+  @override
+  String get showFileNamesInMediaNotificationSubtitle =>
+      '복호화된 파일 이름을 알림, 잠금 화면 및 연결된 기기에 표시합니다.';
+
+  @override
+  String get textEditorEncodingTooltip => '텍스트 인코딩';
+
+  @override
+  String get textEditorEncodingEncodeError => '이 인코딩으로 저장할 수 없는 문자가 포함되어 있습니다.';
+
+  @override
+  String get textEditorShowTabBarLabel => '편집기 탭 표시';
+
+  @override
+  String get textEditorShowTabBarDescription =>
+      '열린 파일의 탭을 표시하거나 숨깁니다. 사이드바에서도 파일을 전환할 수 있습니다.';
+
+  @override
+  String get textEditorAutoHideTabBarLabel => '스크롤할 때 탭 숨기기';
+
+  @override
+  String get textEditorAutoHideTabBarDescription =>
+      '아래로 스크롤하면 탭 표시줄을 숨기고 위로 스크롤하면 다시 표시합니다.';
+
+  @override
+  String get lockWaitingForOperationsMessage =>
+      '잠그기 전에 진행 중인 작업이 완료되기를 기다리는 중…';
+
+  @override
+  String get mirrorSyncActivityLabel => '볼트 변경 사항을 저장소에 저장 중';
+
+  @override
+  String get seekGestureSensitivityTitle => '탐색 제스처 감도';
+
+  @override
+  String get volumeGestureSensitivityTitle => '볼륨 제스처 감도';
+
+  @override
+  String get brightnessGestureSensitivityTitle => '밝기 제스처 감도';
+
+  @override
+  String get thumbnailSettingsHeader => '썸네일 생성';
+
+  @override
+  String get thumbnailGenerationStrategyTitle => '썸네일 프레임 선택 방식';
+
+  @override
+  String get thumbnailFirstFrameOption => '첫 프레임';
+
+  @override
+  String get thumbnailPercentageFrameOption => '지정 위치의 프레임';
+
+  @override
+  String get thumbnailHybridOption => '하이브리드 (빈 시작 부분 건너뛰기)';
+
+  @override
+  String get thumbnailFramePositionTitle => '선호 프레임 위치';
+
+  @override
+  String get volumeBoostHeader => '볼륨 부스트';
+
+  @override
+  String get volumeBoostTitle => '볼륨 부스트 사용';
+
+  @override
+  String get volumeBoostSubtitle => '작은 동영상 오디오를 플레이어의 일반 볼륨보다 높입니다.';
+
+  @override
+  String get volumeBoostGainTitle => '부스트 크기';
+
+  @override
+  String get decoderSelectionHeader => '디코더 선택';
+
+  @override
+  String get videoDecoderTitle => '비디오 디코더';
+
+  @override
+  String get audioDecoderTitle => '오디오 디코더';
+
+  @override
+  String get decoderAutoOption => '자동';
+
+  @override
+  String get decoderHardwareOption => '하드웨어';
+
+  @override
+  String get decoderSoftwareOption => '소프트웨어';
+
+  @override
+  String get decoderFfmpegOption => 'FFmpeg';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningTitle => '로컬 저장소 루트의 파일을 삭제할까요?';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningMessage =>
+      '이 단방향 동기화는 로컬 저장소 루트 전체를 검사합니다. 가져온 후 원본 파일 삭제가 켜져 있으면 Vault에 복사된 파일은 SHA-256 확인 후 기기에서 삭제될 수 있습니다. 원본 파일을 삭제하려는 경우에만 계속하세요.';
+
+  @override
+  String get autoSyncLocalRootDeleteWarningConfirm => '이해했습니다';
+
+  @override
+  String get autoSyncScheduledTitle => '볼트가 잠겨 있을 때 매일 실행';
+
+  @override
+  String get autoSyncScheduledSubtitle =>
+      '앱을 닫아도 백그라운드에서 실행됩니다. Android가 지연하거나 오래 실행되는 작업을 중지할 수 있습니다. 동기화가 끝나면 볼트가 다시 잠깁니다.';
+
+  @override
+  String get autoSyncScheduledSetupRequired => '전체 자동화 권한과 저장된 볼트 비밀번호가 필요합니다.';
+
+  @override
+  String get autoSyncScheduledConfigure => '백그라운드 액세스 설정';
+
+  @override
+  String get autoSyncScheduleWarningTitle => '예약 동기화를 사용 설정할까요?';
+
+  @override
+  String get autoSyncScheduleWarningMessage =>
+      '앱이 하루에 한 번 백그라운드에서 이 볼트를 잠금 해제하고 동기화 후 다시 잠급니다. Android가 실행을 지연할 수 있습니다. 가져온 후 원본 삭제가 켜져 있으면 볼트 복사본을 기록하고 크기와 SHA-256 체크섬이 일치하는지 확인한 뒤에만 원본 파일을 삭제합니다.';
+
+  @override
+  String get autoSyncScheduleEnable => '예약 사용 설정';
+
+  @override
+  String get autoSyncScheduleNotificationRequired =>
+      '백그라운드 동기화 중 Android가 “볼트 동기화 중...”을 표시하도록 알림을 허용하세요.';
+
+  @override
+  String get autoSyncScheduleFailed => '규칙은 저장했지만 예약 동기화를 사용 설정하지 못했습니다.';
+
+  @override
+  String get autoSyncSavedScheduled => '규칙과 일일 일정을 저장했습니다.';
+
+  @override
+  String get autoSyncScheduledTimeTitle => 'Daily run time';
+
+  @override
+  String get autoSyncScheduledTimeSubtitle =>
+      'Device local time. For a quick test, choose a time a minute or two from now; Android may run it later.';
+
+  @override
+  String get autoSyncExactAlarmAccessTitle => '매일 동기화에 정확한 알람을 허용할까요?';
+
+  @override
+  String get autoSyncExactAlarmAccessMessage =>
+      '앱이 닫혀 있어도 선택한 시간에 Vault Explorer가 매일 동기화를 시작하려면 Android의 ‘알람 및 리마인더’ 접근 권한이 필요합니다. 다음 화면에서 허용하고 여기로 돌아온 뒤 예약 동기화를 다시 켜세요.';
+
+  @override
+  String get autoSyncExactAlarmAccessOpen => '설정 열기';
+
+  @override
+  String get autoSyncExactAlarmAccessUnavailable =>
+      'Android 알람 설정을 열 수 없습니다. 시스템 설정에서 Vault Explorer의 ‘알람 및 리마인더’를 허용한 뒤 다시 시도하세요.';
+
+  @override
+  String get localStoragePermissionTitle => '로컬 저장소 접근 허용';
+
+  @override
+  String get localStorageGrantAccess => '접근 허용';
+
+  @override
+  String get hideStorageLocationsTitle => '저장 위치를 숨길까요?';
+
+  @override
+  String get hideStorageLocationsPrompt =>
+      '모든 파일 접근 권한이 허용되지 않았습니다. 사이드바에서 로컬 저장소와 추가한 저장 위치를 숨길까요? 설정에서 다시 표시할 수 있습니다.';
+
+  @override
+  String get hide => '숨기기';
+
+  @override
+  String get mediaViewerActionAdjustments => '조절';
+
+  @override
+  String get adjustmentsSheetTitle => '조절';
+
+  @override
+  String get adjustmentBrightness => '밝기';
+
+  @override
+  String get adjustmentContrast => '대비';
+
+  @override
+  String get adjustmentSaturation => '채도';
+
+  @override
+  String get adjustmentHue => '색조';
+
+  @override
+  String get adjustmentGamma => '감마';
+
+  @override
+  String get adjustmentsApplyToAll => '모든 파일에 적용';
+
+  @override
+  String get adjustmentsCompareHold => '길게 눌러 비교';
+
+  @override
+  String get adjustmentPresetVivid => '생생하게';
+
+  @override
+  String get adjustmentPresetBlackAndWhite => '흑백';
+
+  @override
+  String get adjustmentPresetWarm => '따뜻함';
+
+  @override
+  String get adjustmentPresetCool => '차가움';
+
+  @override
+  String get videoFilePropertiesSectionHeader => '비디오 및 오디오';
+
+  @override
+  String get durationLabel => '재생 시간';
+
+  @override
+  String get rotationLabel => '회전';
+
+  @override
+  String get videoBitrateLabel => '비디오 비트레이트';
+
+  @override
+  String get audioBitrateLabel => '오디오 비트레이트';
+
+  @override
+  String get sampleRateLabel => '샘플 레이트';
+
+  @override
+  String get audioChannelsLabel => '오디오 채널';
+
+  @override
+  String get subtitleTracksLabel => '자막 트랙';
+
+  @override
+  String get skinActionAccent => '작업 강조색';
+
+  @override
+  String get skinEmphasisForActionIconsActiveControlsProgressAndLinks =>
+      '작업 아이콘, 활성 컨트롤, 진행률 및 링크 강조 표시.';
+
+  @override
+  String get skinTextAndIconsOnAccentButtons => '강조 버튼의 텍스트 및 아이콘';
+
+  @override
+  String get skinForegroundForButtonsFilledWithTheActionAccentColor =>
+      '작업 강조색으로 채워진 버튼의 전경색.';
+
+  @override
+  String get skinSelectionAndIconTileBackground => '선택 항목 및 아이콘 타일 배경';
+
+  @override
+  String get skinSelectedFilesAndVaultFormat076e52 =>
+      '선택한 파일과 보관함 형식 아이콘 타일에 이 색상이 사용됩니다. 플로팅 버튼 채우기는 별도의 설정이 있습니다.';
+
+  @override
+  String get skinTextAndIconsOnSelectionColors => '선택 색상의 텍스트 및 아이콘';
+
+  @override
+  String get skinForegroundForIconTilesAndOtherPrimaryContainerSurfaces =>
+      '아이콘 타일 및 기타 기본 컨테이너 표면의 전경색.';
+
+  @override
+  String get skinSteadyMainAccent => '고정 기본 강조색';
+
+  @override
+  String get skinAPrimaryAccentThatStaysTheSameInLightAndDarkSurfaces =>
+      '밝은 표면과 어두운 표면에서 동일하게 유지되는 기본 강조색입니다.';
+
+  @override
+  String get skinMutedSteadyMainAccent => '차분한 고정 기본 강조색';
+
+  @override
+  String get skinASofterVersionOfTheSteadyPrimaryAccent =>
+      '고정 기본 강조색의 더 부드러운 버전입니다.';
+
+  @override
+  String get skinTextOnSteadyMainAccent => '고정 기본 강조색 위의 텍스트';
+
+  @override
+  String get skinForegroundForPrimaryFixedColors => '기본 고정 색상의 전경색.';
+
+  @override
+  String get skinMutedTextOnSteadyMainAccent => '고정 기본 강조색 위의 차분한 텍스트';
+
+  @override
+  String get skinSecondaryForegroundForPrimaryFixedColors =>
+      '기본 고정 색상의 보조 전경색.';
+
+  @override
+  String get skinSecondaryAccent => '보조 강조색';
+
+  @override
+  String get skinSupportingActionsAndLessProminentHighlights =>
+      '보조 작업 및 덜 두드러진 강조 항목.';
+
+  @override
+  String get skinTextOnSecondaryAccent => '보조 강조색 위의 텍스트';
+
+  @override
+  String get skinLabelsAndIconsOnSecondaryColoredAreas =>
+      '보조 색상 영역의 레이블 및 아이콘.';
+
+  @override
+  String get skinSecondaryBackground => '보조 배경';
+
+  @override
+  String get skinSoftFillForSupportingContent => '보조 콘텐츠를 위한 부드러운 채우기.';
+
+  @override
+  String get skinTextOnSecondaryBackgrounds => '보조 배경 위의 텍스트';
+
+  @override
+  String get skinForegroundForSecondaryContainers => '보조 컨테이너의 전경색.';
+
+  @override
+  String get skinSteadySecondaryAccent => '고정 보조 강조색';
+
+  @override
+  String get skinASecondaryAccentThatStaysTheSameAcrossSurfaces =>
+      '모든 표면에서 동일하게 유지되는 보조 강조색입니다.';
+
+  @override
+  String get skinMutedSteadySecondaryAccent => '차분한 고정 보조 강조색';
+
+  @override
+  String get skinASofterVersionOfTheSteadySecondaryAccent =>
+      '고정 보조 강조색의 더 부드러운 버전입니다.';
+
+  @override
+  String get skinTextOnSteadySecondaryAccent => '고정 보조 강조색 위의 텍스트';
+
+  @override
+  String get skinForegroundForSecondaryFixedColors => '보조 고정 색상의 전경색.';
+
+  @override
+  String get skinMutedTextOnSteadySecondaryAccent => '고정 보조 강조색 위의 차분한 텍스트';
+
+  @override
+  String get skinSecondaryForegroundForSecondaryFixedColors =>
+      '보조 고정 색상의 보조 전경색.';
+
+  @override
+  String get skinExtraAccentColor => '추가 강조색';
+
+  @override
+  String get skinDecorativeHighlightsAndContrastingAccents =>
+      '장식용 강조 표시 및 대비 강조색.';
+
+  @override
+  String get skinTextOnExtraAccent => '추가 강조색 위의 텍스트';
+
+  @override
+  String get skinLabelsAndIconsOnTertiaryColoredAreas => '3차 색상 영역의 레이블 및 아이콘.';
+
+  @override
+  String get skinExtraAccentBackground => '추가 강조 배경';
+
+  @override
+  String get skinSoftFillForTertiaryContent => '3차 콘텐츠를 위한 부드러운 채우기.';
+
+  @override
+  String get skinTextOnExtraAccentBackgrounds => '추가 강조 배경 위의 텍스트';
+
+  @override
+  String get skinForegroundForTertiaryContainers => '3차 컨테이너의 전경색.';
+
+  @override
+  String get skinSteadyExtraAccent => '고정 추가 강조색';
+
+  @override
+  String get skinATertiaryAccentThatStaysTheSameAcrossSurfaces =>
+      '모든 표면에서 동일하게 유지되는 3차 강조색입니다.';
+
+  @override
+  String get skinMutedSteadyExtraAccent => '차분한 고정 추가 강조색';
+
+  @override
+  String get skinASofterVersionOfTheSteadyTertiaryAccent =>
+      '고정 3차 강조색의 더 부드러운 버전입니다.';
+
+  @override
+  String get skinTextOnSteadyExtraAccent => '고정 추가 강조색 위의 텍스트';
+
+  @override
+  String get skinForegroundForTertiaryFixedColors => '3차 고정 색상의 전경색.';
+
+  @override
+  String get skinMutedTextOnSteadyExtraAccent => '고정 추가 강조색 위의 차분한 텍스트';
+
+  @override
+  String get skinSecondaryForegroundForTertiaryFixedColors =>
+      '3차 고정 색상의 보조 전경색.';
+
+  @override
+  String get skinErrorColor => '오류 색상';
+
+  @override
+  String get skinErrorsDestructiveActionsAndInvalidInput =>
+      '오류, 파괴적인 작업 및 잘못된 입력.';
+
+  @override
+  String get skinTextOnErrorColor => '오류 색상 위의 텍스트';
+
+  @override
+  String get skinLabelsAndIconsOnErrorColoredAreas => '오류 색상 영역의 레이블 및 아이콘.';
+
+  @override
+  String get skinErrorBackground => '오류 배경';
+
+  @override
+  String get skinSoftFillBehindErrorMessages => '오류 메시지 뒤의 부드러운 채우기.';
+
+  @override
+  String get skinTextOnErrorBackgrounds => '오류 배경 위의 텍스트';
+
+  @override
+  String get skinForegroundForErrorContainers => '오류 컨테이너의 전경색.';
+
+  @override
+  String get skinPageBackground => '페이지 배경';
+
+  @override
+  String get skinTheMainBackgroundBehindAppContent => '앱 콘텐츠 뒤의 기본 배경입니다.';
+
+  @override
+  String get skinMainTextAndIcons => '기본 텍스트 및 아이콘';
+
+  @override
+  String get skinPrimaryContentDrawnOnPageAndCardBackgrounds =>
+      '페이지 및 카드 배경에 그려지는 기본 콘텐츠입니다.';
+
+  @override
+  String get skinDimmedBackground => '어두운 배경';
+
+  @override
+  String get skinTheDarkestNeutralSurfaceLayer => '가장 어두운 중립 표면 레이어입니다.';
+
+  @override
+  String get skinBrightBackground => '밝은 배경';
+
+  @override
+  String get skinTheLightestNeutralSurfaceLayer => '가장 밝은 중립 표면 레이어입니다.';
+
+  @override
+  String get skinDeepestCardLayer => '가장 깊은 카드 레이어';
+
+  @override
+  String get skinTheLowestAndQuietestSurfaceContainer =>
+      '가장 낮고 차분한 표면 컨테이너입니다.';
+
+  @override
+  String get skinLowCardLayer => '낮은 카드 레이어';
+
+  @override
+  String get skinSubtleCardsAndRecessedAreas => '은은한 카드 및 오목한 영역.';
+
+  @override
+  String get skinStandardCardLayer => '표준 카드 레이어';
+
+  @override
+  String get skinCommonCardsAndGroupedContent => '일반 카드 및 그룹화된 콘텐츠.';
+
+  @override
+  String get skinRaisedCardLayer => '돌출된 카드 레이어';
+
+  @override
+  String get skinRaisedCardsMenusAndAppBars => '돌출된 카드, 메뉴 및 앱 바.';
+
+  @override
+  String get skinTopCardLayer => '최상위 카드 레이어';
+
+  @override
+  String get skinProminentPanelsAndSelectedSurfaces => '눈에 띄는 패널 및 선택된 표면.';
+
+  @override
+  String get skinSecondaryTextAndIcons => '보조 텍스트 및 아이콘';
+
+  @override
+  String get skinDetailsHintsAndSupportingLabels => '세부정보, 힌트 및 보조 레이블.';
+
+  @override
+  String get skinStrongBorder => '진한 테두리';
+
+  @override
+  String get skinVisibleBordersAndSeparators => '눈에 띄는 테두리 및 구분선.';
+
+  @override
+  String get skinSubtleBorder => '은은한 테두리';
+
+  @override
+  String get skinQuietOutlinesAndLowEmphasisSeparators =>
+      '차분한 윤곽선 및 낮은 강조 구분선.';
+
+  @override
+  String get skinShadowTint => '그림자 색조';
+
+  @override
+  String get skinTintUsedByElevatedSurfaces => '돌출된 표면에서 사용되는 색조.';
+
+  @override
+  String get skinModalBackdrop => '모달 배경';
+
+  @override
+  String get skinTintBehindDialogsAndModalSheets => '대화 상자 및 모달 시트 뒤의 색조.';
+
+  @override
+  String get skinInvertedSurface => '반전된 표면';
+
+  @override
+  String get skinAContrastingSurfaceForInverseElements => '반전 요소를 위한 대비 표면입니다.';
+
+  @override
+  String get skinTextOnInvertedSurfaces => '반전된 표면 위의 텍스트';
+
+  @override
+  String get skinForegroundUsedOverInverseSurfaces => '반전된 표면 위에서 사용되는 전경색.';
+
+  @override
+  String get skinInvertedMainAccent => '반전된 기본 강조색';
+
+  @override
+  String get skinPrimaryAccentUsedOnInverseSurfaces => '반전된 표면에서 사용되는 기본 강조색.';
+
+  @override
+  String get skinElevationTint => '고도 색조';
+
+  @override
+  String get skinTintAppliedToElevatedSurfaces => '돌출된 표면에 적용되는 색조.';
+
+  @override
+  String get skinSuccessColor => '성공 색상';
+
+  @override
+  String get skinCompletedActionsAndPositiveStatus => '완료된 작업 및 긍정적인 상태.';
+
+  @override
+  String get skinTextOnSuccessColor => '성공 색상 위의 텍스트';
+
+  @override
+  String get skinForegroundForSuccessColoredContent => '성공 색상 콘텐츠의 전경색.';
+
+  @override
+  String get skinSuccessBackground => '성공 배경';
+
+  @override
+  String get skinSoftFillBehindPositiveStatusMessages =>
+      '긍정적인 상태 메시지 뒤의 부드러운 채우기.';
+
+  @override
+  String get skinTextOnSuccessBackgrounds => '성공 배경 위의 텍스트';
+
+  @override
+  String get skinForegroundForSuccessContainers => '성공 컨테이너의 전경색.';
+
+  @override
+  String get skinWarningColor => '경고 색상';
+
+  @override
+  String get skinCautionAttentionAndPendingStatus => '주의, 주의 사항 및 대기 중인 상태.';
+
+  @override
+  String get skinTextOnWarningColor => '경고 색상 위의 텍스트';
+
+  @override
+  String get skinForegroundForWarningColoredContent => '경고 색상 콘텐츠의 전경색.';
+
+  @override
+  String get skinWarningBackground => '경고 배경';
+
+  @override
+  String get skinSoftFillBehindWarningMessages => '경고 메시지 뒤의 부드러운 채우기.';
+
+  @override
+  String get skinTextOnWarningBackgrounds => '경고 배경 위의 텍스트';
+
+  @override
+  String get skinForegroundForWarningContainers => '경고 컨테이너의 전경색.';
+
+  @override
+  String get skinBookmarkColor => '북마크 색상';
+
+  @override
+  String get skinSavedAndBookmarkedItems => '저장 및 북마크된 항목.';
+
+  @override
+  String get skinMainActions => '주요 작업';
+
+  @override
+  String get skinPrimaryButtonsSelectionsAndFixedPrimaryAccents =>
+      '기본 버튼, 선택 항목 및 고정 기본 강조색.';
+
+  @override
+  String get skinSupportingAccents => '보조 강조색';
+
+  @override
+  String get skinSecondaryAndTertiaryHighlightsAndTheirTextColors =>
+      '보조 및 3차 강조 표시와 해당 텍스트 색상.';
+
+  @override
+  String get skinErrorMessagesAndDestructiveOrInvalidStates =>
+      '오류 메시지 및 파괴적이거나 잘못된 상태.';
+
+  @override
+  String get skinPagesCardsAndText => '페이지, 카드 및 텍스트';
+
+  @override
+  String get skinAppBackgroundsCardsMenusAndForegroundText =>
+      '앱 배경, 카드, 메뉴 및 전경 텍스트.';
+
+  @override
+  String get skinBordersAndOverlays => '테두리 및 오버레이';
+
+  @override
+  String get skinOutlinesShadowsAndModalBackdrops => '윤곽선, 그림자 및 모달 배경.';
+
+  @override
+  String get skinTapAnyPreviewElement => '미리보기 요소를 탭하세요';
+
+  @override
+  String get skinChooseAnAppFileOrEditorColorToSeeWhatItControls =>
+      '앱, 파일 또는 편집기 색상을 선택하여 무엇을 제어하는지 확인하세요.';
+
+  @override
+  String get skinCustomizeSkin => '스킨 사용자 정의';
+
+  @override
+  String get skinLight => '라이트';
+
+  @override
+  String get skinDark => '다크';
+
+  @override
+  String get skinApp => '앱';
+
+  @override
+  String get skinEditor => '편집기';
+
+  @override
+  String get skinSkinDetails => '스킨 세부정보';
+
+  @override
+  String get skinNameYourSkinAndChooseWhichPaletteToEdit =>
+      '스킨 이름을 지정하고 편집할 팔레트를 선택하세요.';
+
+  @override
+  String get skinSkinName => '스킨 이름';
+
+  @override
+  String get skinMyCustomSkin => '내 맞춤 스킨';
+
+  @override
+  String get skinLightColors => '라이트 색상';
+
+  @override
+  String get skinDarkColors => '다크 색상';
+
+  @override
+  String get skinPageAndActions => '페이지 및 작업';
+
+  @override
+  String get skinTheMainBackgroundTextAndActionColors => '기본 배경, 텍스트 및 작업 색상.';
+
+  @override
+  String get skinAppBar => '앱 바';
+
+  @override
+  String get skinTheTopNavigationBarIsIndependentFromCardsAndPages =>
+      '상단 탐색 모음은 카드 및 페이지와 독립적입니다.';
+
+  @override
+  String get skinTopBarFillColor => '상단 바 채우기 색상.';
+
+  @override
+  String get skinTitleAndIcons => '제목 및 아이콘';
+
+  @override
+  String get skinTopBarTextAndIconColor => '상단 바 텍스트 및 아이콘 색상.';
+
+  @override
+  String get skinFloatingActionButton => '플로팅 작업 버튼';
+
+  @override
+  String get skinItsFillAndIconColorAreSeparateFromSelectionColors =>
+      '채우기 및 아이콘 색상은 선택 색상과 별개입니다.';
+
+  @override
+  String get skinButtonFill => '버튼 채우기';
+
+  @override
+  String get skinBackgroundOfTheRoundButton => '둥근 + 버튼의 배경.';
+
+  @override
+  String get skinButtonIcon => '버튼 아이콘';
+
+  @override
+  String get skinIconColorOnTheRoundButton => '둥근 + 버튼의 아이콘 색상.';
+
+  @override
+  String get skinDashboardVaultCards => '대시보드 보관함 카드';
+
+  @override
+  String get skinSetTheBackgroundForLockedAndMountedVaultCards =>
+      '잠긴 보관함 및 마운트된 보관함 카드의 배경을 설정합니다.';
+
+  @override
+  String get skinLockedVaultCard => '잠긴 보관함 카드';
+
+  @override
+  String get skinNeutralVaultCardFill => '중립적인 보관함 카드 채우기.';
+
+  @override
+  String get skinMountedVaultCard => '마운트된 보관함 카드';
+
+  @override
+  String get skinSeparateFillForAnUnlockedMountedVault =>
+      '잠금 해제되어 마운트된 보관함을 위한 개별 채우기.';
+
+  @override
+  String get skinFineTuneAppColors => '앱 색상 미세 조정';
+
+  @override
+  String get skinAdvancedMaterialColorsForLessCommonElements =>
+      '덜 일반적인 요소를 위한 고급 Material 색상.';
+
+  @override
+  String get skinStatusAndBookmarkColors => '상태 및 북마크 색상';
+
+  @override
+  String get skinColorsForSuccessWarningsErrorsAndBookmarks =>
+      '성공, 경고, 오류 및 북마크 색상.';
+
+  @override
+  String get skinTheCustomSkinIsActive971ce3 =>
+      '파일 관리자 및 편집기가 앱 스킨을 따르도록 설정된 상태에서 맞춤 스킨이 즉시 활성화됩니다.';
+
+  @override
+  String get skinCustomColorTapToChangeOrReset =>
+      '사용자 지정 색상 — 탭하여 변경하거나 기본값으로 재설정합니다.';
+
+  @override
+  String get skinTapTheColorCircleToChooseAColor => '색상 원을 탭하여 색상을 선택하세요.';
+
+  @override
+  String get skinAppBarBackground => '앱 바 배경';
+
+  @override
+  String get skinTheDashboardAndOtherAppBarsUseThisIndependentColor =>
+      '대시보드 및 기타 앱 바는 이 독립적인 색상을 사용합니다.';
+
+  @override
+  String get skinDashboardMenuIcon => '대시보드 메뉴 아이콘';
+
+  @override
+  String get skinTheHamburgerButtonUsesTheAppBarIconColor =>
+      '햄버거 버튼은 앱 바 아이콘 색상을 사용합니다.';
+
+  @override
+  String get skinDashboardTitle => '대시보드 제목';
+
+  @override
+  String get skinTheDashboardTitleUsesTheAppBarForegroundColor =>
+      '대시보드 제목은 앱 바 전경색을 사용합니다.';
+
+  @override
+  String get skinActionLabelAndIcon => '작업 레이블 및 아이콘';
+
+  @override
+  String get skinTheActionAccentColorsLabelsb08a63 =>
+      '작업 강조색은 \'보관함 추가\'와 같은 레이블 및 해당 아이콘을 표시합니다.';
+
+  @override
+  String get skinDashboardAddButton => '대시보드 추가 버튼';
+
+  @override
+  String get skinTheButtonFillAndPlusIconHaveSeparateSkinColors =>
+      '버튼 채우기와 더하기 아이콘에는 별도의 스킨 색상이 있습니다.';
+
+  @override
+  String get skinVaultCardAndIconBackground => '보관함 카드 및 아이콘 배경';
+
+  @override
+  String get skinTheIconTileUsesPrimary5c2f93 =>
+      '아이콘 타일은 Primary container를 사용합니다. 마운트된 보관함 카드는 해당 색상을 돌출된 표면과 혼합합니다.';
+
+  @override
+  String get skinVaultFormatIconColor => '보관함 형식 아이콘 색상';
+
+  @override
+  String get skinVaultFormatInitialsUseOnPrimaryContainer =>
+      '보관함 형식 이니셜은 On primary container를 사용합니다.';
+
+  @override
+  String get skinVaultStorageDetails => '보관함 저장공간 세부정보';
+
+  @override
+  String get skinFreeSpaceAndCapacityUseTheSupportingTextColor =>
+      '여유 공간 및 용량은 보조 텍스트 색상을 사용합니다.';
+
+  @override
+  String get skin17GBFree5GB => '1.7GB 여유 / 5GB';
+
+  @override
+  String get skinVaultStorageProgress => '보관함 저장공간 진행률';
+
+  @override
+  String get skinTheProgressBarUsesTheba7c98 =>
+      '진행률 표시줄은 앱 강조색을 사용하며 저장공간이 차면 3차 및 오류 색상으로 전환됩니다.';
+
+  @override
+  String get skinLockActionBackground => '잠금 작업 배경';
+
+  @override
+  String get skinTheMountedVaultLockButtonUsesPrimaryContainer =>
+      '마운트된 보관함 잠금 버튼은 Primary container를 사용합니다.';
+
+  @override
+  String get skinVaultActionsIconColor => '보관함 작업 아이콘 색상';
+
+  @override
+  String get skinTheOverflowMenuUsesTheSupportingIconColor =>
+      '더보기 메뉴는 보조 아이콘 색상을 사용합니다.';
+
+  @override
+  String get skinMountedVaultCardBackground => '마운트된 보관함 카드 배경';
+
+  @override
+  String get skinThisIsTheBackgroundOfa8d0d3 =>
+      '마운트된 보관함 카드의 배경입니다. 아이콘 타일은 여전히 주요 작업 색상을 사용합니다.';
+
+  @override
+  String get skinLockedVaultCardBackground => '잠긴 보관함 카드 배경';
+
+  @override
+  String get skinThisColorIsIndependentFromTheAppBarAndMountedVaultCard =>
+      '이 색상은 앱 바 및 마운트된 보관함 카드와 독립적입니다.';
+
+  @override
+  String get skinLockedVaultFormatIcon => '잠긴 보관함 형식 아이콘';
+
+  @override
+  String get skinLockedVaultIconsUseTheSupportingTextAndIconColor =>
+      '잠긴 보관함 아이콘은 보조 텍스트 및 아이콘 색상을 사용합니다.';
+
+  @override
+  String get skinSharedArchive => '공유 아카이브';
+
+  @override
+  String get skinLockedVaultStatusText => '잠긴 보관함 상태 텍스트';
+
+  @override
+  String get skinTheLockedStatusLabelUsesTheSupportingTextColor =>
+      '잠김 상태 레이블은 보조 텍스트 색상을 사용합니다.';
+
+  @override
+  String get skinLockedVaultActionsIcon => '잠긴 보관함 작업 아이콘';
+
+  @override
+  String get skinVaultActionsMenuBackground => '보관함 작업 메뉴 배경';
+
+  @override
+  String get skinTheEditAndRemovePopupUsesTheMenuSurfaceColor =>
+      '수정 및 삭제 팝업은 메뉴 표면 색상을 사용합니다.';
+
+  @override
+  String get skinEditMenuItem => '수정 메뉴 항목';
+
+  @override
+  String get skinTheEditActionUsesTheRegularForegroundColor =>
+      '수정 작업은 일반 전경색을 사용합니다.';
+
+  @override
+  String get skinRemoveMenuItem => '삭제 메뉴 항목';
+
+  @override
+  String get skinDestructiveActionsUseTheErrorColor => '파괴적인 작업은 오류 색상을 사용합니다.';
+
+  @override
+  String get skinFileManagerAppBar => '파일 관리자 앱 바';
+
+  @override
+  String get skinFileBrowserToolbarsUseTheSameAppBarBackground =>
+      '파일 브라우저 도구 모음은 동일한 앱 바 배경을 사용합니다.';
+
+  @override
+  String get skinFileManagerBackButton => '파일 관리자 뒤로 가기 버튼';
+
+  @override
+  String get skinToolbarNavigationIconsUseThisColor =>
+      '도구 모음 탐색 아이콘에 이 색상이 사용됩니다.';
+
+  @override
+  String get skinFileManagerTitle => '파일 관리자 제목';
+
+  @override
+  String get skinTheCurrentFolderNameUsesTheAppBarForeground =>
+      '현재 폴더 이름은 앱 바 전경색을 사용합니다.';
+
+  @override
+  String get skinFileManagerAppBarActions => '파일 관리자 앱 바 작업';
+
+  @override
+  String get skinToolbarActionsUseThisIconColor => '도구 모음 작업은 이 아이콘 색상을 사용합니다.';
+
+  @override
+  String get skinProjects => '프로젝트';
+
+  @override
+  String get skinFolder12Items => '폴더 · 항목 12개';
+
+  @override
+  String get skinTextFile4KB => '텍스트 파일 · 4KB';
+
+  @override
+  String get skinCompressedFile28MB => '압축 파일 · 28MB';
+
+  @override
+  String get skin3Items => '3개 항목';
+
+  @override
+  String get skinFileManagerAddButton => '파일 관리자 추가 버튼';
+
+  @override
+  String get skinAddButtonIconColor => '추가 버튼 아이콘 색상';
+
+  @override
+  String get skinThePlusIconUsesTheButtonForegroundColor =>
+      '더하기 아이콘은 버튼 전경색을 사용합니다.';
+
+  @override
+  String get skinEditorFileName => '편집기 파일 이름';
+
+  @override
+  String get skinTheEditorToolbarUsesTheAppForegroundColor =>
+      '편집기 도구 모음은 앱 전경색을 사용합니다.';
+
+  @override
+  String get skinDartUTF8Ln3Col12 => ' 3행, 12열';
+
+  @override
+  String get skinTheMainBackgroundBehindThisScreen => '이 화면 뒤의 기본 배경입니다.';
+
+  @override
+  String get skinFolderIconColor => '폴더 아이콘 색상';
+
+  @override
+  String get skinFileIconColor => '파일 아이콘 색상';
+
+  @override
+  String get skinText => ' : ';
+
+  @override
+  String get skinFolderNameColor => '폴더 이름 색상';
+
+  @override
+  String get skinFileNameColor => '파일 이름 색상';
+
+  @override
+  String get skinFileDetailsColor => '파일 세부정보 색상';
+
+  @override
+  String get skinTheSmallerDateSizeAndTypeLabelsUseThisColor =>
+      '더 작은 날짜, 크기 및 유형 레이블에 이 색상이 사용됩니다.';
+
+  @override
+  String get skinFileOverflowButton => '파일 더보기 버튼';
+
+  @override
+  String get skinEachRowSThreeDotButtonUsesTheSupportingIconColor =>
+      '각 행의 점 세 개 버튼은 보조 아이콘 색상을 사용합니다.';
+
+  @override
+  String get skinSelectedFileRow => '선택된 파일 행';
+
+  @override
+  String get skinSelectedRowsUseATranslucente0ff21 =>
+      '선택된 행은 반투명한 기본 컨테이너 강조를 사용하며 파일 목록 자체는 페이지 배경을 유지합니다.';
+
+  @override
+  String get skinFileActionsMenuBackground => '파일 작업 메뉴 배경';
+
+  @override
+  String get skinTheFileActionsPopupUsesTheMenuSurfaceColor =>
+      '파일 작업 팝업은 메뉴 표면 색상을 사용합니다.';
+
+  @override
+  String get skinOpenFileMenuItem => '파일 열기 메뉴 항목';
+
+  @override
+  String get skinRegularFileActionsUseTheMainTextColor =>
+      '일반 파일 작업은 기본 텍스트 색상을 사용합니다.';
+
+  @override
+  String get skinOpen => '열기';
+
+  @override
+  String get skinDeleteFileMenuItem => '파일 삭제 메뉴 항목';
+
+  @override
+  String get skinEditorBackground => '편집기 배경';
+
+  @override
+  String get skinTheCanvasColorBehindTheCode => '코드 뒤의 캔버스 색상입니다.';
+
+  @override
+  String get skinEditorLineNumbers => '편집기 줄 번호';
+
+  @override
+  String get skinTheGutterAndLineNumbersBesideTheCode => '코드 옆의 여백과 줄 번호입니다.';
+
+  @override
+  String get skinEditorTextColor => '코드 텍스트 색상';
+
+  @override
+  String get skinTheDefaultCodeAndEditorTextColor =>
+      '일반 코드의 기본 색상입니다. 구문 강조 텍스트는 자체 색상을 사용합니다.';
+
+  @override
+  String get skinEditorCursor => '편집기 커서';
+
+  @override
+  String get skinTheInsertionCaretColor => '삽입 커서 색상입니다.';
+
+  @override
+  String get skinEditorSelectionHighlight => '편집기 선택 영역 강조';
+
+  @override
+  String get skinTheBackgroundUsedToHighlightSelectedCode =>
+      '선택한 코드를 강조 표시하는 데 사용되는 배경입니다.';
+
+  @override
+  String get skinEditorKeywords => '키워드';
+
+  @override
+  String get skinEditorKeywordsExplanation =>
+      'class, void, return, if와 같은 언어 키워드입니다.';
+
+  @override
+  String get skinEditorTypes => '타입 및 클래스';
+
+  @override
+  String get skinEditorTypesExplanation => '클래스 이름, 타입 및 인터페이스입니다.';
+
+  @override
+  String get skinEditorStrings => '문자열';
+
+  @override
+  String get skinEditorStringsExplanation => '따옴표로 묶인 텍스트 및 문자열 리터럴입니다.';
+
+  @override
+  String get skinEditorNumbers => '숫자 및 값';
+
+  @override
+  String get skinEditorNumbersExplanation => '숫자 리터럴, 부울(Boolean) 및 상수입니다.';
+
+  @override
+  String get skinEditorFunctions => '함수 및 메서드';
+
+  @override
+  String get skinEditorFunctionsExplanation => '함수 이름, 메서드 호출 및 기본 제공 요소입니다.';
+
+  @override
+  String get skinEditorComments => '주석';
+
+  @override
+  String get skinEditorCommentsExplanation => '코드 주석 및 문서 블록입니다.';
+
+  @override
+  String get textEditorColorsSectionTitle => '편집기 색상 및 글꼴';
+
+  @override
+  String get textEditorSyntaxColorsSectionTitle => '구문 요소 색상';
+
+  @override
+  String get textEditorColorsCustomized => '사용자 지정 색상 활성화됨';
+
+  @override
+  String get textEditorResetColors => '색상을 기본값으로 재설정';
+
+  @override
+  String get textEditorFollowAppSkinNotice => '편집기 색상은 현재 앱 스킨을 따릅니다.';
+
+  @override
+  String get textEditorCustomizeColorsIndependently => '색상 독립적으로 사용자 지정';
+
+  @override
+  String get textEditorDefaultFromTheme => '기본값 (테마 기준)';
+
+  @override
+  String get skinFileManager => '파일 관리자';
+
+  @override
+  String get skinFolderAndFileGlyphsTilesAndLabelColors =>
+      '폴더 및 파일 글리프, 타일 및 레이블 색상.';
+
+  @override
+  String get skinDetailsTextColor => '세부정보 텍스트 색상';
+
+  @override
+  String get skinUseTheAppSSupportingTextColor => '앱의 보조 텍스트 색상 사용';
+
+  @override
+  String get skinCustomColor => '사용자 지정 색상';
+
+  @override
+  String get skinMonospaceFileNames => '고정폭 파일 이름';
+
+  @override
+  String get skinBackgroundBehindTheIcon => '아이콘 뒤의 배경';
+
+  @override
+  String get skinIconColorSource => '아이콘 색상 소스';
+
+  @override
+  String get skinUseTheAppSMainTextColor => '앱의 기본 텍스트 색상 사용';
+
+  @override
+  String get skinTextEditor => '텍스트 편집기';
+
+  @override
+  String get skinCanvasGutterCursorSelectionBackgroundAndSyntaxTemplate =>
+      '캔버스, 여백, 커서, 선택 영역, 배경 및 구문 템플릿.';
+
+  @override
+  String get skinGutterAndLineNumbers => '여백 및 줄 번호';
+
+  @override
+  String get skinCursor => '커서';
+
+  @override
+  String get skinSelection => '선택 영역';
+
+  @override
+  String get skinEditorBackgroundTemplate => '편집기 배경 템플릿';
+
+  @override
+  String get skinSyntaxTemplate => '구문 템플릿';
+
+  @override
+  String get skinTapTheColorCircleToChooseAColor246981 => '색상 원을 탭하여 색상 선택';
+
+  @override
+  String get skinDefaultVaultExplorerIcons => '기본 Vault Explorer 아이콘';
+
+  @override
+  String get skinSolidIcons => '단색 아이콘';
+
+  @override
+  String get skinRoundedIcons => '둥근 아이콘';
+
+  @override
+  String get skinOutlineIcons => '윤곽선 아이콘';
+
+  @override
+  String get skinSquareCornerIcons => '직각 모서리 아이콘';
+
+  @override
+  String get skinTintedTileBehindTheIcon => '아이콘 뒤의 색조 타일';
+
+  @override
+  String get skinOutlinedTileBehindTheIcon => '아이콘 뒤의 윤곽선 타일';
+
+  @override
+  String get skinNoTile => '타일 없음';
+
+  @override
+  String get skinAutomaticFileTypeOrFolderColor => '자동 (파일 유형 또는 폴더 색상)';
+
+  @override
+  String get skinUseTheMainAppAccent => '앱의 기본 강조색 사용';
+
+  @override
+  String get skinUseAMutedNeutralColor => '차분한 중립 색상 사용';
+
+  @override
+  String get skinChooseAColorBelow => '아래에서 색상 선택';
+
+  @override
+  String get skinUseTheSyntaxThemeBackground => '구문 테마 배경 사용';
+
+  @override
+  String get skinPureBlack => '퓨어 블랙';
+
+  @override
+  String get skinDarkSlate => '다크 슬레이트';
+
+  @override
+  String get skinCleanWhite => '클린 화이트';
+
+  @override
+  String get skinWarmSepia => '웜 세피아';
+
+  @override
+  String get skinAutomaticMatchLightOrDarkMode => '자동 (라이트 또는 다크 모드에 맞춤)';
+
+  @override
+  String get skinSkinExported => '스킨을 내보냈습니다.';
+
+  @override
+  String get skinSkinsExported => '스킨들을 내보냈습니다.';
+
+  @override
+  String get skinRemoveSkin => '스킨을 삭제하시겠습니까?';
+
+  @override
+  String get skinAppSkin => '앱 스킨';
+
+  @override
+  String get skinImportSkins => '스킨 가져오기';
+
+  @override
+  String get skinExportSkins => '스킨 내보내기';
+
+  @override
+  String get skinChooseACoordinatedLookForTheAppFileManagerAndEditor =>
+      '앱, 파일 관리자 및 편집기에 조화로운 스타일을 선택하세요. ';
+
+  @override
+  String get skinLightAndDarkSystemThemesUseMatchingPaletteVariants =>
+      '라이트 및 다크 시스템 테마는 일치하는 팔레트 변형을 사용합니다.';
+
+  @override
+  String get skinEditCurrentSkin => '현재 스킨 수정';
+
+  @override
+  String get skinCreateASkinFromThisLook => '이 스타일로 스킨 생성';
+
+  @override
+  String get skinYourSkins => '내 스킨';
+
+  @override
+  String get skinCustomAppFileManagerAndEditorColors =>
+      '사용자 지정 앱, 파일 관리자 및 편집기 색상';
+
+  @override
+  String get skinMaterialColorsWithLightAndDarkVariants =>
+      '라이트 및 다크 변형이 포함된 Material 색상';
+
+  @override
+  String get skinTrueBlackEditorAndDarkf97e8f =>
+      'OLED 강조 팔레트가 적용된 트루 블랙 편집기 및 어두운 앱 표면';
+
+  @override
+  String get skinYourEditableAppFileManagerAndEditorColors =>
+      '편집 가능한 앱, 파일 관리자 및 편집기 색상';
+
+  @override
+  String get skinSkinActions => '스킨 작업';
+
+  @override
+  String get skinEditSkin => '스킨 수정';
+
+  @override
+  String get skinExportSkin => '스킨 내보내기';
+
+  @override
+  String get skinRemoveSkinf09101 => '스킨 삭제';
+
+  @override
+  String get skinDragAroundTheRingTo868d62 =>
+      '링 주위를 드래그하여 색조를 선택한 다음 내부로 이동하여 음영을 조정하세요.';
+
+  @override
+  String get skinQuickColors => '빠른 색상';
+
+  @override
+  String get skinEnterAnExactColor => '정확한 색상 입력';
+
+  @override
+  String get skinOptionalRGBOrARGBValue => '선택사항인 RGB 또는 ARGB 값';
+
+  @override
+  String get skinRGBARGB => 'RGB / ARGB';
+
+  @override
+  String get skinUseThisValue => '이 값 사용';
+
+  @override
+  String get skinDefaultLightDark => '기본 라이트 / 다크';
+
+  @override
+  String get skinOLEDPureBlack => 'OLED 퓨어 블랙';
+
+  @override
+  String get skinCustomSkin => '사용자 지정 스킨';
+
+  @override
+  String skinImportSucceeded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '#개의 스킨을 가져왔습니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String skinImportFailed(String error) {
+    return '스킨을 가져올 수 없습니다: $error';
+  }
+
+  @override
+  String skinExportFailed(String error) {
+    return '스킨을 내보낼 수 없습니다: $error';
+  }
+
+  @override
+  String skinRemoveConfirmation(String skin) {
+    return '저장된 스킨에서 “$skin”이(가) 삭제됩니다.';
+  }
+
+  @override
+  String skinSelectPreviewElement(String title) {
+    return '$title 선택';
+  }
+
+  @override
+  String skinIconColorForItem(String item) {
+    return '$item 아이콘 색상';
+  }
+
+  @override
+  String skinNameColorForItem(String item) {
+    return '$item 이름 색상';
+  }
+
+  @override
+  String get skinFileIconColorSettingDescription =>
+      '이 색상은 파일 관리자 섹션의 아이콘 색상 설정에 의해 제어됩니다.';
+
+  @override
+  String get skinFileNameColorSettingDescription =>
+      '이 색상은 파일 관리자 섹션의 이름 색상 설정에 의해 제어됩니다.';
+
+  @override
+  String get skinExportedSingle => '스킨을 내보냈습니다.';
+
+  @override
+  String get skinExportedMultiple => '스킨들을 내보냈습니다.';
+
+  @override
+  String get skinExportSkinsOnly => '스킨만';
+
+  @override
+  String get skinExportSkinsOnlySubtitle => '색상과 아이콘 스타일. 공유해도 안전합니다.';
+
+  @override
+  String get skinExportSkinsAndInterface => '스킨 및 인터페이스';
+
+  @override
+  String get skinExportSkinsAndInterfaceSubtitle =>
+      '테마 모드, 도구 모음 및 그리드 레이아웃, 편집기 모양, 미디어 뷰어 레이아웃도 함께 저장합니다. 개인 백업용입니다.';
+
+  @override
+  String get skinAppearanceExported => '스킨과 인터페이스를 내보냈습니다.';
+
+  @override
+  String get skinImportInterfaceTitle => '인터페이스 설정을 적용할까요?';
+
+  @override
+  String get skinImportInterfaceMessage =>
+      '이 파일에는 인터페이스 설정도 포함되어 있습니다. 적용하면 현재 테마 모드, 도구 모음 및 그리드 레이아웃, 편집기 모양, 미디어 뷰어 레이아웃이 대체됩니다.';
+
+  @override
+  String get skinImportInterfaceApply => '적용';
+
+  @override
+  String get skinImportInterfaceSkip => '스킨만';
+
+  @override
+  String get skinInterfaceApplied => '인터페이스 설정을 적용했습니다.';
+
+  @override
+  String get automationBatteryHintTitle => '백그라운드 실행 허용';
+
+  @override
+  String get automationBatteryHintMessage =>
+      'VaultExplorer가 완전히 종료된 경우 Android에서 자동화의 볼트 잠금 해제를 차단할 수 있습니다. Tasker, MacroDroid 및 기타 앱이 백그라운드에서 볼트를 잠금 해제할 수 있도록 VaultExplorer의 배터리 사용량을 \'제한 없음\'으로 설정하세요.';
+
+  @override
+  String get automationBatteryHintButton => '앱 설정 열기';
+
+  @override
+  String get automationBatterySettingsOpenFailedMessage =>
+      '앱 설정을 열 수 없습니다. 설정 > 애플리케이션 > VaultExplorer > 배터리로 이동하여 \'제한 없음\'을 선택하세요.';
+
+  @override
+  String get skinPreviewMountedVaultName => '개인 금고';
+
+  @override
+  String get skinPreviewVaultName => '금고 제목';
+
+  @override
+  String get skinMainTextColorAlsoColorsRegularMenuItems =>
+      '금고 제목과 일반 메뉴 작업은 앱의 기본 텍스트 색상을 공유합니다.';
+
+  @override
+  String get skinStatusBannerExamples => '상태 배너';
+
+  @override
+  String get skinSuccessBanner => '성공 배너';
+
+  @override
+  String get skinWarningBanner => '경고 배너';
+
+  @override
+  String get skinErrorBanner => '오류 배너';
+
+  @override
+  String get skinSuccessBannerUsesSuccessContainer =>
+      '배너 채우기와 메시지는 성공 색상을 사용합니다.';
+
+  @override
+  String get skinWarningBannerUsesWarningContainer =>
+      '배너 채우기와 메시지는 경고 색상을 사용합니다.';
+
+  @override
+  String get skinErrorBannerUsesErrorContainer => '배너 채우기와 메시지는 오류 색상을 사용합니다.';
+
+  @override
+  String get skinPreviewChangesSaved => '변경 사항이 저장되었습니다';
+
+  @override
+  String get skinPreviewStorageAlmostFull => '저장 공간이 거의 가득 찼습니다';
+
+  @override
+  String get skinPreviewCouldNotUnlockVault => '금고를 잠금 해제할 수 없습니다';
+
+  @override
+  String get skinSurfaceAndBorderExamples => '표면 및 테두리';
+
+  @override
+  String get skinFileRowDetailsColor => '파일 행 세부정보 색상';
+
+  @override
+  String get skinFileActionOverflowIconColor => '파일 행 작업 아이콘 색상';
+
+  @override
+  String get skinMatchingElementsHighlightTogether =>
+      '같은 색상의 다른 미리보기 요소도 함께 강조 표시됩니다.';
+
+  @override
+  String get skinStatusBannerTextColor => '배너 텍스트는 이 색상을 사용합니다.';
+
+  @override
+  String get apkOpenPackageInstaller => '패키지 설치 프로그램';
+
+  @override
+  String get apkOpenPackageInstallerSubtitle => '이 앱을 기기에 설치합니다';
+
+  @override
+  String get apkOpenAsZip => 'ZIP으로 열기';
+
+  @override
+  String get apkOpenAsZipSubtitle => '내부 파일을 둘러보고 압축을 풉니다';
+
+  @override
+  String get audioEditorEditAction => '오디오 편집';
+
+  @override
+  String get audioEditorTimelineLabel => '오디오 타임라인';
+
+  @override
+  String get audioEditorAnalyzing => '오디오를 읽는 중…';
+
+  @override
+  String audioEditorLoadFailed(String message) {
+    return '이 오디오 파일을 열 수 없습니다: $message';
+  }
+
+  @override
+  String get audioEditorReadOnly => '이 볼트는 읽기 전용이라 편집한 오디오를 저장할 수 없습니다.';
+
+  @override
+  String get audioEditorExporting => '오디오 내보내는 중';
+
+  @override
+  String audioEditorSaved(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '오디오 파일 $count개 저장됨',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get audioEditorExportMerge => '하나의 파일로 병합';
+
+  @override
+  String get audioEditorExportSeparate => '별도의 파일로 저장';
+
+  @override
+  String get audioEditorReplaceOriginal => '원본 오디오 대체';
+
+  @override
+  String get audioEditorReplaceOriginalHint => '원본 파일이 내보낸 편집본으로 대체됩니다.';
+
+  @override
+  String get audioEditorLosslessNote =>
+      '컷은 무손실입니다. 오디오를 재인코딩하지 않고 복사하므로 음질이 변하지 않습니다. 컷은 지정한 위치에서 몇 밀리초 떨어진 가장 가까운 오디오 프레임에 맞춰집니다. 태그와 커버 아트는 유지되지 않습니다.';
+
+  @override
+  String get audioEditorCutOutModeDescription => '선택한 세그먼트를 제거하고 나머지를 내보냅니다.';
+
+  @override
+  String audioEditorUnsupportedFormat(String format) {
+    return '$format 파일은 이 기기에서 편집할 수 없으므로 여기서 재생만 가능하고 내보낼 수 없습니다.';
+  }
+
+  @override
+  String get audioEditorPrevCutPoint => '이전 컷 지점';
+
+  @override
+  String get audioEditorNextCutPoint => '다음 컷 지점';
+
+  @override
+  String audioEditorReencodeBanner(String format) {
+    return '$format 오디오는 그대로 복사할 수 없어 내보낼 때 AAC(.m4a)로 다시 인코딩됩니다.';
+  }
+
+  @override
+  String get audioEditorReencodeNote =>
+      '이 형식은 그대로 복사할 수 없어 내보내는 오디오가 AAC로 다시 인코딩됩니다. 음질은 높게 유지되지만 비트 단위로 동일하지는 않습니다. 컷은 지정한 위치 그대로 적용됩니다. 태그와 커버 아트는 유지되지 않습니다.';
+
+  @override
+  String get mediaViewerActionAbLoop => 'A-B 구간 반복';
+
+  @override
+  String abLoopStartMarkedMessage(String time) {
+    return 'A 지점이 $time에 설정되었습니다. 다시 탭하여 B 지점을 설정하세요.';
+  }
+
+  @override
+  String abLoopStartedMessage(String start, String end) {
+    return '$start – $end 반복 중';
+  }
+
+  @override
+  String get abLoopEndTooCloseMessage => 'B는 A 이후여야 합니다. 앞으로 이동한 후 다시 탭하세요.';
+
+  @override
+  String get abLoopClearedMessage => 'A-B 구간 반복 꺼짐';
+
+  @override
+  String get skinEditorPanelBackground => '편집기 패널 배경';
+
+  @override
+  String get skinEditorPanelBackgroundDescription =>
+      '편집기 사이드바와 더보기 작업 메뉴에서 함께 사용하는 배경입니다.';
+
+  @override
+  String get skinFollowAppSkin => '앱 스킨 따르기';
+
+  @override
+  String get fileSkinFollowAppSkinDescription => '파일과 폴더 스타일이 선택한 앱 스킨을 따릅니다.';
+
+  @override
+  String get fileSkinUseIndependentStylesDescription =>
+      '이 옵션은 파일 관리자 전용 스타일을 설정합니다. 앱 스킨을 따르는 중에 아래 프리셋이나 스타일을 변경하면 ‘앱 스킨 따르기’가 꺼집니다.';
+
+  @override
+  String get fileSkinManagedByAppSkinTitle => '파일 관리자가 앱 스킨을 따르고 있습니다';
+
+  @override
+  String get fileSkinManagedByAppSkinDescription =>
+      '미리보기에는 현재 앱 스킨이 표시됩니다. 아래 프리셋이나 스타일을 변경하면 파일 관리자 전용 스킨이 저장되고 ‘앱 스킨 따르기’가 꺼집니다.';
+
+  @override
+  String get skinFileManagerIndependentTitle => '파일 관리자가 독립 스킨을 사용합니다';
+
+  @override
+  String get skinFileManagerIndependentDescription =>
+      '이 앱 스킨에서 파일 및 폴더 스타일을 변경해도 파일 관리자가 자체 스킨을 사용하는 동안에는 적용되지 않습니다. 이 앱 스킨을 적용하려면 ‘앱 스킨 따르기’를 켜세요.';
+
+  @override
+  String get skinChooseOrCreateSkin => '스킨 선택 또는 만들기';
+
+  @override
+  String get skinSkinShortcutCustomDescription =>
+      '앱 전체 색상과 공통 토큰을 편집합니다. 구성 요소별 설정은 이 페이지에 유지됩니다.';
+
+  @override
+  String get skinSkinShortcutPresetDescription =>
+      '기본 제공 스킨을 둘러보거나 현재 모습으로 사용자 지정 스킨을 만듭니다.';
+
+  @override
+  String get textEditorUseIndependentAppearanceDescription =>
+      '아래에서 편집기 전용 배경과 구문 테마를 선택합니다.';
+
+  @override
+  String get fileSkinComponentStyling => '구성 요소 스타일';
+
+  @override
+  String get textEditorStyling => '편집기 스타일';
+
+  @override
+  String get audioFilePropertiesSectionHeader => '오디오';
+
+  @override
+  String get audioTagsSectionHeader => '트랙 정보';
+
+  @override
+  String get artistLabel => '아티스트';
+
+  @override
+  String get albumLabel => '앨범';
+
+  @override
+  String get yearLabel => '연도';
+
+  @override
+  String get genreLabel => '장르';
+
+  @override
+  String get audioTrackLabel => '트랙';
+
+  @override
+  String get bitDepthLabel => '비트 심도';
+
+  @override
+  String get colorModeLabel => '색상 모드';
+
+  @override
+  String get transparencyLabel => '투명도';
+
+  @override
+  String get animationLabel => '애니메이션';
+
+  @override
+  String get orientationLabel => '방향';
+
+  @override
+  String get densityLabel => '픽셀 밀도';
+
+  @override
+  String get encodingLabel => '인코딩';
+
+  @override
+  String get skinEditorCodeTextColorDescription =>
+      '일반 코드의 기본 텍스트 색상입니다. 구문 강조 텍스트는 자체 색상을 유지합니다.';
+
+  @override
+  String get skinEditorInterfaceText => '편집기 인터페이스 텍스트';
+
+  @override
+  String get skinEditorInterfaceTextDescription =>
+      '편집기 도구 모음, 사이드바, 메뉴 및 상태 표시줄의 텍스트와 아이콘입니다.';
+
+  @override
+  String get equalizerTitle => '이퀄라이저';
+
+  @override
+  String get equalizerPresetCustom => '사용자 지정';
+
+  @override
+  String get equalizerPreampLabel => '프리앰프';
+
+  @override
+  String get equalizerPreventClippingTitle => '클리핑 방지';
+
+  @override
+  String get equalizerPreventClippingSubtitle =>
+      '증폭한 대역이 왜곡되지 않도록 전체 볼륨을 필요한 만큼만 낮춥니다';
+
+  @override
+  String get equalizerPresetFlat => '플랫';
+
+  @override
+  String get equalizerPresetBassBoost => '저음 강화';
+
+  @override
+  String get equalizerPresetTrebleBoost => '고음 강화';
+
+  @override
+  String get equalizerPresetVoice => '보컬';
+
+  @override
+  String get equalizerPresetRock => '록';
+
+  @override
+  String get equalizerPresetPop => '팝';
+
+  @override
+  String get equalizerPresetJazz => '재즈';
+
+  @override
+  String get equalizerPresetClassical => '클래식';
+
+  @override
+  String get equalizerPresetElectronic => '일렉트로닉';
+
+  @override
+  String get equalizerPresetLoudness => '라우드니스';
+
+  @override
+  String get audioRecorder => '오디오 녹음기';
+
+  @override
+  String get audioCapturedEncrypted => '오디오가 저장되었습니다';
+
+  @override
+  String get audioMicPermissionRequiredMessage => '오디오를 녹음하려면 마이크 권한이 필요합니다.';
+
+  @override
+  String get audioRecordingAllowMicrophone => '마이크 허용';
+
+  @override
+  String get audioRecordingStartTooltip => '녹화 시작';
+
+  @override
+  String get audioRecordingStopTooltip => '녹화 중지';
+
+  @override
+  String get audioRecordingPauseTooltip => '일시 정지';
+
+  @override
+  String get audioRecordingResumeTooltip => '이어보기';
+
+  @override
+  String get audioRecordingPausedLabel => '일시 중지됨';
+
+  @override
+  String get audioRecordingDiscardTitle => '녹음을 취소할까요?';
+
+  @override
+  String get audioRecordingDiscardMessage => '이 녹음은 저장되지 않았으며 영구적으로 삭제됩니다.';
+
+  @override
+  String get skinAreaDashboard => '대시보드';
+
+  @override
+  String get skinAreaDashboardDescription => '금고 카드가 표시되는 기본 금고 목록입니다.';
+
+  @override
+  String get skinAreaDrawer => '사이드 메뉴';
+
+  @override
+  String get skinAreaDrawerDescription => '금고와 바로가기가 포함된 슬라이드 메뉴입니다.';
+
+  @override
+  String get skinAreaFilesDescription => '잠금 해제된 금고 내부의 파일 탐색기입니다.';
+
+  @override
+  String get skinAreaEditorDescription =>
+      '텍스트 및 코드 편집기의 도구 모음입니다. 캔버스 및 구문 색상은 아래 편집기 테마에서 설정합니다.';
+
+  @override
+  String get skinAreaToolsDescription => '도구 탭 및 도구 탭에서 열린 모든 도구입니다.';
+
+  @override
+  String get skinAreaSettingsDescription => '설정 탭 및 해당 하위 페이지입니다.';
+
+  @override
+  String get skinSharedPaletteTitle => '공유 팔레트';
+
+  @override
+  String get skinSharedPaletteShort => '공유';
+
+  @override
+  String get skinSharedPaletteDescription =>
+      '각 페이지가 자체 색상을 설정하기 전까지 상속받는 색상입니다. 잠금 해제, 카메라 등 전용 섹션이 없는 화면에서 직접 사용됩니다.';
+
+  @override
+  String get skinSharedBarDescription => '자체 설정을 하지 않은 모든 페이지의 상단 표시줄입니다.';
+
+  @override
+  String get skinSharedFabDescription => '자체 설정을 하지 않은 모든 페이지의 원형 추가 버튼입니다.';
+
+  @override
+  String get skinPagesTitle => '페이지 색상';
+
+  @override
+  String get skinPagesDescription =>
+      '각 페이지는 고유한 색상을 유지합니다. 한 페이지를 변경해도 다른 페이지에는 영향을 주지 않습니다.';
+
+  @override
+  String get skinResetPageColors => '페이지 색상 재설정';
+
+  @override
+  String get skinTokenBackground => '페이지 배경';
+
+  @override
+  String get skinTokenBackgroundHint => '이 페이지의 모든 요소 뒤에 있는 캔버스입니다.';
+
+  @override
+  String get skinTokenText => '기본 텍스트';
+
+  @override
+  String get skinTokenTextHint => '이 페이지의 제목, 이름 및 본문 텍스트입니다.';
+
+  @override
+  String get skinTokenTextSecondary => '보조 텍스트 및 아이콘';
+
+  @override
+  String get skinTokenTextSecondaryHint => '부제목, 세부 정보, 힌트 및 차분한 아이콘입니다.';
+
+  @override
+  String get skinTokenAppBar => '상단 표시줄';
+
+  @override
+  String get skinTokenAppBarHint => '이 페이지 상단 표시줄의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenOnAppBar => '상단 표시줄 텍스트 및 아이콘';
+
+  @override
+  String get skinTokenOnAppBarHint => '상단 표시줄의 제목 및 아이콘 색상입니다.';
+
+  @override
+  String get skinTokenCard => '카드 및 행';
+
+  @override
+  String get skinTokenCardHint => '카드, 목록 행 및 그룹화된 패널입니다.';
+
+  @override
+  String get skinTokenCardActive => '활성 카드';
+
+  @override
+  String get skinTokenCardActiveHint => '잠금 해제된 금고와 같이 강조 표시된 카드입니다.';
+
+  @override
+  String get skinTokenRaised => '칩 및 컨트롤';
+
+  @override
+  String get skinTokenRaisedHint => '검색 필드, 칩, 썸네일 및 아이콘 타일입니다.';
+
+  @override
+  String get skinTokenOverlay => '메뉴, 대화상자 및 시트';
+
+  @override
+  String get skinTokenOverlayHint => '이 페이지에서 열린 팝업 메뉴, 대화상자 및 하단 시트입니다.';
+
+  @override
+  String get skinTokenAccent => '강조';
+
+  @override
+  String get skinTokenAccentHint => '버튼, 링크, 진행 표시줄 및 활성 아이콘입니다.';
+
+  @override
+  String get skinTokenOnAccent => '강조 위의 텍스트';
+
+  @override
+  String get skinTokenOnAccentHint => '강조 색상으로 채워진 버튼 위에 표시되는 라벨과 아이콘입니다.';
+
+  @override
+  String get skinTokenSelection => '선택 항목';
+
+  @override
+  String get skinTokenSelectionHint => '선택된 행 및 강조 표시된 아이콘 타일입니다.';
+
+  @override
+  String get skinTokenOnSelection => '선택 항목 위의 텍스트';
+
+  @override
+  String get skinTokenOnSelectionHint => '선택된 항목 위에 표시되는 아이콘과 텍스트입니다.';
+
+  @override
+  String get skinTokenDivider => '구분선';
+
+  @override
+  String get skinTokenDividerHint => '얇은 구분선과 은은한 테두리입니다.';
+
+  @override
+  String get skinTokenOutline => '외곽선';
+
+  @override
+  String get skinTokenOutlineHint => '외곽선 버튼과 입력 필드의 뚜렷한 테두리입니다.';
+
+  @override
+  String get skinTokenFab => '원형 추가 버튼';
+
+  @override
+  String get skinTokenFabHint => '원형 추가 버튼의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenOnFab => '원형 추가 버튼 아이콘';
+
+  @override
+  String get skinTokenOnFabHint => '원형 추가 버튼의 더하기 아이콘입니다.';
+
+  @override
+  String get skinPreviewConfirm => '확인';
+
+  @override
+  String get skinPreviewCancelButton => '취소';
+
+  @override
+  String get skinPreviewSaveButton => '저장';
+
+  @override
+  String get skinPreviewRunButton => '실행';
+
+  @override
+  String get skinPreviewPasteButton => '여기에 붙여넣기';
+
+  @override
+  String get skinPreviewUnlockButton => '잠금 해제';
+
+  @override
+  String get skinPreviewSortChip => '정렬: 이름';
+
+  @override
+  String get skinPreviewSearchChip => '파일 검색';
+
+  @override
+  String get skinPreviewPinnedBadge => '고정됨';
+
+  @override
+  String get skinPreviewVaultsHeader => '금고';
+
+  @override
+  String get skinPreviewToolsSection => '파일 암호화';
+
+  @override
+  String get skinPreviewToolOne => '키 파일 및 암호 문구 생성기';
+
+  @override
+  String get skinPreviewToolOneHint => '비밀번호 및 키 파일 생성';
+
+  @override
+  String get skinPreviewToolTwo => '체크섬 및 해시 검증기';
+
+  @override
+  String get skinPreviewToolTwoHint => '대용량 파일 손상 여부 확인';
+
+  @override
+  String get skinPreviewSettingsSection => '보안';
+
+  @override
+  String get skinPreviewSettingOne => '앱 잠금';
+
+  @override
+  String get skinPreviewSettingOneHint => '생체 인식 및 자동 잠금';
+
+  @override
+  String get skinPreviewSettingTwo => '저장소';
+
+  @override
+  String get skinPreviewSettingTwoHint => '외부 저장소 및 클라우드 브리지';
+
+  @override
+  String get inPlaceEditDone => '완료';
+
+  @override
+  String get inPlaceEditTitle => '컨트롤 배치';
+
+  @override
+  String get inPlaceEditHint => '바 사이로 동작을 드래그하거나 눌러서 배치';
+
+  @override
+  String get inPlaceEditAvailable => '사용 가능한 동작';
+
+  @override
+  String get inPlaceEditTopDock => '상단 바';
+
+  @override
+  String get inPlaceEditBottomDock => '하단 독';
+
+  @override
+  String get inPlaceEditDragToRemove => '삭제하려면 여기로 드래그';
+
+  @override
+  String get inPlaceEditAddToTop => '상단 바에 추가';
+
+  @override
+  String get inPlaceEditAddToBottom => '하단 독에 추가';
+
+  @override
+  String get inPlaceEditEmptyDock => '여기에 동작 놓기';
+
+  @override
+  String get inPlaceEditPlayerSettings => '플레이어 설정';
+
+  @override
+  String get inPlaceEditMoveToMore => '더보기 메뉴로 이동';
+
+  @override
+  String get inPlaceEditMoveToAdvanced => '고급 설정으로 이동';
+
+  @override
+  String get inPlaceEditHideAction => '동작 숨기기';
+
+  @override
+  String get inPlaceEditHidden => '숨김';
+
+  @override
+  String get textEditorAutoHideAppBarLabel => '앱 바 자동 숨기기';
+
+  @override
+  String get textEditorAutoHideAppBarDescription =>
+      '세로 공간을 최대화하기 위해 편집 중 상단 바 숨기기';
+
+  @override
+  String get textEditorCopyToMenuItem => '다음으로 복사...';
+
+  @override
+  String get textEditorCopyToDialogTitle => '폴더로 복사';
+
+  @override
+  String get textEditorCopyHereButton => '여기에 복사';
+
+  @override
+  String get textEditorDuplicateMenuItem => '사본 만들기';
+
+  @override
+  String get textEditorCopiedSuccessfully => '성공적으로 복사됨';
+
+  @override
+  String get textEditorSearchFilesHint => '파일 필터링…';
+
+  @override
+  String get audioRecordingQualityLabel => '오디오 녹음 품질';
+
+  @override
+  String get audioRecordingQualityVoice => '음성';
+
+  @override
+  String get audioRecordingQualityStandard => '표준';
+
+  @override
+  String get audioRecordingQualityHigh => '높음';
+
+  @override
+  String audioRecordingQualityDetails(String bitrate, String sampleRate) {
+    return 'AAC · $bitrate kbps · $sampleRate kHz · 모노';
+  }
+
+  @override
+  String get audioEditorCompressTitle => '파일 크기';
+
+  @override
+  String get audioEditorCompressOriginal => '원본';
+
+  @override
+  String audioEditorCompressEstimate(String size) {
+    return '예상 크기: 약 $size';
+  }
+
+  @override
+  String get audioEditorCompressNote =>
+      '오디오가 더 낮은 비트레이트의 AAC로 다시 인코딩되어 파일은 작아지지만 음질은 낮아집니다. 컷은 지정한 위치 그대로 적용됩니다. 태그와 커버 아트는 유지되지 않습니다.';
+
+  @override
+  String get entropyStepTitle => '무작위성 추가';
+
+  @override
+  String get entropyIntro =>
+      '패드 위에서 손가락을 예측할 수 없게 다양한 방향으로 움직이세요. 움직임은 기기의 보안 난수 생성기에 더해(대체가 아님) 암호화 키와 솔트에 섞입니다.';
+
+  @override
+  String get entropyPadHint => '여기에 손가락으로 그리세요';
+
+  @override
+  String get entropyPadSemantics => '무작위성 패드. 손가락으로 문질러 무작위 움직임을 수집합니다.';
+
+  @override
+  String entropyProgress(int percent) {
+    return '무작위성 수집 중… $percent%';
+  }
+
+  @override
+  String get entropyComplete => '충분한 무작위성이 수집되었습니다. 계속 움직여 더 추가하거나 다음으로 진행하세요.';
+
+  @override
+  String get entropySkippedStatus =>
+      '건너뛰었습니다. 기기의 보안 난수 생성기만 사용합니다. 패드에 다시 그리면 무작위성을 추가할 수 있습니다.';
+
+  @override
+  String get entropyPoolLabel => '난수 풀';
+
+  @override
+  String get entropySkip => '건너뛰고 기기 생성기만 사용';
+
+  @override
+  String get entropyReviewLabel => '무작위성';
+
+  @override
+  String get entropyReviewUserAdded => '터치 움직임 + 기기 생성기';
+
+  @override
+  String get entropyReviewDeviceOnly => '기기 생성기만 사용';
+
+  @override
+  String get automationCaptureSectionHeader => '카메라 및 마이크';
+
+  @override
+  String get automationAllowCaptureTitle => '카메라 및 마이크 촬영 허용';
+
+  @override
+  String get automationAllowCaptureSubtitle => '사진, 동영상 및 오디오 녹음';
+
+  @override
+  String get automationPermissionsSectionHeader => '권한';
+
+  @override
+  String get automationPermissionsIntro =>
+      '이 권한은 Android 시스템 권한으로 이 보관함뿐 아니라 앱 전체에 적용됩니다. 현재 보관함 설정에서 사용할 수 있는 권한만 현재 상태와 함께 표시됩니다.';
+
+  @override
+  String get automationPermSetupNeededTitle => '설정 필요';
+
+  @override
+  String get automationPermAlmostReadyTitle => '거의 완료됨';
+
+  @override
+  String get automationPermReadyTitle => '준비 완료';
+
+  @override
+  String get automationPermReadyMessage => '이 보관함의 자동화에 필요한 모든 설정이 완료되었습니다.';
+
+  @override
+  String get automationPermGrantButton => '허용';
+
+  @override
+  String get automationPermGranted => '허용됨';
+
+  @override
+  String get automationPermTagRequired => '필수';
+
+  @override
+  String get automationPermTagRecommended => '권장';
+
+  @override
+  String get automationPermTagOptional => '선택 사항';
+
+  @override
+  String get automationPermDeniedMessage =>
+      '권한이 허용되지 않았습니다. Android에서 다시 묻지 않는 경우 앱 설정에서 직접 켜주세요.';
+
+  @override
+  String get automationPermSettingsOpenFailedMessage =>
+      '앱 설정을 열 수 없습니다. 설정 > 애플리케이션 > VaultExplorer > 권한으로 이동하세요.';
+
+  @override
+  String get automationPermBatteryTitle => '배터리 사용량 제한 없음';
+
+  @override
+  String get automationPermBatteryDescription =>
+      'VaultExplorer가 완전히 종료된 상태에서도 자동화가 이 보관함의 잠금을 해제할 수 있도록 합니다. 이 권한이 없으면 Android에서 작업을 차단할 수 있습니다.';
+
+  @override
+  String get automationPermNotificationsTitle => '알림';
+
+  @override
+  String get automationPermNotificationsDescription =>
+      '가져오기, 내보내기, 동기화 진행 상황과 녹음/녹화가 진행되는 동안 표시기를 표시합니다.';
+
+  @override
+  String get automationPermAllFilesTitle => '모든 파일에 대한 접근 권한';
+
+  @override
+  String get automationPermAllFilesDescription =>
+      '가져오기 및 내보내기 작업에서 /storage/emulated/0/… 과 같은 일반 파일 경로를 사용할 수 있도록 합니다. content:// 링크에는 필요하지 않습니다.';
+
+  @override
+  String get automationPermCameraTitle => '카메라';
+
+  @override
+  String get automationPermCameraDescription => '자동화로 캡처하는 사진 및 동영상.';
+
+  @override
+  String get automationPermMicrophoneTitle => '마이크';
+
+  @override
+  String get automationPermMicrophoneDescription =>
+      '오디오 녹음 및 동영상 소리. 사진 및 동영상 캡처 시에도 확인합니다.';
+
+  @override
+  String get automationPermOverlayDescription =>
+      'Android 14 이상에서 자동화 앱이 브로드캐스트로 사진 또는 동영상 캡처를 시작할 때만 필요합니다. 캡처 액티비티를 직접 실행하는 경우에는 필요하지 않습니다.';
+
+  @override
+  String automationPermSetupNeededMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '필수 권한이 $count개 누락되었습니다. 권한을 허용할 때까지 일부 자동화 작업이 실패합니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String automationPermAlmostReadyMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '권장 설정 $count개가 꺼져 있습니다. 자동화는 작동하지만 안정성이 떨어질 수 있습니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resetSizeOnLayoutChangeLabel => '레이아웃 변경 시 크기 초기화';
+
+  @override
+  String get resetSizeOnLayoutChangeDesc =>
+      '레이아웃을 전환할 때마다 목록 확대 수준과 그리드/메이슨리 열 수를 기본값으로 되돌림';
+
+  @override
+  String get thumbnailUseGlobalDefaultDesc =>
+      '앱 설정의 썸네일 기본값을 따르므로 그곳에서 바꾼 내용이 이 볼트에도 적용됩니다.';
+
+  @override
+  String get resetVaultThumbnailsTitle => '모든 볼트를 기본값으로 재설정';
+
+  @override
+  String get resetVaultThumbnailsSubtitle =>
+      '자체 설정이 있는 볼트를 포함해 모든 볼트가 위의 썸네일 기본값을 따르게 합니다.';
+
+  @override
+  String resetVaultThumbnailsConfirmMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개의 볼트에 자체 썸네일 설정이 있습니다. 대신 기본값을 따르게 할까요?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String resetVaultThumbnailsDone(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '볼트 $count개가 이제 기본값을 따릅니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String thumbnailGlobalInContainerConfirmMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '볼트 $count개가 이 기본값을 따르며 볼트 안에 썸네일을 저장하기 시작합니다. 속도가 느려지고 읽기 전용 볼트에서는 사용할 수 없습니다.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scanAdjustCornersTitle => '모서리 조정';
+
+  @override
+  String get scanResultTitle => '스캔한 페이지';
+
+  @override
+  String get scanAutoDetectButton => '자동 감지';
+
+  @override
+  String get scanFullImageButton => '전체 이미지';
+
+  @override
+  String get scanFilterColor => '컬러';
+
+  @override
+  String get scanFilterGrayscale => '회색조';
+
+  @override
+  String get scanHintSearching => '카메라를 문서에 향하세요';
+
+  @override
+  String get scanHintFound => '문서를 감지했습니다';
+
+  @override
+  String get scanNoDocumentFound => '문서를 감지하지 못했습니다. 모서리를 드래그하여 페이지에 맞추세요.';
+
+  @override
+  String get scanProcessingFailed => '이 페이지를 처리할 수 없습니다';
+
+  @override
+  String get scanDetectingEdges => '가장자리 감지 중…';
+
+  @override
+  String get scanOutputPdf => 'PDF';
+
+  @override
+  String get scanOutputImages => '이미지';
+
+  @override
+  String get scanPdfFailed => 'PDF를 만들 수 없습니다';
+
+  @override
+  String get settingsSearchHint => '설정 검색';
+
+  @override
+  String get settingsSearchClear => '검색어 지우기';
+
+  @override
+  String get settingsSearchNoResults => '일치하는 설정이 없습니다';
+
+  @override
+  String get settingsSearchNoResultsHint => '다른 단어를 입력하거나 맞춤법을 확인해 보세요.';
+
+  @override
+  String get settingsSearchUnavailable => '이 옵션은 관련 설정이 켜져 있을 때만 표시됩니다.';
+
+  @override
+  String createArchiveCompressingSubtitle(String count, String size) {
+    return '$count 압축 중 ($size)';
+  }
+
+  @override
+  String createArchiveInsufficientSpace(String required, String available) {
+    return '여유 공간이 부족합니다 — $required 필요, $available 사용 가능.';
+  }
+
+  @override
+  String get createArchiveMediaRecommendation =>
+      '이미 압축된 미디어 파일이 감지되었습니다. CPU와 배터리를 절약하기 위해 \"저장\" 압축이 자동 선택되었습니다.';
+
+  @override
+  String get createArchiveNameLabel => '아카이브 이름';
+
+  @override
+  String get createArchiveNameHint => 'archive';
+
+  @override
+  String get createArchiveSelectFormatTooltip => '형식 선택';
+
+  @override
+  String get createArchiveSecuritySection => '보안';
+
+  @override
+  String get createArchivePasswordLabel => '비밀번호 (선택사항)';
+
+  @override
+  String get createArchivePasswordHintText => '비밀번호 입력';
+
+  @override
+  String get createArchiveConfirmPasswordLabel => '비밀번호 확인';
+
+  @override
+  String get createArchiveConfirmPasswordHint => '비밀번호 재입력';
+
+  @override
+  String get passphraseStrengthFair => '보통';
+
+  @override
+  String get createArchiveEncryptFilenamesNeedsPassword =>
+      '파일을 미리 보려면 비밀번호가 필요합니다';
+
+  @override
+  String get createArchiveEncryptFilenamesActive => '잠금이 해제될 때까지 파일 목록을 숨깁니다';
+
+  @override
+  String get createArchiveAdvancedOptions => '고급 옵션';
+
+  @override
+  String get createArchiveCompressionLevel => '압축 수준';
+
+  @override
+  String get createArchiveSplitHintZip =>
+      '.z01, .z02 … 및 마지막 .zip으로 저장됩니다. 모든 파트를 같은 폴더에 함께 보관하세요.';
+
+  @override
+  String get createArchiveSplitHintSevenZip =>
+      '.7z.001, .7z.002 … 로 저장됩니다. 모든 파트를 같은 폴더에 함께 보관하세요.';
+
+  @override
+  String get createArchiveSplitVolumes => '분할 압축';
+
+  @override
+  String get createArchiveSplitVolumeNone => '없음';
+
+  @override
+  String get createArchiveCustomVolumeSizeLabel => '사용자 지정 분할 크기 (MB)';
+
+  @override
+  String get createArchiveCustomVolumeSizeHint => '예: 50';
+
+  @override
+  String get archiveCompressionStoreTitle => '저장 (0) — 압축 안 함';
+
+  @override
+  String get archiveCompressionStoreDesc => '즉시 압축, 비디오, 음악 및 아카이브에 적합';
+
+  @override
+  String get archiveCompressionFastTitle => '빠름 (1–3) — 빠른 속도';
+
+  @override
+  String get archiveCompressionFastDesc => '일상적인 공유를 위한 빠른 압축';
+
+  @override
+  String get archiveCompressionNormalTitle => '보통 (5) — 균형';
+
+  @override
+  String get archiveCompressionNormalDesc => '압축률과 속도의 균형';
+
+  @override
+  String get archiveCompressionUltraTitle => '최대 (9) — 최소 크기';
+
+  @override
+  String get archiveCompressionUltraDesc => '최소 크기, 압축 속도 느림';
+
+  @override
+  String get officeViewerErrorTitle => '이 문서를 미리 볼 수 없습니다';
+
+  @override
+  String get officeViewerEncrypted =>
+      '이 문서는 비밀번호로 보호되어 있으며, 암호화된 Office 파일은 미리 볼 수 없습니다.';
+
+  @override
+  String get officeViewerUnsupported =>
+      '이 파일을 읽을 수 없습니다. 파일이 손상되었거나 뷰어가 지원하지 않는 형식일 수 있습니다.';
+
+  @override
+  String get officeViewerTooLarge => '이 문서는 너무 커서 앱에서 미리 볼 수 없습니다.';
+
+  @override
+  String get officeViewerSpeakerNotes => '발표자 노트';
+
+  @override
+  String get fileAssocDocumentViewer => '앱 내장 문서 뷰어';
+
+  @override
+  String get viewOfficeDocumentsInApp =>
+      'Word, Excel, PowerPoint, OpenDocument 파일을 앱에서 미리 보기';
+
+  @override
+  String get archiveCompressionMethodLabel => '압축 방식';
+
+  @override
+  String get archiveMethodLzma2Desc => '가장 균형 잡힌 선택입니다. .tar.xz에서도 사용됩니다.';
+
+  @override
+  String get archiveMethodLzmaDesc => '7-Zip의 이전 방식입니다. .tar.lzma에서도 사용됩니다.';
+
+  @override
+  String get archiveMethodDeflateDesc =>
+      '가장 빠르지만 파일이 더 커지며 호환성이 가장 넓습니다. ZIP과 .tar.gz에서도 사용됩니다.';
+
+  @override
+  String archiveMethodFixedInfo(String format, String method) {
+    return '$format 형식은 항상 $method 방식으로 압축합니다.';
+  }
+
+  @override
+  String get archiveMethodMoreInSevenZip =>
+      'LZMA2와 LZMA는 7-Zip 아카이브에서 사용할 수 있습니다.';
+
+  @override
+  String get archiveMethodStoreNote => '저장은 압축하지 않으므로 선택할 방식이 없습니다.';
+
+  @override
+  String get browserTabsEnabledTitle => '파일 관리자 탭 사용';
+
+  @override
+  String get browserTabsEnabledSubtitle => '여러 위치를 열어 두고 서로 전환합니다.';
+
+  @override
+  String get browserTabNew => '새 탭';
+
+  @override
+  String get browserTabClose => '탭 닫기';
+
+  @override
+  String get browserTabCloseOthers => '다른 탭 닫기';
+
+  @override
+  String get browserTabDuplicate => '탭 복제';
+
+  @override
+  String get browserTabMoveToOtherPane => '다른 패널로 이동';
+
+  @override
+  String get browserTabSwitchPrevious => '이전 탭으로 전환';
+
+  @override
+  String get browserTabOpenInNewTab => '새 탭에서 열기';
+
+  @override
+  String browserTabLimitReached(int max) {
+    return '탭 한도에 도달했습니다($max)';
+  }
+
+  @override
+  String get browserTabCloseToLeft => '왼쪽 탭 닫기';
+
+  @override
+  String get browserTabCloseToRight => '오른쪽 탭 닫기';
+
+  @override
+  String get browserTabCloseAll => '모두 닫기';
+
+  @override
+  String get dualPaneEnabledTitle => '이중 창 사용';
+
+  @override
+  String get dualPaneEnabledSubtitle =>
+      '화면 폭이 충분하면 열린 탭 두 개를 나란히 표시합니다. 파일 관리자 탭이 필요합니다.';
+
+  @override
+  String get pressBackAgainToExit => '한 번 더 뒤로 가기를 누르면 종료됩니다';
+
+  @override
+  String get tabEdgeSwipeLabel => '탭 스와이프 동작';
+
+  @override
+  String get tabSwipeBetweenTabsTitle => '탭 간 스와이프';
+
+  @override
+  String get tabSwipeBetweenTabsOnDesc => '폴더에서 옆으로 스와이프하면 다음 또는 이전 탭으로 이동합니다.';
+
+  @override
+  String get tabSwipeBetweenTabsOffDesc =>
+      '탭 전환은 탭 바에서만 합니다. 아래 두 동작은 화면 어디에서나 작동합니다.';
+
+  @override
+  String get tabSwipeRightOnFirstTab => '첫 번째 탭에서 오른쪽으로 스와이프';
+
+  @override
+  String get tabSwipeRightAnywhere => '어디서나 오른쪽으로 스와이프';
+
+  @override
+  String get tabSwipeLeftOnLastTab => '마지막 탭에서 왼쪽으로 스와이프';
+
+  @override
+  String get tabSwipeLeftAnywhere => '어디서나 왼쪽으로 스와이프';
+
+  @override
+  String get tabSwipeActionNewTab => '새 탭 열기';
+
+  @override
+  String get tabSwipeActionOpenDrawer => '사이드 메뉴 열기';
+
+  @override
+  String get tabSwipeActionLoopFirst => '첫 번째 탭으로 순환';
+
+  @override
+  String get tabSwipeActionLoopLast => '마지막 탭으로 순환';
+
+  @override
+  String get tabSwipeActionNothing => '아무 동작 안 함';
+
+  @override
+  String get tabSwipeRightNothingDesc =>
+      '사이드 메뉴는 화면 왼쪽 가장자리나 메뉴 버튼으로 계속 열 수 있습니다.';
+
+  @override
+  String get tabSwipeRightLoopDesc =>
+      '사이드 메뉴는 화면 왼쪽 가장자리나 메뉴 버튼으로 엽니다. 탭이 하나뿐이면 이 스와이프로 사이드 메뉴가 열립니다.';
+
+  @override
+  String get tabSwipeNewTabsFromStripDesc => '새 탭은 계속 탭 바에서 열 수 있습니다.';
+
+  @override
+  String get tabSwipePreviewFirstTab => '첫 번째 탭';
+
+  @override
+  String get tabSwipePreviewLastTab => '마지막 탭';
+
+  @override
+  String get appBarAtBottomLabel => '앱 바를 아래에 표시';
+
+  @override
+  String get appBarAtBottomDesc =>
+      '앱 바를 화면 위쪽에서 아래쪽으로 옮겨 엄지손가락으로 더 쉽게 닿도록 합니다.';
+
+  @override
+  String get selectByIconLabel => '아이콘을 탭하여 선택';
+
+  @override
+  String get selectByIconDesc =>
+      '목록 보기에서 파일이나 폴더의 아이콘을 탭하면 선택됩니다. 끄면 아이콘을 탭해도 아무 일도 일어나지 않습니다.';
+
+  @override
+  String get showFileExtensionsLabel => '파일 확장자 표시';
+
+  @override
+  String get showFileExtensionsDesc =>
+      '파일 이름 끝에 확장자를 표시합니다. 검색 중에는 항상 확장자가 표시됩니다.';
+
+  @override
+  String get itemActionsMenuTitle => '항목 작업';
+
+  @override
+  String get itemActionsMenuDesc => '항목 메뉴와 선택 메뉴에 표시할 작업과 표시 순서를 선택합니다.';
+
+  @override
+  String get itemActionsQuickRowHeader => '빠른 작업 줄';
+
+  @override
+  String get itemActionsMenuListHeader => '메뉴 목록';
+
+  @override
+  String get itemActionsMoveToQuickRow => '빠른 작업 줄로 이동';
+
+  @override
+  String get itemActionsMoveToMenuList => '메뉴 목록으로 이동';
+
+  @override
+  String get skinEditStarted =>
+      '스킨 편집기가 켜졌습니다. 어느 화면에서든 떠 있는 버튼으로 색을 골라 바꿀 수 있습니다.';
+
+  @override
+  String get skinEditSaved => '스킨이 저장되었습니다';
+
+  @override
+  String get skinEditPickTooltip => '색을 바꿀 요소 선택';
+
+  @override
+  String get skinEditPickStopTooltip => '선택을 끄고 앱을 평소처럼 사용';
+
+  @override
+  String get skinEditDoneTooltip => '저장하고 스킨 편집기 닫기';
+
+  @override
+  String get skinEditHint =>
+      '요소를 탭하면 색을 바꿀 수 있습니다. 스포이트를 다시 탭하면 앱을 평소처럼 사용할 수 있습니다.';
+
+  @override
+  String get skinEditLayersTitle => '이 위치의 색';
+
+  @override
+  String get skinEditAlsoUsedBy => '같은 색을 함께 사용하는 항목';
+
+  @override
+  String get skinEditClosest => '이 색과 정확히 일치하는 스킨 색이 없어 가장 가까운 색을 보여 줍니다.';
+
+  @override
+  String get skinEditNoMatch => '이 위치는 스킨 색을 직접 사용하지 않습니다. 목록에서 색을 선택하세요.';
+
+  @override
+  String get skinEditAllColors => '모든 색';
+
+  @override
+  String get skinEditBackToEditor => '색 편집기로 돌아가기';
+
+  @override
+  String get skinEditStatusInherited => '상속됨';
+
+  @override
+  String get skinEditReset => '초기화';
+
+  @override
+  String get skinEditMoreOptions => '모든 색과 옵션';
+
+  @override
+  String get skinEditCollapse => '패널 접기';
+
+  @override
+  String get skinEditExpand => '패널 펼치기';
+
+  @override
+  String skinEditPageColors(String page) {
+    return '$page의 색';
+  }
+
+  @override
+  String get skinEditDockTop => '패널을 위로 이동';
+
+  @override
+  String get skinEditDockBottom => '패널을 아래로 이동';
+
+  @override
+  String get skinEditEditorIndependent =>
+      '텍스트 편집기는 자체 색상을 사용하므로 앱 스킨을 따르도록 설정하기 전에는 여기서 바꾼 색이 적용되지 않습니다.';
+
+  @override
+  String get cameraKeepShootingTooltip => '촬영 후에도 계속 촬영';
+
+  @override
+  String get cameraSegmentLengthOff => '끄기';
+
+  @override
+  String cameraSegmentLengthMinutes(int minutes) {
+    return '$minutes분';
+  }
+
+  @override
+  String get cameraSegmentLengthTooltip => '녹화를 분할하여 실시간으로 저장';
+
+  @override
+  String get cameraSegmentSpaceMessage =>
+      '금고의 저장 공간이 부족합니다. 녹화가 중단되었습니다. 저장되지 않은 부분은 검토를 위해 유지됩니다.';
+
+  @override
+  String get audioSegmentedStopTitle => '녹음을 중지할까요?';
+
+  @override
+  String get audioSegmentedStopMessage =>
+      '지금까지 녹음된 부분은 이미 금고에 저장되었습니다. 지금 중지하고 나머지를 저장할까요?';
+
+  @override
+  String get audioSegmentedStopAction => '중지하고 저장';
+
+  @override
+  String get audioUnsavedPartsTitle => '일부 파트가 저장되지 않았습니다';
+
+  @override
+  String audioUnsavedPartsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개의 녹음 파트를 저장할 수 없습니다. 공간을 확보하고 다시 시도하거나 삭제하세요.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get segmentRetrySave => '다시 시도';
+
+  @override
+  String get imageEditorActionAuto => '자동';
+
+  @override
+  String get imageEditorActionFlip => '대칭';
+
+  @override
+  String get imageEditorActionRotate => '회전';
+
+  @override
+  String get imageEditorActionColor => '색상';
+
+  @override
+  String get imageEditorActionSize => '크기';
+
+  @override
+  String get imageEditorActionOpacity => '불투명도';
+
+  @override
+  String get imageEditorActionStyle => '스타일';
+
+  @override
+  String get imageEditorExportSave => '내보내기 / 저장';
+
+  @override
+  String get imageEditorRevertOriginal => '원본으로 되돌리기';
+
+  @override
+  String get imageEditorTuneImageToolLabel => '기본 보정';
+
+  @override
+  String get imageEditorLooksToolLabel => '스타일';
+
+  @override
+  String get imageEditorLookCurrent => '현재';
+
+  @override
+  String get imageEditorLookPortrait => '인물';
+
+  @override
+  String get imageEditorLookDramatic => '드라마틱';
+
+  @override
+  String get imageEditorLookVintage => '빈티지';
+
+  @override
+  String get imageEditorTuneAmbiance => '분위기';
+
+  @override
+  String get imageEditorTuneWarmth => '따뜻함';
+
+  @override
+  String get imageEditorTuneShadows => '어두운 영역';
+
+  @override
+  String get imageEditorCropAspectDin => 'DIN';
+
+  @override
+  String get imageEditorAngle => '각도';
+
+  @override
+  String get fontSizeSmall => '작게';
+
+  @override
+  String get fontSizeMedium => '보통';
+
+  @override
+  String get fontSizeLarge => '크게';
+
+  @override
+  String get fontSizeExtraLarge => '아주 크게';
+
+  @override
+  String get imageEditorTextPlaceholder => '두 번 탭하여 텍스트 변경';
+
+  @override
+  String get imageEditorFontSizePreview => '샘플 미리보기 ABC 123';
+
+  @override
+  String imageEditorPhotoLabel(int index) {
+    return '사진 $index';
+  }
+
+  @override
+  String get cameraPauseRecordingTooltip => '녹화 일시중지';
+
+  @override
+  String get cameraResumeRecordingTooltip => '녹화 재개';
+
+  @override
+  String get cameraSnapshotTooltip => '녹화 중 사진 촬영';
+
+  @override
+  String get cameraPauseFailedMessage => '녹화를 일시중지하거나 재개할 수 없습니다';
+
+  @override
+  String get floatingPlayerTitle => '플로팅 동영상 플레이어';
+
+  @override
+  String get floatingPlayerSubtitle =>
+      '동영상 재생 중 플레이어를 닫으면 옮길 수 있는 작은 창에서 계속 재생됩니다. 앱을 나가면 화면 속 화면으로 전환되며 오디오 전용 버튼이 표시됩니다';
+
+  @override
+  String get floatingPlayerExpandTooltip => '확대';
+
+  @override
+  String get floatingPlayerAudioOnly => '오디오만';
+
+  @override
+  String get floatingPlayerShowVideo => '동영상 표시';
+
+  @override
+  String get masterLockTitle => '마스터 잠금';
+
+  @override
+  String get masterLockInactiveSubtitle => '앱을 열 때 비밀번호, PIN 또는 패턴 요구';
+
+  @override
+  String get masterLockChooseTitle => '앱 잠금 방식을 선택하세요';
+
+  @override
+  String get masterLockBackupTitle => '백업 잠금 해제 추가';
+
+  @override
+  String get masterLockBackupMessage =>
+      '생체 인식 잠금 해제에는 대체 수단으로 비밀번호, PIN 또는 패턴이 필요합니다. 함께 설정할 항목을 선택하세요.';
+
+  @override
+  String get masterCredentialPassword => '비밀번호';
+
+  @override
+  String get masterCredentialPin => 'PIN';
+
+  @override
+  String get masterCredentialPattern => '패턴';
+
+  @override
+  String get masterCredentialSet => '설정됨';
+
+  @override
+  String get masterCredentialNotSet => '설정 안 됨';
+
+  @override
+  String get duressMasterLockRequired =>
+      '강요 해제를 설정하려면 먼저 보안 설정에서 마스터 잠금을 활성화해야 합니다.';
+
+  @override
+  String get skinTokenGroupSurface => '표면';
+
+  @override
+  String get skinTokenGroupContent => '텍스트 및 아이콘';
+
+  @override
+  String get skinTokenGroupBorder => '테두리';
+
+  @override
+  String get skinTokenGroupChrome => '상단 표시줄';
+
+  @override
+  String get skinTokenGroupAction => '버튼';
+
+  @override
+  String get skinTokenGroupControl => '스위치 및 슬라이더';
+
+  @override
+  String get skinTokenGroupChoice => '칩 및 세그먼트';
+
+  @override
+  String get skinTokenGroupSelection => '선택된 항목';
+
+  @override
+  String get skinTokenGroupOverlay => '메뉴, 대화상자 및 시트';
+
+  @override
+  String get skinTokenGroupFloating => '플로팅 요소';
+
+  @override
+  String get skinTokenSurfacePage => '페이지 배경';
+
+  @override
+  String get skinTokenSurfacePageHint => '이 페이지의 모든 요소 뒤에 있는 캔버스입니다.';
+
+  @override
+  String get skinTokenSurfaceCard => '카드 및 행';
+
+  @override
+  String get skinTokenSurfaceCardHint => '카드, 목록 행 및 그룹화된 패널입니다.';
+
+  @override
+  String get skinTokenSurfaceCardActive => '활성 카드';
+
+  @override
+  String get skinTokenSurfaceCardActiveHint => '잠금 해제된 보관함과 같이 강조 표시된 카드입니다.';
+
+  @override
+  String get skinTokenSurfaceTile => '타일 및 썸네일';
+
+  @override
+  String get skinTokenSurfaceTileHint => '썸네일 플레이스홀더, 아이콘 타일 및 코드 블록입니다.';
+
+  @override
+  String get skinTokenSurfaceField => '입력 필드';
+
+  @override
+  String get skinTokenSurfaceFieldHint => '텍스트 필드와 검색창의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenContentPrimary => '기본 텍스트';
+
+  @override
+  String get skinTokenContentPrimaryHint => '제목, 이름 및 본문 텍스트입니다.';
+
+  @override
+  String get skinTokenContentSecondary => '보조 텍스트';
+
+  @override
+  String get skinTokenContentSecondaryHint => '부제목, 세부 정보 및 힌트입니다.';
+
+  @override
+  String get skinTokenContentIcon => '아이콘';
+
+  @override
+  String get skinTokenContentIconHint => '버튼이나 바에 있지 않은 일반 아이콘입니다.';
+
+  @override
+  String get skinTokenBorderDivider => '구분선';
+
+  @override
+  String get skinTokenBorderDividerHint => '행과 섹션 사이의 얇은 선입니다.';
+
+  @override
+  String get skinTokenBorderOutline => '윤곽선';
+
+  @override
+  String get skinTokenBorderOutlineHint => '외곽선 버튼과 선택되지 않은 옵션 상자의 테두리입니다.';
+
+  @override
+  String get skinTokenBorderFocus => '포커스 링';
+
+  @override
+  String get skinTokenBorderFocusHint => '현재 편집 중인 텍스트 필드의 테두리입니다.';
+
+  @override
+  String get skinTokenChromeTopBar => '상단 표시줄';
+
+  @override
+  String get skinTokenChromeTopBarHint => '상단 표시줄의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenChromeOnTopBar => '상단 표시줄 텍스트 및 아이콘';
+
+  @override
+  String get skinTokenChromeOnTopBarHint => '상단 표시줄의 제목 및 아이콘 색상입니다.';
+
+  @override
+  String get skinTokenActionPrimary => '채워진 버튼';
+
+  @override
+  String get skinTokenActionPrimaryHint => '채워진 버튼의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenActionOnPrimary => '채워진 버튼 레이블';
+
+  @override
+  String get skinTokenActionOnPrimaryHint => '채워진 버튼의 레이블과 아이콘입니다.';
+
+  @override
+  String get skinTokenActionTonal => '돌출형 버튼';
+
+  @override
+  String get skinTokenActionTonalHint => '돌출형 및 톤 버튼의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenActionOnTonal => '돌출형 버튼 레이블';
+
+  @override
+  String get skinTokenActionOnTonalHint => '돌출형 버튼의 레이블과 아이콘입니다.';
+
+  @override
+  String get skinTokenActionText => '텍스트 및 외곽선 버튼';
+
+  @override
+  String get skinTokenActionTextHint => '텍스트 버튼, 외곽선 버튼 및 링크의 레이블 색상입니다.';
+
+  @override
+  String get skinTokenControlActive => '컨트롤 켜짐 상태';
+
+  @override
+  String get skinTokenControlActiveHint =>
+      '켜졌을 때의 스위치 트랙, 선택된 체크박스 및 라디오, 슬라이더 및 진행률 채우기입니다.';
+
+  @override
+  String get skinTokenControlOnActive => '스위치 손잡이 및 체크 표시';
+
+  @override
+  String get skinTokenControlOnActiveHint => '켜진 스위치의 손잡이와 체크박스 내부의 체크 표시입니다.';
+
+  @override
+  String get skinTokenControlTrack => '컨트롤 트랙';
+
+  @override
+  String get skinTokenControlTrackHint =>
+      '꺼졌을 때의 스위치 트랙과 슬라이더 및 진행률 표시줄의 빈 부분입니다.';
+
+  @override
+  String get skinTokenControlInactive => '컨트롤 꺼짐 상태';
+
+  @override
+  String get skinTokenControlInactiveHint =>
+      '꺼진 스위치의 손잡이와 선택되지 않은 확인란의 테두리입니다.';
+
+  @override
+  String get skinTokenChoiceBackground => '칩';
+
+  @override
+  String get skinTokenChoiceBackgroundHint => '선택되지 않은 칩과 세그먼트의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenChoiceSelected => '선택된 칩';
+
+  @override
+  String get skinTokenChoiceSelectedHint => '선택된 칩 또는 세그먼트의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenChoiceOnSelected => '선택된 칩 레이블';
+
+  @override
+  String get skinTokenChoiceOnSelectedHint => '선택된 칩 또는 세그먼트의 레이블과 아이콘입니다.';
+
+  @override
+  String get skinTokenChoiceBorder => '칩 테두리';
+
+  @override
+  String get skinTokenChoiceBorderHint => '칩 및 분할 버튼의 윤곽선입니다.';
+
+  @override
+  String get skinTokenSelectionFill => '선택된 행';
+
+  @override
+  String get skinTokenSelectionFillHint => '선택된 파일과 행, 강조 표시된 아이콘 타일입니다.';
+
+  @override
+  String get skinTokenSelectionOn => '선택된 행 텍스트 및 아이콘';
+
+  @override
+  String get skinTokenSelectionOnHint => '선택된 행에 표시되는 텍스트와 아이콘입니다.';
+
+  @override
+  String get skinTokenOverlayMenu => '메뉴';
+
+  @override
+  String get skinTokenOverlayMenuHint => '팝업, 드롭다운 및 컨텍스트 메뉴입니다.';
+
+  @override
+  String get skinTokenOverlayOnMenu => '메뉴 텍스트';
+
+  @override
+  String get skinTokenOverlayOnMenuHint => '메뉴의 텍스트와 아이콘입니다.';
+
+  @override
+  String get skinTokenOverlayDialog => '대화상자';
+
+  @override
+  String get skinTokenOverlayDialogHint => '대화상자의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenOverlayOnDialog => '대화상자 제목';
+
+  @override
+  String get skinTokenOverlayOnDialogHint => '대화상자의 제목 텍스트입니다.';
+
+  @override
+  String get skinTokenOverlaySheet => '하단 시트';
+
+  @override
+  String get skinTokenOverlaySheetHint => '하단 시트의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenOverlayOnSheet => '하단 시트 텍스트';
+
+  @override
+  String get skinTokenOverlayOnSheetHint => '하단 시트의 텍스트와 아이콘입니다.';
+
+  @override
+  String get skinTokenOverlayScrim => '대화상자 뒤 어둡게 하기';
+
+  @override
+  String get skinTokenOverlayScrimHint => '대화상자와 하단 시트 뒤의 어두운 배경입니다.';
+
+  @override
+  String get skinTokenFloatingFab => '원형 추가 버튼';
+
+  @override
+  String get skinTokenFloatingFabHint => '원형 추가 버튼의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenFloatingOnFab => '원형 추가 버튼 아이콘';
+
+  @override
+  String get skinTokenFloatingOnFabHint => '원형 추가 버튼 위의 아이콘입니다.';
+
+  @override
+  String get skinTokenFloatingToast => '알림 캡슐';
+
+  @override
+  String get skinTokenFloatingToastHint => '하단에 팝업되는 안내 메시지의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenFloatingOnToast => '알림 캡슐 텍스트';
+
+  @override
+  String get skinTokenFloatingOnToastHint => '안내 메시지의 텍스트와 아이콘입니다.';
+
+  @override
+  String get skinTokenFloatingTooltip => '툴팁';
+
+  @override
+  String get skinTokenFloatingTooltipHint => '툴팁의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenFloatingOnTooltip => '툴팁 텍스트';
+
+  @override
+  String get skinTokenFloatingOnTooltipHint => '툴팁의 텍스트입니다.';
+
+  @override
+  String get skinTokenGroupAccent => '강조 색상';
+
+  @override
+  String get skinTokenGroupStatus => '상태 및 오류';
+
+  @override
+  String get skinTokenSurfacePanel => '패널';
+
+  @override
+  String get skinTokenSurfacePanelHint => '표준 카드 위젯, 북마크 바, 그리드 셀 및 정보 시트입니다.';
+
+  @override
+  String get skinTokenChromeBar => '바 및 탭 스트립';
+
+  @override
+  String get skinTokenChromeBarHint => '작업 표시줄, 탭 스트립, 선택 바 및 하단 바입니다.';
+
+  @override
+  String get skinTokenAccentPrimary => '강조';
+
+  @override
+  String get skinTokenAccentPrimaryHint => '하이라이트, 본문 내 링크, 작은 강조 아이콘 및 배지입니다.';
+
+  @override
+  String get skinTokenAccentSecondary => '보조 강조';
+
+  @override
+  String get skinTokenAccentSecondaryHint => '보조 하이라이트 및 태그입니다.';
+
+  @override
+  String get skinTokenAccentTertiary => '3차 강조';
+
+  @override
+  String get skinTokenAccentTertiaryHint => '3차 하이라이트 및 태그입니다.';
+
+  @override
+  String get skinTokenAccentTertiaryContainer => '3차 강조 채우기';
+
+  @override
+  String get skinTokenAccentTertiaryContainerHint => '3차 하이라이트 배경의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenAccentOnTertiaryContainer => '3차 강조 채우기 텍스트';
+
+  @override
+  String get skinTokenAccentOnTertiaryContainerHint => '3차 채우기 위의 텍스트와 아이콘입니다.';
+
+  @override
+  String get skinTokenStatusDanger => '오류 및 삭제';
+
+  @override
+  String get skinTokenStatusDangerHint => '오류 텍스트, 삭제 작업 및 오류 테두리입니다.';
+
+  @override
+  String get skinTokenStatusOnDanger => '오류 색상 위 텍스트';
+
+  @override
+  String get skinTokenStatusOnDangerHint => '오류 색상 위에 표시되는 텍스트와 아이콘입니다.';
+
+  @override
+  String get skinTokenStatusDangerContainer => '오류 메시지 채우기';
+
+  @override
+  String get skinTokenStatusDangerContainerHint => '오류 메시지 및 배너의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenStatusOnDangerContainer => '오류 메시지 텍스트';
+
+  @override
+  String get skinTokenStatusOnDangerContainerHint => '오류 메시지 내의 텍스트와 아이콘입니다.';
+
+  @override
+  String get skinTokenStatusInfo => '안내 메시지 채우기';
+
+  @override
+  String get skinTokenStatusInfoHint => '안내 배너의 채우기 색상입니다.';
+
+  @override
+  String get skinTokenStatusOnInfo => '안내 메시지 텍스트';
+
+  @override
+  String get skinTokenStatusOnInfoHint => '안내 배너 내의 텍스트와 아이콘입니다.';
+}

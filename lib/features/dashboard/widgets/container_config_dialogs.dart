@@ -1,0 +1,510 @@
+part of 'container_config_sheet.dart';
+
+class _PatternVerifySheet extends ConsumerStatefulWidget {
+  final String storedHash;
+  const _PatternVerifySheet({required this.storedHash});
+  @override
+  ConsumerState<_PatternVerifySheet> createState() => _PatternVerifySheetState();
+}
+
+class _PatternVerifySheetState extends ConsumerState<_PatternVerifySheet> {
+  void _onPatternComplete(List<int> pattern) {
+    ref
+        .read(patternVerifyProvider(widget.storedHash).notifier)
+        .submitPattern(pattern, incorrectMessage: context.l10n.incorrectPatternError);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(patternVerifyProvider(widget.storedHash));
+    ref.listen<VerifyState>(patternVerifyProvider(widget.storedHash), (previous, next) {
+      if (next.verified && (previous == null || !previous.verified)) {
+        Navigator.pop(context, widget.storedHash);
+      }
+    });
+
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    Widget header = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.pattern_rounded,
+              size: 22,
+              color: state.showError ? cs.error : cs.primary,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                context.l10n.verifyPatternTitle,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: state.showError ? cs.error : null,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          state.showError ? (state.error ?? '') : ' ',
+          style: textTheme.bodySmall?.copyWith(
+            color: state.showError ? cs.error : Colors.transparent,
+            fontWeight: state.showError ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+
+    Widget cancelButton = TextButton(
+      onPressed: () => Navigator.pop(context),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      ),
+      child: Text(
+        context.l10n.cancel,
+        style: textTheme.labelLarge?.copyWith(
+          color: cs.onSurfaceVariant,
+        ),
+      ),
+    );
+
+    Widget patternView = PatternLockView(
+      key: ValueKey(state.resetKey),
+      onPatternComplete: _onPatternComplete,
+      showError: state.showError,
+    );
+
+    return AppBottomSheet(
+      child: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          child: isLandscape
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          header,
+                          const SizedBox(height: 24),
+                          cancelButton,
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    patternView,
+                  ],
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    header,
+                    const SizedBox(height: 24),
+                    Center(child: patternView),
+                    const SizedBox(height: 16),
+                    Center(child: cancelButton),
+                    const SizedBox(height: 4),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PinVerifySheet extends ConsumerStatefulWidget {
+  final String storedHash;
+  const _PinVerifySheet({required this.storedHash});
+  @override
+  ConsumerState<_PinVerifySheet> createState() => _PinVerifySheetState();
+}
+
+class _PinVerifySheetState extends ConsumerState<_PinVerifySheet> {
+  void _onPinComplete(String pin) {
+    ref
+        .read(pinVerifyProvider(widget.storedHash).notifier)
+        .submitPin(pin, incorrectMessage: context.l10n.incorrectPinError);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(pinVerifyProvider(widget.storedHash));
+    ref.listen<VerifyState>(pinVerifyProvider(widget.storedHash), (previous, next) {
+      if (next.verified && (previous == null || !previous.verified)) {
+        Navigator.pop(context, widget.storedHash);
+      }
+    });
+
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final mq = MediaQuery.of(context);
+    final isLandscape = mq.orientation == Orientation.landscape;
+
+    Widget header = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.dialpad_rounded,
+              size: 22,
+              color: state.showError ? cs.error : cs.primary,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                context.l10n.verifyPinTitle,
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: state.showError ? cs.error : null,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          state.showError ? (state.error ?? '') : ' ',
+          style: textTheme.bodySmall?.copyWith(
+            color: state.showError ? cs.error : Colors.transparent,
+            fontWeight: state.showError ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+
+    Widget cancelButton = TextButton(
+      onPressed: () => Navigator.pop(context),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      ),
+      child: Text(
+        context.l10n.cancel,
+        style: textTheme.labelLarge?.copyWith(
+          color: cs.onSurfaceVariant,
+        ),
+      ),
+    );
+
+    Widget pinView = PinLockView(
+      key: ValueKey(state.resetKey),
+      onPinComplete: _onPinComplete,
+      showError: state.showError,
+    );
+
+    return AppBottomSheet(
+      child: SingleChildScrollView(
+        child: SizedBox(
+          width: double.infinity,
+          child: isLandscape
+              ? IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // ── Left: Header & Cancel Button ─────────────────────────
+                      Expanded(
+                        flex: 4,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            header,
+                            const SizedBox(height: 20),
+                            OutlinedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(context.l10n.cancel),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      const VerticalDivider(width: 1),
+                      const SizedBox(width: 24),
+                      // ── Right: Scaled PIN Dialpad ─────────────────────────
+                      Expanded(
+                        flex: 6,
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: mq.size.height * 0.72,
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: pinView,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    header,
+                    const SizedBox(height: 20),
+                    Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: pinView,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Center(child: cancelButton),
+                    const SizedBox(height: 4),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RealPasswordGateDialog extends ConsumerStatefulWidget {
+  final String uri;
+  final int cipherId;
+  final int hashId;
+  final bool documentProvider;
+  final bool cacheDerivedKey;
+  final String containerFormat;
+  final List<Map<String, String>> initialKeyfiles;
+  final String? initialPassword;
+  final bool isMounted;
+  final List<Map<String, String>> compositeCarriers;
+
+  const _RealPasswordGateDialog({
+    required this.uri,
+    required this.cipherId,
+    required this.hashId,
+    required this.documentProvider,
+    required this.cacheDerivedKey,
+    this.containerFormat = 'veracrypt',
+    this.initialKeyfiles = const [],
+    this.initialPassword,
+    this.isMounted = false,
+    this.compositeCarriers = const [],
+  });
+
+  @override
+  ConsumerState<_RealPasswordGateDialog> createState() => _RealPasswordGateDialogState();
+}
+
+class _RealPasswordGateDialogState extends ConsumerState<_RealPasswordGateDialog> {
+  final _pwCtrl = TextEditingController();
+  final _pimCtrl = TextEditingController();
+  bool _obscure = true;
+  bool _obscurePim = true;
+
+  bool get _isCryptomator => ContainerFormat.isCryptomatorWire(widget.containerFormat);
+  bool get _isGocryptfs => ContainerFormat.isGocryptfsWire(widget.containerFormat);
+  bool get _isCryfs => ContainerFormat.isCryfsWire(widget.containerFormat);
+  bool get _isBitlocker => ContainerFormat.isBitlockerWire(widget.containerFormat);
+  bool get _isVeraCrypt =>
+      widget.containerFormat == 'veracrypt' ||
+      ContainerFormat.isCompositeWire(widget.containerFormat);
+  bool get _supportsAdvanced => !_isCryptomator && !_isGocryptfs && !_isCryfs && !_isBitlocker;
+
+  @override
+  void dispose() {
+    _pwCtrl.dispose();
+    _pimCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickKeyfiles() =>
+      ref
+          .read(realPasswordGateProvider(widget.initialKeyfiles).notifier)
+          .pickKeyfiles();
+
+  Future<void> _verify() async {
+    final result = await ref
+        .read(realPasswordGateProvider(widget.initialKeyfiles).notifier)
+        .verify(
+          uri: widget.uri,
+          containerFormat: widget.containerFormat,
+          cipherId: widget.cipherId,
+          hashId: widget.hashId,
+          documentProvider: widget.documentProvider,
+          cacheDerivedKey: widget.cacheDerivedKey,
+          password: _pwCtrl.text,
+          pimText: _pimCtrl.text,
+          l10n: context.l10n,
+          isCurrentlyMounted: widget.isMounted,
+          compositeCarriers: widget.compositeCarriers,
+        );
+    if (result != null && mounted) {
+      Navigator.pop(context, result);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final gateState = ref.watch(realPasswordGateProvider(widget.initialKeyfiles));
+
+    return AlertDialog(
+      title: Text(context.l10n.verifyCredentialsTitle),
+      content: SizedBox(
+        // Lock dialog content to a constant width to prevent width snapping
+        width: 380,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _pwCtrl,
+                obscureText: _obscure,
+                autofocus: true,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest,
+                  labelText: context.l10n.containerPasswordOptionalLabel,
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _obscure,
+                    onToggle: () => setState(() => _obscure = !_obscure),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                onSubmitted: (_) => _verify(),
+              ),
+
+              if (_isVeraCrypt) ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _pimCtrl,
+                  keyboardType: TextInputType.number,
+                  obscureText: _obscurePim,
+                  obscuringCharacter: '*',
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest,
+                    labelText: context.l10n.pimOptionalLabel,
+                    suffixIcon: PasswordVisibilityToggle(
+                      obscured: _obscurePim,
+                      onToggle: () => setState(() => _obscurePim = !_obscurePim),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onSubmitted: (_) => _verify(),
+                ),
+              ],
+
+              if (_supportsAdvanced) ...[
+                const SizedBox(height: 12),
+                KeyfilesPicker(
+                  keyfiles: gateState.keyfiles,
+                  picking: gateState.pickingKeyfiles,
+                  onPick: _pickKeyfiles,
+                  onRemove: (k) => ref
+                      .read(realPasswordGateProvider(widget.initialKeyfiles).notifier)
+                      .removeKeyfile(k),
+                ),
+              ],
+
+              if (gateState.error != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  gateState.error!,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: cs.error,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            ref
+                .read(realPasswordGateProvider(widget.initialKeyfiles).notifier)
+                .cancelActiveUnlock();
+            Navigator.pop(context);
+          },
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: gateState.loading ? null : _verify,
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: gateState.loading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                )
+              : Text(context.l10n.verifyButton),
+        ),
+      ],
+    );
+  }
+}
+
+class _DisplayNameDialog extends StatefulWidget {
+  final String initialText;
+  const _DisplayNameDialog({required this.initialText});
+  @override
+  State<_DisplayNameDialog> createState() => _DisplayNameDialogState();
+}
+
+class _DisplayNameDialogState extends State<_DisplayNameDialog> {
+  late final TextEditingController _controller;
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialText);
+  }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.displayNameTitle),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: InputDecoration(hintText: context.l10n.containerNameHint),
+        onSubmitted: (value) => Navigator.pop(context, value),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: Text(context.l10n.save),
+        ),
+      ],
+    );
+  }
+}

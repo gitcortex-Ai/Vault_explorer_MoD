@@ -1,0 +1,427 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/data/models/clipboard_item.dart';
+import 'package:vaultexplorer/data/models/file_operation.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+
+/// A name collision discovered during the pre-paste scan.
+@immutable
+class ConflictEntry {
+  final ClipboardItem item;
+  final bool destIsDir;
+
+  const ConflictEntry({required this.item, required this.destIsDir});
+}
+
+/// Single bottom sheet that resolves every name conflict for a paste in one
+/// pass, instead of one [AlertDialog] per colliding file.
+///
+/// ### Why this replaces the old per-file dialog loop
+/// The previous implementation in `FileBrowserScreen._paste()` awaited a
+/// dialog for every conflict serially, blocking the paste before
+/// [FileOperationService.enqueue] was ever called. For a folder with a dozen
+/// collisions that meant a dozen sequential modal interruptions.
+///
+/// This sheet shows the whole list at once. The user can:
+///   - Set a resolution per item (skip / overwrite / keep both), or
+///   - Tap one of the three "Apply to all" chips to resolve everything at once.
+///
+/// Returns a [ConflictPlan] (folded-name → [ConflictResolution], lowercased
+/// unless [caseSensitive]) ready to pass straight into
+/// [FileOperationService.enqueue], or `null` if the user cancelled the whole
+/// paste.
+class ConflictResolutionSheet extends StatefulWidget {
+  final List<ConflictEntry> conflicts;
+
+  /// Label for the Cancel action. Defaults to [AppLocalizations.cancelPasteButton]
+  /// since paste was this sheet's original (and still most common) caller;
+  /// other callers that reuse this same sheet for a different operation
+  /// (e.g. import) should pass their own wording instead.
+  final String? cancelLabel;
+
+  /// Whether the destination compares names case-sensitively; decides how
+  /// the plan's keys are folded. Must match what the consumer of the plan
+  /// folds with -- pass `namesAreCaseSensitive(destinationContainer)`.
+  final bool caseSensitive;
+
+  const ConflictResolutionSheet({
+    super.key,
+    required this.conflicts,
+    this.cancelLabel,
+    this.caseSensitive = false,
+  });
+
+  /// Shows the sheet and returns the resolved [ConflictPlan], or `null` if
+  /// the user dismissed it / tapped Cancel.
+  static Future<ConflictPlan?> show(
+    BuildContext context, {
+    required List<ConflictEntry> conflicts,
+    String? cancelLabel,
+    bool caseSensitive = false,
+  }) {
+    return showModalBottomSheet<ConflictPlan>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (_) => ConflictResolutionSheet(
+        conflicts: conflicts,
+        cancelLabel: cancelLabel,
+        caseSensitive: caseSensitive,
+      ),
+    );
+  }
+
+  @override
+  State<ConflictResolutionSheet> createState() =>
+      _ConflictResolutionSheetState();
+}
+
+class _ConflictResolutionSheetState extends State<ConflictResolutionSheet> {
+  late final Map<String, ConflictResolution> _resolutions;
+
+  @override
+  void initState() {
+    super.initState();
+    // Default every item to "keep both" — the safest non-destructive choice.
+    _resolutions = {
+      for (final c in widget.conflicts)
+        _keyFor(c): ConflictResolution.keepBoth,
+    };
+  }
+
+  String _keyFor(ConflictEntry c) =>
+      widget.caseSensitive ? c.item.name : c.item.name.toLowerCase();
+
+  void _applyToAll(ConflictResolution resolution) {
+    setState(() {
+      for (final key in _resolutions.keys) {
+        _resolutions[key] = resolution;
+      }
+    });
+  }
+
+  void _setOne(String key, ConflictResolution resolution) {
+    setState(() => _resolutions[key] = resolution);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final count = widget.conflicts.length;
+
+    final double initialChildSize;
+    final double minChildSize;
+    final double maxChildSize;
+
+    if (isLandscape) {
+      initialChildSize = 0.9;
+      minChildSize = 0.8;
+      maxChildSize = 0.95;
+    } else {
+      initialChildSize = count > 4 ? 0.65 : 0.45;
+      minChildSize = count > 4 ? 0.5 : 0.45;
+      maxChildSize = 0.9;
+    }
+
+    return DraggableScrollableSheet(
+      key: ValueKey(isLandscape),
+      expand: false,
+      initialChildSize: initialChildSize,
+      minChildSize: minChildSize,
+      maxChildSize: maxChildSize,
+      builder: (context, scrollController) {
+        return SafeArea(
+          top: false,
+          bottom: false,
+          child: Column(
+            children: [
+              Container(
+                width: 32,
+                height: 4,
+                margin: EdgeInsets.symmetric(
+                  vertical: isLandscape ? 6 : 12,
+                ),
+                decoration: BoxDecoration(
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              // ── Header ───────────────────────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, isLandscape ? 4 : 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 20, color: cs.error),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        context.l10n.conflictItemsAlreadyExistTitle(count),
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, isLandscape ? 6 : 12),
+                child: Text(
+                  context.l10n.conflictResolutionSubtitle,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
+
+              // ── Apply-to-all row ─────────────────────────────────────────────
+              if (count > 1)
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, isLandscape ? 6 : 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _ApplyAllChip(
+                          label: context.l10n.skipAllChipLabel,
+                          icon: Icons.block_rounded,
+                          onTap: () => _applyToAll(ConflictResolution.skip),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _ApplyAllChip(
+                          label: context.l10n.overwriteAllChipLabel,
+                          icon: Icons.find_replace_rounded,
+                          isDestructive: true,
+                          onTap: () => _applyToAll(ConflictResolution.overwrite),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _ApplyAllChip(
+                          label: context.l10n.keepBothButton,
+                          icon: Icons.content_copy_rounded,
+                          onTap: () => _applyToAll(ConflictResolution.keepBoth),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const Divider(height: 1),
+
+              // ── Per-item list ────────────────────────────────────────────────
+              Expanded(
+                child: ListView.separated(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  itemCount: widget.conflicts.length,
+                  separatorBuilder: (_, _) =>
+                      const Divider(height: 1, indent: 56),
+                  itemBuilder: (_, i) {
+                    final conflict = widget.conflicts[i];
+                    final key = _keyFor(conflict);
+                    return _ConflictRow(
+                      conflict: conflict,
+                      resolution: _resolutions[key]!,
+                      onChanged: (r) => _setOne(key, r),
+                    );
+                  },
+                ),
+              ),
+
+              const Divider(height: 1),
+
+              // ── Actions ──────────────────────────────────────────────────────
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  isLandscape ? 8 : 12,
+                  16,
+                  (isLandscape ? 8 : 12) + mediaQuery.padding.bottom,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context, null),
+                        child: Text(
+                          widget.cancelLabel ?? context.l10n.cancelPasteButton,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () =>
+                            Navigator.pop(context, Map.of(_resolutions)),
+                        child: Text(context.l10n.continueButton),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Apply-to-all chip ──────────────────────────────────────────────────────────
+
+class _ApplyAllChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isDestructive;
+  final VoidCallback onTap;
+
+  const _ApplyAllChip({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final color = isDestructive ? cs.error : cs.onSurfaceVariant;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    return Material(
+      color: cs.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: isLandscape ? 6 : 10,
+            horizontal: 6,
+          ),
+          child: isLandscape
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 16, color: color),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 16, color: color),
+                    const SizedBox(height: 4),
+                    Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Per-item conflict row ──────────────────────────────────────────────────────
+
+class _ConflictRow extends StatelessWidget {
+  final ConflictEntry conflict;
+  final ConflictResolution resolution;
+  final ValueChanged<ConflictResolution> onChanged;
+
+  const _ConflictRow({
+    required this.conflict,
+    required this.resolution,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final item = conflict.item;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Icon(
+            item.isDir
+                ? Icons.folder_rounded
+                : Icons.insert_drive_file_outlined,
+            size: 20,
+            color: item.isDir ? cs.secondary : cs.onSurfaceVariant,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              item.name,
+              style: textTheme.bodyMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          DropdownButtonHideUnderline(
+            child: DropdownButton<ConflictResolution>(
+              value: resolution,
+              isDense: true,
+              borderRadius: BorderRadius.circular(8),
+              style: textTheme.bodySmall?.copyWith(color: cs.onSurface),
+              items: [
+                DropdownMenuItem(
+                  value: ConflictResolution.skip,
+                  child: Text(context.l10n.skipButton),
+                ),
+                DropdownMenuItem(
+                  value: ConflictResolution.overwrite,
+                  child: Text(
+                    conflict.destIsDir
+                        ? context.l10n.overwriteFolderDropdownLabel
+                        : context.l10n.overwriteItemDropdownLabel,
+                    style: TextStyle(color: cs.error),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: ConflictResolution.keepBoth,
+                  child: Text(context.l10n.keepBothButton),
+                ),
+              ],
+              onChanged: (v) {
+                if (v != null) onChanged(v);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

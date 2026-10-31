@@ -1,0 +1,1780 @@
+// Extracted from vault_explorer_api_file_io.dart (old _FileIoOps mixin) as part of the Riverpod migration, Phase 2.
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter/services.dart';
+import 'package:vaultexplorer/core/filesystem/local_storage_container.dart';
+import 'package:vaultexplorer/core/filesystem/mounted_container_filesystem.dart';
+import 'package:vaultexplorer/core/utils/image_preview_exception.dart';
+import 'package:vaultexplorer/core/utils/raw_entry.dart';
+import 'package:vaultexplorer/core/utils/ve_log.dart';
+import 'package:vaultexplorer/data/models/clipboard_item.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/models/thumbnail_with_size.dart';
+import 'package:vaultexplorer/data/services/vault_engine/channel_methods.dart';
+import 'package:vaultexplorer/data/services/thumbnail_cache_service.dart';
+
+import 'local_file_io_backend.dart';
+import 'vault_engine_types.dart';
+
+/// File CRUD, thumbnails, import/export, and system-level calls.
+///
+/// Any call whose [MountedContainer] is [kDecoyLocalVolId] (real phone
+/// storage, standing in via [buildLocalStorageContainer]) is diverted to
+/// [_local] instead of the native channel: there's no vault session
+/// registered for that sentinel volId, so a channel call would just fail.
+/// [readWholeFile]/[writeWholeFile]/[createEmptyFile] are composed from
+/// the primitives below, so patching those primitives is enough to make
+/// them work for local storage too, with no changes of their own.
+class VaultFileIoApi {
+  final MethodChannel _channel;
+  static const LocalFileIoBackend _local = LocalFileIoBackend();
+  static int _archiveWriteSequence = 0;
+  static const int _localSourceChunkSize = 4 * 1024 * 1024;
+  const VaultFileIoApi(this._channel);
+
+  // ── File I/O ──────────────────────────────────────────────────────────────
+
+  Future<bool> openWithApp(
+    MountedContainer container,
+    String fileName, {
+    String? packageName,
+    String? mimeType,
+  }) async {
+    if (_isSaf(container)) {
+      final result = await _channel
+          .invokeMethod<bool>(ChannelMethods.safOpenWithApp, {
+            'treeUri': container.uri,
+            'filePath': fileName,
+            'packageName': packageName,
+            'mimeType': mimeType,
+          });
+      return result ?? false;
+    }
+    final result = await _channel
+        .invokeMethod<bool>(ChannelMethods.openWithApp, {
+          'filePath': container.uri,
+          'fileName': fileName,
+          'packageName': packageName,
+          'mimeType': mimeType,
+        });
+    return result ?? false;
+  }
+
+  /// Hands an APK to the system package installer.
+  ///
+  /// Streams the archive out of the container exactly the way
+  /// [openWithApp] does, so nothing is written to disk here either -- the
+  /// difference is that the installer is targeted directly rather than
+  /// offered as one option in a chooser, since "open" on an APK only
+  /// really means one thing.
+  ///
+  /// Returns what actually happened, so the caller can tell an install
+  /// that's under way from one that hasn't started yet:
+  ///  * `'started'` -- the installer is up.
+  ///  * `'permissionRequired'` -- the user hasn't allowed this app to
+  ///    install apps; the relevant settings page has been opened for
+  ///    them, and tapping the APK again after granting it will work.
+  ///  * `'noInstaller'` -- nothing on the device handles APKs (a managed
+  ///    or stripped-down device).
+  ///  * `null` -- the call itself failed; treat as "couldn't open".
+  Future<String?> installApk(
+    MountedContainer container,
+    String fileName,
+  ) async {
+    try {
+      return await _channel.invokeMethod<String>(ChannelMethods.installApk, {
+        'filePath': container.uri,
+        'fileName': fileName,
+        'isLocalStorage': container.isLocalStorage,
+      });
+    } catch (e) {
+      logSwallowed('installApk', e, expected: true);
+      return null;
+    }
+  }
+
+  /// Shares one or more files and/or folders with another app via the system
+  /// share sheet.
+  ///
+  /// Like [openWithApp], this streams decrypted bytes straight from the
+  /// container -- no temp files are written to disk.
+  /// [fileNames] are container-relative paths; a single entry fires
+  /// `ACTION_SEND`, multiple entries fire `ACTION_SEND_MULTIPLE`.
+  ///
+  /// [directoryPaths] names which of [fileNames] are folders (an entry's type
+  /// is always explicit, never guessed from its name). The share sheet can't
+  /// carry a directory, so each one is shared as a single `<name>.zip`
+  /// generated while the receiving app reads it -- for vault containers and
+  /// for SAF trees alike.
+  ///
+  /// [skipExtensions] are lower-case extensions (no dot) left out of any
+  /// shared *vault* folder -- callers pass the Item Vault pseudo-file
+  /// extensions so a folder zip never carries passwords/notes that
+  /// multi-select share already refuses to hand out as loose files. Ignored
+  /// for SAF trees, which never hold Item Vault entries.
+  Future<bool> shareFiles(
+    MountedContainer container,
+    List<String> fileNames, {
+    List<String> directoryPaths = const [],
+    List<String> skipExtensions = const [],
+  }) async {
+    if (fileNames.isEmpty) return false;
+    if (_isSaf(container)) {
+      final result = await _channel.invokeMethod<bool>(
+        ChannelMethods.safShareFiles,
+        {
+          'treeUri': container.uri,
+          'filePaths': fileNames,
+          if (directoryPaths.isNotEmpty) 'directoryPaths': directoryPaths,
+        },
+      );
+      return result ?? false;
+    }
+    final result = await _channel.invokeMethod<bool>(ChannelMethods.shareFile, {
+      'filePath': container.uri,
+      'fileNames': fileNames,
+      if (directoryPaths.isNotEmpty) 'directoryPaths': directoryPaths,
+      if (directoryPaths.isNotEmpty && skipExtensions.isNotEmpty)
+        'skipExtensions': skipExtensions,
+    });
+    return result ?? false;
+  }
+
+  Future<bool> decryptFile(
+    MountedContainer container,
+    String fileName,
+    String destPath, {
+    int opId = 0,
+  }) async {
+    if (container.isLocalStorage) {
+      return _local.decryptFile(container.uri, fileName, destPath);
+    }
+    final result = await _channel
+        .invokeMethod<bool>(ChannelMethods.decryptFile, {
+          'filePath': container.uri,
+          'fileName': fileName,
+          'destPath': destPath,
+          'opId': opId,
+        });
+    return result ?? false;
+  }
+
+  Future<bool> exportFileToStorage(
+    MountedContainer container,
+    String sourcePath,
+  ) async {
+    final result = await _channel.invokeMethod<bool>(
+      ChannelMethods.exportFileToStorage,
+      {'filePath': container.uri, 'sourcePath': sourcePath},
+    );
+    return result ?? false;
+  }
+
+  Future<bool> exportAppSettingsFile(String contents, String fileName) async {
+    final result = await _channel.invokeMethod<bool>(
+      ChannelMethods.exportAppSettingsFile,
+      {'contents': contents, 'fileName': fileName},
+    );
+    return result ?? false;
+  }
+
+  Future<String?> importAppSettingsFile() async {
+    return _channel.invokeMethod<String>(ChannelMethods.importAppSettingsFile);
+  }
+
+  // A vault always has volId >= 0 and must ALWAYS route to the C++ engine.
+  // Only non-vault external storages (volId < 0) with a content:// URI are SAF.
+  bool _isSaf(MountedContainer container) => container.isSafStorage;
+
+  Future<int> getFileSize(MountedContainer container, String fileName) async {
+    if (_isSaf(container)) {
+      final res = await _channel.invokeMethod<int>(
+        ChannelMethods.safGetFileSize,
+        {'treeUri': container.uri, 'filePath': fileName},
+      );
+      return res ?? -1;
+    }
+    if (container.isLocalStorage) {
+      return _local.getFileSize(container.uri, fileName);
+    }
+    final result = await _channel.invokeMethod<int>(
+      ChannelMethods.getFileSize,
+      {'filePath': container.uri, 'fileName': fileName},
+    );
+    return result ?? 0;
+  }
+
+  Future<int> getMediaFileSize(
+    MountedContainer container,
+    String fileName,
+  ) async {
+    if (_isSaf(container)) {
+      return getFileSize(container, fileName);
+    }
+    if (container.isLocalStorage) {
+      return _local.getFileSize(container.uri, fileName);
+    }
+    final result = await _channel.invokeMethod<int>(
+      ChannelMethods.getMediaFileSize,
+      {'filePath': container.uri, 'fileName': fileName},
+    );
+    return result ?? 0;
+  }
+
+  Future<int> getFolderSize(MountedContainer container, String dirPath) async {
+    // SAF trees have no native folder-size call, and the raw file-system
+    // backend can't read a content:// URI (it would silently report 0), so
+    // sum the listing recursively instead.
+    if (_isSaf(container)) return _safFolderSize(container, dirPath);
+    if (container.isLocalStorage) {
+      return _local.getFolderSize(container.uri, dirPath);
+    }
+    final result = await _channel.invokeMethod<int>(
+      ChannelMethods.getFolderSize,
+      {'filePath': container.uri, 'dirPath': dirPath},
+    );
+    return result ?? 0;
+  }
+
+  Future<int> _safFolderSize(MountedContainer container, String dirPath) async {
+    var total = 0;
+    final raw = await listDirectory(container, dirPath) ?? const <String>[];
+    for (final entry in RawEntry.parseAll(raw)) {
+      if (entry.isDir) {
+        total += await _safFolderSize(
+          container,
+          dirPath.isEmpty ? entry.name : '$dirPath/${entry.name}',
+        );
+      } else {
+        total += entry.sizeBytes;
+      }
+    }
+    return total;
+  }
+
+  Future<Uint8List?> readFileChunk(
+    MountedContainer container,
+    String fileName,
+    int offset,
+    int length,
+  ) async {
+    if (_isSaf(container)) {
+      return _channel.invokeMethod<Uint8List>(ChannelMethods.safReadFileChunk, {
+        'treeUri': container.uri,
+        'filePath': fileName,
+        'offset': offset,
+        'length': length,
+      });
+    }
+    if (container.isLocalStorage) {
+      return _local.readFileChunk(container.uri, fileName, offset, length);
+    }
+    final result = await _channel
+        .invokeMethod<Uint8List>(ChannelMethods.readFileChunk, {
+          'filePath': container.uri,
+          'fileName': fileName,
+          'offset': offset,
+          'length': length,
+        });
+    return result;
+  }
+
+  Future<Uint8List?> readMediaFileChunk(
+    MountedContainer container,
+    String fileName,
+    int offset,
+    int length,
+  ) async {
+    if (_isSaf(container)) {
+      const maxChunk = 4 * 1024 * 1024; // 4 MB chunk ceiling
+      if (length <= maxChunk) {
+        return readFileChunk(container, fileName, offset, length);
+      }
+
+      // Stream large media in safe 4 MB chunks to avoid JVM heap spikes
+      final builder = BytesBuilder(copy: false);
+      var curOffset = offset;
+      final endOffset = offset + length;
+      while (curOffset < endOffset) {
+        final toRead = (endOffset - curOffset > maxChunk)
+            ? maxChunk
+            : endOffset - curOffset;
+        final chunk = await readFileChunk(
+          container,
+          fileName,
+          curOffset,
+          toRead,
+        );
+        if (chunk == null || chunk.isEmpty) break;
+        builder.add(chunk);
+        curOffset += chunk.length;
+      }
+      final bytes = builder.takeBytes();
+      return bytes.isNotEmpty ? bytes : null;
+    }
+    if (container.isLocalStorage) {
+      return _local.readFileChunk(container.uri, fileName, offset, length);
+    }
+    final result = await _channel
+        .invokeMethod<Uint8List>(ChannelMethods.readMediaFileChunk, {
+          'filePath': container.uri,
+          'fileName': fileName,
+          'offset': offset,
+          'length': length,
+        });
+    return result;
+  }
+
+  /// For local storage, the native handler reads the real file directly
+  /// instead of going through a vault session -- the same `isLocalStorage`
+  /// bypass [getVideoThumbnail] already relies on (see
+  /// `ThumbnailHandlers.runImageThumbnail` on the Kotlin side). This keeps
+  /// the returned bytes real, small JPEGs either way. Full-screen callers
+  /// may request an alpha-preserving WebP; previously local
+  /// storage was decoded via `dart:ui` instead, which can only emit PNG
+  /// and silently failed `ThumbnailCacheService`'s JPEG-only validation,
+  /// so local thumbnails were never actually cached at any tier.
+  Future<Uint8List?> getImageThumbnail(
+    MountedContainer container,
+    String fileName, {
+    int targetSize = 180,
+    int quality = 70,
+    bool preserveAlpha = false,
+  }) async {
+    try {
+      final Uint8List? bytes = await _channel
+          .invokeMethod<Uint8List>(ChannelMethods.getImageThumbnail, {
+            'filePath': container.uri,
+            'fileName': fileName,
+            'targetSize': targetSize,
+            'quality': quality,
+            'preserveAlpha': preserveAlpha,
+            'isLocalStorage': container.isLocalStorage,
+          });
+      return bytes;
+    } catch (e) {
+      logSwallowed('getImageThumbnail', e, expected: true);
+      return null;
+    }
+  }
+
+  /// Same native call as [getImageThumbnail], but for the two failures a
+  /// caller can do something about it reports them instead of folding them
+  /// into `null`: [ImagePreviewUnavailableReason.tooLarge] (the source is too
+  /// big to decode at all) and [ImagePreviewUnavailableReason.outOfMemory].
+  /// Every other failure still returns `null`, exactly like
+  /// [getImageThumbnail].
+  Future<Uint8List?> getImageThumbnailOrThrow(
+    MountedContainer container,
+    String fileName, {
+    int targetSize = 180,
+    int quality = 70,
+    bool preserveAlpha = false,
+  }) async {
+    try {
+      return await _channel
+          .invokeMethod<Uint8List>(ChannelMethods.getImageThumbnail, {
+            'filePath': container.uri,
+            'fileName': fileName,
+            'targetSize': targetSize,
+            'quality': quality,
+            'preserveAlpha': preserveAlpha,
+            'isLocalStorage': container.isLocalStorage,
+          });
+    } on PlatformException catch (e) {
+      switch (e.code) {
+        case 'IMAGE_TOO_LARGE':
+          throw const ImagePreviewUnavailableException(
+            ImagePreviewUnavailableReason.tooLarge,
+          );
+        case 'OUT_OF_MEMORY':
+          throw const ImagePreviewUnavailableException(
+            ImagePreviewUnavailableReason.outOfMemory,
+          );
+      }
+      logSwallowed('getImageThumbnailOrThrow', e, expected: true);
+      return null;
+    } catch (e) {
+      logSwallowed('getImageThumbnailOrThrow', e, expected: true);
+      return null;
+    }
+  }
+
+  /// Generates a size-limited thumbnail from an app-private local file.
+  /// Used for archive entries after native extraction has streamed them to a
+  /// temporary file, so a large source image never crosses the method channel
+  /// as a full byte array.
+  Future<Uint8List?> getImageThumbnailFromLocalPath(
+    String sourcePath, {
+    int targetSize = 180,
+    int quality = 70,
+  }) async {
+    try {
+      return await _channel
+          .invokeMethod<Uint8List>(ChannelMethods.getImageThumbnail, {
+            'filePath': sourcePath,
+            'fileName': sourcePath,
+            'targetSize': targetSize,
+            'quality': quality,
+            'isLocalStorage': true,
+          });
+    } catch (e) {
+      logSwallowed('getImageThumbnailFromLocalPath', e, expected: true);
+      return null;
+    }
+  }
+
+  /// Generates a size-limited video thumbnail from an app-private local file.
+  /// Used for archive entries after native extraction has streamed them to a
+  /// temporary file.
+  Future<Uint8List?> getVideoThumbnailFromLocalPath(
+    String sourcePath, {
+    int quality = 60,
+    int targetSize = 180,
+    int? timeUs,
+    String? strategy,
+    double? framePosition,
+  }) async {
+    try {
+      final Uint8List? bytes = await _channel
+          .invokeMethod<Uint8List>(ChannelMethods.getVideoThumbnail, {
+            'filePath': sourcePath,
+            'fileName': sourcePath,
+            'quality': quality,
+            'targetSize': targetSize,
+            'isLocalStorage': true,
+            'strategy':
+                strategy ??
+                ThumbnailCacheService.videoThumbnailStrategy.name,
+            'framePosition':
+                framePosition ??
+                ThumbnailCacheService.videoThumbnailFramePosition,
+            if (timeUs != null) 'timeUs': timeUs,
+          });
+      return bytes;
+    } catch (e) {
+      logSwallowed('getVideoThumbnailFromLocalPath', e, expected: true);
+      return null;
+    }
+  }
+
+  /// Same as [getVideoThumbnailFromLocalPath], but also returns the source
+  /// frame's pre-downscale width/height.
+  Future<ThumbnailWithSize?> getVideoThumbnailFromLocalPathWithSize(
+    String sourcePath, {
+    int quality = 60,
+    int targetSize = 180,
+    String? strategy,
+    double? framePosition,
+  }) async {
+    try {
+      final result = await _channel
+          .invokeMethod(ChannelMethods.getVideoThumbnailWithSize, {
+            'filePath': sourcePath,
+            'fileName': sourcePath,
+            'quality': quality,
+            'targetSize': targetSize,
+            'isLocalStorage': true,
+            'strategy':
+                strategy ??
+                ThumbnailCacheService.videoThumbnailStrategy.name,
+            'framePosition':
+                framePosition ??
+                ThumbnailCacheService.videoThumbnailFramePosition,
+          });
+      return ThumbnailWithSize.fromChannelResult(result);
+    } catch (e) {
+      logSwallowed('getVideoThumbnailFromLocalPathWithSize', e, expected: true);
+      return null;
+    }
+  }
+
+  /// See [getImageThumbnail]'s doc comment re: the `isLocalStorage`
+  /// bypass. Still reports the real decoded pixel size for local storage,
+  /// same as it always has for vault content, so masonry-layout tiles
+  /// size correctly before the image itself has loaded.
+  Future<ThumbnailWithSize?> getImageThumbnailWithSize(
+    MountedContainer container,
+    String fileName, {
+    int targetSize = 180,
+    int quality = 70,
+  }) async {
+    try {
+      final result = await _channel
+          .invokeMethod(ChannelMethods.getImageThumbnailWithSize, {
+            'filePath': container.uri,
+            'fileName': fileName,
+            'targetSize': targetSize,
+            'quality': quality,
+            'isLocalStorage': container.isLocalStorage,
+          });
+      return ThumbnailWithSize.fromChannelResult(result);
+    } on PlatformException catch (e) {
+      // Same contract as [getImageThumbnailOrThrow]: a deliberate refusal is
+      // reported, not folded into `null`, so callers don't go and decode the
+      // image some other, unguarded way.
+      switch (e.code) {
+        case 'IMAGE_TOO_LARGE':
+          throw const ImagePreviewUnavailableException(
+            ImagePreviewUnavailableReason.tooLarge,
+          );
+        case 'OUT_OF_MEMORY':
+          throw const ImagePreviewUnavailableException(
+            ImagePreviewUnavailableReason.outOfMemory,
+          );
+      }
+      logSwallowed('getImageThumbnailWithSize', e, expected: true);
+      return null;
+    } catch (e) {
+      logSwallowed('getImageThumbnailWithSize', e, expected: true);
+      return null;
+    }
+  }
+
+  /// Extracts an APK's own launcher icon via `PackageManager` on the
+  /// native side -- full adaptive-icon compositing included, since it's
+  /// the OS's own icon-resolution code doing the work, not a hand-rolled
+  /// parser. See `ThumbnailHandlers.handleGetApkIcon`'s doc comment for
+  /// why that's necessary (and how it still works for a real vault, which
+  /// has no on-disk file for `PackageManager` to open directly) and
+  /// `apk_icon_support.dart` for the manual-parsing fallback this is
+  /// preferred over.
+  ///
+  /// Returns `null` on any failure -- no `android:icon` on the APK, a
+  /// corrupt/unreadable archive, or any other native-side error -- so
+  /// callers should treat `null` exactly like a thrown
+  /// `ApkIconUnavailable`.
+  Future<Uint8List?> getApkIcon(
+    MountedContainer container,
+    String fileName, {
+    int targetSize = 192,
+  }) async {
+    try {
+      return await _channel.invokeMethod<Uint8List>(ChannelMethods.getApkIcon, {
+        'filePath': container.uri,
+        'fileName': fileName,
+        'targetSize': targetSize,
+        'isLocalStorage': container.isLocalStorage,
+      });
+    } catch (e) {
+      logSwallowed('getApkIcon', e, expected: true);
+      return null;
+    }
+  }
+
+  /// Encodes raw pixels as a lossy image file (`'jpeg'` or `'webp'`) with the
+  /// platform's own encoder. `dart:ui` can only produce PNG, which is several
+  /// times larger than the JPEG/WebP photo an edit started from.
+  ///
+  /// [rgba] must be `width * height * 4` bytes of premultiplied RGBA - what
+  /// `ui.Image.toByteData(format: ui.ImageByteFormat.rawRgba)` returns.
+  /// [quality] is the starting quality (1-100). If [maxBytes] is positive the
+  /// native side lowers the quality step by step until the result fits (down
+  /// to a floor), so an image that lost pixels cannot come out larger than
+  /// the share of the original it kept; it is best effort, not a hard limit.
+  ///
+  /// Returns `null` on any failure so the caller can surface a save error
+  /// rather than write something in a different format than the file name
+  /// promises.
+  Future<Uint8List?> encodeImage({
+    required Uint8List rgba,
+    required int width,
+    required int height,
+    required String format,
+    int quality = 92,
+    int maxBytes = 0,
+  }) async {
+    try {
+      return await _channel
+          .invokeMethod<Uint8List>(ChannelMethods.encodeImage, {
+            'rgba': rgba,
+            'width': width,
+            'height': height,
+            'format': format,
+            'quality': quality,
+            'maxBytes': maxBytes,
+          });
+    } catch (e) {
+      logSwallowed('encodeImage', e);
+      return null;
+    }
+  }
+
+  Future<List<String>?> listDirectory(
+    MountedContainer container,
+    String dirPath, {
+    bool refresh = false,
+  }) async {
+    final isSaf = _isSaf(container);
+    VeLog.d(
+      'VaultFileIoApi',
+      'listDirectory: volId=${container.volId}, isSaf=$isSaf, isLocalStorage=${container.isLocalStorage}, uri=${container.uri}, dirPath="$dirPath"',
+    );
+
+    if (isSaf) {
+      try {
+        final rawList = await _channel.invokeMethod(
+          ChannelMethods.safListDirectory,
+          {'treeUri': container.uri, 'dirPath': dirPath, 'refresh': refresh},
+        );
+        VeLog.d(
+          'VaultFileIoApi',
+          'safListDirectory response item count: ${rawList?.length}',
+        );
+        if (rawList == null) return const [];
+        final items = (rawList as List).map((it) {
+          final m = it as Map;
+          final name = m['name'] as String? ?? '';
+          final isDir = m['isDir'] as bool? ?? false;
+          final size = (m['size'] as num?)?.toInt() ?? 0;
+          final mod = (m['lastModified'] as num?)?.toInt() ?? 0;
+          return RawEntry(
+            name: name,
+            isDir: isDir,
+            sizeBytes: size,
+            modifiedSecs: mod,
+          ).raw;
+        }).toList();
+        return items;
+      } catch (e) {
+        VeLog.w('VaultFileIoApi', 'safListDirectory error: $e', e);
+        return const [];
+      }
+    }
+    if (container.isLocalStorage) {
+      return _local.listDirectory(container.uri, dirPath, refresh: refresh);
+    }
+    final result = await _channel.invokeMethod<List<Object?>>(
+      ChannelMethods.listDirectory,
+      {'filePath': container.uri, 'dirPath': dirPath, 'refresh': refresh},
+    );
+    return result?.cast<String>();
+  }
+
+  /// Strict readability probe used by scheduled sync before an empty
+  /// listing is allowed to influence deletion decisions.
+  Future<bool> canListDirectory(
+    MountedContainer container,
+    String dirPath,
+  ) async {
+    if (_isSaf(container)) {
+      try {
+        return await _channel.invokeMethod<bool>(
+              ChannelMethods.safCanListDirectory,
+              {'treeUri': container.uri, 'dirPath': dirPath},
+            ) ??
+            false;
+      } catch (_) {
+        return false;
+      }
+    }
+    if (container.isLocalStorage) {
+      return _local.canListDirectory(container.uri, dirPath);
+    }
+    try {
+      return await listDirectory(container, dirPath, refresh: true) != null;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Resolves standard Android file/tree document URIs to their backing
+  /// storage path. Used only to exclude a selected vault's ciphertext when
+  /// syncing a wider local-storage root.
+  Future<String?> resolveRawStoragePath(String uri) async {
+    if (uri.startsWith('/')) return uri;
+    try {
+      return await _channel.invokeMethod<String>(
+        ChannelMethods.resolveRawStoragePath,
+        {'uri': uri},
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> createDirectory(
+    MountedContainer container,
+    String dirPath,
+  ) async {
+    if (_isSaf(container)) {
+      final segments = dirPath.split('/').where((s) => s.isNotEmpty).toList();
+      final dirName = segments.isEmpty ? 'New Folder' : segments.last;
+      final parentPath = segments.length > 1
+          ? segments.sublist(0, segments.length - 1).join('/')
+          : '';
+      final res = await _channel.invokeMethod<bool>(
+        ChannelMethods.safCreateDirectory,
+        {
+          'treeUri': container.uri,
+          'parentPath': parentPath,
+          'dirName': dirName,
+        },
+      );
+      return res ?? false;
+    }
+    if (container.isLocalStorage) {
+      return _local.createDirectory(container.uri, dirPath);
+    }
+    final result = await _channel.invokeMethod<bool>(
+      ChannelMethods.createDirectory,
+      {'filePath': container.uri, 'dirPath': dirPath},
+    );
+    return result ?? false;
+  }
+
+  Future<bool> renameFile(
+    MountedContainer container,
+    String oldPath,
+    String newPath,
+  ) async {
+    if (_isSaf(container)) {
+      final newName = newPath.contains('/') ? newPath.split('/').last : newPath;
+      final res = await _channel.invokeMethod<bool>(
+        ChannelMethods.safRenameFile,
+        {'treeUri': container.uri, 'filePath': oldPath, 'newName': newName},
+      );
+      return res ?? false;
+    }
+    if (container.isLocalStorage) {
+      return _local.renameFile(container.uri, oldPath, newPath);
+    }
+    final result = await _channel.invokeMethod<bool>(
+      ChannelMethods.renameFile,
+      {'filePath': container.uri, 'oldPath': oldPath, 'newPath': newPath},
+    );
+    return result ?? false;
+  }
+
+  /// Unlike every other method in this class, this one used to skip the
+  /// `isLocalStorage` check entirely and always hit the native channel --
+  /// which has no session for Local Storage's sentinel volId, so the call
+  /// silently failed (caught below) whenever either side was Local
+  /// Storage. That sent every such transfer down
+  /// `FileOperationService._copyFile`'s slow fallback: a
+  /// readFileChunk+writeFileChunk round trip per chunk, each of which also
+  /// reopens/seeks/closes the file on the Local Storage side (see
+  /// [LocalFileIoBackend]) -- versus the single native call "import via
+  /// the picker" uses for the same raw-file-into-vault case
+  /// (writeBackFile, below), which is why that felt so much faster.
+  ///
+  /// Fixed by reusing those same raw-absolute-path primitives whenever a
+  /// real absolute path is available on one side: [writeBackFile] handles
+  /// Local Storage -> vault *and* Local Storage -> Local Storage in one
+  /// call (it already special-cases a Local Storage destination itself),
+  /// and [decryptFile] handles vault -> Local Storage. Both are still a
+  /// single native/OS-level call instead of a chunked loop.
+  ///
+  /// [opId] is threaded through to both so folder-vault formats
+  /// (gocryptfs/Cryptomator/CryFS) still get smooth CopyProgressBridge
+  /// progress here, same as a real vault<->vault copy -- their native
+  /// writeBackFile/extractFile already support opId-based chunk progress
+  /// (used by the copyFileViaBackend extract+writeback path), just not
+  /// with the right byte-accounting for a single-pass call until now (see
+  /// their `singlePass` param). Raw disk-image formats (VeraCrypt/LUKS/
+  /// BitLocker/VHD) are a partial exception: writeBackFile there reports
+  /// through ImportProgressBridge instead (nothing here listens to it, so
+  /// no visible progress, though it's harmless), and extractFile has no
+  /// per-chunk hook at all. Either way the file itself still transfers via
+  /// one fast native/OS call -- only the progress *bar*, not the *speed*,
+  /// is coarser for those two raw-disk-image cases. Callers that care
+  /// (see `FileOperationService._copyFile`) should credit the file's
+  /// bytes in one shot on success for exactly those cases, since nothing
+  /// will stream in via CopyProgressBridge for them.
+  Future<bool> copyFile(
+    MountedContainer src,
+    String srcPath,
+    MountedContainer dest,
+    String destPath, {
+    int opId = 0,
+  }) async {
+    // Fast native SAF copy
+    if (src.isSafStorage || dest.isSafStorage) {
+      // The native copy only understands SAF trees and plain file-system
+      // paths. Given a vault on the other side it would treat the vault's URI
+      // as a file path, so report "not handled" and let the caller stream the
+      // file in chunks instead.
+      final other = src.isSafStorage ? dest : src;
+      if (!other.isLocalStorage) return false;
+      try {
+        final res = await _channel
+            .invokeMethod<bool>(ChannelMethods.safCopyFile, {
+              'srcTreeUri': src.isSafStorage ? src.uri : null,
+              'srcPath': src.isSafStorage
+                  ? srcPath
+                  : _local.resolve(src.uri, srcPath),
+              'destTreeUri': dest.isSafStorage ? dest.uri : null,
+              'destPath': dest.isSafStorage
+                  ? destPath
+                  : _local.resolve(dest.uri, destPath),
+            });
+        return res ?? false;
+      } catch (e) {
+        logSwallowed('safCopyFile', e, expected: true);
+        return false;
+      }
+    }
+    if (src.isLocalStorage) {
+      return writeBackFile(
+        dest,
+        destPath,
+        _local.resolve(src.uri, srcPath),
+        opId: opId,
+      );
+    }
+    if (dest.isLocalStorage) {
+      return decryptFile(
+        src,
+        srcPath,
+        _local.resolve(dest.uri, destPath),
+        opId: opId,
+      );
+    }
+    try {
+      final ok = await _channel.invokeMethod<bool>(ChannelMethods.copyFile, {
+        'srcUri': src.uri,
+        'srcPath': srcPath,
+        'destUri': dest.uri,
+        'destPath': destPath,
+        'opId': opId,
+      });
+      return ok ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Canonical absolute path of [path] inside [container] on the device's
+  /// real filesystem, or null when there is none (a vault, or a cloud /
+  /// virtual Document Provider).
+  ///
+  /// This is how two *different* mounts of one physical folder -- e.g. a
+  /// folder added as a SAF storage location while the same folder is also
+  /// reachable through plain Local Storage -- are recognised as the same
+  /// place. Comparing volIds or URIs can't: they differ by construction.
+  Future<String?> getRealPath(
+    MountedContainer container, [
+    String path = '',
+  ]) async {
+    if (!container.isLocalStorage) return null;
+    try {
+      return await _channel.invokeMethod<String>(ChannelMethods.safGetRealPath, {
+        'treeUri': container.isSafStorage ? container.uri : null,
+        'path': container.isSafStorage
+            ? path
+            : _local.resolve(container.uri, path),
+      });
+    } catch (e) {
+      logSwallowed('getRealPath', e, expected: true);
+      return null;
+    }
+  }
+
+  Future<void> cancelCopy(int opId) async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.cancelCopy, {'opId': opId});
+    } catch (e) {
+      logSwallowed('cancelCopy', e, expected: true);
+    }
+  }
+
+  /// Called once a whole copy/move [FileOperation] finishes (success,
+  /// failure, or cancellation) -- NOT per file. Clears CopyCancellation
+  /// and CopyProgressBridge's native-side state for this opId; clearing
+  /// mid-operation would incorrectly "un-cancel" other items still
+  /// copying under the same shared opId (see CopyProgressBridge.flushPending
+  /// for the per-file equivalent, which copyFile already triggers on its
+  /// own after each native call returns).
+  Future<void> clearCopyState(int opId) async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.clearCopyState, {
+        'opId': opId,
+      });
+    } catch (e) {
+      logSwallowed('clearCopyState', e, expected: true);
+    }
+  }
+
+  Future<bool> writeFileChunk(
+    MountedContainer container,
+    String fileName,
+    int offset,
+    Uint8List data,
+  ) async {
+    if (_isSaf(container)) {
+      final res = await _channel
+          .invokeMethod<bool>(ChannelMethods.safWriteFileChunk, {
+            'treeUri': container.uri,
+            'filePath': fileName,
+            'offset': offset,
+            'data': data,
+          });
+      return res ?? false;
+    }
+    if (container.isLocalStorage) {
+      return _local.writeFileChunk(container.uri, fileName, offset, data);
+    }
+    final result = await _channel
+        .invokeMethod<bool>(ChannelMethods.writeFileChunk, {
+          'filePath': container.uri,
+          'fileName': fileName,
+          'offset': offset,
+          'data': data,
+        });
+    return result ?? false;
+  }
+
+  /// Commits a completed write sequence. Folder-based vault engines need
+  /// this explicit flush; block-based engines treat it as a no-op -- so
+  /// does plain local storage, which has nothing to flush either.
+  Future<bool> finishWrite(MountedContainer container, String fileName) async {
+    if (container.isLocalStorage) return true;
+    try {
+      final success = await _channel.invokeMethod<bool>(
+        ChannelMethods.finishWrite,
+        {'volId': container.volId, 'path': fileName},
+      );
+      return success ?? true;
+    } catch (e) {
+      logSwallowed('finishWrite', e);
+      return true;
+    }
+  }
+
+  Future<bool> deleteFile(MountedContainer container, String fileName) async {
+    if (_isSaf(container)) {
+      final res = await _channel.invokeMethod<bool>(
+        ChannelMethods.safDeleteFile,
+        {'treeUri': container.uri, 'filePath': fileName},
+      );
+      return res ?? false;
+    }
+    if (container.isLocalStorage) {
+      return _local.deleteFile(container.uri, fileName);
+    }
+    final result = await _channel.invokeMethod<bool>(
+      ChannelMethods.deleteFile,
+      {'filePath': container.uri, 'fileName': fileName},
+    );
+    return result ?? false;
+  }
+
+  Future<bool> setLastModifiedTime(
+    MountedContainer container,
+    String fileName,
+    int epochSeconds,
+  ) async {
+    if (container.isLocalStorage) {
+      return _local.setLastModifiedTime(container.uri, fileName, epochSeconds);
+    }
+    final result = await _channel.invokeMethod<bool>(
+      ChannelMethods.setLastModifiedTime,
+      {
+        'filePath': container.uri,
+        'fileName': fileName,
+        'epochSeconds': epochSeconds,
+      },
+    );
+    return result ?? false;
+  }
+
+  Future<bool> writeBackFile(
+    MountedContainer container,
+    String fileName,
+    String sourcePath, {
+    int opId = 0,
+  }) async {
+    if (container.isLocalStorage) {
+      return _local.writeBackFile(container.uri, fileName, sourcePath);
+    }
+    final result = await _channel
+        .invokeMethod<bool>(ChannelMethods.writeBackFile, {
+          'filePath': container.uri,
+          'fileName': fileName,
+          'sourcePath': sourcePath,
+          'opId': opId,
+        });
+    return result ?? false;
+  }
+
+  /// Streams a local file into a container without loading its full contents
+  /// into Dart memory. The destination is written to a unique sibling first,
+  /// then renamed into place after the write completes.
+  ///
+  /// Non-SAF destinations use the existing native write-back path. SAF
+  /// destinations are written in bounded chunks because writeBackFile expects
+  /// a mounted vault session.
+  Future<bool> writeFileFromLocalPath(
+    MountedContainer container,
+    String fileName,
+    String sourcePath, {
+    int opId = 0,
+  }) async {
+    final sequence = _archiveWriteSequence++;
+    final stamp = DateTime.now().microsecondsSinceEpoch;
+    final parentSeparator = fileName.lastIndexOf('/');
+    final parent = parentSeparator < 0
+        ? ''
+        : fileName.substring(0, parentSeparator + 1);
+    final tempPath = '${parent}.archive_extract_${stamp}_$sequence.tmp';
+    var committed = false;
+
+    try {
+      final written = _isSaf(container)
+          ? await _writeLocalSourceInChunks(container, tempPath, sourcePath)
+          : await writeBackFile(container, tempPath, sourcePath, opId: opId);
+      if (!written) return false;
+
+      if (!_isSaf(container) && !await finishWrite(container, tempPath)) {
+        return false;
+      }
+
+      await deleteFile(container, fileName);
+      committed = await renameFile(container, tempPath, fileName);
+      return committed;
+    } finally {
+      if (!committed) {
+        await deleteFile(container, tempPath);
+      }
+    }
+  }
+
+  Future<bool> _writeLocalSourceInChunks(
+    MountedContainer container,
+    String targetPath,
+    String sourcePath,
+  ) async {
+    RandomAccessFile? source;
+    try {
+      source = await File(sourcePath).open(mode: FileMode.read);
+      final length = await source.length();
+      var offset = 0;
+
+      do {
+        final remaining = length - offset;
+        final chunkLength = remaining > _localSourceChunkSize
+            ? _localSourceChunkSize
+            : remaining;
+        final chunk = chunkLength == 0
+            ? Uint8List(0)
+            : await source.read(chunkLength);
+        if (chunk.length != chunkLength) return false;
+        if (!await writeFileChunk(container, targetPath, offset, chunk)) {
+          return false;
+        }
+        offset += chunk.length;
+      } while (offset < length);
+
+      return true;
+    } catch (e) {
+      logSwallowed('writeFileFromLocalPath', e);
+      return false;
+    } finally {
+      await source?.close();
+    }
+  }
+
+  Future<bool> createEmptyFile(
+    MountedContainer container,
+    String fileName,
+  ) async {
+    if (_isSaf(container)) {
+      final res = await _channel.invokeMethod<bool>(
+        ChannelMethods.safCreateFile,
+        {'treeUri': container.uri, 'filePath': fileName},
+      );
+      return res ?? false;
+    }
+    final ok = await writeFileChunk(container, fileName, 0, Uint8List(0));
+    if (!ok) return false;
+    return finishWrite(container, fileName);
+  }
+
+  static const int _wholeFileChunkSize = 8 * 1024 * 1024; // 8 MB
+
+  Future<Uint8List?> readWholeFile(
+    MountedContainer container,
+    String fileName,
+  ) async {
+    final size = await getFileSize(container, fileName);
+    if (size < 0) return null;
+    if (size == 0) return Uint8List(0);
+
+    final builder = BytesBuilder(copy: false);
+    var offset = 0;
+    while (offset < size) {
+      final remaining = size - offset;
+      final len = remaining > _wholeFileChunkSize
+          ? _wholeFileChunkSize
+          : remaining;
+      final chunk = await readFileChunk(container, fileName, offset, len);
+      if (chunk == null || chunk.isEmpty) return null;
+      builder.add(chunk);
+      offset += chunk.length;
+    }
+    return builder.takeBytes();
+  }
+
+  Future<bool> writeWholeFile(
+    MountedContainer container,
+    String fileName,
+    Uint8List bytes,
+  ) async {
+    final tmpPath = '$fileName.tmp';
+    await deleteFile(container, tmpPath);
+
+    var offset = 0;
+    do {
+      final remaining = bytes.length - offset;
+      final len = remaining > _wholeFileChunkSize
+          ? _wholeFileChunkSize
+          : remaining;
+      final chunk = Uint8List.sublistView(bytes, offset, offset + len);
+      final ok = await writeFileChunk(container, tmpPath, offset, chunk);
+      if (!ok) {
+        await deleteFile(container, tmpPath);
+        return false;
+      }
+      offset += len;
+    } while (offset < bytes.length);
+
+    final finished = await finishWrite(container, tmpPath);
+    if (!finished) {
+      await deleteFile(container, tmpPath);
+      return false;
+    }
+
+    await deleteFile(container, fileName);
+    return renameFile(container, tmpPath, fileName);
+  }
+
+  /// No local-storage branch: `dart:io` has no cross-platform way to read
+  /// a volume's free/total space, so callers get `null` for real device
+  /// storage the same as they would for any other unavailable stat -- the
+  /// stats bar already handles a `null` result by simply not showing a
+  /// free-space figure.
+  Future<List<int>?> getSpaceInfo(MountedContainer container) async {
+    if (_isSaf(container)) {
+      final res = await _channel.invokeMethod<List<Object?>>(
+        ChannelMethods.safGetSpaceInfo,
+        {'treeUri': container.uri},
+      );
+      return res?.cast<int>();
+    }
+    if (container.isLocalStorage) return null;
+    final result = await _channel.invokeMethod<List<Object?>>(
+      ChannelMethods.getSpaceInfo,
+      {'filePath': container.uri},
+    );
+    return result?.cast<int>();
+  }
+
+  Future<String?> getSafDocumentUri(
+    MountedContainer container,
+    String filePath,
+  ) async {
+    if (!_isSaf(container)) return null;
+    return _channel.invokeMethod<String>(ChannelMethods.safGetDocumentUri, {
+      'treeUri': container.uri,
+      'filePath': filePath,
+    });
+  }
+
+  Future<Map<String, dynamic>?> getVaultInfo(String uri) async {
+    return _channel.invokeMapMethod<String, dynamic>(
+      ChannelMethods.getVaultInfo,
+      {'filePath': uri},
+    );
+  }
+
+  /// Launches the system multi-file picker and reports back any picked
+  /// names that already exist in [targetPath] -- nothing is imported yet.
+  /// Returns `null` if the user backed out of the picker without
+  /// choosing anything.
+  ///
+  /// Follow up with [importFiles], passing the returned
+  /// [ImportPickResult.pickToken] and a resolution for every conflict, to
+  /// actually copy the picked files. If the caller decides not to
+  /// proceed (e.g. the person cancels the conflict-resolution sheet),
+  /// call [cancelPickedImport] with the same token so native can release
+  /// the picked documents instead of holding them until the app process
+  /// ends.
+  Future<ImportPickResult?> pickFilesForImport(
+    MountedContainer container,
+    String targetPath,
+  ) async {
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      ChannelMethods.pickImportFiles,
+      {
+        'filePath': container.uri,
+        'targetPath': targetPath,
+        'caseSensitive': namesAreCaseSensitive(container),
+      },
+    );
+    return _importPickResultFromChannel(result);
+  }
+
+  /// Same idea as [pickFilesForImport] but for a single folder chosen via
+  /// the system tree picker -- [ImportPickResult.conflicts] has at most
+  /// one entry (the folder's own name).
+  Future<ImportPickResult?> pickFolderForImport(
+    MountedContainer container,
+    String targetPath,
+  ) async {
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      ChannelMethods.pickImportFolder,
+      {
+        'filePath': container.uri,
+        'targetPath': targetPath,
+        'caseSensitive': namesAreCaseSensitive(container),
+      },
+    );
+    return _importPickResultFromChannel(result);
+  }
+
+  ImportPickResult? _importPickResultFromChannel(Map<String, dynamic>? result) {
+    if (result == null) return null;
+    final pickToken = result['pickToken'] as int?;
+    if (pickToken == null) return null;
+    final rawConflicts = (result['conflicts'] as List?) ?? const [];
+    final rawItems = (result['items'] as List?) ?? const [];
+    return (
+      pickToken: pickToken,
+      conflicts: rawConflicts.map((c) {
+        final map = c as Map<Object?, Object?>;
+        return (
+          name: map['name'] as String,
+          destIsDir: map['destIsDir'] as bool? ?? false,
+        );
+      }).toList(),
+      items: rawItems.map((item) {
+        final map = item as Map<Object?, Object?>;
+        return ClipboardItem(
+          path: map['name'] as String? ?? '',
+          isDir: map['isDir'] as bool? ?? false,
+          sizeBytes: (map['sizeBytes'] as num?)?.toInt() ?? 0,
+        );
+      }).toList(),
+    );
+  }
+
+  /// Releases a pick from [pickFilesForImport]/[pickFolderForImport] that
+  /// will never be completed by [importFiles]/[importFolder] -- e.g. the
+  /// person dismissed the conflict-resolution sheet instead of
+  /// continuing. Safe to call with an already-completed or unknown
+  /// [pickToken]; native just no-ops.
+  Future<void> cancelPickedImport(int pickToken) async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.cancelPickedImport, {
+        'pickToken': pickToken,
+      });
+    } catch (e) {
+      logSwallowed('cancelPickedImport', e, expected: true);
+    }
+  }
+
+  /// Copies the files picked by an earlier [pickFilesForImport] call
+  /// (identified by [pickToken]) into [targetPath]. [conflictPlan] maps
+  /// each folded colliding name (lowercased unless the pick was made with
+  /// `caseSensitive`; as reported in that call's
+  /// [ImportPickResult.conflicts]) to "skip" / "overwrite" / "keepBoth";
+  /// any picked name *not* in [conflictPlan] didn't collide with
+  /// anything and is imported as-is (auto-uniquified only if it
+  /// happens to collide with another file in the same picked batch).
+  Future<int> importFiles(
+    MountedContainer container,
+    String targetPath,
+    int opId,
+    int pickToken, {
+    Map<String, String> conflictPlan = const {},
+  }) async {
+    final result = await _channel.invokeMethod<int>(ChannelMethods.importFile, {
+      'filePath': container.uri,
+      'targetPath': targetPath,
+      'opId': opId,
+      'pickToken': pickToken,
+      'conflictPlan': conflictPlan,
+    });
+    return result ?? 0;
+  }
+
+  Future<int> exportSelectedToFolder(
+    MountedContainer container,
+    List<Map<String, dynamic>> items, {
+    int opId = 0,
+  }) async {
+    final result = await _channel.invokeMethod<int>(
+      ChannelMethods.exportFilesToFolder,
+      {'filePath': container.uri, 'items': items, 'opId': opId},
+    );
+    return result ?? 0;
+  }
+
+  Future<void> cancelExport(int opId) async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.cancelExport, {'opId': opId});
+    } catch (e) {
+      logSwallowed('cancelExport', e, expected: true);
+    }
+  }
+
+  /// Copies the folder picked by an earlier [pickFolderForImport] call
+  /// (identified by [pickToken]) into [targetPath]. See [importFiles] for
+  /// what [conflictPlan] means -- here it has at most one entry, for the
+  /// folder's own name.
+  Future<int> importFolder(
+    MountedContainer container,
+    String targetPath,
+    int opId,
+    int pickToken, {
+    Map<String, String> conflictPlan = const {},
+  }) async {
+    final result = await _channel
+        .invokeMethod<int>(ChannelMethods.importFolder, {
+          'filePath': container.uri,
+          'targetPath': targetPath,
+          'opId': opId,
+          'pickToken': pickToken,
+          'conflictPlan': conflictPlan,
+        });
+    return result ?? 0;
+  }
+
+  Future<void> cancelImport(int opId) async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.cancelImport, {'opId': opId});
+    } catch (e) {
+      logSwallowed('cancelImport', e, expected: true);
+    }
+  }
+
+  Future<int> deleteImportSources(int opId) async {
+    try {
+      final result = await _channel.invokeMethod<int>(
+        ChannelMethods.deleteImportSources,
+        {'opId': opId},
+      );
+      return result ?? 0;
+    } catch (e) {
+      logSwallowed('deleteImportSources', e, expected: true);
+      return 0;
+    }
+  }
+
+  /// Releases the source documents retained for an import that was kept,
+  /// cancelled, or otherwise did not qualify for deletion.
+  Future<void> clearImportSources(int opId) async {
+    try {
+      await _channel.invokeMethod<bool>(ChannelMethods.clearImportSources, {
+        'opId': opId,
+      });
+    } catch (e) {
+      logSwallowed('clearImportSources', e, expected: true);
+    }
+  }
+
+  // ── Android Share Sheet integration ─────────────────────────────────────
+  // See ShareIntentHandlers.kt/IncomingShareBridge.kt and
+  // lib/features/share_import/ for the Flutter-side flow these back. The
+  // opt-in toggle itself (isShareTargetEnabled/setShareTargetEnabled) is on
+  // [VaultLifecycleApi] instead, alongside hasAllFilesAccess/
+  // requestNotificationPermission -- an OS-level permission/component
+  // setting, not file I/O.
+
+  /// Non-destructive peek at whatever share request is currently buffered
+  /// natively (see `IncomingShareBridge.peekPending`) -- used for the
+  /// cold-start case, where the person was still at the app-lock screen
+  /// (or the app wasn't running at all) when the share arrived, so there
+  /// was nobody listening for `VaultEngineEvents`'s
+  /// `onIncomingShareRequest` push yet. Called from `MainShell.initState`,
+  /// which by construction only runs once `LockGateScreen` has already
+  /// let the person through -- see ShareIntentHandlers.kt's class doc
+  /// comment for why that ordering is what actually enforces this
+  /// feature's app-lock gating, rather than any check here.
+  ///
+  /// Returns `null` if nothing is pending. Safe to call more than once;
+  /// unlike a queue, it doesn't drain what it reads (only
+  /// [prepareShareImport] or [cancelPendingShareRequest] actually clear
+  /// it), so re-reading after e.g. a hot restart during development is
+  /// harmless.
+  Future<IncomingShareRequest?> checkPendingShareRequest() async {
+    try {
+      final result = await _channel.invokeMethod<Map<Object?, Object?>>(
+        ChannelMethods.checkPendingShareRequest,
+      );
+      if (result == null) return null;
+      final rawItems = (result['items'] as List?) ?? const [];
+      final items = rawItems
+          .map((it) => incomingShareItemFromWire(it as Map<Object?, Object?>))
+          .whereType<IncomingShareItem>()
+          .toList();
+      if (items.isEmpty) return null;
+      return (items: items);
+    } catch (e) {
+      logSwallowed('checkPendingShareRequest', e);
+      return null;
+    }
+  }
+
+  /// Drops a buffered share request without importing it -- call when the
+  /// person backs out of the destination-picker flow
+  /// (`lib/features/share_import/`) before choosing a vault/folder. (If
+  /// they back out *after* [prepareShareImport] already succeeded --
+  /// i.e. during conflict resolution -- the request is no longer sitting
+  /// in the native pending buffer at all; use [cancelPickedImport] with
+  /// the returned pickToken instead, exactly as the regular import-picker
+  /// flow does.)
+  Future<void> cancelPendingShareRequest() async {
+    try {
+      await _channel.invokeMethod<void>(
+        ChannelMethods.cancelPendingShareRequest,
+      );
+    } catch (e) {
+      logSwallowed('cancelPendingShareRequest', e, expected: true);
+    }
+  }
+
+  /// Best-effort "return to sender": asks native to bring whichever app
+  /// referred the share that opened this cold-started instance back to
+  /// the foreground, ahead of the `SystemNavigator.pop()` call that
+  /// follows it in `share_import_flow.dart` -- see
+  /// `presentIncomingShareImport`'s isColdStart doc comment. A silent
+  /// no-op, same as [cancelPendingShareRequest], when there's nothing to
+  /// return to (no referrer was captured, or it can no longer be
+  /// launched) -- `SystemNavigator.pop()` still runs regardless of
+  /// whether this succeeds.
+  Future<void> returnToSharingApp() async {
+    try {
+      await _channel.invokeMethod<void>(ChannelMethods.returnToSharingApp);
+    } catch (e) {
+      logSwallowed('returnToSharingApp', e, expected: true);
+    }
+  }
+
+  /// Phase 1 of importing a pending share request into [container] at
+  /// [targetPath] -- the share-sheet counterpart to [pickFilesForImport],
+  /// returning the identical [ImportPickResult] shape. There's no system
+  /// picker to launch here (the files already arrived via the Android
+  /// Share Sheet and are sitting in native's pending buffer), so unlike
+  /// [pickFilesForImport] this resolves immediately rather than waiting on
+  /// an [ActivityResult]. Follow up with [importFiles] exactly as
+  /// [pickFilesForImport]'s own doc comment describes.
+  ///
+  /// Returns `null` if nothing was pending (e.g. the request was
+  /// superseded by a newer share, or the app process was killed before
+  /// the person finished picking a destination) -- callers should treat
+  /// this the same as [pickFilesForImport] returning `null`.
+  Future<ImportPickResult?> prepareShareImport(
+    MountedContainer container,
+    String targetPath,
+  ) async {
+    try {
+      final result = await _channel.invokeMapMethod<String, dynamic>(
+        ChannelMethods.prepareShareImport,
+        {
+          'filePath': container.uri,
+          'targetPath': targetPath,
+          'caseSensitive': namesAreCaseSensitive(container),
+        },
+      );
+      return _importPickResultFromChannel(result);
+    } catch (e) {
+      logSwallowed('prepareShareImport', e);
+      return null;
+    }
+  }
+
+  /// No local-storage branch: extracting a video frame needs either a
+  /// codec plugin or native decode support, neither of which is wired up
+  /// for local storage (see the doc comment on
+  /// [LocalStorageContainerX.isLocalStorage] call sites in this file for
+  Future<Uint8List?> getVideoThumbnail(
+    MountedContainer container,
+    String fileName, {
+    int quality = 60,
+    int targetSize = 180,
+    int? timeUs,
+    String? strategy,
+    double? framePosition,
+  }) async {
+    try {
+      final Uint8List? bytes = await _channel
+          .invokeMethod<Uint8List>(ChannelMethods.getVideoThumbnail, {
+            'filePath': container.uri,
+            'fileName': fileName,
+            'quality': quality,
+            'targetSize': targetSize,
+            'isLocalStorage': container.isLocalStorage,
+            'strategy':
+                strategy ?? ThumbnailCacheService.videoThumbnailStrategy.name,
+            'framePosition':
+                framePosition ??
+                ThumbnailCacheService.videoThumbnailFramePosition,
+            if (timeUs != null) 'timeUs': timeUs,
+          });
+      return bytes;
+    } catch (e) {
+      logSwallowed('getVideoThumbnail', e, expected: true);
+      return null;
+    }
+  }
+
+  Future<ThumbnailWithSize?> getVideoThumbnailWithSize(
+    MountedContainer container,
+    String fileName, {
+    int quality = 60,
+    int targetSize = 180,
+    String? strategy,
+    double? framePosition,
+  }) async {
+    try {
+      final result = await _channel
+          .invokeMethod(ChannelMethods.getVideoThumbnailWithSize, {
+            'filePath': container.uri,
+            'fileName': fileName,
+            'quality': quality,
+            'targetSize': targetSize,
+            'isLocalStorage': container.isLocalStorage,
+            'strategy':
+                strategy ?? ThumbnailCacheService.videoThumbnailStrategy.name,
+            'framePosition':
+                framePosition ??
+                ThumbnailCacheService.videoThumbnailFramePosition,
+          });
+      return ThumbnailWithSize.fromChannelResult(result);
+    } catch (e) {
+      logSwallowed('getVideoThumbnailWithSize', e, expected: true);
+      return null;
+    }
+  }
+
+  Future<void> setPlaybackActive(bool active) async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.setPlaybackActive, {
+        'active': active,
+      });
+    } catch (e) {
+      logSwallowed('setPlaybackActive', e, expected: true);
+    }
+  }
+
+  Future<bool> setSecureScreen(bool enabled) async {
+    try {
+      final bool? success = await _channel.invokeMethod<bool>(
+        ChannelMethods.setSecureScreen,
+        {'enabled': enabled},
+      );
+      return success ?? false;
+    } catch (e) {
+      logSwallowed('setSecureScreen', e);
+      return false;
+    }
+  }
+
+  Future<void> setRecentsSnapshotBlocked(bool blocked) async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.setRecentsSnapshotBlocked, {
+        'blocked': blocked,
+      });
+    } catch (e) {
+      logSwallowed('setRecentsSnapshotBlocked', e, expected: true);
+    }
+  }
+
+  Future<void> notifyResumedFramePainted() async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.notifyResumedFramePainted);
+    } catch (e) {
+      logSwallowed('notifyResumedFramePainted', e, expected: true);
+    }
+  }
+
+  Future<bool> setSensitiveClipboardText(String text) async {
+    try {
+      final bool? success = await _channel.invokeMethod<bool>(
+        ChannelMethods.setSensitiveClipboardText,
+        {'text': text},
+      );
+      return success ?? false;
+    } catch (e) {
+      logSwallowed('setSensitiveClipboardText', e);
+      return false;
+    }
+  }
+
+  /// Removes the clipboard's primary clip via `clearPrimaryClip()` on the
+  /// native side, rather than replacing it with an empty clip, so Android
+  /// 13+'s clipboard preview overlay doesn't fire on clear.
+  ///
+  /// If [expectedText] is given, the native side only clears when the
+  /// clipboard still holds exactly that text, so it never clobbers
+  /// something the user copied afterward from elsewhere. Returns `false`
+  /// (without throwing) if the platform call isn't available (older
+  /// Android, or a channel failure) so the caller can fall back.
+  Future<bool> clearSensitiveClipboardText({String? expectedText}) async {
+    try {
+      final bool? success = await _channel.invokeMethod<bool>(
+        ChannelMethods.clearSensitiveClipboardText,
+        {'expectedText': expectedText},
+      );
+      return success ?? false;
+    } catch (e) {
+      logSwallowed('clearSensitiveClipboardText', e);
+      return false;
+    }
+  }
+
+  Future<bool> setKeepScreenOn(bool enabled) async {
+    try {
+      final bool? success = await _channel.invokeMethod<bool>(
+        ChannelMethods.setKeepScreenOn,
+        {'enabled': enabled},
+      );
+      return success ?? false;
+    } catch (e) {
+      logSwallowed('setKeepScreenOn', e);
+      return false;
+    }
+  }
+
+  /// Starts VaultCameraRecordingService: the foreground service (typed
+  /// camera|microphone) that keeps an in-progress video recording alive
+  /// after the screen turns off / the app is backgrounded, rather than
+  /// the OS tearing down the camera/mic connection. Only called by
+  /// CameraCaptureScreen, and only when "lock vaults on screen lock" is
+  /// off for the container being recorded into. See that service for the
+  /// full rationale. [audioOnly] makes it declare only the microphone type
+  /// (used by AudioCaptureScreen, which has no camera in play).
+  ///
+  /// Returns whether the service really started. It cannot be started once the
+  /// app is already in the background, and a recording that is not covered by
+  /// it will not survive the app leaving the screen, so a caller that wants to
+  /// keep recording in the background needs to know.
+  ///
+  /// [containerName] may be empty (Quick Capture records before a vault is
+  /// chosen); the notification then has no "saving to" line.
+  Future<bool> startBackgroundRecording({
+    required int volId,
+    required String containerName,
+    bool audioOnly = false,
+  }) async {
+    try {
+      final started = await _channel.invokeMethod<bool>(
+        ChannelMethods.startBackgroundRecording,
+        {
+          'volId': volId,
+          'containerName': containerName,
+          'audioOnly': audioOnly,
+        },
+      );
+      return started ?? false;
+    } catch (e) {
+      logSwallowed('startBackgroundRecording', e);
+      return false;
+    }
+  }
+
+  /// Stops VaultCameraRecordingService (and releases its wake lock).
+  /// Safe to call even if it isn't running.
+  Future<void> stopBackgroundRecording() async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.stopBackgroundRecording);
+    } catch (e) {
+      logSwallowed('stopBackgroundRecording', e);
+    }
+  }
+
+  /// Mirrors the current "Debug logging" settings toggle to the native
+  /// side, so the VeLog-gated verbose logs down in the engine (chunk
+  /// read/write path selection, WRITE_BACK_STREAM profiling, etc.) only
+  /// fire when explicitly enabled. Call this whenever the toggle changes
+  /// and once at startup -- see VaultExplorerApp._resolveMode.
+  Future<void> setDebugLogging(bool enabled) async {
+    try {
+      await _channel.invokeMethod(ChannelMethods.setDebugLogging, {
+        'enabled': enabled,
+      });
+    } catch (e) {
+      logSwallowed('setDebugLogging', e, expected: true);
+    }
+  }
+
+  Future<bool> launchUrl(String url) async {
+    try {
+      final bool? success = await _channel.invokeMethod<bool>(
+        ChannelMethods.launchUrl,
+        {'url': url},
+      );
+      return success ?? false;
+    } catch (e) {
+      logSwallowed('launchUrl', e);
+      return false;
+    }
+  }
+
+  Future<String> getAppVersion() async {
+    try {
+      final String? version = await _channel.invokeMethod<String>(
+        ChannelMethods.getAppVersion,
+      );
+      return version ?? '1.0.0';
+    } catch (e) {
+      logSwallowed('getAppVersion', e);
+      return '1.0.0';
+    }
+  }
+
+  Future<bool> isCryfsVault(String uri) async {
+    try {
+      final result = await _channel.invokeMethod<bool>(
+        ChannelMethods.isCryfsVault,
+        {'uri': uri},
+      );
+      return result ?? false;
+    } catch (e) {
+      logSwallowed('isCryfsVault', e);
+      return false;
+    }
+  }
+
+  Future<void> beginBatchWrite(MountedContainer container) async {
+    try {
+      await _channel.invokeMethod<bool>(ChannelMethods.beginBatchWrite, {
+        'filePath': container.uri,
+      });
+    } catch (e) {
+      logSwallowed('beginBatchWrite', e);
+    }
+  }
+
+  Future<void> endBatchWrite(MountedContainer container) async {
+    try {
+      await _channel.invokeMethod<bool>(ChannelMethods.endBatchWrite, {
+        'filePath': container.uri,
+      });
+    } catch (e) {
+      logSwallowed('endBatchWrite', e);
+    }
+  }
+
+  Future<void> beginBatchDelete(MountedContainer container) async {
+    try {
+      await _channel.invokeMethod<bool>(ChannelMethods.beginBatchDelete, {
+        'filePath': container.uri,
+      });
+    } catch (e) {
+      logSwallowed('beginBatchDelete', e);
+    }
+  }
+
+  Future<void> endBatchDelete(MountedContainer container) async {
+    try {
+      await _channel.invokeMethod<bool>(ChannelMethods.endBatchDelete, {
+        'filePath': container.uri,
+      });
+    } catch (e) {
+      logSwallowed('endBatchDelete', e);
+    }
+  }
+}

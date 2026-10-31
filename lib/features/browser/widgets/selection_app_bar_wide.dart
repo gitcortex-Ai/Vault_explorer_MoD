@@ -1,0 +1,515 @@
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/theme/app_theme.dart';
+import 'package:vaultexplorer/data/models/file_manager_action.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/data/models/file_item_action.dart';
+import 'package:vaultexplorer/features/browser/widgets/item_action_menu_config.dart';
+
+class SelectionAppBarWide extends StatelessWidget implements PreferredSizeWidget {
+  final int selectedCount;
+  final String selectionLabel;
+  final bool singleFileSelected;
+  final bool singleFolderSelected;
+  final bool singleArchiveSelected;
+  final bool folderDocumentProviderMounted;
+  final bool hideVaultOnlyActions;
+  final bool isInsideArchive;
+  final bool readOnly;
+  final bool showPinOption;
+  final bool showUnpinOption;
+  final bool showBookmarkOption;
+  final bool showUnbookmarkOption;
+  final bool showEncryptOption;
+  final bool showDecryptOption;
+  final bool showActionBar;
+  final List<FileManagerAction> visibleActions;
+  final Map<FileManagerAction, WidgetBuilder> actionBuilders;
+  final VoidCallback? onFileInfo;
+
+  /// Set only for a single selected item while a search is showing: offers
+  /// "Go to location", which leaves the search and shows the item in the
+  /// folder it lives in.
+  final VoidCallback? onGoToLocation;
+
+  /// Copies the single selected item's path to the clipboard.
+  final VoidCallback? onCopyPath;
+
+  final VoidCallback onClose;
+  final VoidCallback onSelectAll;
+  final VoidCallback onRename;
+  final bool allowRenameAction;
+  final VoidCallback onCopy;
+  final VoidCallback onCut;
+
+  /// Set only for a single selected folder while the file manager is in tabs.
+  final VoidCallback? onOpenInNewTab;
+  final VoidCallback onExport;
+  final bool allowExportAction;
+  final bool allowExtractAction;
+  final VoidCallback onCompressSelection;
+  final bool allowCompressAction;
+  final VoidCallback onExtractSelectedArchive;
+  final VoidCallback onDelete;
+  final VoidCallback onOpenWithApp;
+  final bool showShareOption;
+  final VoidCallback onShare;
+  final bool showEditImageOption;
+  final VoidCallback onEditImage;
+  final bool showEditVideoOption;
+  final VoidCallback onEditVideo;
+  final bool showEditAudioOption;
+  final VoidCallback? onEditAudio;
+  final VoidCallback onToggleDocumentProvider;
+  final VoidCallback? onSyncSettings;
+  final VoidCallback onPin;
+  final VoidCallback onUnpin;
+  final VoidCallback onBookmark;
+  final VoidCallback onUnbookmark;
+  final VoidCallback onEncrypt;
+  final VoidCallback onDecrypt;
+
+  /// The user's item-action configuration: hidden actions are removed from
+  /// the buttons and the overflow menu, and the menu follows this order.
+  final List<FileItemAction> itemActionOrder;
+  final Set<FileItemAction> hiddenItemActions;
+
+  const SelectionAppBarWide({
+    super.key,
+    required this.selectedCount,
+    required this.selectionLabel,
+    required this.singleFileSelected,
+    required this.singleFolderSelected,
+    required this.singleArchiveSelected,
+    required this.folderDocumentProviderMounted,
+    this.hideVaultOnlyActions = false,
+    this.isInsideArchive = false,
+    this.onFileInfo,
+    this.onGoToLocation,
+    this.onCopyPath,
+    required this.readOnly,
+    required this.showPinOption,
+    required this.showUnpinOption,
+    required this.showBookmarkOption,
+    required this.showUnbookmarkOption,
+    required this.showEncryptOption,
+    required this.showDecryptOption,
+    required this.showActionBar,
+    required this.visibleActions,
+    required this.actionBuilders,
+    required this.onClose,
+    required this.onSelectAll,
+    required this.onRename,
+    this.allowRenameAction = true,
+    required this.onCopy,
+    required this.onCut,
+    this.onOpenInNewTab,
+    required this.onExport,
+    this.allowExportAction = true,
+    this.allowExtractAction = true,
+    required this.onCompressSelection,
+    this.allowCompressAction = true,
+    required this.onExtractSelectedArchive,
+    required this.onDelete,
+    required this.onOpenWithApp,
+    this.showShareOption = false,
+    required this.onShare,
+    this.showEditImageOption = false,
+    required this.onEditImage,
+    this.showEditVideoOption = false,
+    required this.onEditVideo,
+    this.showEditAudioOption = false,
+    this.onEditAudio,
+    required this.onToggleDocumentProvider,
+    this.onSyncSettings,
+    required this.onPin,
+    required this.onUnpin,
+    required this.onBookmark,
+    required this.onUnbookmark,
+    required this.onEncrypt,
+    required this.onDecrypt,
+    this.itemActionOrder = FileItemAction.values,
+    this.hiddenItemActions = const {},
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    bool shown(FileItemAction action) => !hiddenItemActions.contains(action);
+    final bool showExtractButton =
+        allowExtractAction &&
+        (singleArchiveSelected || isInsideArchive) &&
+        shown(FileItemAction.extract);
+
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.close_rounded),
+        tooltip: context.l10n.clearSelectionTooltip,
+        onPressed: onClose,
+      ),
+      titleSpacing: 0,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: cs.primaryContainer,
+              borderRadius: BorderRadius.circular(AppRadius.full),
+            ),
+            child: Text(
+              '$selectedCount',
+              style: textTheme.labelLarge?.copyWith(
+                color: cs.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              selectionLabel,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.titleSmall,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (showExtractButton)
+          IconButton(
+            icon: const Icon(Icons.unarchive_outlined),
+            tooltip: context.l10n.extract,
+            onPressed: onExtractSelectedArchive,
+          ),
+        if (showShareOption && shown(FileItemAction.share))
+          IconButton(
+            icon: const Icon(Icons.share_rounded),
+            tooltip: context.l10n.shareAction,
+            onPressed: onShare,
+          ),
+        if (!isInsideArchive && shown(FileItemAction.copy))
+          IconButton(
+            icon: const Icon(Icons.copy_rounded),
+            tooltip: context.l10n.copyTooltip,
+            onPressed: onCopy,
+          ),
+        if (!isInsideArchive && shown(FileItemAction.move))
+          IconButton(
+            icon: Icon(
+              Icons.cut_rounded,
+              color: readOnly ? cs.onSurfaceVariant.withValues(alpha: 0.5) : null,
+            ),
+            tooltip: readOnly ? context.l10n.readOnlyCantMoveTooltip : context.l10n.moveAction,
+            onPressed: onCut,
+          ),
+        if (!isInsideArchive && allowRenameAction && shown(FileItemAction.rename))
+          IconButton(
+            icon: Icon(
+              Icons.drive_file_rename_outline_rounded,
+              color: readOnly ? cs.onSurfaceVariant.withValues(alpha: 0.5) : null,
+            ),
+            tooltip: readOnly ? context.l10n.readOnlyCantRenameTooltip : context.l10n.renameTooltip,
+            onPressed: onRename,
+          ),
+        if (!isInsideArchive && shown(FileItemAction.delete))
+          IconButton(
+            icon: Icon(
+              Icons.delete_outline_rounded,
+              color: readOnly ? cs.onSurfaceVariant.withValues(alpha: 0.5) : cs.error,
+            ),
+            tooltip: readOnly ? context.l10n.readOnlyCantDeleteTooltip : context.l10n.delete,
+            onPressed: onDelete,
+          ),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert_rounded),
+          tooltip: context.l10n.moreOptionsTooltip,
+          onSelected: (value) {
+            if (value == 'select_all') onSelectAll();
+            if (value == 'share') onShare();
+            if (value == 'open_in_new_tab') onOpenInNewTab?.call();
+            if (value == 'open_with_app') onOpenWithApp();
+            if (value == 'edit_image') onEditImage();
+            if (value == 'edit_video') onEditVideo();
+            if (value == 'edit_audio') onEditAudio?.call();
+            if (value == 'compress') onCompressSelection();
+            if (value == 'export') onExport();
+            if (value == 'encrypt') onEncrypt();
+            if (value == 'decrypt') onDecrypt();
+            if (value == 'doc_provider') onToggleDocumentProvider();
+            if (value == 'sync_settings') onSyncSettings?.call();
+            if (value == 'pin') onPin();
+            if (value == 'unpin') onUnpin();
+            if (value == 'bookmark') onBookmark();
+            if (value == 'unbookmark') onUnbookmark();
+            if (value == 'go_to_location') onGoToLocation?.call();
+            if (value == 'copy_path') onCopyPath?.call();
+            if (value == 'file_info') onFileInfo?.call();
+          },
+          itemBuilder: (context) => applyItemActionMenuConfig(
+            [
+            if (onOpenInNewTab != null)
+              PopupMenuItem<String>(
+                value: 'open_in_new_tab',
+                child: Row(
+                  children: [
+                    Icon(Icons.tab_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.browserTabOpenInNewTab),
+                  ],
+                ),
+              ),
+            // 1. Selection Utility
+            PopupMenuItem<String>(
+              value: 'select_all',
+              child: Row(
+                children: [
+                  Icon(Icons.select_all_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                  const SizedBox(width: 12),
+                  Text(context.l10n.selectAllAction),
+                ],
+              ),
+            ),
+
+            // 2. Consumption / External Actions
+            if (singleFileSelected)
+              PopupMenuItem<String>(
+                value: 'open_with_app',
+                child: Row(
+                  children: [
+                    Icon(Icons.open_in_new_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.openWithAppAction),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && showEditImageOption)
+              PopupMenuItem<String>(
+                value: 'edit_image',
+                enabled: !readOnly,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.edit_outlined,
+                      color: readOnly ? cs.onSurfaceVariant.withValues(alpha: 0.4) : cs.onSurfaceVariant,
+                      size: AppIconSize.small,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.editImageAction),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && showEditVideoOption)
+              PopupMenuItem<String>(
+                value: 'edit_video',
+                enabled: !readOnly,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.content_cut_rounded,
+                      color: readOnly ? cs.onSurfaceVariant.withValues(alpha: 0.4) : cs.onSurfaceVariant,
+                      size: AppIconSize.small,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.videoEditorEditAction),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && showEditAudioOption)
+              PopupMenuItem<String>(
+                value: 'edit_audio',
+                enabled: !readOnly,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.graphic_eq_rounded,
+                      color: readOnly ? cs.onSurfaceVariant.withValues(alpha: 0.4) : cs.onSurfaceVariant,
+                      size: AppIconSize.small,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.audioEditorEditAction),
+                  ],
+                ),
+              ),
+
+            // 3. Core Archive Operations
+            if (!isInsideArchive && allowCompressAction)
+              PopupMenuItem<String>(
+                value: 'compress',
+                enabled: !readOnly,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.folder_zip_outlined,
+                      color: readOnly ? cs.onSurfaceVariant.withValues(alpha: 0.5) : cs.onSurfaceVariant,
+                      size: AppIconSize.small,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.archiveSelectionAction),
+                  ],
+                ),
+              ),
+
+            // 4. Vault & System Integrations
+            if (allowExportAction &&
+                !hideVaultOnlyActions &&
+                !isInsideArchive)
+              PopupMenuItem<String>(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(Icons.drive_folder_upload_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.exportToDeviceAction),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && showEncryptOption)
+              PopupMenuItem<String>(
+                value: 'encrypt',
+                child: Row(
+                  children: [
+                    Icon(Icons.lock_outline_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.cryptoDirectionEncrypt),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && showDecryptOption)
+              PopupMenuItem<String>(
+                value: 'decrypt',
+                child: Row(
+                  children: [
+                    Icon(Icons.lock_open_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.cryptoDirectionDecrypt),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && singleFolderSelected && !hideVaultOnlyActions)
+              PopupMenuItem<String>(
+                value: 'doc_provider',
+                child: Row(
+                  children: [
+                    Icon(
+                      folderDocumentProviderMounted ? Icons.folder_shared_rounded : Icons.folder_shared_outlined,
+                      color: folderDocumentProviderMounted ? cs.tertiary : cs.onSurfaceVariant,
+                      size: AppIconSize.small,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(folderDocumentProviderMounted
+                        ? context.l10n.documentProviderSettingsMenu
+                        : context.l10n.exposeAsDocumentProviderMenu),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && singleFolderSelected && !hideVaultOnlyActions)
+              PopupMenuItem<String>(
+                value: 'sync_settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.sync_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.autoSyncMenuAction),
+                  ],
+                ),
+              ),
+
+            // 5. Bookmarks & Shortcuts
+            if (!isInsideArchive && showPinOption)
+              PopupMenuItem<String>(
+                value: 'pin',
+                child: Row(
+                  children: [
+                    Icon(Icons.push_pin_rounded, color: cs.primary, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(selectedCount > 1 ? context.l10n.pinSelectedAction : context.l10n.pinAction),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && showUnpinOption)
+              PopupMenuItem<String>(
+                value: 'unpin',
+                child: Row(
+                  children: [
+                    Icon(Icons.push_pin_outlined, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(selectedCount > 1 ? context.l10n.unpinSelectedAction : context.l10n.unpinAction),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && showBookmarkOption)
+              PopupMenuItem<String>(
+                value: 'bookmark',
+                child: Row(
+                  children: [
+                    Icon(Icons.star_rounded, color: context.semanticColors.bookmark, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(selectedCount > 1 ? context.l10n.bookmarkSelectedAction : context.l10n.bookmarkAction),
+                  ],
+                ),
+              ),
+            if (!isInsideArchive && showUnbookmarkOption)
+              PopupMenuItem<String>(
+                value: 'unbookmark',
+                child: Row(
+                  children: [
+                    Icon(Icons.star_outline_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(selectedCount > 1 ? context.l10n.unbookmarkSelectedAction : context.l10n.unbookmarkAction),
+                  ],
+                ),
+              ),
+
+            // 6. Location + Properties / Info (Always at the bottom)
+            if (onGoToLocation != null)
+              PopupMenuItem<String>(
+                value: 'go_to_location',
+                child: Row(
+                  children: [
+                    Icon(Icons.folder_open_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.goToLocationAction),
+                  ],
+                ),
+              ),
+            if (onCopyPath != null)
+              PopupMenuItem<String>(
+                value: 'copy_path',
+                child: Row(
+                  children: [
+                    Icon(Icons.link_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.copyPathAction),
+                  ],
+                ),
+              ),
+            if (singleFileSelected || singleFolderSelected)
+              PopupMenuItem<String>(
+                value: 'file_info',
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, color: cs.onSurfaceVariant, size: AppIconSize.small),
+                    const SizedBox(width: 12),
+                    Text(context.l10n.fileInfoAction),
+                  ],
+                ),
+              ),
+            ],
+            order: itemActionOrder,
+            hidden: hiddenItemActions,
+          ),
+        ),
+        const SizedBox(width: 8),
+        VerticalDivider(width: 1, indent: 12, endIndent: 12, color: cs.outlineVariant),
+        const SizedBox(width: 4),
+        if (showActionBar)
+          ...visibleActions.map((action) => actionBuilders[action]!(context)),
+        if (!showActionBar) const SizedBox(width: 4),
+      ],
+    );
+  }
+}

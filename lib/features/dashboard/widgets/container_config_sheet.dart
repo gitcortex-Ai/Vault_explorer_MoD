@@ -1,0 +1,1543 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/api/vault_engine_types.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/utils/responsive.dart';
+import 'package:vaultexplorer/core/utils/ve_log.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/core/widgets/inputs/thumbnail_settings_tiles.dart';
+import 'package:vaultexplorer/data/models/container_format.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/models/thumbnail_settings.dart';
+import 'package:vaultexplorer/data/models/vault_delete_after_import_mode.dart';
+import 'package:vaultexplorer/data/services/app_secure_storage.dart';
+import 'package:vaultexplorer/data/services/app_settings_service.dart';
+import 'package:vaultexplorer/data/services/biometric_enrollment_guard.dart';
+import 'package:vaultexplorer/data/services/container_repository.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/automation_settings_screen.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/change_password_screen.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/container_config_controller.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/pattern_pin_verify_controller.dart';
+import 'package:vaultexplorer/features/dashboard/vault_dashboard_controller.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/real_password_gate_controller.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/vault_info_screen.dart';
+import 'package:vaultexplorer/features/sync/ui/sync_rule_editor_sheet.dart';
+import 'package:vaultexplorer/features/lock/widgets/pattern_lock_view.dart';
+import 'package:vaultexplorer/features/lock/widgets/pattern_setup_sheet.dart';
+import 'package:vaultexplorer/features/lock/widgets/pin_lock_view.dart';
+import 'package:vaultexplorer/features/lock/widgets/pin_setup_sheet.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area_scope.dart';
+
+part 'container_config_dialogs.dart';
+
+class ContainerConfigScreen extends ConsumerStatefulWidget {
+  final String uri;
+  final String currentLabel;
+  final ContainerRecord? existingRecord;
+  final void Function(ContainerRecord record) onSaved;
+  final AppSettings? appSettings;
+  final MountedContainer? mountedContainer;
+
+  const ContainerConfigScreen({
+    super.key,
+    required this.uri,
+    required this.currentLabel,
+    this.existingRecord,
+    required this.onSaved,
+    this.appSettings,
+    this.mountedContainer,
+  });
+
+  @override
+  ConsumerState<ContainerConfigScreen> createState() =>
+      _ContainerConfigScreenState();
+}
+
+class _ContainerConfigScreenState extends ConsumerState<ContainerConfigScreen> {
+  late final TextEditingController _labelCtrl;
+  late final TextEditingController _passwordCtrl;
+  late final TextEditingController _pimCtrl;
+  bool _showPassword = false;
+
+  String? _prefillPassword;
+  bool _prefillCleared = false;
+
+  bool get _passwordPrefilled =>
+      _prefillPassword != null && _passwordCtrl.text == _prefillPassword;
+
+  bool get _revealLocked =>
+      (_prefillPassword?.isNotEmpty ?? false) && !_prefillCleared;
+
+  String get _containerFormat =>
+      widget.existingRecord?.containerFormat ??
+      widget.mountedContainer?.containerFormat ??
+      'veracrypt';
+
+  bool get _isCryptomator =>
+      ContainerFormat.isCryptomatorWire(_containerFormat);
+  bool get _isGocryptfs => ContainerFormat.isGocryptfsWire(_containerFormat);
+  bool get _isCryfs => ContainerFormat.isCryfsWire(_containerFormat);
+  bool get _isBitlocker => ContainerFormat.isBitlockerWire(_containerFormat);
+
+  ContainerConfigParams get _params => ContainerConfigParams(
+    uri: widget.uri,
+    currentLabel: widget.currentLabel,
+    containerFormat: _containerFormat,
+  );
+
+  MountedContainer? get _effectiveMounted {
+    if (widget.mountedContainer != null) return widget.mountedContainer;
+    return ref
+        .read(vaultDashboardControllerProvider)
+        .mounted
+        .where((c) => c.uri == widget.uri)
+        .firstOrNull;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _labelCtrl = TextEditingController(
+      text: widget.existingRecord?.label.isNotEmpty == true
+          ? widget.existingRecord!.label
+          : widget.currentLabel,
+    );
+    _passwordCtrl = TextEditingController();
+    _pimCtrl = TextEditingController();
+    _labelCtrl.addListener(() => setState(() {}));
+    _pimCtrl.addListener(() => setState(() {}));
+
+    Future.microtask(() {
+      ref
+          .read(containerConfigControllerProvider(_params).notifier)
+          .initializeFromRecord(
+            rec: widget.existingRecord,
+            appSettings: widget.appSettings,
+            mountedContainer: widget.mountedContainer,
+          );
+    });
+  }
+
+  @override
+  void dispose() {
+    _labelCtrl.dispose();
+    _passwordCtrl.dispose();
+    _pimCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _clearThumbnailCache() async {
+    final confirm = await showAppConfirmDialog(
+      context,
+      title: context.l10n.clearThumbnailCacheDialogTitle,
+      message: context.l10n.clearThumbnailCacheDialogMessage,
+      confirmLabel: context.l10n.clearCacheButton,
+      isDestructive: true,
+    );
+    if (!confirm || !mounted) return;
+
+    final result = await ref
+        .read(containerConfigControllerProvider(_params).notifier)
+        .clearThumbnailCache();
+
+    if (!mounted) return;
+    if (result.isLocked) {
+      showAppSnackBar(
+        context,
+        message: context.l10n.appCacheClearedUnlockMessage,
+        tone: AppBannerTone.warning,
+      );
+    } else if (result.appCacheCleared && result.containerCacheCleared) {
+      showAppSnackBar(
+        context,
+        message: context.l10n.allThumbnailCachesClearedMessage,
+        tone: AppBannerTone.success,
+      );
+    } else if (result.appCacheCleared) {
+      showAppSnackBar(
+        context,
+        message: context.l10n.appCacheClearedContainerFailedMessage,
+        tone: AppBannerTone.warning,
+      );
+    } else {
+      showAppSnackBar(
+        context,
+        message: context.l10n.failedToClearThumbnailCachesMessage,
+        tone: AppBannerTone.error,
+      );
+    }
+  }
+
+  Future<void> _save(ContainerConfigState state) async {
+    if (state.needsPatternSetup) {
+      showAppSnackBar(
+        context,
+        message: context.l10n.patternSetupRequiredBeforeSaving,
+        tone: AppBannerTone.warning,
+      );
+      return;
+    }
+    if (state.needsPinSetup) {
+      showAppSnackBar(
+        context,
+        message: context.l10n.pinSetupRequiredBeforeSaving,
+        tone: AppBannerTone.warning,
+      );
+      return;
+    }
+
+    final record = await ref
+        .read(containerConfigControllerProvider(_params).notifier)
+        .saveContainer(
+          passwordText: _passwordCtrl.text,
+          pimText: _pimCtrl.text,
+          labelText: _labelCtrl.text,
+          existingRecord: widget.existingRecord,
+        );
+
+    if (record != null && mounted) {
+      widget.onSaved(record);
+      Navigator.pop(context);
+    } else if (record == null && mounted) {
+      // Only happens when biometric unlock could not be set up (no biometric
+      // enrolled / no secure lock screen); nothing was saved.
+      showAppSnackBar(
+        context,
+        message: context.l10n.biometricNotAvailable,
+        tone: AppBannerTone.error,
+      );
+    }
+  }
+
+  Future<void> _setupPattern() async {
+    final hash = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const PatternSetupSheet(),
+    );
+    if (hash != null && mounted) {
+      ref
+          .read(containerConfigControllerProvider(_params).notifier)
+          .setPatternHash(hash);
+    }
+  }
+
+  Future<void> _setupPin() async {
+    final hash = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const PinSetupSheet(),
+    );
+    if (hash != null && mounted) {
+      ref
+          .read(containerConfigControllerProvider(_params).notifier)
+          .setPinHash(hash);
+    }
+  }
+
+  /// Whether this vault's biometric unlock may still be used. When the
+  /// device's biometrics changed the vault has just been put back on a manual
+  /// password: say so, hand the dashboard the updated record and close this
+  /// sheet, which was built for the biometric record and would otherwise keep
+  /// offering it. Reopening shows the vault as a manual-password vault.
+  Future<bool> _biometricsStillTrusted() async {
+    BiometricGuardResult check;
+    try {
+      check = await ref
+          .read(biometricEnrollmentGuardProvider)
+          .checkVault(widget.uri);
+    } catch (e) {
+      VeLog.w('ContainerConfigSheet', 'Biometric enrollment check failed', e);
+      check = BiometricGuardResult.unavailable;
+    }
+    if (!mounted) return false;
+    switch (check) {
+      case BiometricGuardResult.ok:
+        return true;
+      case BiometricGuardResult.unavailable:
+        showAppSnackBar(
+          context,
+          message: context.l10n.biometricNotAvailable,
+          tone: AppBannerTone.error,
+        );
+        return false;
+      case BiometricGuardResult.reverted:
+        final updated = (await ref
+            .read(containerRepositoryProvider)
+            .loadAll())[widget.uri];
+        if (!mounted) return false;
+        showAppSnackBar(
+          context,
+          message: context.l10n.biometricsChangedFallbackMessage,
+          tone: AppBannerTone.warning,
+        );
+        if (updated != null) widget.onSaved(updated);
+        Navigator.pop(context);
+        return false;
+    }
+  }
+
+  Future<void> _authenticateSettings(ContainerConfigState state) async {
+    final record = widget.existingRecord;
+    if (record == null) return;
+
+    if (record.unlockMethod == ContainerUnlockMethod.biometrics) {
+      try {
+        // This prompt releases the saved password into the form, so it is
+        // held to the same rule as unlocking: no new biometric may pass it.
+        if (!await _biometricsStillTrusted()) return;
+        final localAuth = LocalAuthentication();
+        final ok = await localAuth.authenticate(
+          localizedReason: context.l10n.authenticateToModifySettingsPrompt,
+          persistAcrossBackgrounding: true,
+        );
+        if (ok && mounted && await _biometricsStillTrusted()) {
+          final savedPassword = await ref
+              .read(containerRepositoryProvider)
+              .getPassword(widget.uri);
+          final savedPim = await ref
+              .read(appSecureStorageProvider)
+              .read(key: pimStorageKey(widget.uri));
+          ref
+              .read(containerConfigControllerProvider(_params).notifier)
+              .unlockSettings();
+          if (savedPassword != null && mounted) {
+            _prefillPassword = savedPassword;
+            _prefillCleared = false;
+            _passwordCtrl.text = savedPassword;
+          }
+          if (savedPim != null && mounted) _pimCtrl.text = savedPim;
+        }
+      } catch (e) {
+        VeLog.w(
+          'ContainerConfigSheet',
+          'Biometric authentication to modify settings failed',
+          e,
+        );
+      }
+    } else if (record.unlockMethod == ContainerUnlockMethod.pattern) {
+      if (state.patternHash == null) {
+        ref
+            .read(containerConfigControllerProvider(_params).notifier)
+            .unlockSettings();
+        return;
+      }
+      final hash = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) =>
+            _PatternVerifySheet(storedHash: state.patternHash!),
+      );
+      if (hash != null && mounted) {
+        final savedPassword = await ref
+            .read(containerRepositoryProvider)
+            .getPassword(widget.uri);
+        final savedPim = await ref
+            .read(appSecureStorageProvider)
+            .read(key: pimStorageKey(widget.uri));
+        ref
+            .read(containerConfigControllerProvider(_params).notifier)
+            .unlockSettings();
+        if (savedPassword != null && mounted) {
+          _prefillPassword = savedPassword;
+          _prefillCleared = false;
+          _passwordCtrl.text = savedPassword;
+        }
+        if (savedPim != null && mounted) _pimCtrl.text = savedPim;
+      }
+    } else if (record.unlockMethod == ContainerUnlockMethod.pin) {
+      if (state.pinHash == null) {
+        ref
+            .read(containerConfigControllerProvider(_params).notifier)
+            .unlockSettings();
+        return;
+      }
+      final hash = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => _PinVerifySheet(storedHash: state.pinHash!),
+      );
+      if (hash != null && mounted) {
+        final savedPassword = await ref
+            .read(containerRepositoryProvider)
+            .getPassword(widget.uri);
+        final savedPim = await ref
+            .read(appSecureStorageProvider)
+            .read(key: pimStorageKey(widget.uri));
+        ref
+            .read(containerConfigControllerProvider(_params).notifier)
+            .unlockSettings();
+        if (savedPassword != null && mounted) {
+          _prefillPassword = savedPassword;
+          _prefillCleared = false;
+          _passwordCtrl.text = savedPassword;
+        }
+        if (savedPim != null && mounted) _pimCtrl.text = savedPim;
+      }
+    } else {
+      final savedPassword = await ref
+          .read(containerRepositoryProvider)
+          .getPassword(widget.uri);
+      if (!mounted) return;
+      final verified =
+          await showDialog<
+            ({
+              String password,
+              List<KeyfileRef> keyfiles,
+              int cipherId,
+              int hashId,
+            })
+          >(
+            context: context,
+            builder: (context) => _RealPasswordGateDialog(
+              uri: widget.uri,
+              cipherId: record.cipherId,
+              hashId: record.hashId,
+              documentProvider: state.documentProvider,
+              cacheDerivedKey: state.cacheDerivedKey,
+              containerFormat: record.containerFormat,
+              initialKeyfiles: record.keyfiles,
+              initialPassword: savedPassword,
+              isMounted: widget.mountedContainer != null,
+              compositeCarriers: record.compositeCarriers,
+            ),
+          );
+      if (verified != null && mounted) {
+        ref
+            .read(containerConfigControllerProvider(_params).notifier)
+            .unlockSettings(
+              verifiedPassword: verified.password,
+              verifiedKeyfiles: verified.keyfiles,
+              verifiedCipherId: verified.cipherId,
+              verifiedHashId: verified.hashId,
+            );
+        _prefillPassword = verified.password;
+        _prefillCleared = false;
+        _passwordCtrl.text = verified.password;
+      }
+    }
+  }
+
+  Future<void> _editDisplayName() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) =>
+          _DisplayNameDialog(initialText: _labelCtrl.text),
+    );
+    if (result != null && result.trim().isNotEmpty) {
+      _labelCtrl.text = result.trim();
+      ref
+          .read(containerConfigControllerProvider(_params).notifier)
+          .setLabel(result.trim());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(containerConfigControllerProvider(_params));
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final wideLayout = context.screen.useWideLayout;
+
+    // Apply auto-loaded temp credentials if text field is empty
+    if (state.tempPassword != null &&
+        state.tempPassword!.isNotEmpty &&
+        _passwordCtrl.text.isEmpty &&
+        !_prefillCleared) {
+      _prefillPassword = state.tempPassword;
+      _passwordCtrl.text = state.tempPassword!;
+    }
+    if (state.tempPim != null &&
+        state.tempPim!.isNotEmpty &&
+        _pimCtrl.text.isEmpty) {
+      _pimCtrl.text = state.tempPim!;
+    }
+
+    final isModified = state.isModified(
+      _passwordCtrl.text,
+      _labelCtrl.text,
+      _pimCtrl.text,
+    );
+    final canSave = state.canSave(_passwordCtrl.text);
+
+    final generalSection = _buildGeneralSection(context, state);
+    final securitySection = _buildSecuritySection(
+      context,
+      state,
+      cs,
+      textTheme,
+    );
+    final systemSection = _buildSystemIntegrationSection(
+      context,
+      state,
+      textTheme,
+    );
+    final thumbnailSection = _buildThumbnailSection(
+      context,
+      state,
+      textTheme,
+      cs,
+    );
+    final toolsSection = _buildToolsSection(context, cs, textTheme);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: wideLayout
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    widget.uri.startsWith('usb:')
+                        ? context.l10n.usbVaultSettingsTitle
+                        : context.l10n.vaultSettingsTitle,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cs.primaryContainer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      _containerFormat.toUpperCase(),
+                      style: textTheme.labelSmall?.copyWith(
+                        color: cs.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.uri.startsWith('usb:')
+                        ? context.l10n.usbVaultSettingsTitle
+                        : context.l10n.vaultSettingsTitle,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    _containerFormat.toUpperCase(),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: cs.primary,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                ],
+              ),
+        actions: [
+          if (wideLayout && isModified) ...[
+            IconButton(
+              icon: state.saving
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.check_rounded),
+              tooltip: context.l10n.saveConfigurationButton,
+              onPressed: (state.saving || !canSave) ? null : () => _save(state),
+            ),
+          ],
+        ],
+      ),
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: wideLayout ? 1100 : 800),
+            child: wideLayout
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (isModified && !canSave) ...[
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: InlineBanner(
+                            state.needsPatternSetup
+                                ? context
+                                      .l10n
+                                      .patternSetupRequiredAboveBeforeSaving
+                                : state.needsPinSetup
+                                ? context.l10n.pinSetupRequiredAboveBeforeSaving
+                                : context
+                                      .l10n
+                                      .passwordOrCacheDerivedKeyRequiredMessage,
+                            tone: AppBannerTone.error,
+                            icon: Icons.info_outline_rounded,
+                          ),
+                        ),
+                      ],
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Left Column: Identity & Security Credentials (independent scroll)
+                              Expanded(
+                                flex: 5,
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.only(right: 12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      generalSection,
+                                      const SizedBox(height: 14),
+                                      securitySection,
+                                      const SizedBox(height: 16),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              VerticalDivider(
+                                width: 1,
+                                thickness: 1,
+                                color: cs.outlineVariant.withValues(
+                                  alpha: 0.25,
+                                ),
+                              ),
+                              // Right Column: System, Storage & Tools (independent scroll)
+                              Expanded(
+                                flex: 5,
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.only(left: 12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      systemSection,
+                                      const SizedBox(height: 14),
+                                      thumbnailSection,
+                                      const SizedBox(height: 14),
+                                      toolsSection,
+                                      const SizedBox(height: 16),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        generalSection,
+                        const SizedBox(height: 16),
+                        securitySection,
+                        const SizedBox(height: 16),
+                        systemSection,
+                        const SizedBox(height: 16),
+                        thumbnailSection,
+                        const SizedBox(height: 16),
+                        toolsSection,
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+          ),
+        ),
+      ),
+      bottomNavigationBar: wideLayout ? null : _buildBottomSaveBar(state),
+    );
+  }
+
+  Widget _buildGeneralSection(
+    BuildContext context,
+    ContainerConfigState state,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(context.l10n.generalSectionHeader),
+        SectionCard(
+          children: [
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
+              title: Text(_labelCtrl.text.trim()),
+              trailing: IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                tooltip: context.l10n.renameTooltip,
+                onPressed: _editDisplayName,
+              ),
+              onTap: _editDisplayName,
+            ),
+            OptionPickerTile<VaultDeleteAfterImportMode>(
+              label: context.l10n.deleteAfterImportVaultSettingLabel,
+              value: state.vaultDeleteAfterImportMode,
+              subtitle: state.vaultDeleteAfterImportMode.getLocalizedSubtitle(
+                context.l10n,
+                state.globalDeleteAfterImportMode,
+              ),
+              options: VaultDeleteAfterImportMode.values.map((mode) {
+                return SelectOption(
+                  value: mode,
+                  label: mode.getLocalizedLabel(context.l10n),
+                  subtitle: mode.getLocalizedSubtitle(
+                    context.l10n,
+                    state.globalDeleteAfterImportMode,
+                  ),
+                );
+              }).toList(),
+              onChanged: (mode) => ref
+                  .read(containerConfigControllerProvider(_params).notifier)
+                  .setVaultDeleteAfterImportMode(mode),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSecuritySection(
+    BuildContext context,
+    ContainerConfigState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(context.l10n.securityCredentialsSectionHeader),
+        SectionCard(
+          children: [
+            if (state.settingsLocked) ...[
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        context.l10n.securityOptionsLockedTitle,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        context.l10n.authenticateOriginalCredentialsMessage,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: () => _authenticateSettings(state),
+                        icon: const Icon(Icons.lock_open_rounded, size: 18),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 44),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        label: Text(context.l10n.unlockSettingsButton),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ] else ...[
+              OptionPickerTile<ContainerUnlockMethod>(
+                label: context.l10n.unlockCredentialsLabel,
+                value: state.unlockMethod,
+                subtitle: state.unlockMethod.getLocalizedSubtitle(context.l10n),
+                options: ContainerUnlockMethod.values
+                    .where(
+                      (m) =>
+                          m != ContainerUnlockMethod.biometrics ||
+                          state.biometricAvailable ||
+                          state.unlockMethod == m,
+                    )
+                    .map((m) {
+                      final isUnavailableBio =
+                          m == ContainerUnlockMethod.biometrics &&
+                          !state.biometricAvailable;
+                      return SelectOption(
+                        value: m,
+                        label: isUnavailableBio
+                            ? '${m.getLocalizedLabel(context.l10n)} ${context.l10n.unavailableSuffixLabel}'
+                            : m.getLocalizedLabel(context.l10n),
+                        subtitle: m.getLocalizedSubtitle(context.l10n),
+                      );
+                    })
+                    .toList(),
+                onChanged: (v) {
+                  ref
+                      .read(containerConfigControllerProvider(_params).notifier)
+                      .setUnlockMethod(v);
+                  if (v == ContainerUnlockMethod.password) {
+                    _passwordCtrl.clear();
+                  } else if (v == ContainerUnlockMethod.pattern) {
+                    if (ref
+                            .read(containerConfigControllerProvider(_params))
+                            .patternHash ==
+                        null) {
+                      _setupPattern();
+                    }
+                  } else if (v == ContainerUnlockMethod.pin) {
+                    if (ref
+                            .read(containerConfigControllerProvider(_params))
+                            .pinHash ==
+                        null) {
+                      _setupPin();
+                    }
+                  }
+                },
+              ),
+              if (widget.existingRecord != null &&
+                  widget.existingRecord!.unlockMethod !=
+                      ContainerUnlockMethod.password &&
+                  state.unlockMethod != ContainerUnlockMethod.password &&
+                  !state.changePassword) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: FilledButton.tonalIcon(
+                    onPressed: () => ref
+                        .read(
+                          containerConfigControllerProvider(_params).notifier,
+                        )
+                        .setChangePassword(true),
+                    icon: const Icon(Icons.key_rounded, size: 18),
+                    label: Text(context.l10n.updateSavedCredentialsButton),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      backgroundColor: cs.surfaceContainerHighest,
+                      foregroundColor: cs.primary,
+                    ),
+                  ),
+                ),
+              ],
+              if (state.unlockMethod != ContainerUnlockMethod.password &&
+                  (widget.existingRecord == null ||
+                      widget.existingRecord!.unlockMethod ==
+                          ContainerUnlockMethod.password ||
+                      state.changePassword)) ...[
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: _passwordCtrl,
+                        obscureText: _revealLocked ? true : !_showPassword,
+                        enableInteractiveSelection: !_revealLocked,
+                        autofillHints: null,
+                        onChanged: (val) {
+                          if (val.isEmpty) _prefillCleared = true;
+                          setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: cs.surfaceContainerHighest,
+                          labelText:
+                              context.l10n.containerPasswordOptionalLabel,
+                          prefixIcon: const Icon(
+                            Icons.lock_outline_rounded,
+                            size: 20,
+                          ),
+                          suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (_passwordPrefilled)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 4),
+                                  child: Tooltip(
+                                    message:
+                                        context.l10n.usingSavedPasswordTooltip,
+                                    child: Icon(
+                                      Icons.bookmark_rounded,
+                                      size: 20,
+                                      color: cs.primary,
+                                    ),
+                                  ),
+                                ),
+                              PasswordVisibilityToggle(
+                                obscured: _revealLocked ? true : !_showPassword,
+                                enabled: !_revealLocked,
+                                onToggle: () => setState(
+                                  () => _showPassword = !_showPassword,
+                                ),
+                              ),
+                              if (widget.existingRecord != null &&
+                                  widget.existingRecord!.unlockMethod !=
+                                      ContainerUnlockMethod.password)
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.close_rounded,
+                                    size: 20,
+                                  ),
+                                  tooltip: context
+                                      .l10n
+                                      .cancelUpdatingPasswordTooltip,
+                                  onPressed: () {
+                                    ref
+                                        .read(
+                                          containerConfigControllerProvider(
+                                            _params,
+                                          ).notifier,
+                                        )
+                                        .setChangePassword(false);
+                                    _passwordCtrl.clear();
+                                    _prefillCleared = true;
+                                  },
+                                ),
+                            ],
+                          ),
+                          hintText: context.l10n.passwordHintContainer,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!_isCryptomator &&
+                    !_isGocryptfs &&
+                    !_isCryfs &&
+                    !_isBitlocker) ...[
+                  PimInputField(controller: _pimCtrl, enabled: !state.saving),
+                  KeyfilesPicker(
+                    keyfiles: state.keyfiles,
+                    picking: state.pickingKeyfiles,
+                    onPick: () => ref
+                        .read(
+                          containerConfigControllerProvider(_params).notifier,
+                        )
+                        .pickKeyfiles(),
+                    onRemove: (k) => ref
+                        .read(
+                          containerConfigControllerProvider(_params).notifier,
+                        )
+                        .removeKeyfile(k),
+                  ),
+                ],
+              ],
+              if (state.unlockMethod == ContainerUnlockMethod.pattern) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: OutlinedButton(
+                    onPressed: _setupPattern,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      state.patternHash != null
+                          ? context.l10n.changePatternButton
+                          : context.l10n.setPatternButton,
+                    ),
+                  ),
+                ),
+              ],
+              if (state.unlockMethod == ContainerUnlockMethod.pin) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: OutlinedButton(
+                    onPressed: _setupPin,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 44),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      state.pinHash != null
+                          ? context.l10n.changePinButton
+                          : context.l10n.setPinButton,
+                    ),
+                  ),
+                ),
+              ],
+              if (!_isCryptomator && !_isGocryptfs && !_isBitlocker) ...[
+                SwitchListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  title: Text(
+                    context.l10n.cacheDerivedKeyLabel,
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Text(
+                    _isCryfs
+                        ? context.l10n.cryfsSkipScryptKdfSubtitle
+                        : context.l10n.reuseKeyMaterialKeystoreSubtitle,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                  value: state.cacheDerivedKey,
+                  onChanged: (v) => ref
+                      .read(containerConfigControllerProvider(_params).notifier)
+                      .setCacheDerivedKey(v),
+                ),
+                if (state.cacheDerivedKey)
+                  _buildDerivedKeyLifetimeTile(context, state),
+                if (!_isCryfs)
+                  AdvancedParamsPanel(
+                    collapsible: false,
+                    cipherId: state.cipherId,
+                    hashId: state.hashId,
+                    subtitle: context.l10n.pinAlgorithmSkipAutoDetectSubtitle,
+                    onCipherChanged: (val) => ref
+                        .read(
+                          containerConfigControllerProvider(_params).notifier,
+                        )
+                        .setCipherId(val),
+                    onHashChanged: (val) => ref
+                        .read(
+                          containerConfigControllerProvider(_params).notifier,
+                        )
+                        .setHashId(val),
+                  ),
+              ],
+            ],
+            if (widget.existingRecord != null) ...[
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                leading: Icon(Icons.key_rounded, color: cs.primary),
+                title: Text(
+                  context.l10n.changeContainerPasswordTitle,
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                trailing: Icon(
+                  Icons.chevron_right_rounded,
+                  color: cs.onSurfaceVariant,
+                ),
+                onTap: () async {
+                  final rec = widget.existingRecord;
+                  if (rec?.isCompositeSource == true) {
+                    showAppSnackBar(
+                      context,
+                      message: context
+                          .l10n
+                          .compositePasswordChangeNotSupportedMessage,
+                      tone: AppBannerTone.warning,
+                    );
+                    return;
+                  }
+                  final fmt = rec?.containerFormat;
+                  if (fmt == 'bitlocker') {
+                    showAppSnackBar(
+                      context,
+                      message: context
+                          .l10n
+                          .bitlockerCredentialsChangeNotSupportedMessage,
+                      tone: AppBannerTone.warning,
+                    );
+                  } else {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SkinAreaScope(area: SkinArea.dashboard, child: ChangePasswordScreen(
+                          uri: widget.uri,
+                          initialCipherId: widget.existingRecord!.cipherId,
+                          initialHashId: widget.existingRecord!.hashId,
+                          containerFormat: fmt ?? 'veracrypt',
+                        )),
+                      ),
+                    );
+                    if (result is List<KeyfileRef> && mounted) {
+                      ref
+                          .read(
+                            containerConfigControllerProvider(_params).notifier,
+                          )
+                          .setKeyfiles(result);
+                    }
+                  }
+                },
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Lifetime picker for the cached derived key. The expiry is an absolute
+  /// date: an untouched picker shows the date already stored, and only an
+  /// explicit choice replaces it (counting from the moment of saving).
+  Widget _buildDerivedKeyLifetimeTile(
+    BuildContext context,
+    ContainerConfigState state,
+  ) {
+    final l10n = context.l10n;
+    final dates = MaterialLocalizations.of(context);
+    String expiresOn(DateTime date) =>
+        l10n.cacheDerivedKeyLifetimeExpiresOn(dates.formatShortDate(date));
+
+    final stored = state.derivedKeyExpiresAt;
+    final pendingDays = state.derivedKeyLifetimeDays;
+    final effective = state.effectiveDerivedKeyExpiry();
+
+    return OptionPickerTile<int>(
+      label: l10n.cacheDerivedKeyLifetimeTitle,
+      prefixIcon: Icons.timer_outlined,
+      value:
+          pendingDays ??
+          (stored != null ? kKeepDerivedKeyExpiry : kNoDerivedKeyExpiry),
+      options: [
+        if (stored != null)
+          SelectOption(value: kKeepDerivedKeyExpiry, label: expiresOn(stored)),
+        SelectOption(
+          value: kNoDerivedKeyExpiry,
+          label: l10n.cacheDerivedKeyLifetimeNever,
+        ),
+        for (final days in kDerivedKeyLifetimePresetDays)
+          SelectOption(value: days, label: l10n.nDays(days)),
+      ],
+      subtitle: effective != null ? expiresOn(effective) : null,
+      onChanged: (days) => ref
+          .read(containerConfigControllerProvider(_params).notifier)
+          .setDerivedKeyLifetimeDays(days),
+    );
+  }
+
+  Widget _buildSystemIntegrationSection(
+    BuildContext context,
+    ContainerConfigState state,
+    TextTheme textTheme,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(context.l10n.systemIntegrationSectionHeader),
+        SectionCard(
+          children: [
+            OptionPickerTile<int>(
+              label: context.l10n.autoLockDurationLabel,
+              value: state.autoCloseMins,
+              options: autoLockDurationOptions(
+                context,
+                defaultOption: SelectOption(
+                  value: kInheritAutoLockDuration,
+                  label: context.l10n.useGlobalDefaultSubtitle,
+                  subtitle: context.l10n.defaultAutoLockOptionSubtitle,
+                ),
+                immediateOption: SelectOption(
+                  value: kImmediateAutoLockDuration,
+                  label: context.l10n.immediately,
+                  subtitle: context.l10n.immediateAutoLockOptionSubtitle,
+                ),
+                screenLockOnlyOption: SelectOption(
+                  value: kScreenLockOnlyAutoLockDuration,
+                  label: context.l10n.screenLockOnlyAutoLockOption,
+                  subtitle: context.l10n.screenLockOnlyAutoLockOptionSubtitle,
+                ),
+                zeroOption: SelectOption(
+                  value: 0,
+                  label: context.l10n.neverAutoLockOption,
+                  subtitle: context.l10n.neverAutoLockOptionSubtitle,
+                ),
+                currentMinutes: state.autoCloseMins,
+              ),
+              onChanged: (v) {
+                if (v == kCustomAutoLockDuration) {
+                  pickCustomAutoLockDuration(
+                    context,
+                    currentMinutes: state.autoCloseMins,
+                    onPicked: (mins) => ref
+                        .read(
+                          containerConfigControllerProvider(_params).notifier,
+                        )
+                        .setAutoCloseMins(mins),
+                  );
+                } else {
+                  ref
+                      .read(containerConfigControllerProvider(_params).notifier)
+                      .setAutoCloseMins(v);
+                }
+              },
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              title: Text(
+                context.l10n.alwaysOpenReadOnlyLabel,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                context.l10n.alwaysOpenReadOnlySubtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              value: state.alwaysOpenReadOnly,
+              onChanged: (value) => ref
+                  .read(containerConfigControllerProvider(_params).notifier)
+                  .setAlwaysOpenReadOnly(value),
+              secondary: const Icon(Icons.visibility_outlined),
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              title: Text(
+                context.l10n.androidFileProviderTitle,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                context.l10n.exposeContentToFilePickerSubtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              value: state.documentProvider,
+              onChanged: (v) => ref
+                  .read(containerConfigControllerProvider(_params).notifier)
+                  .setDocumentProvider(v),
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
+              title: Text(
+                context.l10n.autoSyncMenuAction,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                context.l10n.autoSyncSheetIntro,
+                style: textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: cs.onSurfaceVariant,
+              ),
+              onTap: () {
+                final mountedVault = _effectiveMounted;
+                if (mountedVault != null) {
+                  SyncRuleEditorSheet.show(
+                    context,
+                    vault: mountedVault,
+                    folderPath: '',
+                    folderName: mountedVault.displayName,
+                  );
+                } else {
+                  showAppSnackBar(
+                    context,
+                    message: context.l10n.autoSyncUnavailable,
+                    tone: AppBannerTone.warning,
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThumbnailSection(
+    BuildContext context,
+    ContainerConfigState state,
+    TextTheme textTheme,
+    ColorScheme cs,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(context.l10n.thumbnailStorageSectionHeader),
+        SectionCard(
+          children: [
+            if (state.loadingPassword)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              )
+            else ...[
+              ThumbnailSettingsTiles(
+                useGlobalDefault: state.useGlobalThumbnails,
+                onUseGlobalDefaultChanged: (v) => ref
+                    .read(containerConfigControllerProvider(_params).notifier)
+                    .setUseGlobalThumbnails(v),
+                cacheMode:
+                    state.thumbnailCacheMode ??
+                    ThumbnailSettings.defaults.cacheMode,
+                quality:
+                    state.thumbnailQuality ?? ThumbnailSettings.defaults.quality,
+                cacheModeLabel: context.l10n.cacheModeLabel,
+                qualityLabel: context.l10n.thumbnailQualityLabel,
+                onCacheModeChanged: (v) => ref
+                    .read(containerConfigControllerProvider(_params).notifier)
+                    .setThumbnailCacheMode(v),
+                onQualityChanged: (v) => ref
+                    .read(containerConfigControllerProvider(_params).notifier)
+                    .setThumbnailQuality(v),
+              ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                title: Text(
+                  context.l10n.clearThumbnailCacheTitle,
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  context.l10n.removeCachedThumbnailsSubtitle,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+                trailing: state.clearingCache
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        Icons.chevron_right_rounded,
+                        color: cs.onSurfaceVariant,
+                      ),
+                onTap: state.clearingCache ? null : _clearThumbnailCache,
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToolsSection(
+    BuildContext context,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(context.l10n.vaultInformationSectionHeader),
+        SectionCard(
+          children: [
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
+              leading: Icon(Icons.info_outline_rounded, color: cs.primary),
+              title: Text(
+                context.l10n.vaultInformationTileTitle,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                context.l10n.vaultInformationTileSubtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: cs.onSurfaceVariant,
+              ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SkinAreaScope(area: SkinArea.dashboard, child: VaultInfoScreen(
+                    uri: widget.uri,
+                    containerFormat: _containerFormat,
+                  )),
+                ),
+              ),
+            ),
+            ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
+              leading: Icon(Icons.bolt_rounded, color: cs.primary),
+              title: Text(
+                context.l10n.automationTileTitle,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                context.l10n.automationTileSubtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: cs.onSurfaceVariant,
+              ),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SkinAreaScope(area: SkinArea.settings, child: AutomationSettingsScreen(
+                    uri: widget.uri,
+                    containerFormat: _containerFormat,
+                  )),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomSaveBar(ContainerConfigState state) {
+    final isModified = state.isModified(_passwordCtrl.text, _labelCtrl.text);
+    final canSave = state.canSave(_passwordCtrl.text);
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.bottomCenter,
+      child: !isModified
+          ? const SizedBox(width: double.infinity, height: 0)
+          : Container(
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerLow,
+                border: Border(
+                  top: BorderSide(
+                    color: cs.outlineVariant.withValues(alpha: 0.3),
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                minimum: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Center(
+                  heightFactor: 1.0,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!canSave) ...[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.info_outline_rounded,
+                                size: 18,
+                                color: cs.error,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  state.needsPatternSetup
+                                      ? context
+                                            .l10n
+                                            .patternSetupRequiredAboveBeforeSaving
+                                      : state.needsPinSetup
+                                      ? context
+                                            .l10n
+                                            .pinSetupRequiredAboveBeforeSaving
+                                      : context
+                                            .l10n
+                                            .passwordOrCacheDerivedKeyRequiredMessage,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: cs.error,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        FilledButton(
+                          onPressed: (state.saving || !canSave)
+                              ? null
+                              : () => _save(state),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            shape: const StadiumBorder(),
+                          ),
+                          child: state.saving
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  context.l10n.saveConfigurationButton,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
+}

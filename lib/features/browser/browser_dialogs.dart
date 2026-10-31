@@ -1,0 +1,956 @@
+import 'dart:async';
+
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vaultexplorer/core/api/vault_file_io_api.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/filesystem/entry_conflict.dart';
+import 'package:vaultexplorer/core/filesystem/filesystem_type.dart';
+import 'package:vaultexplorer/core/filesystem/illegal_char_input_formatter.dart';
+import 'package:vaultexplorer/core/filesystem/mounted_container_filesystem.dart';
+import 'package:vaultexplorer/core/filesystem/name_validation.dart';
+import 'package:vaultexplorer/core/filesystem/path_components.dart';
+import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
+import 'package:vaultexplorer/core/utils/raw_entry.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/data/models/archive_models.dart';
+import 'package:vaultexplorer/data/models/file_operation.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/features/browser/advanced_rename_screen.dart';
+import 'package:vaultexplorer/features/browser/controllers/file_browser_pins_bookmarks_controller.dart';
+import 'package:vaultexplorer/features/browser/widgets/create_archive_bottom_sheet.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area_scope.dart';
+
+abstract class BrowserDialogs {
+  static void _blockedReadOnly(BuildContext context) {
+    showAppSnackBar(
+      context,
+      message: context.l10n.readOnlyContainerWarning,
+      tone: AppBannerTone.warning,
+    );
+  }
+
+  static void showCreateFolder(
+    BuildContext context, {
+    required MountedContainer container,
+    required String currentDirPath,
+    required List<RawEntry> existingEntries,
+    required VoidCallback onSuccess,
+    bool readOnly = false,
+  }) {
+    if (readOnly) {
+      _blockedReadOnly(context);
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _CreateFolderDialog(
+        container: container,
+        currentDirPath: currentDirPath,
+        existingEntries: existingEntries,
+        onSuccess: onSuccess,
+      ),
+    );
+  }
+
+  static void showCreateFile(
+    BuildContext context, {
+    required MountedContainer container,
+    required String currentDirPath,
+    required List<RawEntry> existingEntries,
+    required VoidCallback onSuccess,
+    String? suggestedName,
+    bool readOnly = false,
+  }) {
+    if (readOnly) {
+      _blockedReadOnly(context);
+      return;
+    }
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _CreateFileDialog(
+        container: container,
+        currentDirPath: currentDirPath,
+        existingEntries: existingEntries,
+        onSuccess: onSuccess,
+        suggestedName: suggestedName,
+      ),
+    );
+  }
+
+  /// Prompts for a name, then hands the validated full container path back
+  /// to [onCreate] to actually build and write the archive.
+  ///
+  /// Unlike [showCreateFile]/[showCreateFolder] above, the write itself
+  /// isn't done here: compressing a folder can take a while (a recursive
+  /// walk plus an in-memory zip encode), so the caller runs it with its own
+  /// loading indicator and a "N files archived" style status message
+  /// instead of this dialog awaiting silently.
+  static void showCreateArchive(
+    BuildContext context, {
+    required MountedContainer container,
+    required String currentDirPath,
+    required List<RawEntry> existingEntries,
+    required String suggestedName,
+    List<RawEntry> selectedEntries = const [],
+    int? freeSpace,
+   required Future<void> Function(
+      String destPathInContainer,
+      ArchiveFormatType format,
+      String? passphrase,
+      bool encryptFilenames,
+      ArchiveCompressionLevel compressionLevel,
+      ArchiveCompressionMethod compressionMethod,
+    ) onCreate,
+    bool readOnly = false,
+  }) {
+    if (readOnly) {
+      _blockedReadOnly(context);
+      return;
+    }
+    CreateArchiveBottomSheet.show(
+      context,
+      container: container,
+      currentDirPath: currentDirPath,
+      existingEntries: existingEntries,
+      suggestedName: suggestedName,
+      selectedEntries: selectedEntries,
+      freeSpace: freeSpace,
+      onCreate: onCreate,
+    );
+  }
+
+  /// Prompts for the password to an encrypted archive. Returns the entered
+  /// password, or null if the user cancelled. Pass [wrongPassword] to show
+  /// an inline error when re-prompting after a failed attempt.
+  static Future<String?> showArchivePasswordPrompt(
+    BuildContext context, {
+    bool wrongPassword = false,
+  }) {
+    return showDialog<String>(
+      context: context,
+      builder: (dialogContext) => _ArchivePasswordDialog(wrongPassword: wrongPassword),
+    );
+  }
+
+  static Future<void> showRename(
+    BuildContext context, {
+    required MountedContainer container,
+    required List<RawEntry> oldEntries,
+    required List<RawEntry> existingEntries,
+    required String currentDirPath,
+    required VoidCallback onSuccess,
+    void Function(String oldPath, String newPath)? onEntryRenamed,
+    bool readOnly = false,
+  }) {
+    if (readOnly) {
+      _blockedReadOnly(context);
+      return Future.value();
+    }
+    return showDialog(
+      context: context,
+      builder: (dialogContext) => _RenameDialog(
+        container: container,
+        oldEntries: oldEntries,
+        existingEntries: existingEntries,
+        currentDirPath: currentDirPath,
+        onSuccess: onSuccess,
+        onEntryRenamed: onEntryRenamed,
+      ),
+    );
+  }
+
+  static Future<void> showAdvancedRename(
+    BuildContext context, {
+    required MountedContainer container,
+    required List<RawEntry> oldEntries,
+    required List<RawEntry> existingEntries,
+    required String currentDirPath,
+    required VoidCallback onSuccess,
+    void Function(String oldPath, String newPath)? onEntryRenamed,
+    bool readOnly = false,
+  }) {
+    if (readOnly) {
+      _blockedReadOnly(context);
+      return Future.value();
+    }
+    return Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SkinAreaScope(area: SkinArea.files, child: AdvancedRenameScreen(
+          container: container,
+          oldEntries: oldEntries,
+          existingEntries: existingEntries,
+          currentDirPath: currentDirPath,
+          onSuccess: onSuccess,
+          onEntryRenamed: onEntryRenamed,
+        )),
+      ),
+    );
+  }
+
+  static void showBatchDelete(
+    BuildContext context, {
+    required List<RawEntry> toDelete,
+    required void Function(List<RawEntry> items) onConfirmed,
+    bool readOnly = false,
+  }) async {
+    if (readOnly) {
+      _blockedReadOnly(context);
+      return;
+    }
+    final hasDir = toDelete.any((item) => item.isDir);
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: context.l10n.deleteItemsTitle(toDelete.length),
+      message: hasDir
+          ? context.l10n.deleteFoldersWarning
+          : context.l10n.deleteFilesWarning,
+      confirmLabel: context.l10n.delete,
+      isDestructive: true,
+    );
+    if (confirmed) onConfirmed(toDelete);
+  }
+}
+
+mixin _LiveNameValidation<T extends StatefulWidget> on State<T> {
+  List<NameValidationIssue> issues = [];
+  EntryConflictResult conflict = const EntryConflictResult(EntryConflictKind.none, null);
+  bool get isValid => issues.isEmpty && !conflict.isConflict;
+
+  void _computeValidation({
+    required String text,
+    required FilesystemType fsType,
+    required EntryType entryType,
+    required List<RawEntry> existingEntries,
+    RawEntry? excluding,
+  }) {
+    final nameResult = validateEntryName(text, fsType, entryType: entryType, l10n: context.l10n);
+    final conflictResult = text.isEmpty
+        ? const EntryConflictResult(EntryConflictKind.none, null)
+        : checkEntryConflict(
+            candidateName: text,
+            candidateIsDir: entryType == EntryType.folder,
+            existingEntries: existingEntries,
+            caseSensitive: FilesystemRules.of(fsType).caseSensitive,
+            excluding: excluding,
+          );
+    issues = nameResult.issues;
+    conflict = conflictResult;
+  }
+
+  void seedValidation({
+    required String text,
+    required FilesystemType fsType,
+    required EntryType entryType,
+    required List<RawEntry> existingEntries,
+    RawEntry? excluding,
+  }) =>
+      _computeValidation(
+        text: text,
+        fsType: fsType,
+        entryType: entryType,
+        existingEntries: existingEntries,
+        excluding: excluding,
+      );
+
+  void revalidate({
+    required String text,
+    required FilesystemType fsType,
+    required EntryType entryType,
+    required List<RawEntry> existingEntries,
+    RawEntry? excluding,
+  }) =>
+      setState(() => _computeValidation(
+            text: text,
+            fsType: fsType,
+            entryType: entryType,
+            existingEntries: existingEntries,
+            excluding: excluding,
+          ));
+
+  List<String> get allMessages => [
+        ...issues.map((i) => i.message),
+        if (conflict.isConflict) conflict.message(context.l10n, '')!,
+      ];
+
+  Widget buildIssuesList(String candidateName) {
+    final hasIssues = issues.isNotEmpty || conflict.isConflict;
+    final messages = hasIssues
+        ? [
+            ...issues.map((i) => i.message),
+            if (conflict.isConflict) conflict.message(context.l10n, candidateName)!,
+          ]
+        : const <String>[];
+    final errorColor = Theme.of(context).colorScheme.error;
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: hasIssues
+          ? Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: messages
+                    .map((m) => Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            m,
+                            style: TextStyle(
+                              color: errorColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            )
+          : const SizedBox(width: double.infinity, height: 0),
+    );
+  }
+}
+
+Widget _buildNamePromptDialog(
+  BuildContext context, {
+  required Widget title,
+  required Widget content,
+  required List<Widget> actions,
+}) {
+  final media = MediaQuery.of(context);
+  final maxHeight = (media.size.height - media.viewInsets.bottom - 16)
+      .clamp(0.0, media.size.height)
+      .toDouble();
+
+  return Dialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+    child: ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 560, maxHeight: maxHeight),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DefaultTextStyle(
+              style: Theme.of(context).textTheme.titleLarge!,
+              child: title,
+            ),
+            const SizedBox(height: 24),
+            content,
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(spacing: 8, children: actions),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _CreateFolderDialog extends ConsumerStatefulWidget {
+  final MountedContainer container;
+  final String currentDirPath;
+  final List<RawEntry> existingEntries;
+  final VoidCallback onSuccess;
+  const _CreateFolderDialog({
+    required this.container,
+    required this.currentDirPath,
+    required this.existingEntries,
+    required this.onSuccess,
+  });
+
+  @override
+  ConsumerState<_CreateFolderDialog> createState() => _CreateFolderDialogState();
+}
+
+class _CreateFolderDialogState extends ConsumerState<_CreateFolderDialog>
+    with _LiveNameValidation<_CreateFolderDialog> {
+  VaultFileIoApi get _fileIoApi => ref.read(vaultFileIoApiProvider);
+  late final TextEditingController _ctrl;
+  late final FilesystemType _fsType;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController();
+    _fsType = resolveFilesystemType(widget.container);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _onChanged(String text) => revalidate(
+        text: text,
+        fsType: _fsType,
+        entryType: EntryType.folder,
+        existingEntries: widget.existingEntries,
+      );
+
+  Future<void> _onCreate() async {
+    final name = _ctrl.text;
+    if (name.isEmpty || !isValid) return;
+    final l10n = context.l10n;
+    final parentSegments =
+        widget.currentDirPath.isEmpty ? <String>[] : widget.currentDirPath.split('/');
+    final built = PathComponents(
+      parentSegments: parentSegments,
+      name: name,
+      type: EntryType.folder,
+      fsType: _fsType,
+    ).validateAndBuild(l10n);
+    if (built is! PathBuildSuccess) return;
+    final parentContext = context;
+    final opService = ref.read(fileOperationServiceProvider);
+    Navigator.pop(context);
+    final ok = await _fileIoApi.createDirectory(widget.container, built.path);
+    if (ok) {
+      opService.notifyVolumeContentChanged(widget.container.volId);
+      widget.onSuccess();
+    } else if (parentContext.mounted) {
+      showAppSnackBar(
+        parentContext,
+        message: l10n.couldntCreateItem(name),
+        tone: AppBannerTone.error,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = _ctrl.text;
+    return _buildNamePromptDialog(
+      context,
+      title: Text(context.l10n.newFolderTitle),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _ctrl,
+              decoration: InputDecoration(hintText: context.l10n.folderNameHint),
+              autofocus: true,
+              inputFormatters: [IllegalCharacterInputFormatter(_fsType)],
+              onChanged: _onChanged,
+              onSubmitted: (_) => _onCreate(),
+            ),
+            buildIssuesList(name),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        TextButton(
+          onPressed: name.isNotEmpty && isValid ? _onCreate : null,
+          child: Text(context.l10n.create),
+        ),
+      ],
+    );
+  }
+}
+
+class _CreateFileDialog extends ConsumerStatefulWidget {
+  final MountedContainer container;
+  final String currentDirPath;
+  final List<RawEntry> existingEntries;
+  final VoidCallback onSuccess;
+  final String? suggestedName;
+  const _CreateFileDialog({
+    required this.container,
+    required this.currentDirPath,
+    required this.existingEntries,
+    required this.onSuccess,
+    this.suggestedName,
+  });
+
+  @override
+  ConsumerState<_CreateFileDialog> createState() => _CreateFileDialogState();
+}
+
+class _CreateFileDialogState extends ConsumerState<_CreateFileDialog>
+    with _LiveNameValidation<_CreateFileDialog> {
+  VaultFileIoApi get _fileIoApi => ref.read(vaultFileIoApiProvider);
+  late final TextEditingController _ctrl;
+  late final FilesystemType _fsType;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = TextEditingController();
+    _fsType = resolveFilesystemType(widget.container);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      final existingNames =
+          widget.existingEntries.map((e) => e.name.toLowerCase()).toSet();
+      final baseName = widget.suggestedName ?? context.l10n.filenameHint;
+      final defaultName = FileOperationService.makeUniqueName(
+        baseName,
+        existingNames,
+      );
+      final dotIdx = defaultName.lastIndexOf('.');
+      final selectionEnd = dotIdx > 0 ? dotIdx : defaultName.length;
+      _ctrl.value = TextEditingValue(
+        text: defaultName,
+        selection: TextSelection(baseOffset: 0, extentOffset: selectionEnd),
+      );
+      seedValidation(
+        text: _ctrl.text,
+        fsType: _fsType,
+        entryType: EntryType.file,
+        existingEntries: widget.existingEntries,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _onChanged(String text) => revalidate(
+        text: text,
+        fsType: _fsType,
+        entryType: EntryType.file,
+        existingEntries: widget.existingEntries,
+      );
+
+  Future<void> _onCreate() async {
+    final name = _ctrl.text;
+    if (name.isEmpty || !isValid) return;
+    final l10n = context.l10n;
+    final parentSegments =
+        widget.currentDirPath.isEmpty ? <String>[] : widget.currentDirPath.split('/');
+    final built = PathComponents(
+      parentSegments: parentSegments,
+      name: name,
+      type: EntryType.file,
+      fsType: _fsType,
+    ).validateAndBuild(l10n);
+    if (built is! PathBuildSuccess) return;
+    final parentContext = context;
+    final opService = ref.read(fileOperationServiceProvider);
+    Navigator.pop(context);
+    final ok = await _fileIoApi.createEmptyFile(widget.container, built.path);
+    if (ok) {
+      opService.notifyVolumeContentChanged(widget.container.volId);
+      widget.onSuccess();
+    } else if (parentContext.mounted) {
+      showAppSnackBar(
+        parentContext,
+        message: l10n.couldntCreateItem(name),
+        tone: AppBannerTone.error,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = _ctrl.text;
+    return _buildNamePromptDialog(
+      context,
+      title: Text(context.l10n.newTextFileTitle),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _ctrl,
+              decoration: InputDecoration(hintText: context.l10n.filenameHint),
+              autofocus: true,
+              inputFormatters: [IllegalCharacterInputFormatter(_fsType)],
+              onChanged: _onChanged,
+              onSubmitted: (_) => _onCreate(),
+            ),
+            buildIssuesList(name),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        TextButton(
+          onPressed: name.isNotEmpty && isValid ? _onCreate : null,
+          child: Text(context.l10n.create),
+        ),
+      ],
+    );
+  }
+}
+
+class _ArchivePasswordDialog extends StatefulWidget {
+  final bool wrongPassword;
+  const _ArchivePasswordDialog({required this.wrongPassword});
+
+  @override
+  State<_ArchivePasswordDialog> createState() => _ArchivePasswordDialogState();
+}
+
+class _ArchivePasswordDialogState extends State<_ArchivePasswordDialog> {
+  final TextEditingController _ctrl = TextEditingController();
+  bool _obscure = true;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final value = _ctrl.text;
+    if (value.isEmpty) return;
+    Navigator.pop(context, value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.archivePasswordPromptTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.l10n.archivePasswordPromptMessage),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _ctrl,
+            obscureText: _obscure,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: context.l10n.passwordFieldLabel,
+              errorText: widget.wrongPassword ? context.l10n.incorrectPassword : null,
+              suffixIcon: PasswordVisibilityToggle(
+                obscured: _obscure,
+                onToggle: () => setState(() => _obscure = !_obscure),
+              ),
+            ),
+            onChanged: (_) => setState(() {}),
+            onSubmitted: (_) => _submit(),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: _ctrl.text.isEmpty ? null : _submit,
+          child: Text(context.l10n.unlock),
+        ),
+      ],
+    );
+  }
+}
+
+class _RenameDialog extends ConsumerStatefulWidget {
+  final MountedContainer container;
+  final List<RawEntry> oldEntries;
+  final List<RawEntry> existingEntries;
+  final String currentDirPath;
+  final VoidCallback onSuccess;
+  final void Function(String oldPath, String newPath)? onEntryRenamed;
+
+  const _RenameDialog({
+    required this.container,
+    required this.oldEntries,
+    required this.existingEntries,
+    required this.currentDirPath,
+    required this.onSuccess,
+    this.onEntryRenamed,
+  });
+
+  @override
+  ConsumerState<_RenameDialog> createState() => _RenameDialogState();
+}
+
+class _RenameDialogState extends ConsumerState<_RenameDialog>
+    with _LiveNameValidation<_RenameDialog> {
+  VaultFileIoApi get _fileIoApi => ref.read(vaultFileIoApiProvider);
+  late final TextEditingController _ctrl;
+  late final FilesystemType _fsType;
+  bool _validationSeeded = false;
+  bool get _isSingle => widget.oldEntries.length == 1;
+
+  @override
+  void initState() {
+    super.initState();
+    final oldName = _isSingle ? widget.oldEntries.first.name : '';
+    final dotIdx = _isSingle && !widget.oldEntries.first.isDir ? oldName.lastIndexOf('.') : -1;
+    final selectionEnd = dotIdx > 0 ? dotIdx : oldName.length;
+    _ctrl = TextEditingController.fromValue(
+      TextEditingValue(
+        text: oldName,
+        selection: TextSelection(baseOffset: 0, extentOffset: selectionEnd),
+      ),
+    );
+    _fsType = resolveFilesystemType(widget.container);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_validationSeeded) {
+      _validationSeeded = true;
+      if (_isSingle) {
+        seedValidation(
+          text: _ctrl.text,
+          fsType: _fsType,
+          entryType: widget.oldEntries.first.isDir ? EntryType.folder : EntryType.file,
+          existingEntries: widget.existingEntries,
+          excluding: widget.oldEntries.first,
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _onChanged(String text) {
+    if (_isSingle) {
+      revalidate(
+        text: text,
+        fsType: _fsType,
+        entryType: widget.oldEntries.first.isDir ? EntryType.folder : EntryType.file,
+        existingEntries: widget.existingEntries,
+        excluding: widget.oldEntries.first,
+      );
+    } else {
+      final result = validateEntryName(
+        text,
+        _fsType,
+        entryType: EntryType.file,
+        l10n: context.l10n,
+      );
+      setState(() => issues = result.issues);
+    }
+  }
+
+  Future<void> _onRename() async {
+    final newNameBase = _ctrl.text;
+    if (newNameBase.isEmpty) return;
+    final l10n = context.l10n;
+    // Taken now: the dialog is popped before the renames finish, and a
+    // disposed State can no longer read providers.
+    final marks = ref.read(
+      fileBrowserPinsBookmarksProvider(widget.container.volId).notifier,
+    );
+    final opService = ref.read(fileOperationServiceProvider);
+    if (_isSingle) {
+      if (!isValid) return;
+      final oldEntry = widget.oldEntries.first;
+      final oldName = oldEntry.name;
+      if (newNameBase == oldName) {
+        Navigator.pop(context);
+        return;
+      }
+      final parentSegments =
+          widget.currentDirPath.isEmpty ? <String>[] : widget.currentDirPath.split('/');
+      final built = PathComponents(
+        parentSegments: parentSegments,
+        name: newNameBase,
+        type: oldEntry.isDir ? EntryType.folder : EntryType.file,
+        fsType: _fsType,
+      ).validateAndBuild(l10n);
+      if (built is! PathBuildSuccess) return;
+      final parentContext = context;
+      Navigator.pop(context);
+      final oldFull = widget.currentDirPath.isEmpty
+          ? oldName
+          : '${widget.currentDirPath}/$oldName';
+      final ok = await _fileIoApi.renameFile(
+        widget.container,
+        oldFull,
+        built.path,
+      );
+      if (ok) {
+        opService.notifyVolumeContentChanged(widget.container.volId);
+        // Bookmarks and pins on the entry (or inside a renamed folder) follow.
+        unawaited(marks.remapPaths(widget.container, {oldFull: built.path}));
+        widget.onSuccess();
+        widget.onEntryRenamed?.call(oldFull, built.path);
+      } else if (parentContext.mounted) {
+        showAppSnackBar(
+          parentContext,
+          message: l10n.couldntRenameSingle(oldName),
+          tone: AppBannerTone.error,
+        );
+      }
+      return;
+    }
+    final parentContext = context;
+    Navigator.pop(context);
+    int successCount = 0;
+    int failCount = 0;
+    String? firstFailureReason;
+    final renamed = <String, String>{};
+    final existingLower =
+        Set<String>.from(widget.existingEntries.map((e) => e.name.toLowerCase()));
+    for (final oldEntry in widget.oldEntries) {
+      final oldName = oldEntry.name;
+      final parts = oldName.split('.');
+      final ext = parts.length > 1 ? '.${parts.last}' : '';
+      String desiredName;
+      if (newNameBase.toLowerCase().endsWith(ext.toLowerCase())) {
+        desiredName = newNameBase;
+      } else {
+        desiredName = '$newNameBase$ext';
+      }
+      final uniqueName = FileOperationService.makeUniqueName(desiredName, existingLower);
+      final nameCheck = validateEntryName(
+        uniqueName,
+        _fsType,
+        entryType: oldEntry.isDir ? EntryType.folder : EntryType.file,
+        l10n: l10n,
+      );
+      if (nameCheck.issues.isNotEmpty) {
+        failCount++;
+        firstFailureReason ??= nameCheck.issues.first.message;
+        continue;
+      }
+      final conflictCheck = checkEntryConflict(
+        candidateName: uniqueName,
+        candidateIsDir: oldEntry.isDir,
+        existingEntries: widget.existingEntries,
+        caseSensitive: FilesystemRules.of(_fsType).caseSensitive,
+        excluding: oldEntry,
+      );
+      if (conflictCheck.kind == EntryConflictKind.crossType) {
+        failCount++;
+        firstFailureReason ??= conflictCheck.message(l10n, uniqueName);
+        continue;
+      }
+      existingLower.add(uniqueName.toLowerCase());
+      final oldFull = widget.currentDirPath.isEmpty
+          ? oldName
+          : '${widget.currentDirPath}/$oldName';
+      final newFull = widget.currentDirPath.isEmpty
+          ? uniqueName
+          : '${widget.currentDirPath}/$uniqueName';
+      final ok = await _fileIoApi.renameFile(widget.container, oldFull, newFull);
+      if (ok) {
+        successCount++;
+        renamed[oldFull] = newFull;
+        widget.onEntryRenamed?.call(oldFull, newFull);
+      } else {
+        failCount++;
+      }
+    }
+    if (renamed.isNotEmpty) {
+      unawaited(marks.remapPaths(widget.container, renamed));
+    }
+    if (successCount > 0) {
+      opService.notifyVolumeContentChanged(widget.container.volId);
+      widget.onSuccess();
+    }
+    if (failCount > 0 && parentContext.mounted) {
+      showAppSnackBar(
+        parentContext,
+        message: firstFailureReason != null
+            ? l10n.couldntRenameMultiWithReason(failCount, firstFailureReason)
+            : l10n.couldntRenameMultiNoReason(failCount),
+        tone: AppBannerTone.error,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final title = _isSingle
+        ? context.l10n.rename
+        : context.l10n.renameMultipleTitle(widget.oldEntries.length);
+    final name = _ctrl.text;
+    return _buildNamePromptDialog(
+      context,
+      title: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            icon: const Icon(Icons.auto_fix_high_rounded, size: 16),
+            label: Text(context.l10n.advancedRenameButton),
+            onPressed: () {
+              Navigator.pop(context);
+              BrowserDialogs.showAdvancedRename(
+                context,
+                container: widget.container,
+                oldEntries: widget.oldEntries,
+                existingEntries: widget.existingEntries,
+                currentDirPath: widget.currentDirPath,
+                onSuccess: widget.onSuccess,
+                onEntryRenamed: widget.onEntryRenamed,
+              );
+            },
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _ctrl,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: _isSingle ? context.l10n.newNameHint : context.l10n.baseNameHint,
+              ),
+              inputFormatters: [IllegalCharacterInputFormatter(_fsType)],
+              onChanged: _onChanged,
+              onSubmitted: (_) => _onRename(),
+            ),
+            buildIssuesList(name),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        TextButton(
+          onPressed: name.isNotEmpty && (_isSingle ? isValid : issues.isEmpty)
+              ? _onRename
+              : null,
+          child: Text(context.l10n.rename),
+        ),
+      ],
+    );
+  }
+}

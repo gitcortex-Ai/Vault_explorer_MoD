@@ -1,0 +1,303 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:vaultexplorer/core/utils/raw_entry.dart';
+import 'package:vaultexplorer/features/browser/file_browser_predicates.dart';
+
+RawEntry _file(String name) => RawEntry(name: name, isDir: false, sizeBytes: 100, modifiedSecs: 0);
+RawEntry _dir(String name) => RawEntry(name: name, isDir: true, sizeBytes: 0, modifiedSecs: 0);
+
+void main() {
+  group('fullPathOf', () {
+    test('a root-level entry is just its own name', () {
+      expect(fullPathOf(_file('photo.jpg'), ''), 'photo.jpg');
+    });
+
+    test('a nested entry is prefixed with the current directory', () {
+      expect(fullPathOf(_file('photo.jpg'), 'Vacation/2026'), 'Vacation/2026/photo.jpg');
+    });
+  });
+
+  group('isFolderMounted', () {
+    test('true for a directory whose full path is in the mounted set', () {
+      final entry = _dir('Documents');
+      expect(isFolderMounted(entry, '', {'Documents'}), isTrue);
+    });
+
+    test('false for a directory not in the mounted set', () {
+      final entry = _dir('Documents');
+      expect(isFolderMounted(entry, '', {'Photos'}), isFalse);
+    });
+
+    test('false for a file even if its path happens to be in the mounted set', () {
+      // A file can never be SAF-mounted -- the set only ever holds
+      // directory paths in practice, but this pins down that the
+      // isDir check isn't skippable as an optimization.
+      final entry = _file('Documents');
+      expect(isFolderMounted(entry, '', {'Documents'}), isFalse);
+    });
+
+    test('resolves against the current directory, not just the bare name', () {
+      final entry = _dir('2026');
+      expect(isFolderMounted(entry, 'Vacation', {'Vacation/2026'}), isTrue);
+      expect(isFolderMounted(entry, 'Work', {'Vacation/2026'}), isFalse);
+    });
+  });
+
+  group('isPinned', () {
+    test('true when the full path is pinned', () {
+      expect(isPinned(_file('notes.txt'), 'Docs', {'Docs/notes.txt'}), isTrue);
+    });
+
+    test('false when it is not', () {
+      expect(isPinned(_file('notes.txt'), 'Docs', {'Docs/other.txt'}), isFalse);
+    });
+  });
+
+  group('isBookmark', () {
+    test('true when the full path is bookmarked', () {
+      expect(isBookmark(_file('notes.txt'), 'Docs', ['Docs/notes.txt']), isTrue);
+    });
+
+    test('false when it is not', () {
+      expect(isBookmark(_file('notes.txt'), 'Docs', ['Docs/other.txt']), isFalse);
+    });
+  });
+
+  group('matchesFilter', () {
+    test('null filter matches everything', () {
+      expect(matchesFilter('photo.jpg', null), isTrue);
+      expect(matchesFilter('report.pdf', null), isTrue);
+      expect(matchesFilter('archive.zip', null), isTrue);
+    });
+
+    test('an unrecognized filter string matches everything, same as null', () {
+      expect(matchesFilter('photo.jpg', 'not_a_real_filter'), isTrue);
+    });
+
+    test('image filter matches known image extensions only', () {
+      expect(matchesFilter('photo.jpg', 'image'), isTrue);
+      expect(matchesFilter('photo.PNG', 'image'), isTrue, reason: 'extension matching is case-insensitive');
+      expect(matchesFilter('clip.mp4', 'image'), isFalse);
+    });
+
+    test('video filter matches known video extensions only', () {
+      expect(matchesFilter('clip.mp4', 'video'), isTrue);
+      expect(matchesFilter('photo.jpg', 'video'), isFalse);
+    });
+
+    test('audio filter matches known audio extensions only', () {
+      expect(matchesFilter('song.mp3', 'audio'), isTrue);
+      expect(matchesFilter('photo.jpg', 'audio'), isFalse);
+    });
+
+    test('document filter matches office/text/archive extensions, case-insensitively', () {
+      expect(matchesFilter('report.pdf', 'document'), isTrue);
+      expect(matchesFilter('report.PDF', 'document'), isTrue);
+      expect(matchesFilter('notes.docx', 'document'), isTrue);
+      expect(matchesFilter('photo.jpg', 'document'), isFalse);
+    });
+
+    group('secure filter (vault-item pseudo-extensions)', () {
+      // Regression coverage for a real bug found while extracting this
+      // function: the original _matchesFilter lowercased the extension
+      // before this check, but vaultIconForExt()'s switch is
+      // case-sensitive over VaultItemType.name values like 'paymentCard'
+      // -- so this filter matched 'password' items (no uppercase letters
+      // to lose) but silently matched none of the other five vault item
+      // types. Every other call site in the app (file_tile.dart,
+      // bookmark_bar.dart, file_grid_view.dart, file_masonry_view.dart)
+      // already passed the extension un-lowercased.
+      test('matches every VaultItemType pseudo-extension, not just password', () {
+        expect(matchesFilter('Login.password', 'secure'), isTrue);
+        expect(matchesFilter('Visa.paymentCard', 'secure'), isTrue);
+        expect(matchesFilter('Passport.identity', 'secure'), isTrue);
+        expect(matchesFilter('Wifi.secureNote', 'secure'), isTrue);
+        expect(matchesFilter('Checking.bankAccount', 'secure'), isTrue);
+        expect(matchesFilter('IDE.softwareLicense', 'secure'), isTrue);
+      });
+
+      test('an all-lowercase vault extension does NOT match (case matters, by design)', () {
+        // This is the exact failure mode the old bug produced for every
+        // *other* type: confirms the match is genuinely case-sensitive
+        // rather than this test accidentally being case-insensitive too.
+        expect(matchesFilter('Visa.paymentcard', 'secure'), isFalse);
+      });
+
+      test('does not match ordinary file extensions', () {
+        expect(matchesFilter('photo.jpg', 'secure'), isFalse);
+        expect(matchesFilter('report.pdf', 'secure'), isFalse);
+      });
+    });
+  });
+
+  group('isHiddenEntryName', () {
+    test('dot-files are hidden', () {
+      expect(isHiddenEntryName('.nomedia'), isTrue);
+      expect(isHiddenEntryName('.'), isTrue);
+    });
+
+    test('ordinary names are not hidden', () {
+      for (final name in ['', 'photo.jpg', 'Documents', 'readme', 'a.b.c']) {
+        expect(isHiddenEntryName(name), isFalse, reason: name);
+      }
+    });
+
+    test('known system folders are hidden whatever their case', () {
+      for (final name in [
+        'lost+found',
+        'Lost+Found',
+        'LOST.DIR',
+        'System Volume Information',
+        r'$RECYCLE.BIN',
+        r'$Recycle.Bin',
+        'Recycled',
+        'RECYCLER',
+      ]) {
+        expect(isHiddenEntryName(name), isTrue, reason: name);
+      }
+    });
+
+    test('lookalikes of the system names are not hidden', () {
+      for (final name in [
+        'lost',
+        'lost+found2',
+        'recycle',
+        'recycler.bak',
+        'system volume',
+        'foundation',
+        'Fonts',
+        'Songs',
+      ]) {
+        expect(isHiddenEntryName(name), isFalse, reason: name);
+      }
+    });
+
+    test('chkdsk found.NNN folders are hidden, but only with ASCII digits', () {
+      for (final name in ['found.0', 'FOUND.12', 'Found.007']) {
+        expect(isHiddenEntryName(name), isTrue, reason: name);
+      }
+      for (final name in [
+        'found.',
+        'found',
+        'found.1a',
+        'found.1.2',
+        'xfound.1',
+        'found.\u0663', // Arabic-Indic digit three
+      ]) {
+        expect(isHiddenEntryName(name), isFalse, reason: name);
+      }
+    });
+
+    test('a path is hidden when any segment is', () {
+      expect(isHiddenEntryName('photos/.thumbs/a.jpg'), isTrue);
+      expect(isHiddenEntryName('photos/lost+found/a.jpg'), isTrue);
+      expect(isHiddenEntryName('photos/2026/a.jpg'), isFalse);
+    });
+  });
+
+  group('splitParentAndName', () {
+    test('splits a nested path into folder and last segment', () {
+      final r = splitParentAndName('photos/2026/trip/img.jpg');
+      expect(r.parent, 'photos/2026/trip');
+      expect(r.name, 'img.jpg');
+    });
+
+    test('a single segment lives in the vault root', () {
+      final r = splitParentAndName('notes.txt');
+      expect(r.parent, '');
+      expect(r.name, 'notes.txt');
+    });
+
+    test('a folder path splits the same way as a file path', () {
+      final r = splitParentAndName('photos/2026');
+      expect(r.parent, 'photos');
+      expect(r.name, '2026');
+    });
+
+    test('round-trips with joinPath for deep-search results', () {
+      // Deep-search names are relative to the folder the search ran from.
+      final entry = RawEntry(
+        name: 'sub/dir/a.txt',
+        isDir: false,
+        sizeBytes: 1,
+        modifiedSecs: 1,
+      );
+      final full = fullPathOf(entry, 'root/start');
+      expect(full, 'root/start/sub/dir/a.txt');
+      final r = splitParentAndName(full);
+      expect(r.parent, 'root/start/sub/dir');
+      expect(r.name, 'a.txt');
+    });
+  });
+
+  group('clipboardPathFor', () {
+    test('a vault copies the in-vault path', () {
+      expect(
+        clipboardPathFor(
+          relativePath: 'Photos/2026/a.jpg',
+          rootPath: 'content://com.android.externalstorage.documents/tree/primary%3AVaults%2Fx.hc',
+          isLocalStorage: false,
+        ),
+        'Photos/2026/a.jpg',
+      );
+    });
+
+    test('a device storage copies the real filesystem path', () {
+      expect(
+        clipboardPathFor(
+          relativePath: 'DCIM/Camera/a.jpg',
+          rootPath: '/storage/emulated/0',
+          isLocalStorage: true,
+        ),
+        '/storage/emulated/0/DCIM/Camera/a.jpg',
+      );
+    });
+
+    test('the root itself is just the root path', () {
+      expect(
+        clipboardPathFor(
+          relativePath: '',
+          rootPath: '/storage/emulated/0/',
+          isLocalStorage: true,
+        ),
+        '/storage/emulated/0',
+      );
+    });
+
+    test('a trailing slash on the root does not double up', () {
+      expect(
+        clipboardPathFor(
+          relativePath: 'a.txt',
+          rootPath: '/storage/1234-ABCD/',
+          isLocalStorage: true,
+        ),
+        '/storage/1234-ABCD/a.txt',
+      );
+      expect(
+        clipboardPathFor(relativePath: 'a.txt', rootPath: '/', isLocalStorage: true),
+        '/a.txt',
+      );
+    });
+
+    test('an external storage given as a SAF tree URI is mapped back to a path', () {
+      expect(
+        clipboardPathFor(
+          relativePath: 'sub/a.txt',
+          rootPath: 'content://com.android.externalstorage.documents/tree/primary%3ADownload',
+          isLocalStorage: true,
+        ),
+        '/storage/emulated/0/Download/sub/a.txt',
+      );
+    });
+
+    test('a storage root with no filesystem path falls back to the relative path', () {
+      expect(
+        clipboardPathFor(
+          relativePath: 'sub/a.txt',
+          rootPath: 'content://com.example.cloud/tree/abc',
+          isLocalStorage: true,
+        ),
+        'sub/a.txt',
+      );
+    });
+  });
+}

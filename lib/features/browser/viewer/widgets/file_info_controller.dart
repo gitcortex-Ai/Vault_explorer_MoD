@@ -1,0 +1,287 @@
+// FileInfoSheet was a StatefulWidget owning metadata-load and SHA-256
+// compute state directly as State fields. Family-keyed by (volId, fullPath):
+// a fresh sheet instance is pushed per file/folder inspected, same shape as
+// VaultItemDetail/TextEditorLoad scoping to "this screen's session". The
+// pure in-memory parsers (_ParsedMetadata/_MetadataParser and their EXIF/
+// JPEG/PNG/GIF/WebP byte-parsing) stay exactly where they are in
+// file_info_sheet.dart -- they're stateless functions, nothing to convert.
+import 'dart:async';
+import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:path/path.dart' as p;
+import 'package:vaultexplorer/core/api/vault_audio_edit_api.dart';
+import 'package:vaultexplorer/core/api/vault_video_edit_api.dart';
+import 'package:vaultexplorer/core/filesystem/local_storage_container.dart';
+import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/services/media_aspect_ratio_cache.dart';
+import 'package:vaultexplorer/features/audio_editor/audio_edit_providers.dart';
+import 'package:vaultexplorer/features/browser/viewer/audio_metadata_parser.dart';
+import 'package:vaultexplorer/features/browser/viewer/media_viewer_constants.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/file_info_sheet.dart'
+    show ParsedMetadata, MetadataParser;
+import 'package:vaultexplorer/features/video_editor/video_edit_providers.dart';
+import 'package:vaultexplorer/core/utils/raw_entry.dart';
+
+part 'file_info_controller.g.dart';
+
+class FileInfoState {
+  final bool loading;
+  final ParsedMetadata? metadata;
+  final VideoProbe? videoMetadata;
+  final AudioProbe? audioMetadata;
+  final ParsedAudioMetadata? audioTags;
+  final String? sha256;
+  final bool calculatingSha256;
+  final int? folderItemCount;
+  final int? folderTotalBytes;
+  final bool loadingFolderStats;
+
+  const FileInfoState({
+    this.loading = true,
+    this.metadata,
+    this.videoMetadata,
+    this.audioMetadata,
+    this.audioTags,
+    this.sha256,
+    this.calculatingSha256 = false,
+    this.folderItemCount,
+    this.folderTotalBytes,
+    this.loadingFolderStats = false,
+  });
+
+  FileInfoState copyWith({
+    bool? loading,
+    ParsedMetadata? metadata,
+    VideoProbe? videoMetadata,
+    AudioProbe? audioMetadata,
+    ParsedAudioMetadata? audioTags,
+    String? sha256,
+    bool? calculatingSha256,
+    int? folderItemCount,
+    int? folderTotalBytes,
+    bool? loadingFolderStats,
+  }) => FileInfoState(
+    loading: loading ?? this.loading,
+    metadata: metadata ?? this.metadata,
+    videoMetadata: videoMetadata ?? this.videoMetadata,
+    audioMetadata: audioMetadata ?? this.audioMetadata,
+    audioTags: audioTags ?? this.audioTags,
+    sha256: sha256 ?? this.sha256,
+    calculatingSha256: calculatingSha256 ?? this.calculatingSha256,
+    folderItemCount: folderItemCount ?? this.folderItemCount,
+    folderTotalBytes: folderTotalBytes ?? this.folderTotalBytes,
+    loadingFolderStats: loadingFolderStats ?? this.loadingFolderStats,
+  );
+}
+
+@riverpod
+class FileInfo extends _$FileInfo {
+  @override
+  FileInfoState build(int volId, String fullPath) {
+    return const FileInfoState();
+  }
+
+  Future<void> load(MountedContainer container, RawEntry entry) async {
+    if (!state.loading) {
+      state = state.copyWith(loading: true);
+    }
+    try {
+      final isImg = MediaViewerConstants.isImage(entry.name);
+      final isVid = MediaViewerConstants.isVideo(entry.name);
+      final isAud = MediaViewerConstants.isAudio(entry.name);
+
+      Uint8List? headerBytes;
+      if (!entry.isDir && isImg) {
+        final readLen = min(entry.sizeBytes, 256 * 1024);
+        if (readLen > 0) {
+          headerBytes = await ref
+              .read(vaultFileIoApiProvider)
+              .readFileChunk(container, fullPath, 0, readLen);
+        }
+      }
+
+      // Tags (and cover art) sit at the start of an audio file, so read more
+      // of it than an image header. A failed read just means no tags.
+      ParsedAudioMetadata? audioTags;
+      if (!entry.isDir && isAud) {
+        final readLen = min(entry.sizeBytes, AudioMetadataParser.headerReadBytes);
+        if (readLen > 0) {
+          try {
+            final audioHeader = await ref
+                .read(vaultFileIoApiProvider)
+                .readFileChunk(container, fullPath, 0, readLen);
+            if (audioHeader != null) {
+              audioTags = AudioMetadataParser.parse(audioHeader);
+            }
+          } catch (_) {
+            // Keep ordinary file properties available.
+          }
+        }
+      }
+
+      final cachedRatio = MediaAspectRatioCache.get(container, fullPath);
+      final parsed = MetadataParser.parse(
+        fileName: entry.name,
+        isDir: entry.isDir,
+        headerBytes: headerBytes,
+        cachedAspectRatio: cachedRatio,
+      );
+
+      VideoProbe? videoMetadata;
+      if (!entry.isDir && isVid) {
+        final nativePath = container.isLocalStorage
+            ? p.join(container.uri, fullPath)
+            : fullPath;
+        try {
+          videoMetadata = await ref
+              .read(vaultVideoEditApiProvider)
+              .probe(
+                volId: container.volId,
+                filePath: nativePath,
+                isLocalStorage: container.isLocalStorage,
+                includeKeyframes: false,
+              );
+        } catch (_) {
+          // Keep ordinary file properties available if this video cannot be
+          // inspected by the platform media extractor.
+        }
+      }
+
+      AudioProbe? audioMetadata;
+      if (!entry.isDir && isAud) {
+        final nativePath = container.isLocalStorage
+            ? p.join(container.uri, fullPath)
+            : fullPath;
+        try {
+          audioMetadata = await ref
+              .read(vaultAudioEditApiProvider)
+              .probe(
+                volId: container.volId,
+                filePath: nativePath,
+                isLocalStorage: container.isLocalStorage,
+              );
+        } catch (_) {
+          // Same as video: a file the platform can't inspect still shows its
+          // ordinary properties (and any tags read above).
+        }
+      }
+
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        metadata: parsed,
+        videoMetadata: videoMetadata,
+        audioMetadata: audioMetadata,
+        audioTags: audioTags,
+        loading: false,
+      );
+
+      // Auto-trigger SHA-256 computation for files
+      if (!entry.isDir) {
+        unawaited(computeSha256(container, entry));
+      }
+    } catch (_) {
+      if (ref.mounted) state = state.copyWith(loading: false);
+    }
+  }
+
+  Future<void> computeSha256(MountedContainer container, RawEntry entry) async {
+    if (state.calculatingSha256 || state.sha256 != null) return;
+    state = state.copyWith(calculatingSha256: true);
+    try {
+      final size = entry.sizeBytes;
+      final opId = DateTime.now().millisecondsSinceEpoch & 0x7FFFFFFF;
+      final hashApi = ref.read(vaultHashApiProvider);
+      final fileIoApi = ref.read(vaultFileIoApiProvider);
+      await hashApi.beginHashSession(opId, ['SHA-256']);
+
+      int offset = 0;
+      const chunkSize = 256 * 1024;
+      while (offset < size) {
+        if (!ref.mounted) break;
+        final len = min(size - offset, chunkSize);
+        final chunk = await fileIoApi.readFileChunk(
+          container,
+          fullPath,
+          offset,
+          len,
+        );
+        if (chunk == null) break;
+        await hashApi.updateHashSession(opId, chunk);
+        offset += len;
+      }
+
+      final results = await hashApi.finishHashSession(opId);
+      if (ref.mounted) {
+        state = state.copyWith(
+          sha256: results['SHA-256']?.toLowerCase(),
+          calculatingSha256: false,
+        );
+      }
+    } catch (_) {
+      if (ref.mounted) state = state.copyWith(calculatingSha256: false);
+    }
+  }
+
+  /// Recursively walks the folder tree, counting items and summing file sizes.
+  /// Starts with null counts to display "Calculating...", then updates progressively.
+  Future<void> loadFolderStats(MountedContainer container) async {
+    if (state.loadingFolderStats) return;
+    state = state.copyWith(
+      loadingFolderStats: true,
+      folderItemCount: null,
+      folderTotalBytes: null,
+    );
+
+    try {
+      final fileIoApi = ref.read(vaultFileIoApiProvider);
+      int totalItems = 0;
+      int totalBytes = 0;
+
+      // Iterative BFS to prevent call-stack overflow on deeply nested trees
+      final queue = <String>[fullPath];
+
+      while (queue.isNotEmpty) {
+        if (!ref.mounted) return;
+        final dirPath = queue.removeAt(0);
+        final rawList = await fileIoApi.listDirectory(container, dirPath);
+        if (rawList == null) continue;
+
+        final entries = RawEntry.parseAll(rawList.cast<String>());
+        for (final entry in entries) {
+          totalItems++;
+          if (!entry.isDir) {
+            totalBytes += entry.sizeBytes;
+          } else {
+            final childPath = dirPath.isEmpty
+                ? entry.name
+                : '$dirPath/${entry.name}';
+            queue.add(childPath);
+          }
+        }
+
+        // Progressive update after each directory is parsed
+        if (ref.mounted) {
+          state = state.copyWith(
+            folderItemCount: totalItems,
+            folderTotalBytes: totalBytes,
+          );
+        }
+      }
+
+      if (ref.mounted) {
+        state = state.copyWith(
+          folderItemCount: totalItems,
+          folderTotalBytes: totalBytes,
+          loadingFolderStats: false,
+        );
+      }
+    } catch (_) {
+      if (ref.mounted) {
+        state = state.copyWith(loadingFolderStats: false);
+      }
+    }
+  }
+}

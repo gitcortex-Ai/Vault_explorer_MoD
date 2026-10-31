@@ -1,0 +1,100 @@
+import 'package:flutter/services.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:vaultexplorer/features/camera/active_recording_registry.dart';
+import 'package:vaultexplorer/features/sync/services/sync_lock_barrier.dart';
+
+import '../api/vault_archive_api.dart';
+import '../api/vault_automation_api.dart';
+import '../api/vault_crypto_api.dart';
+import '../api/vault_engine_channel.dart';
+import '../api/vault_engine_events.dart';
+import '../api/vault_file_io_api.dart';
+import '../api/vault_hash_api.dart';
+import '../api/vault_lifecycle_api.dart';
+import '../api/vault_local_share_api.dart';
+import '../api/vault_panic_api.dart';
+import '../api/vault_pdf_api.dart';
+import '../api/vault_repair_api.dart';
+import '../api/vault_split_join_api.dart';
+import '../api/vault_composite_api.dart';
+import '../api/quick_capture_api.dart';
+
+part 'vault_engine_providers.g.dart';
+
+/// The single platform channel every VaultXxxApi class talks over --
+/// matches the `const _channel = MethodChannel(...)` top-level constant the
+/// pre-migration VaultExplorerApi used, but resolvable/overridable through
+/// Riverpod instead of being a bare global.
+@Riverpod(keepAlive: true)
+MethodChannel vaultEngineChannel(Ref ref) => kVaultEngineChannel;
+
+/// Cross-cutting native-event listener registries + the method-call
+/// dispatch that used to live as static state directly on VaultExplorerApi.
+/// `keepAlive: true` + registering the handler exactly once here reproduces
+/// the old "single static handler for the process lifetime" behaviour
+/// (previously wired up by `VaultExplorerApi.initMethodCallHandler()` in
+/// `main()` -- see lib/main.dart, which should call
+/// `ref.read(vaultEngineEventsProvider)` once at startup instead once all
+/// consumers have migrated off the old static listener methods).
+@Riverpod(keepAlive: true)
+VaultEngineEvents vaultEngineEvents(Ref ref) {
+  final events = VaultEngineEvents();
+  events.registerHandler(ref.watch(vaultEngineChannelProvider));
+  return events;
+}
+
+@Riverpod(keepAlive: true)
+VaultCryptoApi vaultCryptoApi(Ref ref) =>
+    VaultCryptoApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultFileIoApi vaultFileIoApi(Ref ref) =>
+    VaultFileIoApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultHashApi vaultHashApi(Ref ref) =>
+    VaultHashApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultLifecycleApi vaultLifecycleApi(Ref ref) => VaultLifecycleApi(
+  ref.watch(vaultEngineChannelProvider),
+  ref.watch(vaultEngineEventsProvider),
+  ref.watch(activeRecordingRegistryProvider),
+  ref.watch(syncLockBarrierProvider),
+);
+
+@Riverpod(keepAlive: true)
+VaultPdfApi vaultPdfApi(Ref ref) =>
+    VaultPdfApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultRepairApi vaultRepairApi(Ref ref) =>
+    VaultRepairApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultSplitJoinApi vaultSplitJoinApi(Ref ref) =>
+    VaultSplitJoinApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultAutomationApi vaultAutomationApi(Ref ref) =>
+    VaultAutomationApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultLocalShareApi vaultLocalShareApi(Ref ref) =>
+    VaultLocalShareApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultArchiveApi vaultArchiveApi(Ref ref) =>
+    VaultArchiveApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultCompositeApi vaultCompositeApi(Ref ref) =>
+    VaultCompositeApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+VaultPanicApi vaultPanicApi(Ref ref) =>
+    VaultPanicApi(ref.watch(vaultEngineChannelProvider));
+
+@Riverpod(keepAlive: true)
+QuickCaptureApi quickCaptureApi(Ref ref) =>
+    QuickCaptureApi(ref.watch(vaultEngineChannelProvider));

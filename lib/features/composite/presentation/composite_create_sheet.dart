@@ -1,0 +1,896 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/api/vault_engine_types.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
+import 'package:vaultexplorer/core/theme/app_theme.dart';
+import 'package:vaultexplorer/core/utils/entropy_pool.dart';
+import 'package:vaultexplorer/core/utils/format_utils.dart';
+import 'package:vaultexplorer/core/utils/sensitive_clipboard.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/core/widgets/crypto_forms/entropy_collector.dart';
+import 'package:vaultexplorer/data/models/crypto_algorithms.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/services/session_lock_controller.dart';
+import 'package:vaultexplorer/features/dashboard/vault_dashboard_controller.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/container_wizard_shared.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/quick_password_generator_sheet.dart';
+import 'package:vaultexplorer/features/tools/widgets/composite_container_controller.dart';
+import 'package:vaultexplorer/features/unlock/unlock_sheet.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area_scope.dart';
+
+enum _CompositeWizStep { carriers, security, advanced, randomness, review }
+
+/// Linear multi-step wizard for creating a new distributed composite VeraCrypt volume
+/// across multiple carrier files.
+class CompositeCreateSheet extends ConsumerStatefulWidget {
+  /// Called right after this sheet pops itself, once a composite container
+  /// is actually ready (freshly created, or unlocked via the "already have
+  /// one?" shortcut) — never on cancel/back. Callers use it to get the user
+  /// the rest of the way back to the vault dashboard, the same way the
+  /// normal (non-composite) container wizard already lands there.
+  final VoidCallback? onCreated;
+
+  const CompositeCreateSheet({super.key, this.onCreated});
+
+  @override
+  ConsumerState<CompositeCreateSheet> createState() => _CompositeCreateSheetState();
+}
+
+class _CompositeCreateSheetState extends ConsumerState<CompositeCreateSheet> {
+  int _currentStep = 0;
+
+  Future<T> _suppressLock<T>(Future<T> Function() action) =>
+      ref.read(sessionLockControllerProvider).withLockSuppression(action);
+
+   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _pimController = TextEditingController();
+  final _carrierScrollCtrl = ScrollController();
+
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+  bool _obscurePim = true;
+
+  /// Touch-movement randomness gathered by the "Add randomness" step. Owned
+  /// here (not by the step widget) so it survives stepping back and forth.
+  final _entropyPool = EntropyPool();
+  bool _entropySatisfied = false;
+
+  static const _steps = [
+    _CompositeWizStep.carriers,
+    _CompositeWizStep.security,
+    _CompositeWizStep.advanced,
+    _CompositeWizStep.randomness,
+    _CompositeWizStep.review,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _entropyPool.addListener(_onEntropyChanged);
+    Future.microtask(() {
+      if (mounted) {
+        ref.read(compositeContainerProvider.notifier).setMode(true);
+      }
+    });
+  }
+
+  // The pool notifies on every sample; only a change of "may continue" needs
+  // the wizard (its Next button) to rebuild.
+  void _onEntropyChanged() {
+    final satisfied = _entropyPool.isSatisfied;
+    if (satisfied != _entropySatisfied && mounted) {
+      setState(() => _entropySatisfied = satisfied);
+    }
+  }
+
+   @override
+  void dispose() {
+    _entropyPool.removeListener(_onEntropyChanged);
+    _entropyPool.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _pimController.dispose();
+    _carrierScrollCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openPasswordGenerator() async {
+    final password = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+      ),
+      builder: (ctx) => const QuickPasswordGeneratorSheet(),
+    );
+
+    if (password != null && mounted) {
+      setState(() {
+        _passwordController.text = password;
+        _confirmPasswordController.text = password;
+        _obscurePassword = false;
+        _obscureConfirmPassword = false;
+      });
+      await ref.read(sensitiveClipboardProvider).copy(password);
+    }
+  }
+
+  /// "Already have one? Unlock it" shortcut.
+  ///
+  /// Picks the carriers straight from the system picker and hands them to the
+  /// unlock screen, without touching this wizard's own carrier list. Going back
+  /// from the unlock screen therefore returns to the wizard exactly as the user
+  /// left it (nothing preselected, nothing merged with the carriers they had
+  /// already chosen for creating a new container).
+  Future<void> _openUnlockShortcut() async {
+    final picked = await _suppressLock(
+      () => ref.read(vaultLifecycleApiProvider).pickCryptoFiles(),
+    );
+    if (!mounted || picked.isEmpty) return;
+
+    MountedContainer? newlyMountedContainer;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SkinAreaScope(area: SkinArea.dashboard, child: UnlockSheet(
+          initialCompositeCarriers: picked,
+          initialName: context.l10n.compositeDefaultContainerName(picked.length),
+          onMounted: (container, {record}) {
+            ref
+                .read(vaultDashboardControllerProvider.notifier)
+                .onContainerMounted(container, record: record);
+            newlyMountedContainer = container;
+          },
+        )),
+      ),
+    );
+    if (!mounted) return;
+    final unlocked = newlyMountedContainer;
+    if (unlocked == null) return; // backed out: stay on the wizard as it was
+
+    final dashboard = ref.read(vaultDashboardControllerProvider.notifier);
+    await dashboard.loadAll();
+    dashboard.refreshContainerSpace(unlocked.volId);
+    if (!mounted) return;
+    Navigator.of(context).pop();
+    widget.onCreated?.call();
+  }
+
+  bool _canProceedFor(_CompositeWizStep step, CompositeContainerState state) =>
+      switch (step) {
+        _CompositeWizStep.carriers =>
+          state.pickedCarriers.isNotEmpty &&
+              !state.hasUnsupportedArchiveCarrier &&
+              !state.isAnalyzing,
+        _CompositeWizStep.security =>
+          (_passwordController.text.isNotEmpty || state.keyfiles.isNotEmpty) &&
+              (_passwordController.text.isEmpty ||
+                  _passwordController.text == _confirmPasswordController.text),
+        _CompositeWizStep.advanced => true,
+        _CompositeWizStep.randomness => _entropyPool.isSatisfied,
+        _CompositeWizStep.review => true,
+      };
+
+  String _stepTitle(_CompositeWizStep step, CompositeContainerState state) =>
+      switch (step) {
+        _CompositeWizStep.carriers => state.pickedCarriers.isEmpty
+            ? context.l10n.compositeAddCarrierFilesTitle
+            : context.l10n.compositeCarrierFilesCountHeader(state.pickedCarriers.length),
+        _CompositeWizStep.security => context.l10n.securityCredentialsSectionHeader,
+        _CompositeWizStep.advanced => context.l10n.compositeEncryptionAndFilesystemHeader,
+        _CompositeWizStep.randomness => context.l10n.entropyStepTitle,
+        _CompositeWizStep.review => context.l10n.wizardStepReviewTitle,
+      };
+
+  void _goNext(CompositeContainerState state) {
+    if (_currentStep == _steps.length - 1) {
+      _create();
+    } else {
+      setState(() => _currentStep++);
+    }
+  }
+
+  void _goBackOrExit() {
+    if (_currentStep > 0) {
+      setState(() => _currentStep--);
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _create() async {
+    final ctrl = ref.read(compositeContainerProvider.notifier);
+    // A copy of the pool's bytes for this attempt; wiped as soon as the call
+    // returns. The pool itself is kept so a retry after a failure doesn't
+    // make the user move their finger again.
+    final userEntropy = _entropyPool.takeBytes();
+    final bool ok;
+    try {
+      ok = await ctrl.createContainer(
+        password: _passwordController.text,
+        confirmPassword: _confirmPasswordController.text,
+        userEntropy: userEntropy,
+      );
+    } finally {
+      userEntropy.fillRange(0, userEntropy.length, 0);
+    }
+    if (ok && mounted) {
+      await ref.read(vaultDashboardControllerProvider.notifier).loadAll();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      widget.onCreated?.call();
+      showAppSnackBar(
+        context,
+        message: context.l10n.compositeCreateSuccessMessage,
+        tone: AppBannerTone.success,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(compositeContainerProvider);
+    final cs = context.colors;
+    final textTheme = context.typography;
+    final l10n = context.l10n;
+    final isShortScreen = MediaQuery.sizeOf(context).height < 520;
+
+    final safeStep = _currentStep.clamp(0, _steps.length - 1);
+    final currentKind = _steps[safeStep];
+    final isLastStep = safeStep == _steps.length - 1;
+
+    final inputDecorationTheme = InputDecorationTheme(
+      filled: true,
+      fillColor: cs.surfaceContainerHighest,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: isShortScreen ? 11 : 16,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+    );
+
+    return Theme(
+      data: Theme.of(context).copyWith(inputDecorationTheme: inputDecorationTheme),
+      child: WizardScaffold(
+        appBarTitle: l10n.compositeCreateScreenTitle,
+        currentStep: safeStep,
+        totalSteps: _steps.length,
+        stepTitle: _stepTitle(currentKind, state),
+        stepContent: _stepContent(currentKind, state, cs, textTheme, isShortScreen),
+        busy: state.isOperating,
+        busyMessage: state.statusMessage ?? l10n.compositeProcessingStatus,
+        canProceed: _canProceedFor(currentKind, state),
+        isLastStep: isLastStep,
+        nextLabel: isLastStep
+            ? l10n.compositeCreateContainerButton
+            : l10n.wizardNextButton,
+        onNext: () => _goNext(state),
+        onBackOrExit: _goBackOrExit,
+        errorMessage: state.error,
+      ),
+    );
+  }
+
+  Widget _stepContent(
+    _CompositeWizStep kind,
+    CompositeContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) =>
+      switch (kind) {
+        _CompositeWizStep.carriers => _buildCarriersStep(state, cs, textTheme),
+        _CompositeWizStep.security =>
+          _buildSecurityStep(state, cs, textTheme, isShortScreen),
+        _CompositeWizStep.advanced => _buildAdvancedStep(state, cs, textTheme),
+        _CompositeWizStep.randomness => EntropyCollector(pool: _entropyPool),
+        _CompositeWizStep.review => _buildReviewStep(state, cs, textTheme),
+      };
+
+  // ── Step 1: Virtualized Carriers List & Isolated Stealth Slider ─────────────
+  Widget _buildCarriersStep(
+    CompositeContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    final l10n = context.l10n;
+    final ctrl = ref.read(compositeContainerProvider.notifier);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InlineBanner(
+          l10n.compositeAddCarrierFilesSubtitle,
+          tone: AppBannerTone.info,
+          icon: Icons.info_outline_rounded,
+        ),
+        if (state.hasUnsupportedArchiveCarrier) ...[
+          const SizedBox(height: 10),
+          InlineBanner(
+            l10n.compositeArchiveCarrierBlockingWarning,
+            tone: AppBannerTone.error,
+            icon: Icons.warning_amber_rounded,
+          ),
+        ],
+        const SizedBox(height: 14),
+        SectionHeader(l10n.compositeCarrierFilesCountHeader(state.pickedCarriers.length)),
+        SectionCard(
+          children: [
+           InkWell(
+              onTap: state.isOperating ? null : () => _suppressLock(ctrl.pickCarriers),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Icon(Icons.add_photo_alternate_rounded, color: cs.primary, size: 24),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.compositeAddCarrierFilesTitle,
+                            style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.compositeAddCarrierFilesSubtitle,
+                            style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    FilledButton.tonalIcon(
+                      onPressed: state.isOperating ? null : () => _suppressLock(ctrl.pickCarriers),
+                      style: FilledButton.styleFrom(
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                      ),
+                      icon: const Icon(Icons.folder_open_rounded, size: 18),
+                      label: Text(l10n.compositeBrowseButtonLabel),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (state.pickedCarriers.isNotEmpty) ...[
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 280),
+                child: Scrollbar(
+                  controller: _carrierScrollCtrl,
+                  thumbVisibility: state.pickedCarriers.length > 4,
+                  interactive: true,
+                  thickness: 4.5,
+                  radius: const Radius.circular(8),
+                  child: ListView.builder(
+                    controller: _carrierScrollCtrl,
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: state.pickedCarriers.length,
+                    padding: const EdgeInsets.only(right: 6),
+                    itemBuilder: (context, index) {
+                      final carrier = state.pickedCarriers[index];
+                      final matchingBudgets = state.profile?.carriers
+                          .where((budget) => budget.inputIndex == index)
+                          .toList();
+                      final budget = matchingBudgets == null ||
+                              matchingBudgets.isEmpty
+                          ? null
+                          : matchingBudgets.first;
+                      final unsupportedArchive =
+                          isUnsupportedArchiveCarrierName(
+                            carrier.displayName,
+                            detectedFormat: budget?.detectedFormat,
+                          );
+
+                      Widget leadingWidget;
+                      if (budget == null || state.isAnalyzing) {
+                        leadingWidget = SizedBox(
+                          width: 26,
+                          height: 26,
+                          child: Center(
+                            child: SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: cs.primary,
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        leadingWidget = Container(
+                          width: 26,
+                          height: 26,
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHighest,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${index + 1}',
+                            style: textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return ListTile(
+                        key: ValueKey(carrier.uri),
+                        dense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                        leading: leadingWidget,
+                        title: Text(
+                          carrier.displayName,
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: cs.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          unsupportedArchive
+                              ? l10n.compositeArchiveCarrierRowWarning
+                              : budget != null
+                                  ? l10n.compositeCarrierAllocatableSubtitle(
+                                      budget.detectedFormat.toUpperCase(),
+                                      formatBytes(budget.allocatableBytes),
+                                    )
+                                  : l10n.compositeCarrierAnalyzingStatus,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: unsupportedArchive
+                                ? cs.error
+                                : cs.onSurfaceVariant,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                          tooltip: l10n.clear,
+                          visualDensity: VisualDensity.compact,
+                          onPressed: state.isOperating ? null : () => ctrl.removeCarrier(index),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        if (state.pickedCarriers.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          // Isolated slider widget: dragging only rebuilds itself, avoiding whole-sheet rebuilds
+          _CarrierGrowthSliderCard(
+            currentGrowthPct: state.safetyMarginPct,
+            disabled: state.isOperating || state.isAnalyzing,
+            onCommitted: (pct) => ctrl.setSafetyMargin(pct),
+          ),
+        ],
+        if (state.profile != null) ...[
+          const SizedBox(height: 16),
+          SectionHeader(l10n.compositeTotalUsableCapacityHeader),
+          SectionCard(
+            children: [
+              ListTile(
+                leading: Icon(Icons.storage_rounded, color: cs.secondary),
+                title: Text(
+                  formatBytes(compositeUsableCapacityBytes(
+                    state.profile!.totalAllocatableBytes,
+                  )),
+                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  l10n.compositeCapacityDistributedSubtitle(state.profile!.carriers.length),
+                ),
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 16),
+        Center(
+          child: TextButton.icon(
+            onPressed: state.isOperating ? null : _openUnlockShortcut,
+            icon: const Icon(Icons.lock_open_rounded, size: 18),
+            label: Text(l10n.compositeAlreadyHaveUnlockPrompt),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Step 2: Security & Credentials ─────────────────────────────────────────
+  Widget _buildSecurityStep(
+    CompositeContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) {
+    final l10n = context.l10n;
+    final ctrl = ref.read(compositeContainerProvider.notifier);
+    final vPad = isShortScreen ? 4.0 : 8.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.securityCredentialsSectionHeader),
+        SectionCard(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, isShortScreen ? 10 : 16, 16, vPad),
+              child: TextField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.passwordFieldLabel,
+                  prefixIcon: Icon(Icons.key_rounded, size: 20, color: cs.primary),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.auto_awesome_rounded, size: 20, color: cs.primary),
+                        tooltip: l10n.generateStrongPasswordTooltip,
+                        onPressed: _openPasswordGenerator,
+                      ),
+                      PasswordVisibilityToggle(
+                        obscured: _obscurePassword,
+                        onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, vPad, 16, isShortScreen ? 8 : 12),
+              child: TextField(
+                controller: _confirmPasswordController,
+                obscureText: _obscureConfirmPassword,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.confirmPasswordFieldLabelTitleCase,
+                  prefixIcon: Icon(Icons.check_circle_outline_rounded, size: 20, color: cs.primary),
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _obscureConfirmPassword,
+                    onToggle: () => setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: TextField(
+                controller: _pimController,
+                keyboardType: TextInputType.number,
+                obscureText: _obscurePim,
+                obscuringCharacter: '*',
+                decoration: InputDecoration(
+                  labelText: l10n.compositePimFieldLabel,
+                  prefixIcon: const Icon(Icons.speed_rounded, size: 20),
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _obscurePim,
+                    onToggle: () => setState(() => _obscurePim = !_obscurePim),
+                  ),
+                ),
+                onChanged: (val) {
+                  final parsed = int.tryParse(val.trim()) ?? 0;
+                  ctrl.setPim(parsed);
+                  setState(() {});
+                },
+              ),
+            ),
+            KeyfilesPicker(
+              keyfiles: state.keyfiles,
+              picking: state.pickingKeyfiles,
+              onPick: () => _suppressLock(ctrl.pickKeyfiles),
+              onRemove: ctrl.removeKeyfile,
+              enabled: !state.isOperating,
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              value: state.remember,
+              onChanged: state.isOperating ? null : ctrl.setRemember,
+              title: Text(l10n.compositeRememberContainerTitle),
+              subtitle: Text(
+                l10n.compositeRememberContainerSubtitle,
+                style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+              ),
+              secondary: Icon(Icons.push_pin_outlined, color: cs.primary, size: 22),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // ── Step 3: Encryption & Filesystem ───────────────────────────────────────
+  Widget _buildAdvancedStep(
+    CompositeContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    final l10n = context.l10n;
+    final ctrl = ref.read(compositeContainerProvider.notifier);
+    final cipherChoices = cipherChoicesForFormat(CreateFormat.veracrypt);
+    final hashChoices = hashChoicesForFormat(CreateFormat.veracrypt);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.compositeEncryptionAndFilesystemHeader),
+        SectionCard(
+          children: [
+            OptionPickerTile<int>(
+              label: l10n.compositeEncryptionAlgorithmLabel,
+              value: state.cipherId,
+              prefixIcon: Icons.security_rounded,
+              options: cipherChoices
+                  .map((c) => SelectOption(value: c.id, label: c.label))
+                  .toList(),
+              onChanged: (val) => ctrl.setCipherId(val),
+            ),
+            OptionPickerTile<int>(
+              label: l10n.compositeHashAlgorithmLabel,
+              value: state.hashId,
+              prefixIcon: Icons.tag_rounded,
+              options: hashChoices
+                  .map((h) => SelectOption(value: h.id, label: h.label))
+                  .toList(),
+              onChanged: (val) => ctrl.setHashId(val),
+            ),
+            OptionPickerTile<String>(
+              label: l10n.compositeFilesystemTypeLabel,
+              value: state.fileSystem,
+              prefixIcon: Icons.dns_rounded,
+              options: const [
+                SelectOption(value: 'FAT', label: 'FAT32 / exFAT'),
+                SelectOption(value: 'ext4', label: 'ext4'),
+                SelectOption(value: 'NTFS', label: 'NTFS'),
+              ],
+              onChanged: (val) => ctrl.setFileSystem(val),
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              title: Text(
+                l10n.compositeQuickFormatTitle,
+                style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                l10n.compositeQuickFormatSubtitle,
+                style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+              ),
+              value: state.quickFormat,
+              onChanged: state.isOperating ? null : ctrl.setQuickFormat,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // ── Step 5: Review Summary (step 4 is the shared EntropyCollector) ────────
+  Widget _buildReviewStep(
+    CompositeContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    final l10n = context.l10n;
+    final rows = <Widget>[
+      WizardSummaryRow(
+        icon: Icons.category_rounded,
+        label: l10n.metaLabelType,
+        value: 'VeraCrypt Composite',
+      ),
+      WizardSummaryRow(
+        icon: Icons.folder_shared_rounded,
+        label: l10n.compositeCarrierFilesCountHeader(state.pickedCarriers.length),
+        value: '${state.pickedCarriers.length}',
+      ),
+    ];
+
+    if (state.profile != null) {
+      rows.add(
+        WizardSummaryRow(
+          icon: Icons.storage_rounded,
+          label: l10n.compositeTotalUsableCapacityHeader,
+          value: formatBytes(compositeUsableCapacityBytes(
+            state.profile!.totalAllocatableBytes,
+          )),
+        ),
+      );
+    }
+
+    rows.addAll([
+      WizardSummaryRow(
+        icon: Icons.security_rounded,
+        label: l10n.compositeEncryptionAlgorithmLabel,
+        value: CipherAlgo.nameFor(state.cipherId),
+      ),
+      WizardSummaryRow(
+        icon: Icons.tag_rounded,
+        label: l10n.compositeHashAlgorithmLabel,
+        value: HashAlgo.nameFor(state.hashId),
+      ),
+      WizardSummaryRow(
+        icon: Icons.dns_rounded,
+        label: l10n.compositeFilesystemTypeLabel,
+        value: state.fileSystem,
+      ),
+      WizardSummaryRow(
+        icon: Icons.speed_rounded,
+        label: l10n.wizardSummaryPimLabel,
+        value: _pimController.text.trim().isEmpty
+            ? l10n.wizardSummaryPimDefaultValue
+            : l10n.wizardPasswordSetValue,
+      ),
+      WizardSummaryRow(
+        icon: Icons.bolt_rounded,
+        label: l10n.compositeQuickFormatTitle,
+        value: state.quickFormat ? l10n.vaultInfoYesValue : l10n.vaultInfoNoValue,
+      ),
+      WizardSummaryRow(
+        icon: Icons.key_rounded,
+        label: l10n.wizardSummaryPasswordLabel,
+        value: _passwordController.text.isNotEmpty
+            ? l10n.wizardPasswordSetValue
+            : l10n.wizardPasswordNotSetValue,
+      ),
+      WizardSummaryRow(
+        icon: Icons.insert_drive_file_outlined,
+        label: l10n.wizardSummaryKeyfilesLabel,
+        value: state.keyfiles.isEmpty
+            ? l10n.noKeyfilesAttached
+            : '${state.keyfiles.length}',
+      ),
+      WizardSummaryRow(
+        icon: Icons.shuffle_rounded,
+        label: l10n.entropyReviewLabel,
+        value: _entropyPool.hasUserEntropy
+            ? l10n.entropyReviewUserAdded
+            : l10n.entropyReviewDeviceOnly,
+      ),
+      WizardSummaryRow(
+        icon: Icons.push_pin_outlined,
+        label: l10n.compositeRememberContainerTitle,
+        value: state.remember ? l10n.vaultInfoYesValue : l10n.vaultInfoNoValue,
+      ),
+    ]);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.wizardSummaryTitle),
+        SectionCard(children: rows),
+      ],
+    );
+  }
+}
+
+/// Isolated slider widget: local state ensures that dragging does not rebuild
+/// the parent list of carrier files on every 16 ms frame.
+class _CarrierGrowthSliderCard extends StatefulWidget {
+  final int currentGrowthPct;
+  final bool disabled;
+  final ValueChanged<int> onCommitted;
+
+  const _CarrierGrowthSliderCard({
+    required this.currentGrowthPct,
+    required this.disabled,
+    required this.onCommitted,
+  });
+
+  @override
+  State<_CarrierGrowthSliderCard> createState() => _CarrierGrowthSliderCardState();
+}
+
+class _CarrierGrowthSliderCardState extends State<_CarrierGrowthSliderCard> {
+  double? _dragValue;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final cs = context.colors;
+    final textTheme = context.typography;
+
+    final displayPct = (_dragValue ?? widget.currentGrowthPct.toDouble()).round();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.compositeCarrierGrowthSectionHeader),
+        SectionCard(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.compositeCarrierGrowthSliderTitle,
+                        style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: displayPct <= 10
+                              ? cs.primaryContainer
+                              : cs.tertiaryContainer,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          l10n.compositeCarrierGrowthPercentLabel(displayPct),
+                          style: textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: displayPct <= 10
+                                ? cs.onPrimaryContainer
+                                : cs.onTertiaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    displayPct <= 5
+                        ? l10n.compositeCarrierGrowthUltraStealthDesc
+                        : displayPct <= 12
+                            ? l10n.compositeCarrierGrowthRecommendedDesc
+                            : l10n.compositeCarrierGrowthHighCapacityDesc,
+                    style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: 6),
+                  Slider(
+                    value: (_dragValue ?? widget.currentGrowthPct.toDouble()).clamp(3.0, 30.0),
+                    min: 3.0,
+                    max: 30.0,
+                    divisions: 27,
+                    label: l10n.compositeCarrierGrowthPercentLabel(displayPct),
+                    onChanged: widget.disabled
+                        ? null
+                        : (val) {
+                            setState(() => _dragValue = val);
+                          },
+                    onChangeEnd: (val) {
+                      setState(() => _dragValue = null);
+                      widget.onCommitted(val.round());
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}

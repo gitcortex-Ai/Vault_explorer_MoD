@@ -1,0 +1,827 @@
+import 'dart:async';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/utils/file_type_utils.dart';
+import 'package:vaultexplorer/core/utils/format_utils.dart';
+import 'package:vaultexplorer/core/utils/raw_entry.dart';
+import 'package:vaultexplorer/core/widgets/activity/app_bar_transfer_button.dart';
+import 'package:vaultexplorer/core/widgets/full_screen_drag_drawer.dart';
+import 'package:vaultexplorer/data/models/file_manager_action.dart';
+import 'package:vaultexplorer/data/models/file_manager_toolbar_config.dart';
+import 'package:vaultexplorer/data/models/mounted_container.dart';
+import 'package:vaultexplorer/data/models/vault_item.dart';
+import 'package:vaultexplorer/data/services/app_settings_service.dart';
+import 'package:vaultexplorer/data/services/archive_service.dart';
+import 'package:vaultexplorer/features/browser/browser_dialogs.dart';
+import 'package:vaultexplorer/features/browser/file_browser_screen.dart'
+    show PathSegment;
+import 'package:vaultexplorer/features/browser/viewer/media_viewer_constants.dart';
+import 'package:vaultexplorer/features/browser/viewer/widgets/file_info_sheet.dart';
+import 'package:vaultexplorer/features/browser/widgets/selection_app_bar.dart';
+import 'package:vaultexplorer/features/browser/widgets/selection_app_bar_wide.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/filesystem/local_storage_container.dart';
+
+PreferredSizeWidget buildBrowserAppBar(
+  BuildContext context, {
+  required AppSettingsService appSettingsService,
+  required MountedContainer container,
+  required List<PathSegment> pathStack,
+  required ValueChanged<int> onJumpTo,
+
+  /// Folders just stepped back out of, nearest first. They stay in the path
+  /// menu, dimmed below the current folder, so the person can walk forward
+  /// again. [onForwardTo] receives an index into this list.
+  List<PathSegment> forwardStack = const [],
+  ValueChanged<int>? onForwardTo,
+  required List<RawEntry> filteredItems,
+  required int dirCount,
+  required int fileCount,
+  required bool isSelectionMode,
+  required Set<RawEntry> selectedItems,
+  int? selectedCountOverride,
+  bool singleSelectionInCurrentTab = true,
+  bool allowRenameAction = true,
+  bool allowShareAction = true,
+  bool allowCompressAction = true,
+  bool allowExportAction = true,
+  bool allowExtractAction = true,
+  bool allowPinBookmarkActions = true,
+  bool? hideVaultOnlyActionsOverride,
+  required bool isReadOnly,
+  required bool searchActive,
+  required String currentDirPath,
+  required FileManagerToolbarConfig toolbarConfig,
+  required String? currentFilter,
+  required int? freeSpace,
+  required int selectedTotalBytes,
+  required bool hasPendingFolderSizes,
+  required Map<FileManagerAction, WidgetBuilder> actionBuilders,
+  required bool Function(RawEntry entry) isFolderMounted,
+  required bool Function(RawEntry entry) isPinned,
+  required bool Function(RawEntry entry) isBookmark,
+  required VoidCallback onExitSelectionMode,
+  required VoidCallback onSelectAll,
+  required VoidCallback onCopy,
+  required VoidCallback onCut,
+  VoidCallback? onOpenInNewTab,
+
+  /// Leaves the search and shows the single selected item in the folder it
+  /// lives in. Offered only while a search is showing and outside archives.
+  VoidCallback? onGoToLocation,
+
+  /// Copies [entry]'s path to the clipboard. Offered for a single selected
+  /// item outside archives.
+  void Function(RawEntry entry)? onCopyPath,
+  required VoidCallback onExport,
+  required VoidCallback onCompressSelected,
+  required VoidCallback onExtractSelectedArchive,
+  required VoidCallback onDelete,
+  required VoidCallback onShare,
+  required VoidCallback onEncryptSelected,
+  required VoidCallback onDecryptSelected,
+  required void Function({required bool pin}) onTogglePin,
+  required void Function({required bool bookmark}) onToggleBookmark,
+  required void Function(String path) onDirectoryReload,
+  required void Function(String msg, {required bool error}) onSetStatus,
+  required Future<void> Function(
+    String fileName,
+    String fullPath,
+    String ext,
+    AppSettings settings,
+  )
+  onShowOpenWithDialog,
+  required Future<void> Function(RawEntry entry)
+  onShowFolderDocumentProviderSheet,
+  required Future<void> Function(RawEntry entry) onToggleFolderDocumentProvider,
+  void Function(RawEntry entry)? onSyncSettings,
+  VoidCallback? onSyncRoot,
+  required Future<void> Function(String fileName, String fullPath) onEditImage,
+  required Future<void> Function(String fullPath) onEditVideo,
+  Future<void> Function(String fullPath)? onEditAudio,
+  required Future<void> Function() onSettingsClosed,
+  required bool isFiltered,
+  required VoidCallback? onPaste,
+  VoidCallback? onNavigateUp,
+  VoidCallback? onBackAtRoot,
+  bool isInsideArchive = false,
+  bool showBackButton = true,
+  Widget Function(Widget title)? wrapTitle,
+  VoidCallback? onOpenStorageSwitcher,
+}) {
+  final allItems = filteredItems;
+  final cs = Theme.of(context).colorScheme;
+  final isLandscape =
+      MediaQuery.of(context).orientation == Orientation.landscape;
+  final showActionBar = !searchActive;
+
+  if (isSelectionMode) {
+    final selectedCount = selectedCountOverride ?? selectedItems.length;
+    final single =
+        selectedCount == 1 &&
+        selectedItems.length == 1 &&
+        singleSelectionInCurrentTab;
+    final singleFile = single && !selectedItems.first.isDir;
+    final singleFolder = single && selectedItems.first.isDir;
+    final folderDocProviderMounted =
+        singleFolder && isFolderMounted(selectedItems.first);
+    // Export-to-device and expose-as-document-provider only make sense for
+    // a real encrypted vault: decoy mode's "container" is just a plain
+    // local-storage folder (see LocalStorageContainerX.isLocalStorage), so
+    // both actions are hidden there rather than threaded through a second
+    // no-op implementation.
+    final hideVaultOnlyActions =
+        hideVaultOnlyActionsOverride ?? container.isLocalStorage;
+    final singleArchiveSelected =
+        singleFile &&
+        ArchiveService.isOpenableAsArchive(
+          ArchiveService.splitPartExtension(selectedItems.first.name) ??
+              (selectedItems.first.name.contains('.')
+                  ? selectedItems.first.name.split('.').last.toLowerCase()
+                  : ''),
+        );
+    final showPinOption =
+        allowPinBookmarkActions && selectedItems.any((item) => !isPinned(item));
+    final showUnpinOption =
+        allowPinBookmarkActions && selectedItems.any((item) => isPinned(item));
+    final showBookmarkOption =
+        allowPinBookmarkActions &&
+        selectedItems.any((item) => !isBookmark(item));
+    final showUnbookmarkOption =
+        allowPinBookmarkActions &&
+        selectedItems.any((item) => isBookmark(item));
+    final showEncryptOption = selectedItems.any(
+      (item) => !item.isDir && !isAppEncryptedFileName(item.name),
+    );
+    final showDecryptOption = selectedItems.any(
+      (item) => !item.isDir && isAppEncryptedFileName(item.name),
+    );
+    // Vault items (passwords, secure notes, etc.) are internal structured
+    // records rather than real files -- like doOpenWithApp/doRename below,
+    // they're excluded from what counts as "shareable". Unlike those two,
+    // a vault item mixed into a larger selection doesn't hide the option
+    // entirely: it's still shown as long as at least one real file or
+    // folder qualifies. onShare (_shareSelected in file_browser_screen.dart)
+    // silently skips the rest -- sharing is inherently a partial,
+    // best-effort action (this mirrors how a plain Android file manager's
+    // own multi-select share behaves), unlike renaming or opening a
+    // single specific file.
+    bool isVaultItemFile(RawEntry item) {
+      if (item.isDir) return false;
+      final parts = item.name.split('.');
+      final ext = parts.length > 1 ? parts.last.toLowerCase() : '';
+      return VaultItemType.values.any((t) => t.name.toLowerCase() == ext);
+    }
+
+    // A folder is shareable (it goes out as a zip) in every kind of
+    // container, and isVaultItemFile is already false for folders.
+    final showShareOption =
+        allowShareAction &&
+        !isInsideArchive &&
+        selectedItems.any((item) => !isVaultItemFile(item));
+    final showEditImageOption =
+        singleFile && MediaViewerConstants.isImage(selectedItems.first.name);
+    final showEditVideoOption =
+        singleFile && MediaViewerConstants.isVideo(selectedItems.first.name);
+    final showEditAudioOption =
+        onEditAudio != null &&
+        singleFile &&
+        MediaViewerConstants.isAudio(selectedItems.first.name);
+    final totalBytes = selectedTotalBytes;
+    final isPending = hasPendingFolderSizes;
+    final sizeLabel = isPending
+        ? (totalBytes > 0
+              ? context.l10n.sizeCalculatingWithBytesLabel(
+                  formatBytes(totalBytes),
+                )
+              : context.l10n.sizeCalculatingLabel)
+        : formatBytes(totalBytes);
+
+    final VoidCallback? goToLocation =
+        single && searchActive && !isInsideArchive ? onGoToLocation : null;
+
+    final VoidCallback? copyPath =
+        single && !isInsideArchive && onCopyPath != null
+        ? () {
+            final entry = selectedItems.first;
+            onExitSelectionMode();
+            onCopyPath(entry);
+          }
+        : null;
+
+    void doShowFileInfo() {
+      final entry = selectedItems.first;
+      onExitSelectionMode();
+      FileInfoSheet.show(
+        context,
+        container: container,
+        entry: entry,
+        currentDirPath: currentDirPath,
+      );
+    }
+
+    void doRename() {
+      final entries = selectedItems.toList();
+      for (final entry in entries) {
+        final parts = entry.name.split('.');
+        final ext = parts.length > 1 ? parts.last.toLowerCase() : '';
+        if (VaultItemType.values.any((t) => t.name.toLowerCase() == ext)) {
+          onSetStatus(
+            context.l10n.editSecureItemsToRenameMessage,
+            error: false,
+          );
+          onExitSelectionMode();
+          return;
+        }
+      }
+      unawaited(
+        BrowserDialogs.showRename(
+          context,
+          container: container,
+          oldEntries: entries,
+          existingEntries: allItems,
+          currentDirPath: currentDirPath,
+          onSuccess: () => onDirectoryReload(currentDirPath),
+          readOnly: isReadOnly,
+        ),
+      );
+      onExitSelectionMode();
+    }
+
+    Future<void> doOpenWithApp() async {
+      final entry = selectedItems.first;
+      final path = currentDirPath.isEmpty
+          ? entry.name
+          : '$currentDirPath/${entry.name}';
+      final parts = entry.name.split('.');
+      final ext = parts.length > 1 ? parts.last.toLowerCase() : '';
+      onExitSelectionMode();
+      if (VaultItemType.values.any((t) => t.name.toLowerCase() == ext)) {
+        onSetStatus(
+          context.l10n.vaultItemsCannotBeOpenedExternallyMessage,
+          error: true,
+        );
+        return;
+      }
+      final settings = await appSettingsService.loadSettings();
+      if (context.mounted) {
+        await onShowOpenWithDialog(entry.name, path, ext, settings);
+      }
+    }
+
+    Future<void> doToggleDocProvider() async {
+      final entry = selectedItems.first;
+      onExitSelectionMode();
+      if (folderDocProviderMounted) {
+        await onShowFolderDocumentProviderSheet(entry);
+      } else {
+        await onToggleFolderDocumentProvider(entry);
+      }
+    }
+
+    Future<void> doEditImage() async {
+      final entry = selectedItems.first;
+      final path = currentDirPath.isEmpty
+          ? entry.name
+          : '$currentDirPath/${entry.name}';
+      onExitSelectionMode();
+      await onEditImage(entry.name, path);
+    }
+
+    Future<void> doEditVideo() async {
+      final entry = selectedItems.first;
+      final path = currentDirPath.isEmpty
+          ? entry.name
+          : '$currentDirPath/${entry.name}';
+      onExitSelectionMode();
+      await onEditVideo(path);
+    }
+
+    Future<void> doEditAudio() async {
+      final entry = selectedItems.first;
+      final path = currentDirPath.isEmpty
+          ? entry.name
+          : '$currentDirPath/${entry.name}';
+      onExitSelectionMode();
+      await onEditAudio?.call(path);
+    }
+
+    void doSyncSettings() {
+      final entry = selectedItems.first;
+      onExitSelectionMode();
+      onSyncSettings?.call(entry);
+    }
+
+    if (!isLandscape) {
+      return SelectionAppBar(
+        selectedCount: selectedCount,
+        selectionLabel: sizeLabel,
+        singleSelected: single,
+        singleFileSelected: singleFile,
+        singleFolderSelected: singleFolder,
+        singleArchiveSelected: singleArchiveSelected,
+        folderDocumentProviderMounted: folderDocProviderMounted,
+        hideVaultOnlyActions: hideVaultOnlyActions,
+        isInsideArchive: isInsideArchive,
+        readOnly: isReadOnly,
+        showPinOption: showPinOption,
+        showUnpinOption: showUnpinOption,
+        onPin: () => onTogglePin(pin: true),
+        onUnpin: () => onTogglePin(pin: false),
+        showBookmarkOption: showBookmarkOption,
+        showUnbookmarkOption: showUnbookmarkOption,
+        onBookmark: () => onToggleBookmark(bookmark: true),
+        onUnbookmark: () => onToggleBookmark(bookmark: false),
+        showEncryptOption: showEncryptOption,
+        showDecryptOption: showDecryptOption,
+        onEncrypt: onEncryptSelected,
+        onDecrypt: onDecryptSelected,
+        onClose: onExitSelectionMode,
+        onSelectAll: onSelectAll,
+        onRename: doRename,
+        allowRenameAction: allowRenameAction,
+        onCopy: onCopy,
+        onCut: onCut,
+        onOpenInNewTab: onOpenInNewTab,
+        onExport: onExport,
+        allowExportAction: allowExportAction,
+        allowExtractAction: allowExtractAction,
+        onCompressSelection: onCompressSelected,
+        allowCompressAction: allowCompressAction,
+        onExtractSelectedArchive: onExtractSelectedArchive,
+        onDelete: onDelete,
+        onOpenWithApp: doOpenWithApp,
+        showShareOption: showShareOption,
+        onShare: onShare,
+        onToggleDocumentProvider: doToggleDocProvider,
+        onSyncSettings: doSyncSettings,
+        onFileInfo: doShowFileInfo,
+        onGoToLocation: goToLocation,
+        onCopyPath: copyPath,
+        showEditImageOption: showEditImageOption,
+        onEditImage: doEditImage,
+        showEditVideoOption: showEditVideoOption,
+        onEditVideo: doEditVideo,
+        showEditAudioOption: showEditAudioOption,
+        onEditAudio: doEditAudio,
+        itemActionOrder: toolbarConfig.itemActionsOrder,
+        hiddenItemActions: toolbarConfig.hiddenItemActions,
+      );
+    }
+    return SelectionAppBarWide(
+      selectedCount: selectedCount,
+      selectionLabel: sizeLabel,
+      singleFileSelected: singleFile,
+      singleFolderSelected: singleFolder,
+      singleArchiveSelected: singleArchiveSelected,
+      folderDocumentProviderMounted: folderDocProviderMounted,
+      hideVaultOnlyActions: hideVaultOnlyActions,
+      isInsideArchive: isInsideArchive,
+      readOnly: isReadOnly,
+      showPinOption: showPinOption,
+      showUnpinOption: showUnpinOption,
+      showBookmarkOption: showBookmarkOption,
+      showUnbookmarkOption: showUnbookmarkOption,
+      showEncryptOption: showEncryptOption,
+      showDecryptOption: showDecryptOption,
+      showActionBar: toolbarConfig.bottomSelectionBar ? false : showActionBar,
+      visibleActions: toolbarConfig.visible,
+      actionBuilders: actionBuilders,
+      onClose: onExitSelectionMode,
+      onSelectAll: onSelectAll,
+      onRename: doRename,
+      allowRenameAction: allowRenameAction,
+      onCopy: onCopy,
+      onCut: onCut,
+      onOpenInNewTab: onOpenInNewTab,
+      onExport: onExport,
+      allowExportAction: allowExportAction,
+      allowExtractAction: allowExtractAction,
+      onCompressSelection: onCompressSelected,
+      allowCompressAction: allowCompressAction,
+      onExtractSelectedArchive: onExtractSelectedArchive,
+      onDelete: onDelete,
+      onOpenWithApp: doOpenWithApp,
+      showShareOption: showShareOption,
+      onShare: onShare,
+      onToggleDocumentProvider: doToggleDocProvider,
+      onSyncSettings: doSyncSettings,
+      onPin: () => onTogglePin(pin: true),
+      onUnpin: () => onTogglePin(pin: false),
+      onBookmark: () => onToggleBookmark(bookmark: true),
+      onUnbookmark: () => onToggleBookmark(bookmark: false),
+      onEncrypt: onEncryptSelected,
+      onDecrypt: onDecryptSelected,
+      onFileInfo: doShowFileInfo,
+      onGoToLocation: goToLocation,
+      onCopyPath: copyPath,
+      showEditImageOption: showEditImageOption,
+      onEditImage: doEditImage,
+      showEditVideoOption: showEditVideoOption,
+      onEditVideo: doEditVideo,
+      showEditAudioOption: showEditAudioOption,
+      onEditAudio: doEditAudio,
+      itemActionOrder: toolbarConfig.itemActionsOrder,
+      hiddenItemActions: toolbarConfig.hiddenItemActions,
+    );
+  }
+
+  final hasParents = pathStack.length > 1;
+  // At the storage-location root the title is normally just a label (or the
+  // storage switcher). Forward history lives in the path menu, so with
+  // history to walk forward through the title becomes that menu instead.
+  final showsPathMenu = hasParents || forwardStack.isNotEmpty;
+
+  Widget buildReadOnlyBadge() {
+    return Tooltip(
+      message: context.l10n.mountedReadOnlyTooltip,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.lock_outline_rounded,
+              size: 11,
+              color: cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: 3),
+            Text(
+              context.l10n.readOnlyBadgeAbbreviation,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _buildLeftTruncatedPath(
+    String rootName,
+    List<PathSegment> stack,
+    double maxWidth,
+    TextStyle style,
+  ) {
+    if (stack.length == 1) return rootName;
+    final allLabels = [rootName, ...stack.sublist(1).map((s) => s.label)];
+    final fullPath = allLabels.join('/');
+    double measure(String text) {
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        maxLines: 1,
+        textDirection: TextDirection.ltr,
+      )..layout();
+      return painter.width;
+    }
+
+    if (measure(fullPath) <= maxWidth) {
+      return fullPath;
+    }
+    int low = 0;
+    int high = fullPath.length - 1;
+    int bestK = fullPath.length - 1;
+    while (low <= high) {
+      final mid = (low + high) ~/ 2;
+      final candidate = '…${fullPath.substring(mid)}';
+      if (measure(candidate) <= maxWidth) {
+        bestK = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return '…${fullPath.substring(bestK)}';
+  }
+
+  Widget buildTitleHeader() {
+    final textTheme = Theme.of(context).textTheme;
+    final style =
+        textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold) ??
+        const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+    if (!showsPathMenu) {
+      if (onOpenStorageSwitcher == null) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  container.displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: style,
+                ),
+              ),
+              if (isReadOnly) ...[
+                const SizedBox(width: 8),
+                buildReadOnlyBadge(),
+              ],
+            ],
+          ),
+        );
+      }
+
+      return InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onOpenStorageSwitcher,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  container.displayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: style,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Icon(Icons.arrow_drop_down_rounded, size: 22, color: cs.primary),
+              if (isReadOnly) ...[
+                const SizedBox(width: 8),
+                buildReadOnlyBadge(),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final reservedSpace = 22.0 + (isReadOnly ? 46.0 : 0.0) + 12.0;
+        final availableWidth = (constraints.maxWidth - reservedSpace).clamp(
+          60.0,
+          2000.0,
+        );
+        final displayTitle = _buildLeftTruncatedPath(
+          container.displayName,
+          pathStack,
+          availableWidth,
+          style,
+        );
+        return MenuAnchor(
+          builder: (ctx, controller, child) => InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      displayTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: style,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_drop_down_rounded,
+                    size: 22,
+                    color: cs.primary,
+                  ),
+                  if (isReadOnly) ...[
+                    const SizedBox(width: 6),
+                    buildReadOnlyBadge(),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          menuChildren: [
+            for (int i = 0; i < pathStack.length; i++) ...[
+              (() {
+                final segment = pathStack[i];
+                final isCurrent = i == pathStack.length - 1;
+                final isRoot = i == 0;
+                final label = isRoot ? container.displayName : segment.label;
+                final IconData icon = isRoot
+                    ? Icons.home_rounded
+                    : (segment.isArchiveRoot
+                          ? Icons.archive_rounded
+                          : Icons.folder_rounded);
+                final Color iconColor = isRoot
+                    ? cs.primary
+                    : (segment.isArchiveRoot
+                          ? const Color(0xFFFF8F00)
+                          : cs.secondary);
+                return MenuItemButton(
+                  onPressed: isCurrent ? null : () => onJumpTo(i),
+                  leadingIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (i > 0) SizedBox(width: (i - 1) * 12.0),
+                      Icon(
+                        icon,
+                        size: 18,
+                        color: isCurrent ? cs.primary : iconColor,
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: isCurrent
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isCurrent ? cs.primary : cs.onSurface,
+                    ),
+                  ),
+                );
+              })(),
+            ],
+            for (int f = 0; f < forwardStack.length; f++)
+              MenuItemButton(
+                onPressed: onForwardTo == null ? null : () => onForwardTo(f),
+                leadingIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(width: (pathStack.length + f - 1) * 12.0),
+                    Icon(
+                      forwardStack[f].isArchiveRoot
+                          ? Icons.archive_rounded
+                          : Icons.folder_rounded,
+                      size: 18,
+                      color: cs.onSurfaceVariant.withValues(alpha: 0.55),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  forwardStack[f].label,
+                  style: TextStyle(
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+            // At the root the title tap used to open the storage switcher;
+            // keep that reachable now that it opens the path menu instead.
+            if (!hasParents && onOpenStorageSwitcher != null) ...[
+              const Divider(height: 8),
+              MenuItemButton(
+                onPressed: onOpenStorageSwitcher,
+                leadingIcon: Icon(
+                  Icons.storage_rounded,
+                  size: 18,
+                  color: cs.onSurfaceVariant,
+                ),
+                child: Text(context.l10n.storageLocationsTitle),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  return AppBar(
+    leading: Builder(
+      builder: (ctx) {
+        final scaffold = Scaffold.maybeOf(ctx);
+        final fullScreenDrawer = FullScreenDragDrawerScope.maybeOf(ctx);
+
+        if (fullScreenDrawer != null || scaffold?.hasDrawer == true) {
+          // In single-location mode there is no tab strip to return to the
+          // Dashboard, so the toolbar back action walks up folders and then
+          // returns to the Dashboard at the container root. The drawer remains
+          // available through its edge gesture.
+          if (onBackAtRoot != null) {
+            return IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: Theme.of(ctx).appBarTheme.foregroundColor,
+              ),
+              tooltip: ctx.l10n.backToDashboardTooltip,
+              onPressed: () {
+                if (pathStack.length > 1 && onNavigateUp != null) {
+                  onNavigateUp();
+                } else {
+                  onBackAtRoot();
+                }
+              },
+            );
+          }
+
+          // With tabs enabled, the drawer remains the primary leading action.
+          return IconButton(
+            icon: Icon(
+              Icons.menu_rounded,
+              color: Theme.of(ctx).appBarTheme.foregroundColor,
+            ),
+            tooltip: ctx.l10n.storageLocationsTitle,
+            onPressed: () {
+              if (fullScreenDrawer != null) {
+                fullScreenDrawer.openDrawer();
+              } else {
+                scaffold!.openDrawer();
+              }
+            },
+          );
+        }
+
+        if (showBackButton) {
+          return IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(ctx).appBarTheme.foregroundColor,
+            ),
+            tooltip: ctx.l10n.backToDashboardTooltip,
+            onPressed: () {
+              if (pathStack.length > 1 && onNavigateUp != null) {
+                onNavigateUp();
+              } else if (onBackAtRoot != null) {
+                onBackAtRoot();
+              } else {
+                Navigator.of(ctx).pop();
+              }
+            },
+          );
+        }
+
+        if (onOpenStorageSwitcher != null) {
+          return IconButton(
+            icon: Icon(
+              Icons.menu_rounded,
+              color: Theme.of(ctx).appBarTheme.foregroundColor,
+            ),
+            tooltip: ctx.l10n.storageLocationsTitle,
+            onPressed: onOpenStorageSwitcher,
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    ),
+    automaticallyImplyLeading: false,
+    title: (wrapTitle ?? (Widget w) => w)(
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildTitleHeader(),
+          if (toolbarConfig.showStatsBar)
+            buildBrowserAppBarStatsSubtitle(
+              context,
+              dirCount: dirCount,
+              fileCount: fileCount,
+              isFiltered: isFiltered,
+              freeSpace: freeSpace,
+            ),
+        ],
+      ),
+    ),
+    actions: [
+      const AppBarTransferButton(),
+      if (isLandscape && showActionBar) ...[
+        ...toolbarConfig.visible
+            .where((action) => actionBuilders.containsKey(action))
+            .map((action) => actionBuilders[action]!(context)),
+      ],
+    ],
+  );
+}
+
+Widget buildBrowserAppBarStatsSubtitle(
+  BuildContext context, {
+  required int dirCount,
+  required int fileCount,
+  required bool isFiltered,
+  required int? freeSpace,
+}) {
+  final cs = Theme.of(context).colorScheme;
+  final textTheme = Theme.of(context).textTheme;
+  final style = textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant);
+  final parts = <String>[
+    if (dirCount > 0) context.l10n.statsFolderCount(dirCount),
+    if (fileCount > 0) context.l10n.statsFileCount(fileCount),
+    if (dirCount == 0 && fileCount == 0) ...[
+      context.l10n.statsFolderCount(0),
+      context.l10n.statsFileCount(0),
+    ],
+    if (freeSpace != null && freeSpace >= 0)
+      context.l10n.freeSpaceLabel(formatBytes(freeSpace)),
+    if (isFiltered) context.l10n.filteredLabel,
+  ];
+  return Text(
+    parts.join(' · '),
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: style,
+  );
+}

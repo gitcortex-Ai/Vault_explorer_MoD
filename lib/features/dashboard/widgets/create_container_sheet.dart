@@ -1,0 +1,1411 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
+import 'package:vaultexplorer/core/theme/app_theme.dart';
+import 'package:vaultexplorer/core/utils/entropy_pool.dart';
+import 'package:vaultexplorer/core/utils/sensitive_clipboard.dart';
+import 'package:vaultexplorer/core/utils/validation_utils.dart';
+import 'package:vaultexplorer/core/widgets/common_widgets.dart';
+import 'package:vaultexplorer/core/widgets/container_format_icon.dart';
+import 'package:vaultexplorer/core/widgets/crypto_forms/entropy_collector.dart';
+import 'package:vaultexplorer/data/models/container_format.dart';
+import 'package:vaultexplorer/data/models/crypto_algorithms.dart';
+import 'package:vaultexplorer/data/services/session_lock_controller.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/container_wizard_shared.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/create_container_controller.dart';
+import 'package:vaultexplorer/features/composite/presentation/composite_create_sheet.dart';
+import 'package:vaultexplorer/features/dashboard/widgets/quick_password_generator_sheet.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area.dart';
+import 'package:vaultexplorer/core/theme/skin/skin_area_scope.dart';
+
+enum _WizStep { basics, security, advanced, hiddenVolume, randomness, review }
+
+class CreateContainerSheet extends ConsumerStatefulWidget {
+  const CreateContainerSheet({super.key});
+
+  @override
+  ConsumerState<CreateContainerSheet> createState() => _CreateContainerSheetState();
+}
+
+class _CreateContainerSheetState extends ConsumerState<CreateContainerSheet> {
+  final _nameCtrl = TextEditingController(text: 'vault');
+
+  Future<T> _suppressLock<T>(Future<T> Function() action) =>
+      ref.read(sessionLockControllerProvider).withLockSuppression(action);
+  final _sizeCtrl = TextEditingController(text: '100');
+  final _passwordCtrl = TextEditingController();
+  final _confirmPasswordCtrl = TextEditingController();
+  final _pimCtrl = TextEditingController();
+
+  final _hiddenPasswordCtrl = TextEditingController();
+  final _hiddenConfirmPasswordCtrl = TextEditingController();
+  final _hiddenPimCtrl = TextEditingController();
+  final _hiddenSizeCtrl = TextEditingController(text: '10');
+
+  final _folderVaultPasswordCtrl = TextEditingController();
+  final _folderVaultConfirmCtrl = TextEditingController();
+
+  bool _obscure = true;
+  bool _confirmObscure = true;
+  bool _pimObscure = true;
+  bool _hiddenObscure = true;
+  bool _hiddenConfirmObscure = true;
+  bool _hiddenPimObscure = true;
+  bool _folderVaultObscure = true;
+  bool _folderVaultConfirmObscure = true;
+
+  /// Touch-movement randomness gathered by the "Add randomness" step. Owned
+  /// here (not by the step widget) so it survives stepping back and forth.
+  final _entropyPool = EntropyPool();
+  bool _entropySatisfied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _entropyPool.addListener(_onEntropyChanged);
+  }
+
+  // The pool notifies on every sample; only a change of "may continue" needs
+  // the wizard (its Next button) to rebuild.
+  void _onEntropyChanged() {
+    final satisfied = _entropyPool.isSatisfied;
+    if (satisfied != _entropySatisfied && mounted) {
+      setState(() => _entropySatisfied = satisfied);
+    }
+  }
+
+  @override
+  void dispose() {
+    _entropyPool.removeListener(_onEntropyChanged);
+    _entropyPool.dispose();
+    _nameCtrl.dispose();
+    _sizeCtrl.dispose();
+    _passwordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
+    _pimCtrl.dispose();
+    _hiddenPasswordCtrl.dispose();
+    _hiddenConfirmPasswordCtrl.dispose();
+    _hiddenPimCtrl.dispose();
+    _hiddenSizeCtrl.dispose();
+    _folderVaultPasswordCtrl.dispose();
+    _folderVaultConfirmCtrl.dispose();
+    super.dispose();
+  }
+
+  List<String> _availableFileSystems(CreateFormat format) => availableFileSystemsForFormat(format);
+  List<CipherAlgo> _cipherChoices(CreateFormat format) => cipherChoicesForFormat(format);
+  List<HashAlgo> _hashChoices(CreateFormat format) => hashChoicesForFormat(format);
+
+  String _folderVaultFormatDisplayLabel(String format) => switch (format) {
+        'cryptomator' => 'Cryptomator',
+        'gocryptfs' => 'Gocryptfs',
+        'cryfs' => 'CryFS',
+        _ => format,
+      };
+
+  String _gocryptfsCipherDisplayLabel(String cipher) => switch (cipher) {
+        'aes-256-gcm' => 'AES-256-GCM',
+        'xchacha20-poly1305' => 'XChaCha20-Poly1305',
+        _ => cipher,
+      };
+
+  String _cryfsCipherDisplayLabel(String cipher) => switch (cipher) {
+        'xchacha20-poly1305' => 'XChaCha20-Poly1305',
+        'aes-256-gcm' => 'AES-256-GCM',
+        _ => cipher,
+      };
+
+  String _cryfsBlockSizeDisplayLabel(int blockSize, BuildContext context) => switch (blockSize) {
+        const (4 * 1024) => '4 KiB',
+        const (8 * 1024) => '8 KiB',
+        const (16 * 1024) => '16 KiB',
+        const (32 * 1024) => context.l10n.cryfsBlockSizeDefaultLabel,
+        const (64 * 1024) => '64 KiB',
+        const (128 * 1024) => '128 KiB',
+        const (512 * 1024) => '512 KiB',
+        const (1024 * 1024) => '1 MiB',
+        const (4 * 1024 * 1024) => '4 MiB',
+        _ => '$blockSize B',
+      };
+
+   Future<void> _create(CreateContainerState state) async {
+    final l10n = context.l10n;
+    // A copy of the pool's bytes for this attempt; wiped as soon as the call
+    // returns. The pool itself is kept so a retry after a failure doesn't
+    // make the user move their finger again.
+    final userEntropy = _entropyPool.takeBytes();
+    final bool ok;
+    try {
+      ok = await _suppressLock(
+        () => state.isFolderVault
+            ? ref.read(createContainerProvider.notifier).createFolderVault(
+                  password: _folderVaultPasswordCtrl.text,
+                  confirmPassword: _folderVaultConfirmCtrl.text,
+                  l10n: l10n,
+                  userEntropy: userEntropy,
+                )
+            : ref.read(createContainerProvider.notifier).createContainerFile(
+                  nameText: _nameCtrl.text,
+                  sizeText: _sizeCtrl.text,
+                  passwordText: _passwordCtrl.text,
+                  confirmPasswordText: _confirmPasswordCtrl.text,
+                  pimText: _pimCtrl.text,
+                  hiddenPasswordText: _hiddenPasswordCtrl.text,
+                  hiddenConfirmPasswordText: _hiddenConfirmPasswordCtrl.text,
+                  hiddenPimText: _hiddenPimCtrl.text,
+                  hiddenSizeText: _hiddenSizeCtrl.text,
+                  l10n: l10n,
+                  userEntropy: userEntropy,
+                ),
+      );
+    } finally {
+      userEntropy.fillRange(0, userEntropy.length, 0);
+    }
+
+    if (ok && mounted) {
+      Navigator.pop(context);
+      showAppSnackBar(
+        context,
+        message: state.isFolderVault
+            ? l10n.vaultCreatedSuccessfully
+            : l10n.containerFileCreatedSuccessfully,
+        tone: AppBannerTone.success,
+      );
+    }
+  }
+
+  Future<void> _openPasswordGenerator({
+    bool isFolderVault = false,
+    bool isHidden = false,
+  }) async {
+    final password = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+      ),
+      builder: (ctx) => const QuickPasswordGeneratorSheet(),
+    );
+
+    if (password != null && mounted) {
+      setState(() {
+        if (isHidden) {
+          _hiddenPasswordCtrl.text = password;
+          _hiddenConfirmPasswordCtrl.text = password;
+          _hiddenObscure = false;
+          _hiddenConfirmObscure = false;
+        } else if (isFolderVault) {
+          _folderVaultPasswordCtrl.text = password;
+          _folderVaultConfirmCtrl.text = password;
+          _folderVaultObscure = false;
+          _folderVaultConfirmObscure = false;
+        } else {
+          _passwordCtrl.text = password;
+          _confirmPasswordCtrl.text = password;
+          _obscure = false;
+          _confirmObscure = false;
+        }
+      });
+      await ref.read(sensitiveClipboardProvider).copy(password);
+    }
+  }
+
+  bool _hasAdvancedOptions(CreateContainerState state) =>
+      !(state.isFolderVault && state.folderVaultFormat == 'cryptomator');
+
+  bool _hasHiddenVolumeStep(CreateContainerState state) =>
+      !state.isFolderVault &&
+      state.format == CreateFormat.veracrypt &&
+      state.enableHiddenVolume;
+
+  List<_WizStep> _stepKinds(CreateContainerState state) => [
+        _WizStep.basics,
+        _WizStep.security,
+        if (_hasAdvancedOptions(state)) _WizStep.advanced,
+        if (_hasHiddenVolumeStep(state)) _WizStep.hiddenVolume,
+        _WizStep.randomness,
+        _WizStep.review,
+      ];
+
+  bool _canProceedBasicInfo(CreateContainerState state) => state.isFolderVault
+      ? state.folderVaultUri != null
+      : (_nameCtrl.text.trim().isNotEmpty && (double.tryParse(_sizeCtrl.text) ?? 0) > 0);
+
+  bool _canProceedSecurity(CreateContainerState state) => state.isFolderVault
+      ? (_folderVaultPasswordCtrl.text.isNotEmpty &&
+          _folderVaultPasswordCtrl.text == _folderVaultConfirmCtrl.text)
+      : ((_passwordCtrl.text.isNotEmpty || state.outerKeyfiles.isNotEmpty) &&
+          (_passwordCtrl.text.isEmpty ||
+              _passwordCtrl.text == _confirmPasswordCtrl.text));
+
+  HiddenVolumeValidation? _hiddenVolumeValidationResult(CreateContainerState state) {
+    if (!_hasHiddenVolumeStep(state)) return null;
+    return computeHiddenVolumeValidation(
+      sizeText: _sizeCtrl.text,
+      sizeUnit: state.sizeUnit,
+      pimText: _pimCtrl.text,
+      hiddenPimText: _hiddenPimCtrl.text,
+      hiddenSizeText: _hiddenSizeCtrl.text,
+      hiddenSizeUnit: state.hiddenSizeUnit,
+      outerPassword: _passwordCtrl.text,
+      hiddenPassword: _hiddenPasswordCtrl.text,
+      hasHiddenKeyfiles: state.hiddenKeyfiles.isNotEmpty,
+      outerKeyfileUris: state.outerKeyfiles.map((k) => k.uri).toSet(),
+      hiddenKeyfileUris: state.hiddenKeyfiles.map((k) => k.uri).toSet(),
+      l10n: context.l10n,
+    );
+  }
+
+  bool _canProceedHiddenVolume(CreateContainerState state) {
+    if (!_hasHiddenVolumeStep(state)) return true;
+    final validation = _hiddenVolumeValidationResult(state);
+    return validation != null && validation.isValid;
+  }
+
+  bool _canProceedFor(_WizStep kind, CreateContainerState state) => switch (kind) {
+        _WizStep.basics => _canProceedBasicInfo(state),
+        _WizStep.security => _canProceedSecurity(state),
+        _WizStep.advanced => true,
+        _WizStep.hiddenVolume => _canProceedHiddenVolume(state),
+        _WizStep.randomness => _entropyPool.isSatisfied,
+        _WizStep.review => true,
+      };
+
+  String _stepTitle(_WizStep kind) => switch (kind) {
+        _WizStep.basics => context.l10n.wizardStepBasicInfoTitle,
+        _WizStep.security => context.l10n.securityCredentialsSectionHeader,
+        _WizStep.advanced => context.l10n.compositeEncryptionAndFilesystemHeader,
+        _WizStep.hiddenVolume => context.l10n.hiddenVolumeHeader,
+        _WizStep.randomness => context.l10n.entropyStepTitle,
+        _WizStep.review => context.l10n.wizardStepReviewTitle,
+      };
+
+  void _goNext(CreateContainerState state, List<_WizStep> kinds) {
+    final safe = state.currentStep.clamp(0, kinds.length - 1);
+    if (safe == kinds.length - 1) {
+      _create(state);
+    } else {
+      ref.read(createContainerProvider.notifier).setCurrentStep(safe + 1);
+    }
+  }
+
+  void _goBackOrExit(CreateContainerState state) {
+    if (state.currentStep > 0) {
+      ref.read(createContainerProvider.notifier).setCurrentStep(state.currentStep - 1);
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(createContainerProvider);
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+    final isShortScreen = MediaQuery.sizeOf(context).height < 520;
+
+    final kinds = _stepKinds(state);
+    final safeStep = state.currentStep.clamp(0, kinds.length - 1);
+    final currentKind = kinds[safeStep];
+    final isLastStep = safeStep == kinds.length - 1;
+
+    final inputDecorationTheme = InputDecorationTheme(
+      filled: true,
+      fillColor: cs.surfaceContainerHighest,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: isShortScreen ? 11 : 16,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+    );
+
+    return Theme(
+      data: Theme.of(context).copyWith(inputDecorationTheme: inputDecorationTheme),
+      child: WizardScaffold(
+        appBarTitle: state.isFolderVault
+            ? l10n.createEncryptedVaultTitle
+            : l10n.createEncryptedContainerTitle,
+        currentStep: safeStep,
+        totalSteps: kinds.length,
+        stepTitle: _stepTitle(currentKind),
+        stepContent: _stepContent(currentKind, state, cs, textTheme, isShortScreen),
+        busy: state.loading,
+        busyMessage: state.isFolderVault
+            ? l10n.vaultCreationInProgressWait
+            : l10n.containerCreationInProgressWait,
+        canProceed: _canProceedFor(currentKind, state),
+        isLastStep: isLastStep,
+        nextLabel: isLastStep
+            ? (state.isFolderVault ? l10n.createVaultButton : l10n.createContainerButton)
+            : l10n.wizardNextButton,
+        onNext: () => _goNext(state, kinds),
+        onBackOrExit: () => _goBackOrExit(state),
+        errorMessage: state.error,
+      ),
+    );
+  }
+
+  Widget _stepContent(
+    _WizStep kind,
+    CreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) =>
+      switch (kind) {
+        _WizStep.basics => _buildBasicsStep(state, cs, textTheme, isShortScreen),
+        _WizStep.security => _buildSecurityStep(state, cs, textTheme, isShortScreen),
+        _WizStep.advanced => _buildAdvancedStep(state, cs, textTheme),
+        _WizStep.hiddenVolume => _buildHiddenVolumeStep(state, cs, textTheme, isShortScreen),
+        _WizStep.randomness => EntropyCollector(pool: _entropyPool),
+        _WizStep.review => _buildReviewStep(state, cs, textTheme),
+      };
+
+  Widget _buildBasicsStep(
+    CreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) {
+    final l10n = context.l10n;
+    final rowGap = isShortScreen ? 6.0 : 12.0;
+    final sectionGap = isShortScreen ? 14.0 : 22.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.wizardCreateTypePrompt,
+          style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        SizedBox(height: rowGap),
+        Row(
+          children: [
+            Expanded(
+              child: WizardSelectionCard(
+                icon: Icons.folder_zip_rounded,
+                title: l10n.vaultKindContainerFile,
+                selected: !state.isFolderVault,
+                enabled: !state.loading,
+                onTap: () => ref.read(createContainerProvider.notifier).setVaultKind(false),
+              ),
+            ),
+            SizedBox(width: rowGap),
+            Expanded(
+              child: WizardSelectionCard(
+                icon: Icons.folder_shared_rounded,
+                title: l10n.vaultKindFolderVault,
+                selected: state.isFolderVault,
+                enabled: !state.loading,
+                onTap: () => ref.read(createContainerProvider.notifier).setVaultKind(true),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: sectionGap),
+        Text(
+          state.isFolderVault ? l10n.vaultFormatLabel : l10n.containerFormatLabel,
+          style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        SizedBox(height: rowGap),
+        state.isFolderVault
+            ? _buildFolderVaultFormatCards(state)
+            : _buildContainerFormatCards(state),
+        SizedBox(height: sectionGap),
+        state.isFolderVault
+            ? _buildFolderVaultBasicInfo(state, cs, textTheme)
+            : _buildContainerBasicInfo(state, cs, textTheme, isShortScreen),
+        if (!state.isFolderVault && state.format == CreateFormat.veracrypt) ...[
+          const SizedBox(height: 16),
+          _buildCompositeContainerHint(cs, textTheme),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCompositeContainerHint(ColorScheme cs, TextTheme textTheme) {
+    final l10n = context.l10n;
+    return Card(
+      elevation: 0,
+      color: cs.surfaceContainerHigh,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => SkinAreaScope(area: SkinArea.dashboard, child: CompositeCreateSheet(
+              // This wizard was itself pushed on top of the dashboard, so
+              // popping it here is enough to land back there — same as
+              // creating a normal (non-composite) container.
+              onCreated: () {
+                if (mounted) Navigator.of(context).pop();
+              },
+            )),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Icon(Icons.layers_rounded, size: 22, color: cs.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.createCompositeHintPrompt,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                     Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              l10n.createCompositeHintAction,
+                              style: textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: cs.primary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: cs.tertiaryContainer,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              l10n.badgeExperimental,
+                              style: textTheme.labelSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: cs.onTertiaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_rounded, size: 18, color: cs.primary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContainerFormatCards(CreateContainerState state) {
+    return Row(
+      children: [
+        Expanded(
+          child: WizardSelectionCard(
+            format: ContainerFormat.veracrypt,
+            title: CreateFormat.veracrypt.label,
+            selected: state.format == CreateFormat.veracrypt,
+            enabled: !state.loading,
+            onTap: () =>
+                ref.read(createContainerProvider.notifier).setFormat(CreateFormat.veracrypt),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: WizardSelectionCard(
+            format: ContainerFormat.luks1,
+            title: CreateFormat.luks1.label,
+            selected: state.format == CreateFormat.luks1,
+            enabled: !state.loading,
+            onTap: () => ref.read(createContainerProvider.notifier).setFormat(CreateFormat.luks1),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: WizardSelectionCard(
+            format: ContainerFormat.luks2,
+            title: CreateFormat.luks2.label,
+            selected: state.format == CreateFormat.luks2,
+            enabled: !state.loading,
+            onTap: () => ref.read(createContainerProvider.notifier).setFormat(CreateFormat.luks2),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFolderVaultFormatCards(CreateContainerState state) {
+    return Row(
+      children: [
+        Expanded(
+          child: WizardSelectionCard(
+            format: ContainerFormat.cryptomator,
+            title: 'Cryptomator',
+            selected: state.folderVaultFormat == 'cryptomator',
+            enabled: !state.loading,
+            onTap: () =>
+                ref.read(createContainerProvider.notifier).setFolderVaultFormat('cryptomator'),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: WizardSelectionCard(
+            format: ContainerFormat.gocryptfs,
+            title: 'Gocryptfs',
+            selected: state.folderVaultFormat == 'gocryptfs',
+            enabled: !state.loading,
+            onTap: () =>
+                ref.read(createContainerProvider.notifier).setFolderVaultFormat('gocryptfs'),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: WizardSelectionCard(
+            format: ContainerFormat.cryfs,
+            title: 'CryFS',
+            selected: state.folderVaultFormat == 'cryfs',
+            enabled: !state.loading,
+            onTap: () =>
+                ref.read(createContainerProvider.notifier).setFolderVaultFormat('cryfs'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFolderVaultBasicInfo(CreateContainerState state, ColorScheme cs, TextTheme textTheme) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildFolderVaultPickerCard(state, cs, textTheme),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline_rounded, size: 16, color: cs.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n.folderVaultLimitationsNote,
+                style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant, height: 1.3),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContainerBasicInfo(
+    CreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) {
+    final l10n = context.l10n;
+    final pad = EdgeInsets.all(isShortScreen ? 12 : 16);
+
+    return SectionCard(
+      children: [
+        Padding(
+          padding: pad,
+          child: TextField(
+            controller: _nameCtrl,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              labelText: l10n.fileNameLabel,
+              prefixIcon: const Icon(Icons.drive_file_rename_outline_rounded, size: 20),
+            ),
+          ),
+        ),
+        Padding(
+          padding: pad,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _sizeCtrl,
+                  onChanged: (_) => setState(() {}),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: l10n.containerSizeLabel,
+                    prefixIcon: const Icon(Icons.sd_card_outlined, size: 20),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OptionPickerTile<String>(
+                  label: l10n.unitLabel,
+                  value: state.sizeUnit,
+                  options: [
+                    SelectOption(value: 'MB', label: l10n.unitMbShort),
+                    SelectOption(value: 'GB', label: l10n.unitGbShort),
+                  ],
+                  onChanged: (val) =>
+                      ref.read(createContainerProvider.notifier).setSizeUnit(val),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFolderVaultPickerCard(
+    CreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+  ) {
+    final hasSelection = state.folderVaultUri != null;
+    final busy = state.loading || state.pickingFolderVault;
+    final format = ContainerFormat.fromWire(state.folderVaultFormat);
+
+    return GestureDetector(
+      onTap: busy
+          ? null
+          : () => _suppressLock(
+                () => ref
+                    .read(createContainerProvider.notifier)
+                    .pickFolderVaultLocation(context.l10n),
+              ),
+      child: Card(
+        elevation: 0,
+        color: hasSelection ? cs.primaryContainer.withValues(alpha: 0.15) : cs.surfaceContainerHigh,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: hasSelection ? cs.primaryContainer : cs.surfaceContainerHighest,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: ContainerFormatIcon(
+                  format: format,
+                  color: hasSelection ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasSelection
+                          ? context.l10n.destinationFolderLabel
+                          : context.l10n.selectEmptyFolderLabel,
+                      style: textTheme.labelMedium?.copyWith(
+                        color: hasSelection ? cs.primary : cs.onSurfaceVariant,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      state.folderVaultDisplayName ?? context.l10n.tapToChooseVaultLocation,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: hasSelection ? cs.onSurface : cs.onSurfaceVariant,
+                        fontWeight: hasSelection ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              if (state.pickingFolderVault)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                )
+              else if (hasSelection)
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: state.loading
+                      ? null
+                      : () => ref
+                          .read(createContainerProvider.notifier)
+                          .clearFolderVaultLocation(),
+                  style: IconButton.styleFrom(
+                    backgroundColor: cs.surfaceContainerHigh,
+                    padding: EdgeInsets.zero,
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant, size: 18),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecurityStep(
+    CreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionCard(
+          children: [
+            ...(state.isFolderVault
+                ? _buildFolderVaultPasswordFields(cs, isShortScreen)
+                : [..._buildPasswordFields(cs, isShortScreen), _buildKeyfilesPicker(state)]),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              value: state.remember,
+              onChanged: state.loading
+                  ? null
+                  : (val) => ref.read(createContainerProvider.notifier).setRemember(val),
+              title: Text(l10n.rememberContainerLabel),
+              subtitle: Text(
+                l10n.rememberContainerSubtitle,
+                style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+              ),
+              secondary: Icon(Icons.push_pin_outlined, color: cs.primary, size: 22),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildPasswordFields(ColorScheme cs, bool isShortScreen) {
+    final l10n = context.l10n;
+    final vPad = isShortScreen ? 4.0 : 8.0;
+    return [
+      Padding(
+        padding: EdgeInsets.fromLTRB(16, isShortScreen ? 10 : 16, 16, vPad),
+        child: TextField(
+          controller: _passwordCtrl,
+          obscureText: _obscure,
+          onChanged: (_) => setState(() {}),
+          autofillHints: null,
+          decoration: InputDecoration(
+            labelText: l10n.passwordFieldLabel,
+            prefixIcon: Icon(Icons.key_rounded, size: 20, color: cs.primary),
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.auto_awesome_rounded, size: 20, color: cs.primary),
+                  tooltip: l10n.generateStrongPasswordTooltip,
+                  onPressed: () => _openPasswordGenerator(isFolderVault: false),
+                ),
+                PasswordVisibilityToggle(
+                  obscured: _obscure,
+                  onToggle: () => setState(() => _obscure = !_obscure),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.fromLTRB(16, vPad, 16, vPad),
+        child: TextField(
+          controller: _confirmPasswordCtrl,
+          obscureText: _confirmObscure,
+          onChanged: (_) => setState(() {}),
+          autofillHints: null,
+          decoration: InputDecoration(
+            labelText: l10n.confirmPasswordFieldLabelTitleCase,
+            prefixIcon: Icon(Icons.check_circle_outline_rounded, size: 20, color: cs.primary),
+            suffixIcon: PasswordVisibilityToggle(
+              obscured: _confirmObscure,
+              onToggle: () => setState(() => _confirmObscure = !_confirmObscure),
+            ),
+          ),
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.fromLTRB(16, vPad, 16, isShortScreen ? 8 : 12),
+        child: TextField(
+          controller: _pimCtrl,
+          keyboardType: TextInputType.number,
+          obscureText: _pimObscure,
+          obscuringCharacter: '*',
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            labelText: l10n.pimOptionalLabel,
+            prefixIcon: Icon(Icons.pin_rounded, size: 20, color: cs.primary),
+            suffixIcon: PasswordVisibilityToggle(
+              obscured: _pimObscure,
+              onToggle: () => setState(() => _pimObscure = !_pimObscure),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _buildFolderVaultPasswordFields(ColorScheme cs, bool isShortScreen) {
+    final l10n = context.l10n;
+    final vPad = isShortScreen ? 4.0 : 8.0;
+    return [
+      Padding(
+        padding: EdgeInsets.fromLTRB(16, isShortScreen ? 10 : 16, 16, vPad),
+        child: TextField(
+          controller: _folderVaultPasswordCtrl,
+          obscureText: _folderVaultObscure,
+          onChanged: (_) => setState(() {}),
+          autofillHints: null,
+          decoration: InputDecoration(
+            labelText: l10n.passwordFieldLabel,
+            prefixIcon: Icon(Icons.key_rounded, size: 20, color: cs.primary),
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.auto_awesome_rounded, size: 20, color: cs.primary),
+                  tooltip: l10n.generateStrongPasswordTooltip,
+                  onPressed: () => _openPasswordGenerator(isFolderVault: true),
+                ),
+                PasswordVisibilityToggle(
+                  obscured: _folderVaultObscure,
+                  onToggle: () => setState(() => _folderVaultObscure = !_folderVaultObscure),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.fromLTRB(16, vPad, 16, isShortScreen ? 10 : 16),
+        child: TextField(
+          controller: _folderVaultConfirmCtrl,
+          obscureText: _folderVaultConfirmObscure,
+          onChanged: (_) => setState(() {}),
+          autofillHints: null,
+          decoration: InputDecoration(
+            labelText: l10n.confirmPasswordFieldLabelTitleCase,
+            prefixIcon: Icon(Icons.check_circle_outline_rounded, size: 20, color: cs.primary),
+            suffixIcon: PasswordVisibilityToggle(
+              obscured: _folderVaultConfirmObscure,
+              onToggle: () => setState(() => _folderVaultConfirmObscure = !_folderVaultConfirmObscure),
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildKeyfilesPicker(CreateContainerState state) {
+    return KeyfilesPicker(
+      keyfiles: state.outerKeyfiles,
+      picking: state.pickingOuterKeyfiles,
+      onPick: () => _suppressLock(
+        () => ref.read(createContainerProvider.notifier).pickOuterKeyfiles(),
+      ),
+      onRemove: (k) => ref.read(createContainerProvider.notifier).removeOuterKeyfile(k),
+      enabled: !state.loading,
+    );
+  }
+
+  Widget _buildAdvancedStep(CreateContainerState state, ColorScheme cs, TextTheme textTheme) {
+    final l10n = context.l10n;
+
+    if (state.isFolderVault) {
+      if (state.folderVaultFormat == 'gocryptfs') {
+        return SectionCard(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(1),
+              child: OptionPickerTile<String>(
+                label: l10n.gocryptfsCipherLabel,
+                value: state.gocryptfsCipher,
+                prefixIcon: Icons.enhanced_encryption_rounded,
+                options: const [
+                  SelectOption(value: 'aes-256-gcm', label: 'AES-256-GCM'),
+                  SelectOption(value: 'xchacha20-poly1305', label: 'XChaCha20-Poly1305'),
+                ],
+                onChanged: (val) =>
+                    ref.read(createContainerProvider.notifier).setGocryptfsCipher(val),
+              ),
+            ),
+          ],
+        );
+      }
+      if (state.folderVaultFormat == 'cryfs') {
+        return SectionCard(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(1),
+              child: OptionPickerTile<String>(
+                label: l10n.cryfsCipherLabel,
+                value: state.cryfsCipher,
+                prefixIcon: Icons.enhanced_encryption_rounded,
+                options: const [
+                  SelectOption(value: 'xchacha20-poly1305', label: 'XChaCha20-Poly1305'),
+                  SelectOption(value: 'aes-256-gcm', label: 'AES-256-GCM'),
+                ],
+                onChanged: (val) =>
+                    ref.read(createContainerProvider.notifier).setCryfsCipher(val),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(1),
+              child: OptionPickerTile<int>(
+                label: l10n.cryfsBlockSizeLabel,
+                value: state.cryfsBlockSize,
+                prefixIcon: Icons.grid_view_rounded,
+                options: [
+                  const SelectOption(value: 4 * 1024, label: '4 KiB'),
+                  const SelectOption(value: 8 * 1024, label: '8 KiB'),
+                  const SelectOption(value: 16 * 1024, label: '16 KiB'),
+                  SelectOption(value: 32 * 1024, label: l10n.cryfsBlockSizeDefaultLabel),
+                  const SelectOption(value: 64 * 1024, label: '64 KiB'),
+                  const SelectOption(value: 128 * 1024, label: '128 KiB'),
+                  const SelectOption(value: 512 * 1024, label: '512 KiB'),
+                  const SelectOption(value: 1024 * 1024, label: '1 MiB'),
+                  const SelectOption(value: 4 * 1024 * 1024, label: '4 MiB'),
+                ],
+                onChanged: (val) =>
+                    ref.read(createContainerProvider.notifier).setCryfsBlockSize(val),
+              ),
+            ),
+          ],
+        );
+      }
+      return const SizedBox.shrink();
+    }
+
+    final cipherChoices = _cipherChoices(state.format);
+    final hashChoices = _hashChoices(state.format);
+    final fileSystems = _availableFileSystems(state.format);
+    final bool outerReady = _passwordCtrl.text.isNotEmpty || state.outerKeyfiles.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionCard(
+          children: [
+            OptionPickerTile<int>(
+              label: l10n.encryptionAlgorithmLabel,
+              value: state.cipherId,
+              prefixIcon: Icons.security_rounded,
+              options: cipherChoices
+                  .map((c) => SelectOption(value: c.id, label: c.label))
+                  .toList(),
+              onChanged: (val) =>
+                  ref.read(createContainerProvider.notifier).setCipherId(val),
+            ),
+            OptionPickerTile<int>(
+              label: l10n.hashAlgorithmLabel,
+              value: state.hashId,
+              prefixIcon: Icons.tag_rounded,
+              options:
+                  hashChoices.map((h) => SelectOption(value: h.id, label: h.label)).toList(),
+              onChanged: (val) =>
+                  ref.read(createContainerProvider.notifier).setHashId(val),
+            ),
+            OptionPickerTile<String>(
+              label: l10n.formatFileSystemLabel,
+              value: state.fileSystem,
+              prefixIcon: Icons.dns_rounded,
+              options: fileSystems.map((fs) => SelectOption(value: fs, label: fs)).toList(),
+              onChanged: (val) =>
+                  ref.read(createContainerProvider.notifier).setFileSystem(val),
+            ),
+            SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              title: Text(
+                l10n.quickFormatTitle,
+                style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                l10n.quickFormatDescription,
+                style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+              ),
+              value: state.quickFormat,
+              onChanged: state.loading
+                  ? null
+                  : (val) =>
+                      ref.read(createContainerProvider.notifier).setQuickFormat(val),
+            ),
+          ],
+        ),
+        if (!state.isFolderVault && state.format == CreateFormat.veracrypt) ...[
+          const SizedBox(height: 16),
+          SectionCard(
+            children: [
+              SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                value: outerReady && state.enableHiddenVolume,
+                onChanged: outerReady
+                    ? (val) =>
+                        ref.read(createContainerProvider.notifier).setEnableHiddenVolume(val)
+                    : null,
+                title: Text(
+                  l10n.createHiddenVolumeToggleTitle,
+                  style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  outerReady
+                      ? (state.enableHiddenVolume
+                          ? l10n.hiddenVolumeConfiguredInNextStepNotice
+                          : l10n.createInvisibleSecondaryVolume)
+                      : l10n.setOuterPasswordFirstToEnable,
+                  style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                ),
+                secondary: Icon(
+                  Icons.visibility_off_outlined,
+                  color: outerReady ? cs.primary : cs.onSurfaceVariant.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHiddenVolumeStep(
+    CreateContainerState state,
+    ColorScheme cs,
+    TextTheme textTheme,
+    bool isShortScreen,
+  ) {
+    final l10n = context.l10n;
+    final validation = _hiddenVolumeValidationResult(state);
+    final cipherChoices = _cipherChoices(state.format);
+    final hashChoices = _hashChoices(state.format);
+    final fileSystems = _availableFileSystems(state.format);
+    final vPad = isShortScreen ? 4.0 : 8.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InlineBanner(
+          l10n.hiddenVolumeExplanationBanner,
+          tone: AppBannerTone.info,
+          icon: Icons.shield_outlined,
+        ),
+        const SizedBox(height: 14),
+        SectionHeader(l10n.hiddenVolumeCredentialsSectionHeader),
+        SectionCard(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, isShortScreen ? 10 : 16, 16, vPad),
+              child: TextField(
+                controller: _hiddenPasswordCtrl,
+                obscureText: _hiddenObscure,
+                onChanged: (_) => setState(() {}),
+                autofillHints: null,
+                decoration: InputDecoration(
+                  labelText: l10n.hiddenPasswordLabel,
+                  prefixIcon: Icon(Icons.key_rounded, size: 20, color: cs.primary),
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.auto_awesome_rounded, size: 20, color: cs.primary),
+                        tooltip: l10n.generateStrongPasswordTooltip,
+                        onPressed: () => _openPasswordGenerator(isHidden: true),
+                      ),
+                      PasswordVisibilityToggle(
+                        obscured: _hiddenObscure,
+                        onToggle: () => setState(() => _hiddenObscure = !_hiddenObscure),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, vPad, 16, vPad),
+              child: TextField(
+                controller: _hiddenConfirmPasswordCtrl,
+                obscureText: _hiddenConfirmObscure,
+                onChanged: (_) => setState(() {}),
+                autofillHints: null,
+                decoration: InputDecoration(
+                  labelText: l10n.confirmHiddenPasswordLabel,
+                  prefixIcon: Icon(Icons.check_circle_outline_rounded, size: 20, color: cs.primary),
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _hiddenConfirmObscure,
+                    onToggle: () => setState(() => _hiddenConfirmObscure = !_hiddenConfirmObscure),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, vPad, 16, isShortScreen ? 8 : 12),
+              child: TextField(
+                controller: _hiddenPimCtrl,
+                keyboardType: TextInputType.number,
+                obscureText: _hiddenPimObscure,
+                obscuringCharacter: '*',
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.pimOptionalLabel,
+                  prefixIcon: Icon(Icons.pin_rounded, size: 20, color: cs.primary),
+                  suffixIcon: PasswordVisibilityToggle(
+                    obscured: _hiddenPimObscure,
+                    onToggle: () => setState(() => _hiddenPimObscure = !_hiddenPimObscure),
+                  ),
+                ),
+              ),
+            ),
+            KeyfilesPicker(
+              keyfiles: state.hiddenKeyfiles,
+              picking: state.pickingHiddenKeyfiles,
+              onPick: () => _suppressLock(
+                () => ref.read(createContainerProvider.notifier).pickHiddenKeyfiles(),
+              ),
+              onRemove: (k) => ref.read(createContainerProvider.notifier).removeHiddenKeyfile(k),
+              enabled: !state.loading,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SectionHeader(l10n.hiddenVolumeSizeAndFormatSectionHeader),
+        SectionCard(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(isShortScreen ? 12 : 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: _hiddenSizeCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.hiddenSizeLabel,
+                        prefixIcon: const Icon(Icons.sd_card_outlined, size: 20),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OptionPickerTile<String>(
+                      label: l10n.unitLabel,
+                      value: state.hiddenSizeUnit,
+                      options: [
+                        SelectOption(value: 'MB', label: l10n.unitMbMegabytes),
+                        SelectOption(value: 'GB', label: l10n.unitGbGigabytes),
+                      ],
+                      onChanged: (val) =>
+                          ref.read(createContainerProvider.notifier).setHiddenSizeUnit(val),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            OptionPickerTile<int>(
+              label: l10n.encryptionAlgorithmLabel,
+              value: state.hiddenCipherId,
+              prefixIcon: Icons.security_rounded,
+              options: cipherChoices
+                  .map((c) => SelectOption(value: c.id, label: c.label))
+                  .toList(),
+              onChanged: (val) =>
+                  ref.read(createContainerProvider.notifier).setHiddenCipherId(val),
+            ),
+            OptionPickerTile<int>(
+              label: l10n.hashAlgorithmLabel,
+              value: state.hiddenHashId,
+              prefixIcon: Icons.tag_rounded,
+              options:
+                  hashChoices.map((h) => SelectOption(value: h.id, label: h.label)).toList(),
+              onChanged: (val) =>
+                  ref.read(createContainerProvider.notifier).setHiddenHashId(val),
+            ),
+            OptionPickerTile<String>(
+              label: l10n.hiddenFileSystemLabel,
+              value: state.hiddenFileSystem,
+              prefixIcon: Icons.dns_rounded,
+              options: fileSystems.map((fs) => SelectOption(value: fs, label: fs)).toList(),
+              onChanged: (val) =>
+                  ref.read(createContainerProvider.notifier).setHiddenFileSystem(val),
+            ),
+          ],
+        ),
+        if (validation != null && !validation.isValid) ...[
+          const SizedBox(height: 12),
+          InlineBanner(validation.error!, tone: AppBannerTone.warning),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildReviewStep(CreateContainerState state, ColorScheme cs, TextTheme textTheme) {
+    final l10n = context.l10n;
+    final rows = <Widget>[
+      WizardSummaryRow(
+        icon: Icons.category_rounded,
+        label: l10n.metaLabelType,
+        value: state.isFolderVault ? l10n.vaultKindFolderVault : l10n.vaultKindContainerFile,
+      ),
+    ];
+
+    if (state.isFolderVault) {
+      rows.addAll([
+        WizardSummaryRow(
+          icon: Icons.enhanced_encryption_rounded,
+          label: l10n.vaultFormatLabel,
+          value: _folderVaultFormatDisplayLabel(state.folderVaultFormat),
+        ),
+        WizardSummaryRow(
+          icon: Icons.folder_rounded,
+          label: l10n.vaultInfoLocationLabel,
+          value: state.folderVaultDisplayName ?? '—',
+        ),
+        if (state.folderVaultFormat == 'gocryptfs')
+          WizardSummaryRow(
+            icon: Icons.security_rounded,
+            label: l10n.encryptionAlgorithmLabel,
+            value: _gocryptfsCipherDisplayLabel(state.gocryptfsCipher),
+          )
+        else if (state.folderVaultFormat == 'cryfs') ...[
+          WizardSummaryRow(
+            icon: Icons.security_rounded,
+            label: l10n.encryptionAlgorithmLabel,
+            value: _cryfsCipherDisplayLabel(state.cryfsCipher),
+          ),
+          WizardSummaryRow(
+            icon: Icons.grid_view_rounded,
+            label: l10n.cryfsBlockSizeLabel,
+            value: _cryfsBlockSizeDisplayLabel(state.cryfsBlockSize, context),
+          ),
+        ],
+      ]);
+    } else {
+      rows.addAll([
+        WizardSummaryRow(
+          icon: Icons.enhanced_encryption_rounded,
+          label: l10n.containerFormatLabel,
+          value: state.format.label,
+        ),
+        WizardSummaryRow(
+          icon: Icons.drive_file_rename_outline_rounded,
+          label: l10n.fileNameLabel,
+          value: _nameCtrl.text.isEmpty ? '—' : _nameCtrl.text,
+        ),
+        WizardSummaryRow(
+          icon: Icons.sd_card_rounded,
+          label: l10n.containerSizeLabel,
+          value: '${_sizeCtrl.text} ${state.sizeUnit}',
+        ),
+        WizardSummaryRow(
+          icon: Icons.dns_rounded,
+          label: l10n.formatFileSystemLabel,
+          value: state.fileSystem,
+        ),
+        WizardSummaryRow(
+          icon: Icons.security_rounded,
+          label: l10n.encryptionAlgorithmLabel,
+          value: CipherAlgo.nameFor(state.cipherId),
+        ),
+        WizardSummaryRow(
+          icon: Icons.tag_rounded,
+          label: l10n.hashAlgorithmLabel,
+          value: HashAlgo.nameFor(state.hashId),
+        ),
+        WizardSummaryRow(
+          icon: Icons.password_outlined,
+          label: l10n.wizardSummaryPimLabel,
+          value: _pimCtrl.text.trim().isEmpty
+              ? l10n.wizardSummaryPimDefaultValue
+              : l10n.wizardPasswordSetValue,
+        ),
+        WizardSummaryRow(
+          icon: Icons.bolt_rounded,
+          label: l10n.quickFormatTitle,
+          value: state.quickFormat ? l10n.vaultInfoYesValue : l10n.vaultInfoNoValue,
+        ),
+      ]);
+    }
+
+    rows.add(WizardSummaryRow(
+      icon: Icons.key_rounded,
+      label: l10n.wizardSummaryPasswordLabel,
+      value: (state.isFolderVault ? _folderVaultPasswordCtrl : _passwordCtrl).text.isNotEmpty
+          ? l10n.wizardPasswordSetValue
+          : l10n.wizardPasswordNotSetValue,
+    ));
+
+    rows.add(WizardSummaryRow(
+      icon: Icons.shuffle_rounded,
+      label: l10n.entropyReviewLabel,
+      value: _entropyPool.hasUserEntropy
+          ? l10n.entropyReviewUserAdded
+          : l10n.entropyReviewDeviceOnly,
+    ));
+
+    rows.add(WizardSummaryRow(
+      icon: Icons.push_pin_outlined,
+      label: l10n.rememberContainerLabel,
+      value: state.remember ? l10n.vaultInfoYesValue : l10n.vaultInfoNoValue,
+    ));
+
+    if (!state.isFolderVault) {
+      rows.addAll([
+        WizardSummaryRow(
+          icon: Icons.insert_drive_file_outlined,
+          label: l10n.wizardSummaryKeyfilesLabel,
+          value: state.outerKeyfiles.isEmpty
+              ? l10n.noKeyfilesAttached
+              : '${state.outerKeyfiles.length}',
+        ),
+        WizardSummaryRow(
+          icon: Icons.visibility_off_outlined,
+          label: l10n.hiddenVolumeHeader,
+          value: _hasHiddenVolumeStep(state)
+              ? l10n.vaultInfoYesValue
+              : l10n.vaultInfoNoValue,
+        ),
+      ]);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(l10n.wizardSummaryTitle),
+        SectionCard(children: rows),
+      ],
+    );
+  }
+}
