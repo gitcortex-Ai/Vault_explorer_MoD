@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vaultexplorer/core/filesystem/local_storage_container.dart';
+import 'package:vaultexplorer/core/utils/google_drive_saf.dart';
 import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
 import 'package:vaultexplorer/core/utils/ve_log.dart';
 import 'package:vaultexplorer/data/models/external_storage_location.dart';
@@ -15,6 +16,11 @@ import 'package:vaultexplorer/data/services/vault_engine/channel_methods.dart';
 /// `_isOwnDocumentsProviderUri` doc comment for why that's refused.
 class SelfReferentialStorageException implements Exception {
   const SelfReferentialStorageException();
+}
+
+/// The system picker returned a provider other than Google Drive.
+class NotGoogleDriveLocationException implements Exception {
+  const NotGoogleDriveLocationException();
 }
 
 class ExternalStorageLocationsNotifier extends Notifier<List<ExternalStorageLocation>> {
@@ -55,7 +61,10 @@ class ExternalStorageLocationsNotifier extends Notifier<List<ExternalStorageLoca
     state = await _repo.loadAll();
   }
 
-  Future<ExternalStorageLocation?> promptAndAddLocation() async {
+  Future<ExternalStorageLocation?> promptAndAddGoogleDriveLocation() =>
+      promptAndAddLocation(googleDriveOnly: true);
+
+  Future<ExternalStorageLocation?> promptAndAddLocation({bool googleDriveOnly = false}) async {
     final channel = ref.read(vaultEngineChannelProvider);
     final result = await channel.invokeMapMethod<String, dynamic>(
       ChannelMethods.pickExtractFolder,
@@ -76,6 +85,17 @@ class ExternalStorageLocationsNotifier extends Notifier<List<ExternalStorageLoca
     final rawPath = result['path'] as String?;
     final treeUri = result['treeUri'] as String?;
     var displayName = result['displayName'] as String? ?? '';
+
+    // A user controls the system picker: never label arbitrary SAF providers
+    // as Google Drive, nor persist such a selection in our locations list.
+    if (googleDriveOnly && !isGoogleDriveTreeUri(treeUri)) {
+      throw const NotGoogleDriveLocationException();
+    }
+    if (treeUri != null && treeUri.isNotEmpty) {
+      for (final location in state) {
+        if (location.treeUri == treeUri) return location;
+      }
+    }
 
     // Defense in depth: refuse it here too, purely from the returned
     // treeUri, in case some other caller ever reaches this point without
@@ -122,8 +142,8 @@ class ExternalStorageLocationsNotifier extends Notifier<List<ExternalStorageLoca
         final last = segments.isNotEmpty ? Uri.decodeComponent(segments.last) : 'Storage';
         displayName = last.contains('acc=') ? 'Cloud Storage' : last;
       }
-    } else if (treeUri != null && treeUri.contains('com.google.android.apps.docs')) {
-      // e.g. "Google Drive (data)"
+    } else if (isGoogleDriveTreeUri(treeUri) && displayName != 'Google Drive' &&
+        !displayName.startsWith('Google Drive (')) {
       displayName = 'Google Drive ($displayName)';
     }
 
