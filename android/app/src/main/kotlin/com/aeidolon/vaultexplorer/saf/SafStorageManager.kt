@@ -624,6 +624,64 @@ class SafStorageManager(private val context: Context) {
         }
     }
 
+    /**
+     * Move an item between folders inside a SAF tree. Unlike renameDocument,
+     * moveDocument changes the parent folder. No copy-and-delete fallback:
+     * if a provider doesn't support the operation, the source stays intact.
+     */
+    fun moveFile(treeUri: Uri, oldPath: String, newPath: String): Boolean {
+        val sourcePath = normalizePath(oldPath)
+        val targetPath = normalizePath(newPath)
+        if (sourcePath.isEmpty() || targetPath.isEmpty()) return false
+        if (sourcePath == targetPath) return true
+
+        val sourceParent = sourcePath.substringBeforeLast('/', "")
+        val targetParent = targetPath.substringBeforeLast('/', "")
+        val oldName = sourcePath.substringAfterLast('/')
+        val newName = targetPath.substringAfterLast('/')
+        if (newName.isBlank() || newName == "." || newName == "..") return false
+        if (sourceParent == targetParent) return renameFile(treeUri, sourcePath, newName)
+
+        // Never risk a provider's implicit overwrite or auto-rename on conflict.
+        if (resolveDocumentId(treeUri, targetPath) != null) return false
+        val sourceUri = getDocumentUri(treeUri, sourcePath) ?: return false
+        val sourceParentUri = getDocumentUri(treeUri, sourceParent) ?: return false
+        val targetParentUri = getDocumentUri(treeUri, targetParent) ?: return false
+
+        return try {
+            var movedUri = DocumentsContract.moveDocument(
+                context.contentResolver, sourceUri, sourceParentUri, targetParentUri
+            ) ?: return false
+            if (newName != oldName) {
+                val renamed = DocumentsContract.renameDocument(
+                    context.contentResolver, movedUri, newName
+                )
+                if (renamed == null) {
+                    // Best-effort reversal if the second step fails.
+                    try {
+                        DocumentsContract.moveDocument(
+                            context.contentResolver, movedUri, targetParentUri, sourceParentUri
+                        )
+                    } catch (_: Exception) {}
+                    invalidateCache(treeUri, sourceParent)
+                    invalidateCache(treeUri, targetParent)
+                    return false
+                }
+                movedUri = renamed
+            }
+            invalidateCache(treeUri, sourceParent)
+            invalidateCache(treeUri, targetParent)
+            val id = DocumentsContract.getDocumentId(movedUri)
+            pathDocumentIdCache[cacheKey(treeUri, targetPath)] = id
+            true
+        } catch (e: Exception) {
+            invalidateCache(treeUri, sourceParent)
+            invalidateCache(treeUri, targetParent)
+            VeLog.w(TAG) { "moveFile failed for selected document: ${e.javaClass.simpleName}" }
+            false
+        }
+    }
+
     fun deleteRecursively(treeUri: Uri, relativePath: String): Boolean {
         val clean = normalizePath(relativePath)
         val docId = resolveDocumentId(treeUri, clean) ?: return false
