@@ -1538,8 +1538,21 @@ class FileOperationService extends ChangeNotifier {
                     errorMessage: op.l10n.fileOpCopyFailed,
                   );
                 } else if (op.isCut) {
-                  await _deleteEntryRecursive(src, r.item.path, r.item.isDir);
-                  op._recordItemResult(idx, FileItemResult.success);
+                  // A successful cloud copy is not proof that deleting the
+                  // original succeeded. Keep the partial move visible as
+                  // failed so the user can inspect both locations.
+                  final sourceRemoved = await _deleteEntryRecursive(
+                    src, r.item.path, r.item.isDir,
+                  );
+                  if (sourceRemoved) {
+                    op._recordItemResult(idx, FileItemResult.success);
+                  } else {
+                    op._recordItemResult(
+                      idx,
+                      FileItemResult.failed,
+                      errorMessage: op.l10n.fileOpMoveFailed,
+                    );
+                  }
                 } else {
                   op._recordItemResult(idx, FileItemResult.success);
                 }
