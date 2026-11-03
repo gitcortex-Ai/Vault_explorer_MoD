@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
 import 'package:vaultexplorer/core/filesystem/local_storage_container.dart';
 import 'package:vaultexplorer/core/providers/external_storage_locations_provider.dart';
+import 'package:vaultexplorer/features/browser/widgets/google_drive_actions.dart';
 import 'package:vaultexplorer/core/widgets/common_widgets.dart';
 import 'package:vaultexplorer/data/models/external_storage_location.dart';
 import 'package:vaultexplorer/data/models/mounted_container.dart';
@@ -279,6 +280,25 @@ class StorageLocationsDrawer extends ConsumerWidget {
                     },
                   ),
 
+                  ListTile(
+                    leading: Icon(Icons.cloud_outlined, color: cs.primary),
+                    title: const Text('Google Drive'),
+                    subtitle: Text(
+                      GoogleDriveActions.isRussian(context)
+                          ? 'Подключить папку через системный выбор Android'
+                          : 'Connect a folder through the Android system picker',
+                    ),
+                    onTap: () async {
+                      final loc = await GoogleDriveActions.connect(context, ref);
+                      if (!context.mounted || loc == null) return;
+                      Navigator.pop(context);
+                      onSelected(buildExternalStorageContainer(
+                        rootPath: loc.resolvedUri,
+                        displayName: loc.displayName,
+                        volId: loc.volId,
+                      ));
+                    },
+                  ),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 1),
                     child: Divider(),

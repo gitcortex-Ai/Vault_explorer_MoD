@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:vaultexplorer/core/extensions/l10n_extension.dart';
 import 'package:vaultexplorer/core/filesystem/local_storage_container.dart';
 import 'package:vaultexplorer/core/providers/external_storage_locations_provider.dart';
+import 'package:vaultexplorer/features/browser/widgets/google_drive_actions.dart';
 import 'package:vaultexplorer/core/providers/vault_engine_providers.dart';
 import 'package:vaultexplorer/core/theme/skin/skin_area.dart';
 import 'package:vaultexplorer/core/theme/skin/skin_area_scope.dart';
@@ -874,6 +875,41 @@ class AppNavigationDrawer extends ConsumerWidget {
                           );
                         }
                       },
+                    ),
+                    ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      leading: Icon(Icons.cloud_outlined, color: cs.primary),
+                      title: const Text('Google Drive'),
+                      subtitle: Text(
+                        GoogleDriveActions.isRussian(context)
+                            ? 'Подключить папку через системный выбор Android'
+                            : 'Connect a folder through the Android system picker',
+                      ),
+                      onTap: () async {
+                        final loc = await GoogleDriveActions.connect(context, ref);
+                        if (!context.mounted || loc == null) return;
+                        Navigator.pop(context);
+                        onSelectContainer?.call(buildExternalStorageContainer(
+                          rootPath: loc.resolvedUri,
+                          displayName: loc.displayName,
+                          volId: loc.volId,
+                        ));
+                      },
+                    ),
+                    ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      leading: Icon(Icons.enhanced_encryption_outlined, color: cs.primary),
+                      title: Text(
+                        GoogleDriveActions.isRussian(context)
+                            ? 'Создать зашифрованное хранилище'
+                            : 'Create encrypted storage',
+                      ),
+                      subtitle: const Text('Google Drive · Cryptomator / VeraCrypt'),
+                      onTap: () => GoogleDriveActions.openCreationWizard(context),
                     ),
                   ],
 

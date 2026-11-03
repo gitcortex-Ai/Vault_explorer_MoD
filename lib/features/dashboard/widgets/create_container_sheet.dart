@@ -21,7 +21,11 @@ import 'package:vaultexplorer/core/theme/skin/skin_area_scope.dart';
 enum _WizStep { basics, security, advanced, hiddenVolume, randomness, review }
 
 class CreateContainerSheet extends ConsumerStatefulWidget {
-  const CreateContainerSheet({super.key});
+  /// Optional starting choice for entry points such as Google Drive.
+  /// Null preserves the standard dashboard wizard behavior.
+  final bool? initialFolderVault;
+
+  const CreateContainerSheet({super.key, this.initialFolderVault});
 
   @override
   ConsumerState<CreateContainerSheet> createState() => _CreateContainerSheetState();
@@ -63,6 +67,12 @@ class _CreateContainerSheetState extends ConsumerState<CreateContainerSheet> {
   void initState() {
     super.initState();
     _entropyPool.addListener(_onEntropyChanged);
+    final preset = widget.initialFolderVault;
+    if (preset != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(createContainerProvider.notifier).setVaultKind(preset);
+      });
+    }
   }
 
   // The pool notifies on every sample; only a change of "may continue" needs
