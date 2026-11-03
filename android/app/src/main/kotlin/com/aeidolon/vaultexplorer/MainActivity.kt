@@ -1337,6 +1337,20 @@ open class MainActivity : FlutterFragmentActivity() {
                         runOnUiThread { result.success(ok) }
                     }
                 }
+                ChannelMethods.SAF_MOVE_FILE -> {
+                    val treeUri = Uri.parse(call.argument<String>("treeUri") ?: "")
+                    val oldPath = call.argument<String>("oldPath") ?: ""
+                    val newPath = call.argument<String>("newPath") ?: ""
+                    ioExecutor.execute {
+                        val ok = try {
+                            safStorageManager.moveFile(treeUri, oldPath, newPath)
+                        } catch (t: Throwable) {
+                            VeLog.e("MainActivity", t) { "SAF_MOVE_FILE failed: ${t.javaClass.simpleName}" }
+                            false
+                        }
+                        runOnUiThread { result.success(ok) }
+                    }
+                }
                 ChannelMethods.SAF_DELETE_FILE -> {
                     val treeUri = Uri.parse(call.argument<String>("treeUri") ?: "")
                     val filePath = call.argument<String>("filePath") ?: ""
