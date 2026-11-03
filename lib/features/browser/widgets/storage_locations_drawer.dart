@@ -299,17 +299,6 @@ class StorageLocationsDrawer extends ConsumerWidget {
                       ));
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.enhanced_encryption_outlined, color: cs.primary),
-                    title: Text(
-                      GoogleDriveActions.isRussian(context)
-                          ? 'Создать зашифрованное хранилище'
-                          : 'Create encrypted storage',
-                    ),
-                    subtitle: const Text('Google Drive · Cryptomator / VeraCrypt'),
-                    onTap: () => GoogleDriveActions.openCreationWizard(context),
-                  ),
-
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 1),
                     child: Divider(),
