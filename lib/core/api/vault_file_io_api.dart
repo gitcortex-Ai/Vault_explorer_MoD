@@ -730,6 +730,21 @@ class VaultFileIoApi {
     String newPath,
   ) async {
     if (_isSaf(container)) {
+      final oldParent = oldPath.contains('/')
+          ? oldPath.substring(0, oldPath.lastIndexOf('/'))
+          : '';
+      final newParent = newPath.contains('/')
+          ? newPath.substring(0, newPath.lastIndexOf('/'))
+          : '';
+      if (oldParent != newParent) {
+        // Renaming alone never changes a SAF document's parent directory.
+        // Move within the granted tree using DocumentsContract.moveDocument.
+        final moved = await _channel.invokeMethod<bool>(
+          ChannelMethods.safMoveFile,
+          {'treeUri': container.uri, 'oldPath': oldPath, 'newPath': newPath},
+        );
+        return moved ?? false;
+      }
       final newName = newPath.contains('/') ? newPath.split('/').last : newPath;
       final res = await _channel.invokeMethod<bool>(
         ChannelMethods.safRenameFile,
