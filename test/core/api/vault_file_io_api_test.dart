@@ -512,5 +512,31 @@ void main() {
       expect(calls.map((c) => c.method), everyElement('safCopyFile'));
       expect(calls, hasLength(3));
     });
+    test('moving a SAF file between folders calls moveDocument', () async {
+      mockChannel((call) => true);
+      expect(await api.renameFile(saf, 'one/a.txt', 'two/a.txt'), isTrue);
+      expect(calls, hasLength(1));
+      expect(calls.single.method, 'safMoveFile');
+      expect(calls.single.arguments, {
+        'treeUri': saf.uri,
+        'oldPath': 'one/a.txt',
+        'newPath': 'two/a.txt',
+      });
+    });
+
+    test('renaming a SAF file within a folder calls renameDocument', () async {
+      mockChannel((call) => true);
+      expect(await api.renameFile(saf, 'one/a.txt', 'one/b.txt'), isTrue);
+      expect(calls, hasLength(1));
+      expect(calls.single.method, 'safRenameFile');
+      expect(calls.single.arguments['newName'], 'b.txt');
+    });
+
+    test('SAF cross-folder move failure does not report success', () async {
+      mockChannel((call) => false);
+      expect(await api.renameFile(saf, 'one/a.txt', 'two/a.txt'), isFalse);
+      expect(calls.single.method, 'safMoveFile');
+    });
+
   });
 }
