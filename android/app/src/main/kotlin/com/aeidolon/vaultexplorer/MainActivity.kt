@@ -336,6 +336,7 @@ private object ChannelMethods {
     const val SAF_CREATE_FILE           = "safCreateFile"
     const val SAF_CREATE_DIRECTORY      = "safCreateDirectory"
     const val SAF_RENAME_FILE           = "safRenameFile"
+    const val SAF_MOVE_FILE             = "safMoveFile"
     const val SAF_DELETE_FILE           = "safDeleteFile"
     const val SAF_GET_SPACE_INFO        = "safGetSpaceInfo"
     const val SAF_GET_THUMBNAIL         = "safGetThumbnail"
